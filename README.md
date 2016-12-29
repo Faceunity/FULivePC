@@ -1,7 +1,5 @@
 # FULivePC
-Faceunity 人脸跟踪及虚拟道具绘制PC端SDK
-
-FUQiniuDemo 是 Faceunity 的面部跟踪和虚拟道具功能在 PLMediaStreamingKit 中的集成。PLMediaStreamingKit 是一个适用于 iOS 的 RTMP 直播推流 SDK，原版文档可以参考[这里](https://github.com/pili-engineering/PLMediaStreamingKit/blob/master/README.md)。
+Faceunity 人脸跟踪及虚拟道具绘制PC端SDK。
 
 ## 运行环境
 
