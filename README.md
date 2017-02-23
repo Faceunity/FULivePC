@@ -29,7 +29,9 @@ Faceunity 人脸跟踪及虚拟道具绘制PC端SDK。
 ## 集成方法
 首先把nama.lib链接到工程中，并确保nama.dll在运行时可以正确加载。包含funama.h之后就可以开始调用我们提供的接口函数。
 
-首先对 faceunity 环境进行初始化。其中 v3data 是人脸跟踪数据的指针，指向 v3.bundle 文件中的内容； g_auth_package 为密钥数组，该密钥定义在我司提供的证书文件authpack.h中，没有该密钥会导致初始化失败。
+首先初始化OpenGL环境。
+
+接着对 faceunity 环境进行初始化。其中 v3data 是人脸跟踪数据的指针，指向 v3.bundle 文件中的内容； g_auth_package 为密钥数组，该密钥定义在我司提供的证书文件authpack.h中，没有该密钥会导致初始化失败。
 
 ```C
 fuSetup(v3data, nullptr, g_auth_package, sizeof(g_auth_package));
@@ -45,9 +47,9 @@ if (!g_items[0]){
 }
 ```
 
-之后就可以调用绘制函数将已经加载的道具绘制到图像数据中，如下例所示，提供图像数据的指针、宽度stride、高度、当前运行帧号、道具 handle 列表、以及绘制道具数量等信息后，完成绘制操作。
+之后就可以调用绘制函数将已经加载的道具绘制到图像数据中，如下例所示，提供图像数据的指针、宽度stride、高度、当前运行帧号、道具 handle 列表、以及绘制道具数量等信息后，完成绘制操作。其中，图像数据必须是布局为BRGA、类型为unsigned char的数据。
 
-```   
+```   
 fuRenderItems(0, img, stride, h, g_frame_id++, g_items, 1);    
 ```
 
@@ -273,6 +275,100 @@ int fuRenderItemsEx(
 int fuItemSetParamd(int item,char* name,double value);
 
 /**
+\brief Initialize and authenticate your SDK instance to the FaceUnity server, must be called exactly once before all other functions.
+	The buffers should NEVER be freed while the other functions are still being called.
+	You can call this function multiple times to "switch pointers".
+\param v3data should point to contents of the "v3.bin" we provide
+\param ardata should be NULL
+\param authdata is the pointer to the authentication data pack we provide. You must avoid storing the data in a file.
+	Normally you can just `#include "authpack.h"` and put `g_auth_package` here.
+\param sz_authdata is the authentication data size, we use plain int to avoid cross-language compilation issues.
+	Normally you can just `#include "authpack.h"` and put `sizeof(g_auth_package)` here.
+\return non-zero for success, zero for failure
+*/
+FUNAMA_API int fuSetup(float* v3data,float* ardata,void* authdata,int sz_authdata);
+/**
+\brief Call this function when the GLES context has been lost and recreated.
+	That isn't a normal thing, so this function could leak resources on each call.
+*/
+FUNAMA_API void fuOnDeviceLost();
+/**
+\brief Call this function to reset the face tracker on camera switches
+*/
+FUNAMA_API void fuOnCameraChange();
+/**
+\brief Create an accessory item from a binary package, you can discard the data after the call.
+	This function MUST be called in the same GLES context / thread as fuRenderItems.
+\param data is the pointer to the data
+\param sz is the data size, we use plain int to avoid cross-language compilation issues
+\return an integer handle representing the item
+*/
+FUNAMA_API int fuCreateItemFromPackage(void* data,int sz);
+/**
+\brief Destroy an accessory item.
+	This function MUST be called in the same GLES context / thread as the original fuCreateItemFromPackage.
+\param item is the handle to be destroyed
+*/
+FUNAMA_API void fuDestroyItem(int item);
+/**
+\brief Destroy all accessory items ever created.
+	This function MUST be called in the same GLES context / thread as the original fuCreateItemFromPackage.
+*/
+FUNAMA_API void fuDestroyAllItems();
+
+FUNAMA_API void fuClearRenderData();
+/**
+\brief Render a list of items on top of a GLES texture or a memory buffer.
+	This function needs a GLES 2.0+ context.
+\param texid specifies a GLES texture. Set it to 0u if you want to render to a memory buffer.
+\param img specifies a memory buffer. Set it to NULL if you want to render to a texture.
+	If img is non-NULL, it will be overwritten by the rendered image when fuRenderItems returns
+\param w specifies the image width
+\param h specifies the image height
+\param frameid specifies the current frame id. 
+	To get animated effects, please increase frame_id by 1 whenever you call this.
+\param p_items points to the list of items
+\param n_items is the number of items
+\return a new GLES texture containing the rendered image in the texture mode
+*/
+FUNAMA_API int fuRenderItems(int texid,int* img,int w,int h,int frame_id, int* p_items,int n_items);
+
+/**
+\brief Generalized interface for rendering a list of items.
+	This function needs a GLES 2.0+ context.
+\param out_format is the output format
+\param out_ptr receives the rendering result, which is either a GLuint texture handle or a memory buffer
+	Note that in the texture cases, we will overwrite *out_ptr with a texture we generate.
+\param in_format is the input format
+\param in_ptr points to the input image, which is either a GLuint texture handle or a memory buffer
+\param w specifies the image width
+\param h specifies the image height
+\param frameid specifies the current frame id. 
+	To get animated effects, please increase frame_id by 1 whenever you call this.
+\param p_items points to the list of items
+\param n_items is the number of items
+\return a GLuint texture handle containing the rendering result if out_format isn't FU_FORMAT_GL_CURRENT_FRAMEBUFFER
+*/
+FUNAMA_API int fuRenderItemsEx(
+	int out_format,void* out_ptr,
+	int in_format,void* in_ptr,
+	int w,int h,int frame_id, int* p_items,int n_items);
+
+/**************************************************************
+The set / get functions do not make sense on their own. Refer to
+the documentation of specific items for their get/set-able
+parameters. Most items do not have any.
+**************************************************************/
+
+/**
+\brief Set an item parameter to a double value
+\param item specifies the item
+\param name is the parameter name
+\param value is the parameter value to be set
+\return zero for failure, non-zero for success
+*/
+FUNAMA_API int fuItemSetParamd(int item,char* name,double value);
+/**
 \brief Set an item parameter to a double array
 \param item specifies the item
 \param name is the parameter name
@@ -280,8 +376,7 @@ int fuItemSetParamd(int item,char* name,double value);
 \param n specifies the number of elements in value
 \return zero for failure, non-zero for success
 */
-int fuItemSetParamdv(int item,char* name,double* value,int n);
-
+FUNAMA_API int fuItemSetParamdv(int item,char* name,double* value,int n);
 /**
 \brief Set an item parameter to a string value
 \param item specifies the item
@@ -289,35 +384,49 @@ int fuItemSetParamdv(int item,char* name,double* value,int n);
 \param value is the parameter value to be set
 \return zero for failure, non-zero for success
 */
-int fuItemSetParams(int item,char* name,char* value);
-
+FUNAMA_API int fuItemSetParams(int item,char* name,char* value);
 /**
-\brief Get an item parameter to a double value
+\brief Get an item parameter as a double value
 \param item specifies the item
 \param name is the parameter name
 \return double value of the parameter
 */
-double fuItemGetParamd(int item,char* name);
+FUNAMA_API double fuItemGetParamd(int item,char* name);
+/**
+\brief Get an item parameter as a string
+\param item specifies the item
+\param name is the parameter name
+\param buf receives the string value
+\param sz is the number of bytes available at buf
+\return the length of the string value, or -1 if the parameter is not a string.
+*/
+FUNAMA_API int fuItemGetParams(int item,char* name,char* buf,int sz);
 
+/**
+\brief Turn off the camera
+*/
+FUNAMA_API void fuTurnOffCamera();
+/**
+\brief Get the camera image size
+\param pret points to two integers, which receive the size
+*/
+FUNAMA_API void fuGetCameraImageSize(int* pret);
 /**
 \brief Get the face tracking status
-\return zero for not tracking, non-zero for tracking
+\return The number of valid faces currently being tracked
 */
-int fuIsTracking();
-
+FUNAMA_API int fuIsTracking();
 /**
 \brief Set the default orientation for face detection. The correct orientation would make the initial detection much faster.
-One of 0..3 should work.
+\param rmode is the default orientation to be set to, one of 0..3 should work.
 */
-void fuSetDefaultOrientation(int rmode);
-
+FUNAMA_API void fuSetDefaultOrientation(int rmode);
 /**
 \brief Set the maximum number of faces we track. The default value is 1.
 \param n is the new maximum number of faces to track
 \return The previous maximum number of faces tracked
 */
-int fuSetMaxFaces(int n);
-
+FUNAMA_API int fuSetMaxFaces(int n);
 /**
 \brief Set the quality-performance tradeoff. 
 \param quality is the new quality value. 
@@ -325,5 +434,21 @@ int fuSetMaxFaces(int n);
        Use 0 for maximum performance and 1 for maximum quality.
        The default quality is 1 (maximum quality).
 */
-void fuSetQualityTradeoff(float quality);
+FUNAMA_API void fuSetQualityTradeoff(float quality);
+
+/**
+\brief Get face info. Certificate aware interface.
+\param face_id is the id of face, index is smaller than which is set in fuSetMaxFaces
+\param name is among "landmarks", "eye_rotation", "translation", "rotation"
+\param pret allocated memory space as container
+\param num is number of double allocated in pret
+	required: "landmarks" - 150 doubles
+			  "eye_rotation" - 4
+			  "translation" - 3
+			  "rotation" - 4
+\return 1 means successful fetch, container filled with info
+	0 means failure, general failure is due to invalid face info
+	other specific failure will print on the console
+*/
+FUNAMA_API int fuGetFaceInfo(int face_id, char* name, double* pret, int num);
 ```
