@@ -54,7 +54,7 @@ NE::Nama::Nama()
 	m_cap(0),
 	m_curBundleIdx(0),
 	m_mode(PROP),
-	m_isBeautyOn(false),
+	m_isBeautyOn(true),
 	m_frameWidth(0),
 	m_frameHeight(0),
 	m_curFilterIdx(0),
@@ -219,6 +219,7 @@ std::tr1::shared_ptr<unsigned char> NE::Nama::NextFrame()
 	default:
 		break;
 	}
+	++m_frameID;
 	
 	return frame;
 }
