@@ -18,8 +18,15 @@ namespace NE
 		void Init(const int width=1280, const int height=720);
 
 		void SwitchRenderMode();
+		void SwitchBeauty();
 		void PreBundle();
 		void NextBundle();
+
+		void SwitchFilter();
+		void UpdateColorLevel(const double delta);
+		void UpdateBlurLevel(const double delta);
+		void UpdateCheekThinning(const double delta);
+		void UpdateEyeEnlarging(const double delta);
 
 		std::tr1::shared_ptr<unsigned char> NextFrame();
 
@@ -37,9 +44,20 @@ namespace NE
 		int m_curBundleIdx;
 
 		MODE m_mode;
+		bool m_isBeautyOn;
 
 		std::vector<int> m_propHandles;
+		int m_beautyHandles;
 
 		int m_frameWidth, m_frameHeight;
+
+	private:
+		int m_curFilterIdx;
+		double m_curColorLevel;
+		double m_curBlurLevel;
+		double m_curCheekThinning;
+		double m_curEyeEnlarging;
+
+		static std::string _filters[6];
 	};
 }

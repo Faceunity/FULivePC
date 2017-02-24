@@ -55,6 +55,8 @@ int main()
 	SetOpenGLState();
 	GenTexture();
 
+	std::cout << "Up/Down: switch prop\n1: switch between landmark/prop mode\n2: turn on/off face beautification\nQ: switch filter\nW/S: adjust color level\nE/D: adjust blur level\nR/F: adjust cheek thinning\nT/G: adjust eye enlarging\n";
+
 	while (false == glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -154,8 +156,38 @@ void NE::key_callback(GLFWwindow * window, int key, int scancode, int action, in
 		case GLFW_KEY_DOWN:
 			nama->NextBundle();
 			break;
-		case GLFW_KEY_TAB:
+		case GLFW_KEY_1:
 			nama->SwitchRenderMode();
+			break;
+		case GLFW_KEY_2:
+			nama->SwitchBeauty();
+			break;
+		case GLFW_KEY_Q:
+			nama->SwitchFilter();
+			break;
+		case GLFW_KEY_W:
+			nama->UpdateColorLevel(0.1);
+			break;
+		case GLFW_KEY_S:
+			nama->UpdateColorLevel(-0.1);
+			break;
+		case GLFW_KEY_E:
+			nama->UpdateBlurLevel(0.1);
+			break;
+		case GLFW_KEY_D:
+			nama->UpdateBlurLevel(-0.1);
+			break;
+		case GLFW_KEY_R:
+			nama->UpdateCheekThinning(0.1);
+			break;
+		case GLFW_KEY_F:
+			nama->UpdateCheekThinning(-0.1);
+			break;
+		case GLFW_KEY_T:
+			nama->UpdateEyeEnlarging(0.1);
+			break;
+		case GLFW_KEY_G:
+			nama->UpdateEyeEnlarging(-0.1);
 			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(window, true);

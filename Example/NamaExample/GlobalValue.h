@@ -21,3 +21,5 @@ const std::string g_propName[] = {
 	"item0501.bundle"
 };
 const int g_propCount = sizeof(g_propName) / sizeof(g_propName[0]);
+
+const std::string g_faceBeautification = "face_beautification.bundle";
