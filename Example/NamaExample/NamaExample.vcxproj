@@ -166,7 +166,7 @@ copy "$(SolutionDir)..\Win32\*.pdb" "$(OutDir)"</Command>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)..\Win64\*.dll" "$(OutDir)"
-copy "$(SolutionDir)..\Win64\*.pdb" "$(OutDir)"</Command>
+ </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
