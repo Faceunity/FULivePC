@@ -251,11 +251,103 @@ void NE::Nama::CreateBundle(const int idx)
 void NE::Nama::DrawLandmarks(std::tr1::shared_ptr<unsigned char> frame)
 {
 	double landmarks[150];
-	int ret = fuGetFaceInfo(0, "landmarks", landmarks, sizeof(landmarks) / sizeof(landmarks[0]));
+	int ret = fuGetFaceInfo(0, "landmarks", landmarks, sizeof(landmarks) / sizeof(landmarks[0]));	
 	for (int i(0); i != 75; ++i)
 	{
 		DrawPoint(frame, static_cast<int>(landmarks[2 * i]), static_cast<int>(landmarks[2 * i + 1]));
 	}
+
+	double quat[4];
+	ret = fuGetFaceInfo(0, "rotation_raw", quat, sizeof(quat) / sizeof(quat[0]));
+	//double angle = 2 * acos(quat[3]);
+	//printf("Rotation angle = %f\n", angle / 3.1415926 * 180.0);
+
+	/*
+	double rmode[1];
+	ret = fuGetFaceInfo(0, "rotation_mode", rmode, 1);
+
+	
+	double quat2[4];
+	double alpha;
+	double beta[3];
+	alpha = (rmode[0] * 90.0) / 180.0 * 3.1415926;
+	beta[0] = 0.0; beta[1] = 0.0; beta[2] = 1.0;
+	double sinValue = std::sin(alpha * 0.5);
+	double cosValue = std::cos(alpha * 0.5);
+	quat2[0] = sinValue * beta[0];
+	quat2[1] = sinValue * beta[1];
+	quat2[2] = sinValue * beta[2];
+	quat2[3] = cosValue;
+	
+	// quat mult
+	double tw = (quat[3] * quat2[3]) - (quat[0] * quat2[0] + quat[1] * quat2[1] + quat[2] * quat2[2]);//std::dot(v, q.v);
+	double tx = (quat[1] * quat2[2]) - (quat[2] * quat2[1]) + quat2[3] * quat[0] + quat[3] * quat2[0];
+	double ty = (quat[2] * quat2[0]) - (quat[0] * quat2[2]) + quat2[3] * quat[1] + quat[3] * quat2[1];
+	double tz = (quat[0] * quat2[1]) - (quat[1] * quat2[0]) + quat2[3] * quat[2] + quat[3] * quat2[2];	
+	quat[0] = tx;
+	quat[1] = ty;
+	quat[2] = tz;
+	quat[3] = tw;
+	
+
+	printf("a- quat = %f %f %f %f\n", quat[0], quat[1], quat[2], quat[3]);
+	*/
+
+	double roll, pitch, yaw;	
+	{
+		double ysqr = quat[1] * quat[1];
+		// roll (x-axis rotation)
+		double t0 = +2.0 * (quat[3] * quat[0] + quat[1] * quat[2]);
+		double t1 = +1.0 - 2.0 * (quat[0] * quat[0] + ysqr);
+		roll = std::atan2(t0, t1);
+		// pitch (y-axis rotation)
+		double t2 = +2.0 * (quat[3] * quat[1] - quat[2] * quat[0]);
+		t2 = t2 > 1.0 ? 1.0 : t2;
+		t2 = t2 < -1.0 ? -1.0 : t2;
+		pitch = std::asin(t2);
+		// yaw (z-axis rotation)
+		double t3 = +2.0 * (quat[3] * quat[2] + quat[0] * quat[1]);
+		double t4 = +1.0 - 2.0 * (ysqr + quat[2] * quat[2]);
+		yaw = std::atan2(t3, t4);
+		printf("a- roll=%f pitch=%f yaw=%f\n", roll / 3.1415926 * 180.0, pitch / 3.1415926 * 180.0, yaw / 3.1415926 * 180.0);
+	}
+
+	/*
+	yaw += (rmode[0] * 90.0) / 180.0 * 3.1415926;
+
+	{		
+		double t0 = std::cos(yaw * 0.5);
+		double t1 = std::sin(yaw * 0.5);
+		double t2 = std::cos(roll * 0.5);
+		double t3 = std::sin(roll * 0.5);
+		double t4 = std::cos(pitch * 0.5);
+		double t5 = std::sin(pitch * 0.5);
+
+		quat[3] = t0 * t2 * t4 + t1 * t3 * t5;
+		quat[0] = t0 * t3 * t4 - t1 * t2 * t5;
+		quat[1] = t0 * t2 * t5 + t1 * t3 * t4;
+		quat[2] = t1 * t2 * t4 - t0 * t3 * t5;
+		printf("b- quat = %f %f %f %f\n", quat[0], quat[1], quat[2], quat[3]);
+	}
+
+	{
+		double ysqr = quat[1] * quat[1];
+		// roll (x-axis rotation)
+		double t0 = +2.0 * (quat[3] * quat[0] + quat[1] * quat[2]);
+		double t1 = +1.0 - 2.0 * (quat[0] * quat[0] + ysqr);
+		roll = std::atan2(t0, t1);
+		// pitch (y-axis rotation)
+		double t2 = +2.0 * (quat[3] * quat[1] - quat[2] * quat[0]);
+		t2 = t2 > 1.0 ? 1.0 : t2;
+		t2 = t2 < -1.0 ? -1.0 : t2;
+		pitch = std::asin(t2);
+		// yaw (z-axis rotation)
+		double t3 = +2.0 * (quat[3] * quat[2] + quat[0] * quat[1]);
+		double t4 = +1.0 - 2.0 * (ysqr + quat[2] * quat[2]);
+		yaw = std::atan2(t3, t4);
+		printf("b- roll=%f pitch=%f yaw=%f rmode = %f\n", roll / 3.1415926 * 180.0, pitch / 3.1415926 * 180.0, yaw / 3.1415926 * 180.0, rmode[0]);
+	}
+	*/
 }
 
 void NE::Nama::DrawPoint(std::tr1::shared_ptr<unsigned char> frame, int x, int y, unsigned char r, unsigned char g, unsigned char b)
@@ -270,7 +362,7 @@ void NE::Nama::DrawPoint(std::tr1::shared_ptr<unsigned char> frame, int x, int y
 	{
 		int xx = x + offsetX[i];
 		int yy = y + offsetY[i];
-		if (0 > xx || xx > m_frameWidth || 0 > yy || yy > m_frameHeight)
+		if (0 > xx || xx >= m_frameWidth || 0 > yy || yy >= m_frameHeight)
 		{
 			continue;
 		}
