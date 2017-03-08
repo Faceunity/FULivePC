@@ -9,6 +9,8 @@
 
 #pragma comment(lib, "nama.lib")
 
+bool NE::Nama::m_hasSetup = false;
+
 namespace NE
 {
 	size_t FileSize(std::ifstream& file)
@@ -65,6 +67,22 @@ NE::Nama::Nama()
 {
 }
 
+NE::Nama::~Nama()
+{
+	if (0 != m_beautyHandles)
+	{
+		fuDestroyItem(m_beautyHandles);
+	}
+	for (auto iter = m_propHandles.begin(); iter != m_propHandles.end(); ++iter)
+	{
+		if (0 != *iter)
+		{
+			fuDestroyItem(*iter);
+		}
+	}
+	//fuDestroyAllItems();
+}
+
 void NE::Nama::Init(const int width, const int height)
 {
 	m_frameWidth = width;
@@ -75,13 +93,21 @@ void NE::Nama::Init(const int width, const int height)
 		exit(1);
 	}
 
-	std::vector<char> v3data;
-	if(false == NE::LoadBundle(g_fuDataDir + g_v3Data, v3data))
+	if (false == m_hasSetup)
 	{
-		exit(1);
-	}
+		std::vector<char> v3data;
+		if (false == NE::LoadBundle(g_fuDataDir + g_v3Data, v3data))
+		{
+			exit(1);
+		}
 
-	fuSetup(reinterpret_cast<float*>(&v3data[0]), NULL, g_auth_package, sizeof(g_auth_package));
+		fuSetup(reinterpret_cast<float*>(&v3data[0]), NULL, g_auth_package, sizeof(g_auth_package));
+		m_hasSetup = true;
+	}
+	else
+	{
+		fuOnDeviceLost();
+	}
 
 	{
 		std::vector<char> propData;
@@ -101,8 +127,6 @@ void NE::Nama::Init(const int width, const int height)
 		fuItemSetParamd(m_beautyHandles, "cheek_thinning", m_curCheekThinning);
 		fuItemSetParamd(m_beautyHandles, "eye_enlarging", m_curEyeEnlarging);
 	}
-	
-
 
 	m_propHandles.resize(g_propCount);
 

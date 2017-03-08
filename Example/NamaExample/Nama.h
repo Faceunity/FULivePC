@@ -15,6 +15,7 @@ namespace NE
 		};
 	public:
 		Nama();
+		~Nama();
 		void Init(const int width=1280, const int height=720);
 
 		void SwitchRenderMode();
@@ -59,5 +60,7 @@ namespace NE
 		double m_curEyeEnlarging;
 
 		static std::string _filters[6];
+
+		static bool m_hasSetup;
 	};
 }

@@ -36,6 +36,8 @@ namespace NE
 	void ShowFrame();
 
 	void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+	void ReInit();
 }
 
 
@@ -55,15 +57,20 @@ int main()
 	SetOpenGLState();
 	GenTexture();
 
-	std::cout << "Up/Down: switch prop\n1: switch between landmark/prop mode\n2: turn on/off face beautification\nQ: switch filter\nW/S: adjust color level\nE/D: adjust blur level\nR/F: adjust cheek thinning\nT/G: adjust eye enlarging\n";
+	std::cout << "Up/Down: switch prop\n1: switch between landmark/prop mode\n2: turn on/off face beautification\n3: recreate glfw window\nQ: switch filter\nW/S: adjust color level\nE/D: adjust blur level\nR/F: adjust cheek thinning\nT/G: adjust eye enlarging\n";
 
 	while (false == glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		std::tr1::shared_ptr<unsigned char> frame = nama->NextFrame();
 
+		if (frame.get()[wndWidth*4*10+1000 * 4] == 0 && frame.get()[wndWidth * 4 * 10 + 1000 * 4 + 1] == 0 && frame.get()[wndWidth * 4 * 10 + 1000 * 4 + 2] == 0)
+		{
+			std::cout << "aaa" << std::endl;
+		}
 		SetTextureData(frame);
 
+		glDisable(GL_BLEND);
 		ShowFrame();
 
 		glfwSwapBuffers(window);
@@ -78,7 +85,11 @@ int main()
 
 bool NE::InitWindow()
 {
-	if (false == glfwInit())
+	if (nullptr != window)
+	{
+		glfwDestroyWindow(window);
+	}
+	else if (false == glfwInit())
 	{
 		std::cout << "ERROR: could not start GLFW3" << std::endl;
 		return false;
@@ -192,8 +203,20 @@ void NE::key_callback(GLFWwindow * window, int key, int scancode, int action, in
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(window, true);
 			break;
+		case GLFW_KEY_3:
+			ReInit();
+			break;
 		default:
 			break;
 		}
 	}
+}
+
+void NE::ReInit()
+{
+	InitWindow();
+	nama = std::tr1::shared_ptr<Nama>(new Nama);
+	nama->Init(wndWidth, wndHeight);
+	SetOpenGLState();
+	GenTexture();
 }
