@@ -2,7 +2,8 @@
 
 #include <vector>
 #include <memory>
-
+#include <string>
+#include <sstream>
 class CCameraDS;
 namespace NE
 {
@@ -15,49 +16,57 @@ namespace NE
 		};
 	public:
 		Nama();
-		void Init(const int width=1280, const int height=720);
-
+		~Nama();
+		void Init(const int width = 1280, const int height = 720);
 		void SwitchRenderMode();
 		void SwitchBeauty();
 		void PreBundle();
 		void NextBundle();
-
-		void SwitchFilter();
-		void UpdateColorLevel(const double delta);
-		void UpdateBlurLevel(const double delta);
-		void UpdateCheekThinning(const double delta);
-		void UpdateEyeEnlarging(const double delta);
-
-		std::tr1::shared_ptr<unsigned char> NextFrame();
-
+		void NextShape();
+		void UpdateFilter();
+		void UpdateBeauty();
+		std::tr1::shared_ptr<unsigned char> Render();
 	private:
 		void CreateBundle();
 		void CreateBundle(const int idx);
-
 		void DrawLandmarks(std::tr1::shared_ptr<unsigned char> frame);
-		void DrawPoint(std::tr1::shared_ptr<unsigned char> frame, int x, int y, unsigned char r = 255, unsigned char g = 0, unsigned char b = 0);
+		void DrawPoint(std::tr1::shared_ptr<unsigned char> frame, int x, int y, unsigned char r = 255, unsigned char g = 240, unsigned char b = 33);
 
 	private:
 		int m_frameID;
 		std::tr1::shared_ptr<CCameraDS> m_cap;
-
 		int m_curBundleIdx;
-
+		int m_face_shape;
 		MODE m_mode;
-		bool m_isBeautyOn;
-
 		std::vector<int> m_propHandles;
 		int m_beautyHandles;
-
+		int m_gestureHandles;
 		int m_frameWidth, m_frameHeight;
+		static bool m_hasSetup;
+	public:
+		int m_isBeautyOn;
+		int m_isDrawProp;
+		int m_isDrawPoints;
+		int m_isDrawWireFram;
+		int m_isDrawSplines;
 
-	private:
 		int m_curFilterIdx;
-		double m_curColorLevel;
-		double m_curBlurLevel;
-		double m_curCheekThinning;
-		double m_curEyeEnlarging;
-
+		float m_curColorLevel;
+		float m_curBlurLevel;
+		float m_curCheekThinning;
+		float m_curEyeEnlarging;
+		float m_faceShapeLevel;
+		float m_redLevel;
+		std::string m_curTranslation;
+		std::string m_curRotation;
 		static std::string _filters[6];
+
 	};
+}
+
+template < class T>
+std::string ConvertToString(T value) {
+	std::stringstream ss;
+	ss << value;
+	return ss.str();
 }

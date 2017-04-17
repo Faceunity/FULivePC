@@ -1,3 +1,11 @@
+/**
+* FU SDK使用者可以将拿到处理后的frame图像与自己的原有项目对接
+* 请FU SDK使用者直接参考示例放至代码至对应位置
+*
+* FU SDK与camera无耦合，不关心数据的来源，只要图像内容正确且和宽高吻合即可
+*
+* Created by liujia on 2017/3/24 mybbs2200@gmail.com.
+*/
 #include "CameraDS.h"
 #include "Nama.h"
 #include "GlobalValue.h"
@@ -8,6 +16,8 @@
 #include <authpack.h>
 
 #pragma comment(lib, "nama.lib")
+
+bool NE::Nama::m_hasSetup = false;
 
 namespace NE
 {
@@ -55,14 +65,26 @@ NE::Nama::Nama()
 	m_curBundleIdx(0),
 	m_mode(PROP),
 	m_isBeautyOn(true),
+	m_isDrawProp(1),
 	m_frameWidth(0),
 	m_frameHeight(0),
 	m_curFilterIdx(0),
+	m_beautyHandles(0),
+	m_gestureHandles(0),
+	m_propHandles(0),
 	m_curColorLevel(1.0f),
 	m_curBlurLevel(5.0f),
 	m_curCheekThinning(1.0f),
-	m_curEyeEnlarging(1.0f)
+	m_curEyeEnlarging(1.0f),
+	m_face_shape(0),
+	m_redLevel(0.6f),
+	m_faceShapeLevel(1.0f)
 {
+}
+
+NE::Nama::~Nama()
+{
+	fuDestroyAllItems();//Note: 切忌使用一个已经destroy的item
 }
 
 void NE::Nama::Init(const int width, const int height)
@@ -75,13 +97,21 @@ void NE::Nama::Init(const int width, const int height)
 		exit(1);
 	}
 
-	std::vector<char> v3data;
-	if(false == NE::LoadBundle(g_fuDataDir + g_v3Data, v3data))
+	if (false == m_hasSetup)
 	{
-		exit(1);
-	}
+		std::vector<char> v3data;
+		if (false == NE::LoadBundle(g_fuDataDir + g_v3Data, v3data))
+		{
+			exit(1);
+		}
 
-	fuSetup(reinterpret_cast<float*>(&v3data[0]), NULL, g_auth_package, sizeof(g_auth_package));
+		fuSetup(reinterpret_cast<float*>(&v3data[0]), NULL, g_auth_package, sizeof(g_auth_package));
+		m_hasSetup = true;
+	}
+	else
+	{
+		fuOnDeviceLost();
+	}
 
 	{
 		std::vector<char> propData;
@@ -94,16 +124,29 @@ void NE::Nama::Init(const int width, const int height)
 
 		m_beautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
 
-		//"nature", "delta", "electric", "slowlived", "tokyo", "warm"
+		//"nature", "delta", "electric", "slowlived", "tokyo", "warm"等参数的设置
 		fuItemSetParams(m_beautyHandles, "filter_name", &_filters[m_curFilterIdx][0]);
+		fuItemSetParamd(m_beautyHandles, "is_opengl_es", 0);
+
 		fuItemSetParamd(m_beautyHandles, "color_level", m_curColorLevel);
 		fuItemSetParamd(m_beautyHandles, "blur_level", m_curBlurLevel);
 		fuItemSetParamd(m_beautyHandles, "cheek_thinning", m_curCheekThinning);
 		fuItemSetParamd(m_beautyHandles, "eye_enlarging", m_curEyeEnlarging);
+		fuItemSetParamd(m_beautyHandles, "face_shape_level", m_faceShapeLevel);
+		fuItemSetParamd(m_beautyHandles, "red_level", m_redLevel);
+		fuItemSetParamd(m_beautyHandles, "face_shape", m_face_shape);
 	}
-	
+	{
+		std::vector<char> gestureData;
+		if (false == NE::LoadBundle(g_fuDataDir + g_gestureRecongnition, gestureData))
+		{
+			std::cout << "load gesture recognition data failed." << std::endl;
+			exit(1);
+		}
+		std::cout << "load gesture recognition data." << std::endl;
 
-
+		m_gestureHandles = fuCreateItemFromPackage(&gestureData[0], gestureData.size());
+	}
 	m_propHandles.resize(g_propCount);
 
 	m_curBundleIdx = -1;
@@ -123,6 +166,10 @@ void NE::Nama::SwitchBeauty()
 
 void NE::Nama::PreBundle()
 {
+	if (!m_isDrawProp)
+	{
+		return;
+	}
 	--m_curBundleIdx;
 	if (m_curBundleIdx < 0)
 	{
@@ -134,83 +181,72 @@ void NE::Nama::PreBundle()
 
 void NE::Nama::NextBundle()
 {
+	if (!m_isDrawProp)
+	{
+		return;
+	}
 	++m_curBundleIdx;
 	m_curBundleIdx %= m_propHandles.size();
 
 	CreateBundle(m_curBundleIdx);
 }
 
-void NE::Nama::SwitchFilter()
+void NE::Nama::NextShape()
 {
 	if (false == m_isBeautyOn)
 	{
 		return;
 	}
-	++m_curFilterIdx;
-	m_curFilterIdx %= sizeof(_filters) / sizeof(_filters[0]);
+	++m_face_shape;
+	m_face_shape %= 3;
+	int res = fuItemSetParamd(m_beautyHandles, "face_shape", m_face_shape);
+	std::cout << "face_shape: " << m_face_shape << std::endl;
+}
+
+void NE::Nama::UpdateFilter()
+{
+	if (false == m_isBeautyOn)
+	{
+		return;
+	}
 	fuItemSetParams(m_beautyHandles, "filter_name", &_filters[m_curFilterIdx][0]);
 }
 
-void NE::Nama::UpdateColorLevel(const double delta)
+void NE::Nama::UpdateBeauty()
 {
 	if (false == m_isBeautyOn)
 	{
 		return;
 	}
-	m_curColorLevel += delta;
-	m_curColorLevel = min(max(0.0, m_curColorLevel), 1);
 	fuItemSetParamd(m_beautyHandles, "color_level", m_curColorLevel);
-}
-
-void NE::Nama::UpdateBlurLevel(const double delta)
-{
-	if (false == m_isBeautyOn)
-	{
-		return;
-	}
-	m_curBlurLevel += delta;
-	m_curBlurLevel = min(max(0.0, m_curBlurLevel), 6.0);
 	fuItemSetParamd(m_beautyHandles, "blur_level", m_curBlurLevel);
-}
-
-void NE::Nama::UpdateCheekThinning(const double delta)
-{
-	if (false == m_isBeautyOn)
-	{
-		return;
-	}
-	m_curCheekThinning += delta;
-	m_curCheekThinning = min(max(0.0, m_curCheekThinning), 2.0);
 	fuItemSetParamd(m_beautyHandles, "cheek_thinning", m_curCheekThinning);
-}
-
-void NE::Nama::UpdateEyeEnlarging(const double delta)
-{
-	if (false == m_isBeautyOn)
-	{
-		return;
-	}
-	m_curEyeEnlarging += delta;
-	m_curEyeEnlarging = min(max(0.0, m_curEyeEnlarging), 4.0);
 	fuItemSetParamd(m_beautyHandles, "eye_enlarging", m_curEyeEnlarging);
+	fuItemSetParamd(m_beautyHandles, "face_shape_level", m_faceShapeLevel);
+	fuItemSetParamd(m_beautyHandles, "red_level", m_redLevel);
+	//fuItemSetParamd(m_beautyHandles, "face_shape", m_face_shape);
 }
 
-std::tr1::shared_ptr<unsigned char> NE::Nama::NextFrame()
+std::tr1::shared_ptr<unsigned char> NE::Nama::Render()
 {
 	std::tr1::shared_ptr<unsigned char> frame = m_cap->QueryFrame();
 	switch (m_mode)
 	{
 	case PROP:
-		if (true == m_isBeautyOn)
+		if (1 == m_isBeautyOn && 1 == m_isDrawProp)
 		{
-			int handle[2] = {m_beautyHandles, m_propHandles[m_curBundleIdx] };
+			int handle[2] = { m_beautyHandles, m_propHandles[m_curBundleIdx] };
 			fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, handle, 2);
 		}
-		else
+		else if (1 == m_isDrawProp && 0 == m_isBeautyOn)
 		{
 			fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, &m_propHandles[m_curBundleIdx], 1);
 		}
-
+		else if (1 == m_isBeautyOn && 0 == m_isDrawProp)
+		{
+			fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, &m_beautyHandles, 1);
+		}
+		//fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, &m_gestureHandles, 1);
 		break;
 	case LANDMARK:
 		fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, NULL, 0);
@@ -220,10 +256,10 @@ std::tr1::shared_ptr<unsigned char> NE::Nama::NextFrame()
 		break;
 	}
 	++m_frameID;
-	
+
 	return frame;
 }
-
+//加载全部道具，初始化稍慢
 void NE::Nama::CreateBundle()
 {
 	for (int i(0); i != g_propCount; ++i)
@@ -231,10 +267,10 @@ void NE::Nama::CreateBundle()
 		CreateBundle(i);
 	}
 }
-
+//按需加载道具，但是在切换的时候会卡顿一下
 void NE::Nama::CreateBundle(const int idx)
 {
-	if(0 == m_propHandles[idx])
+	if (0 == m_propHandles[idx])
 	{
 		std::vector<char> propData;
 		if (false == NE::LoadBundle(g_fuDataDir + g_propName[idx], propData))
@@ -250,19 +286,32 @@ void NE::Nama::CreateBundle(const int idx)
 
 void NE::Nama::DrawLandmarks(std::tr1::shared_ptr<unsigned char> frame)
 {
-	double landmarks[150];
-	int ret = fuGetFaceInfo(0, "landmarks", landmarks, sizeof(landmarks) / sizeof(landmarks[0]));	
-	for (int i(0); i != 75; ++i)
+	float landmarks[150];
+	float trans[3];
+	float rotat[4];
+	int ret = 0;
+
+	ret = fuGetFaceInfo(0, "translation", trans, sizeof(trans) / sizeof(trans[0]));
+	ret = fuGetFaceInfo(0, "rotation", rotat, sizeof(rotat) / sizeof(rotat[0]));
+	m_curTranslation = ConvertToString(trans[0]) + "," + ConvertToString(trans[1])
+		+ "," + ConvertToString(trans[2]);
+	m_curRotation = ConvertToString(rotat[0]) + "," + ConvertToString(rotat[1]) + ","
+		+ ConvertToString(rotat[2]) + "," + ConvertToString(rotat[3]);
+
+	if (m_isDrawPoints)
 	{
-		DrawPoint(frame, static_cast<int>(landmarks[2 * i]), static_cast<int>(landmarks[2 * i + 1]));
+		ret = fuGetFaceInfo(0, "landmarks", landmarks, sizeof(landmarks) / sizeof(landmarks[0]));
+		for (int i(0); i != 75; ++i)
+		{
+			DrawPoint(frame, static_cast<int>(landmarks[2 * i]), static_cast<int>(landmarks[2 * i + 1]));
+		}
 	}
 }
 
 void NE::Nama::DrawPoint(std::tr1::shared_ptr<unsigned char> frame, int x, int y, unsigned char r, unsigned char g, unsigned char b)
 {
 	const int offsetX[] = { -1, 0, 1 , -1, 0, 1 , -1, 0, 1 };
-	const int offsetY[] = {-1, -1, -1, 0, 0, 0, 1, 1, 1};
-
+	const int offsetY[] = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
 	const int count = sizeof(offsetX) / sizeof(offsetX[0]);
 
 	unsigned char* data = frame.get();
@@ -270,7 +319,7 @@ void NE::Nama::DrawPoint(std::tr1::shared_ptr<unsigned char> frame, int x, int y
 	{
 		int xx = x + offsetX[i];
 		int yy = y + offsetY[i];
-		if (0 > xx || xx >= m_frameWidth || 0 > yy || yy >= m_frameHeight)
+		if (0 > xx || xx > m_frameWidth || 0 > yy || yy > m_frameHeight)
 		{
 			continue;
 		}
