@@ -1,1 +1,11 @@
 authpack.h
+*.pdb
+*.db
+*.ilk
+*.obj
+*.log
+*.opendb
+*.suo
+*.tlog
+*.idb
+*.exe

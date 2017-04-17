@@ -59,7 +59,7 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)thirdparty/DirectShow/include;$(SolutionDir)..;$(SolutionDir)thirdparty/opengl/include;</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(SolutionDir)thirdparty/DirectShow/Lib;$(SolutionDir)../Win32;$(SolutionDir)thirdparty/opengl/lib/x86;</LibraryPath>
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -82,8 +82,11 @@
       <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)..\Win32\*.dll" "$(OutDir)"
-copy "$(SolutionDir)..\Win32\*.pdb" "$(OutDir)"</Command>
+      <Command>xcopy /e /y "$(SolutionDir)..\Win32\*.dll" "$(OutDir)"
+
+xcopy /e /y "$(SolutionDir)..\Win32\*.pdb" "$(OutDir)"
+
+xcopy /e /y "$(SolutionDir)..\Example\thirdparty\opengl\bin\Debug\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
