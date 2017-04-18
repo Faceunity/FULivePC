@@ -66,7 +66,7 @@ namespace NE
 int main(int argc, char* argv[])
 {
 	using namespace NE;
-	ShowWindow(GetConsoleWindow(), SW_HIDE);
+	//ShowWindow(GetConsoleWindow(), SW_HIDE);
 
 	glutInit(&argc, argv);
 	timeSinceStart = glutGet(GLUT_ELAPSED_TIME);

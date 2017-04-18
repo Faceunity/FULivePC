@@ -9,3 +9,5 @@ authpack.h
 *.tlog
 *.idb
 *.exe
+Example/Debug/*
+Example/Release/*
