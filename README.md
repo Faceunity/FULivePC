@@ -1,16 +1,11 @@
 # FULivePC
-Faceunity 人脸跟踪及虚拟道具绘制PC端SDK。
+FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，作为一款集成示例。。
 
-## v3.2 爱心手势识别
-在v3.2中加入了爱心手势识别，用户比出爱心手势，可以触发特定的道具动效。目前线上提供了一个简单的演示用手势道具，自定义手势道具的流程和2D道具制作一致，具体打包的细节可以联系我司技术支持。
+## v3.3 美颜模块升级
 
-手势识别的技术细节参见[这里](https://github.com/Faceunity/FULivePC#手势识别)。
+在v3.3中我们升级了美颜模块。保留老版磨皮算法的同时，默认提供了效果更好的新磨皮算法，进一步减少涂抹感。另外，我们改进了美白效果，并新增了可调节的红润效果，进一步改善肤色。在美型模块中，我们新增了三个脸型调整模板，以进一步满足不同的美型需要。参见[这里](https://github.com/Faceunity/FULivePC#视频美颜)。
 
-## v3.1 美颜更新
-
-在v3.1中，全面更新了美颜的功能和效果。改进了磨皮算法，使得在细腻皮肤的同时充分保持皮肤的细节，减少涂抹感。增加智能美型功能，可以自然地实现瘦脸和大眼效果，并可根据需要进行调节。
-
-美颜的加载及参数调节参见[这里](https://github.com/Faceunity/FULivePC#视频美颜)。
+另外，我们改进了手势识别模块，引入了移动端深度神经网络，提高了手势检出率，同时降低了误检率。 具体细节可以参见[这里](https://github.com/Faceunity/FULivePC#手势识别)。
 
 ## 运行环境
 
@@ -66,7 +61,7 @@ g_items[1] = fuCreateItemFromPackage(g_res_zip, (int)g_res_size);
 fuRenderItems(0, img, stride/4, h, g_frame_id, g_items, 2);
 ```
 
-美颜道具主要包含四个模块的内容，滤镜，美白，磨皮，美型。每个模块可以调节的参数如下。
+美颜道具主要包含五个模块的内容，滤镜，美白和红润，磨皮，美型。
 
 #### 滤镜
 
@@ -81,7 +76,7 @@ fuRenderItems(0, img, stride/4, h, g_frame_id, g_items, 2);
 fuItemSetParams(g_items[1], "filter_name", "nature");
 ```
 
-#### 美白
+#### 美白和红润
 
 当滤镜设置为美白滤镜 "nature" 时，通过参数 color_level 来控制美白程度。当滤镜为其他风格化滤镜时，该参数用于控制风格化程度。该参数取值为大于等于0的浮点数，0为无效果，1为默认效果，大于1为继续增强效果。
 
@@ -92,28 +87,52 @@ fuItemSetParams(g_items[1], "filter_name", "nature");
 fuItemSetParamd(g_items[1], "color_level", 1.0);
 ```
 
+新版美颜新增红润调整功能。参数名为 red_level 来控制红润程度。使用方法基本与美白效果一样。该参数的推荐取值范围为[0, 1]，0为无效果，0.5为默认效果，大于1为继续增强效果。
+
 #### 磨皮
 
-新版美颜中磨皮的参数改为了一个复合参数 blur_level ，其取值范围为0-5，对应6个不同的磨皮程度。
+新版美颜中，控制磨皮的参数有两个：blur_level、use_old_blur。
+
+参数 blur_level 指定磨皮程度。该参数的推荐取值范围为[0, 6]，0为无效果，对应7个不同的磨皮程度。
+
+参数 use_old_blur 指定是否使用旧磨皮。该参数设置为0即使用新磨皮，设置为大于0即使用旧磨皮
 
 设置参数的例子代码如下：
 
 ```C
 //  Set item parameters - blur
 fuItemSetParamd(g_items[1], "blur_level", 5.0);
+//  Set item parameters - use old blur
+fuItemSetParamd(g_items[1], "use_old_blur", 1.0);
 ```
 
 如果对默认的6个磨皮等级不满意，想进一步自定义磨皮效果，可以联系我司获取内部参数调节的方式。
 
 #### 美型
 
-目前我们支持两种美型模式，瘦脸和大眼，分别由 cheek_thinning 和 eye_enlarging 控制效果的强弱。两个参数的取值都为大于等于0的浮点数，0为关闭效果，1为默认效果，大于1为进一步增强效果。
+目前我们支持四种基本脸型：女神、网红、自然、默认。由参数 face_shape 指定：默认（3）、女神（0）、网红（1）、自然（2）。
+```C
+//  Set item parameters - shaping
+fuItemSetParamd(g_items[1], "face_shape", 3);
+```
+在上述四种基本脸型的基础上，我们提供了以下三个参数：face_shape_level、eye_enlarging、cheek_thinning。
 
-设置参数的例子代码如下：
+参数 face_shape_level 用以控制变化到指定基础脸型的程度。该参数的取值范围为[0, 1]。0为无效果，即关闭美型，1为指定脸型。
+
+若要关闭美型，可将 face_shape_level 设置为0。
+```C
+//  Set item parameters - shaping level
+fuItemSetParamd(g_items[1], "face_shape_level", 1.0);
+```
+参数 eye_enlarging 用以控制眼睛大小。此参数受参数 face_shape_level 影响。该参数的推荐取值范围为[0, 1]。大于1为继续增强效果。
+```C
+//  Set item parameters - shaping
+fuItemSetParamd(g_items[1], "eye_enlarging", 1.0);
+```
+参数 cheek_thinning 用以控制脸大小。此参数受参数 face_shape_level 影响。该参数的推荐取值范围为[0, 1]。大于1为继续增强效果。
 ```C
 //  Set item parameters - shaping
 fuItemSetParamd(g_items[1], "cheek_thinning", 1.0);
-fuItemSetParamd(g_items[1], "eye_enlarging", 1.0);
 ```
 
 ## 手势识别
@@ -168,6 +187,12 @@ static char g_auth_package[]={ ... }
 用户在库环境初始化时，需要提供该数组进行鉴权，具体参考 fuSetup 接口。没有证书、证书失效、网络连接失败等情况下，会造成鉴权失败，在控制台或者Android平台的log里面打出 "not authenticated" 信息，并在运行一段时间后停止渲染道具。
 
 任何其他关于授权问题，请email：support@faceunity.com
+
+## FAQ
+
+## 为什么过了一段时间人脸识别失效了？
+
+检查证书。如证书是否正确使用，是否过期。
 
 ## 函数接口及参数说明
 
