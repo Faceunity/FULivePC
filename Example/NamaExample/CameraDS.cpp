@@ -89,6 +89,10 @@ bool CCameraDS::OpenCamera(int nCamID, bool bDisplayProperties, int nWidth, int 
 	BindFilter(nCamID, &m_pDeviceFilter);
 	m_pGraph->AddFilter(m_pDeviceFilter, NULL);
 
+	if (m_pDeviceFilter==NULL)
+	{
+		exit(1);
+	}
 	CComPtr<IEnumPins> pEnum;
 	m_pDeviceFilter->EnumPins(&pEnum);
 

@@ -74,7 +74,15 @@ int main(int argc, char* argv[])
 	glutInitWindowPosition(250, 150);
 	glutInitWindowSize(wndWidth + 200, wndHeight);
 	main_window = glutCreateWindow("NamaExample");
+	const GLubyte* name = glGetString(GL_VENDOR); //返回负责当前OpenGL实现厂商的名字  
+	const GLubyte* biaoshifu = glGetString(GL_RENDERER); //返回一个渲染器标识符，通常是个硬件平台  
+	const GLubyte* OpenGLVersion = glGetString(GL_VERSION); //返回当前OpenGL实现的版本号  
+	const GLubyte* gluVersion = gluGetString(GLU_VERSION); //返回当前GLU工具库版本  
 
+	printf("OpenGL实现厂商的名字：%s\n", name);
+	printf("渲染器标识符：%s\n", biaoshifu);
+	printf("OpenGL实现的版本号：%s\n", OpenGLVersion);
+	printf("OGLU工具库版本：%s\n", gluVersion);
 	nama = std::tr1::shared_ptr<Nama>(new Nama);
 	nama->Init(wndWidth, wndHeight);
 	setOpenGLState();
@@ -180,12 +188,16 @@ void NE::namaGlutDisplay(void)
 	glLoadIdentity();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_BLEND);
-	timeSinceStart = glutGet(GLUT_ELAPSED_TIME);
+	
 	std::tr1::shared_ptr<unsigned char> frame = nama->Render();
+	//std::tr1::shared_ptr<unsigned char> frame = nama->RenderEx();	
 	setTextureData(frame);
 	drawFrame();
 	glutSwapBuffers();
-	deltaTime = glutGet(GLUT_ELAPSED_TIME) - timeSinceStart;
+
+	deltaTime = GetTickCount() - timeSinceStart;
+	timeSinceStart = GetTickCount();
+	
 	float frameTime = floor(1000.0 / frameRate);
 	if (deltaTime < frameTime)
 	{
@@ -273,12 +285,12 @@ void NE::createUI(int window)
 	new GLUI_Column(glui2, false);
 	GLUI_EditText *counter_edittext3 = new GLUI_EditText(glui2, "EyeEnlarging:", &nama->m_curEyeEnlarging);
 	new GLUI_Column(glui2, true);
-	GLUI_EditText *counter_edittext4 = new GLUI_EditText(glui2, "Translation:", nama->m_curTranslation);
-	counter_edittext4->set_w(230);
-	new GLUI_Column(glui2, false);
-	GLUI_EditText *counter_edittext5 = new GLUI_EditText(glui2, "Rotation:", nama->m_curRotation);
-	counter_edittext5->set_w(330);
-	new GLUI_Column(glui2, true);
+	//GLUI_EditText *counter_edittext4 = new GLUI_EditText(glui2, "Translation:", nama->m_curTranslation);
+	//counter_edittext4->set_w(230);
+	//new GLUI_Column(glui2, false);
+	//GLUI_EditText *counter_edittext5 = new GLUI_EditText(glui2, "Rotation:", &nama->m_curRotation);
+	//counter_edittext5->set_w(330);
+	//new GLUI_Column(glui2, true);
 	glui2->disable();
 	fps_spinner->enable();
 #if 1

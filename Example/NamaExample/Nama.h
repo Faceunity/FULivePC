@@ -15,6 +15,7 @@ namespace NE
 			LANDMARK
 		};
 	public:
+		int m_frameID;
 		Nama();
 		~Nama();
 		void Init(const int width = 1280, const int height = 720);
@@ -26,6 +27,7 @@ namespace NE
 		void UpdateFilter();
 		void UpdateBeauty();
 		std::tr1::shared_ptr<unsigned char> Render();
+		std::tr1::shared_ptr<unsigned char> RenderEx();
 	private:
 		void CreateBundle();
 		void CreateBundle(const int idx);
@@ -33,7 +35,7 @@ namespace NE
 		void DrawPoint(std::tr1::shared_ptr<unsigned char> frame, int x, int y, unsigned char r = 255, unsigned char g = 240, unsigned char b = 33);
 
 	private:
-		int m_frameID;
+		
 		std::tr1::shared_ptr<CCameraDS> m_cap;
 		int m_curBundleIdx;
 		int m_face_shape;

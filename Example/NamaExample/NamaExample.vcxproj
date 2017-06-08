@@ -20,13 +20,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v100</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v100</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -57,14 +57,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)thirdparty/DirectShow/include;$(SolutionDir)..;$(SolutionDir)thirdparty/opengl/include;</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(SolutionDir)thirdparty/DirectShow/Lib;$(SolutionDir)../Win32;$(SolutionDir)thirdparty/opengl/lib/x86;</LibraryPath>
+    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;$(SolutionDir);$(SolutionDir)thirdparty/DirectShow/include;$(SolutionDir)..;$(SolutionDir)thirdparty/opengl/include;</IncludePath>
+    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib;$(SolutionDir)thirdparty/DirectShow/Lib;$(SolutionDir)../Win32;$(SolutionDir)thirdparty/opengl/lib/x86;</LibraryPath>
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)thirdparty/DirectShow/include;$(SolutionDir)..;$(SolutionDir)thirdparty/opengl/include;</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(SolutionDir)thirdparty/DirectShow/Lib;$(SolutionDir)../Win32;$(SolutionDir)thirdparty/opengl/lib/x86/Release;$(SolutionDir)thirdparty/opengl/lib/x86</LibraryPath>
+    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;$(SolutionDir);$(SolutionDir)thirdparty/DirectShow/include;$(SolutionDir)..;$(SolutionDir)thirdparty/opengl/include;</IncludePath>
+    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib;$(SolutionDir)thirdparty/DirectShow/Lib;$(SolutionDir)../Win32;$(SolutionDir)thirdparty/opengl/lib/x86/Release;$(SolutionDir)thirdparty/opengl/lib/x86</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -106,6 +106,13 @@ xcopy /e /y "$(SolutionDir)..\Example\thirdparty\opengl\bin\Debug\*.dll" "$(OutD
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /e /y "$(SolutionDir)..\Win32\*.dll" "$(OutDir)"
+
+xcopy /e /y "$(SolutionDir)..\Win32\*.pdb" "$(OutDir)"
+
+xcopy /e /y "$(SolutionDir)..\Example\thirdparty\opengl\bin\Debug\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CameraDS.cpp" />

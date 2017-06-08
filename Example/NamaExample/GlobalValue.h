@@ -6,7 +6,8 @@ extern const std::string g_fuDataDir;
 extern const std::string g_v3Data;
 
 const std::string g_propName[] = {
-	"BeagleDog.bundle",
+	"lixiaolong.bundle",
+	//"BeagleDog.bundle",
 	"Deer.bundle",
 	"HappyRabbi.bundle",
 	"hartshorn.bundle",

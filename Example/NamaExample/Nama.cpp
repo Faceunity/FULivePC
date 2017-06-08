@@ -83,8 +83,11 @@ NE::Nama::Nama()
 }
 
 NE::Nama::~Nama()
-{
-	fuDestroyAllItems();//Note: 切忌使用一个已经destroy的item
+{	
+	if (true== m_hasSetup)
+	{
+		fuDestroyAllItems();//Note: 切忌使用一个已经destroy的item
+	}	
 }
 
 void NE::Nama::Init(const int width, const int height)
@@ -92,7 +95,20 @@ void NE::Nama::Init(const int width, const int height)
 	m_frameWidth = width;
 	m_frameHeight = height;
 	m_cap = std::tr1::shared_ptr<CCameraDS>(new CCameraDS);
-	if (false == m_cap->OpenCamera(0, false, m_frameWidth, m_frameHeight))
+	int cameraCount = m_cap->CameraCount();
+	int chooseCamera = 0;
+	if (cameraCount > 1)
+	{		
+		std::cout << "camera count:" << cameraCount << std::endl << "please input CameraID:[0,1,2...] ";
+		std::cin >> chooseCamera;
+		while (chooseCamera > cameraCount - 1 || chooseCamera < 0)
+		{
+			std::cout << "camera count:" << cameraCount << std::endl << "please input CameraID:[0,1,2...] ";
+			std::cin >> chooseCamera;
+		}
+	}
+
+	if (false == m_cap->OpenCamera(chooseCamera, false, m_frameWidth, m_frameHeight))
 	{
 		exit(1);
 	}
@@ -123,6 +139,7 @@ void NE::Nama::Init(const int width, const int height)
 		std::cout << "load face beautification data." << std::endl;
 
 		m_beautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
+
 
 		//"nature", "delta", "electric", "slowlived", "tokyo", "warm"等参数的设置
 		fuItemSetParams(m_beautyHandles, "filter_name", &_filters[m_curFilterIdx][0]);
@@ -226,7 +243,7 @@ void NE::Nama::UpdateBeauty()
 	fuItemSetParamd(m_beautyHandles, "red_level", m_redLevel);
 	//fuItemSetParamd(m_beautyHandles, "face_shape", m_face_shape);
 }
-
+//同时调用nama里的所有模块
 std::tr1::shared_ptr<unsigned char> NE::Nama::Render()
 {
 	std::tr1::shared_ptr<unsigned char> frame = m_cap->QueryFrame();
@@ -255,6 +272,20 @@ std::tr1::shared_ptr<unsigned char> NE::Nama::Render()
 	default:
 		break;
 	}
+
+	++m_frameID;
+
+	return frame;
+}
+//只调用nama里的美颜模块
+std::tr1::shared_ptr<unsigned char> NE::Nama::RenderEx()
+{
+	std::tr1::shared_ptr<unsigned char> frame = m_cap->QueryFrame();
+
+	fuBeautifyImage(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
+		FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
+		m_frameWidth, m_frameHeight, m_frameID, &m_beautyHandles, 1);
+
 	++m_frameID;
 
 	return frame;
