@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\CrashReport">
+      <UniqueIdentifier>{b2ed9423-350a-4d45-b1d9-e15cd34163b1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CameraDS.cpp">
@@ -27,6 +30,9 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="CrashReport\CrashReport.cpp">
+      <Filter>源文件\CrashReport</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraDS.h">
@@ -37,6 +43,9 @@
     </ClInclude>
     <ClInclude Include="GlobalValue.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CrashReport\CrashReport.h">
+      <Filter>源文件\CrashReport</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

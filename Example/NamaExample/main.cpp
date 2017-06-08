@@ -200,7 +200,7 @@ void NE::namaGlutDisplay(void)
 	
 	float frameTime = floor(1000.0 / frameRate);
 	if (deltaTime < frameTime)
-	{
+	{		
 		Sleep((frameTime)-deltaTime);
 	}
 }

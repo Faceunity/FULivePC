@@ -17,6 +17,7 @@
 
 #pragma comment(lib, "nama.lib")
 
+#include "CrashReport/CrashReport.h"
 bool NE::Nama::m_hasSetup = false;
 
 namespace NE
@@ -92,6 +93,7 @@ NE::Nama::~Nama()
 
 void NE::Nama::Init(const int width, const int height)
 {
+	SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
 	m_frameWidth = width;
 	m_frameHeight = height;
 	m_cap = std::tr1::shared_ptr<CCameraDS>(new CCameraDS);
@@ -106,8 +108,7 @@ void NE::Nama::Init(const int width, const int height)
 			std::cout << "camera count:" << cameraCount << std::endl << "please input CameraID:[0,1,2...] ";
 			std::cin >> chooseCamera;
 		}
-	}
-
+	}	
 	if (false == m_cap->OpenCamera(chooseCamera, false, m_frameWidth, m_frameHeight))
 	{
 		exit(1);
@@ -119,8 +120,7 @@ void NE::Nama::Init(const int width, const int height)
 		if (false == NE::LoadBundle(g_fuDataDir + g_v3Data, v3data))
 		{
 			exit(1);
-		}
-
+		}		
 		fuSetup(reinterpret_cast<float*>(&v3data[0]), NULL, g_auth_package, sizeof(g_auth_package));
 		m_hasSetup = true;
 	}

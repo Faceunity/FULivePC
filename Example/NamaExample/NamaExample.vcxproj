@@ -116,12 +116,14 @@ xcopy /e /y "$(SolutionDir)..\Example\thirdparty\opengl\bin\Debug\*.dll" "$(OutD
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CameraDS.cpp" />
+    <ClCompile Include="CrashReport\CrashReport.cpp" />
     <ClCompile Include="GlobalValue.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Nama.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraDS.h" />
+    <ClInclude Include="CrashReport\CrashReport.h" />
     <ClInclude Include="GlobalValue.h" />
     <ClInclude Include="Nama.h" />
   </ItemGroup>
