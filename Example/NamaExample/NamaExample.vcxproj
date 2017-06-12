@@ -111,7 +111,7 @@ xcopy /e /y "$(SolutionDir)..\Example\thirdparty\opengl\bin\Debug\*.dll" "$(OutD
 
 xcopy /e /y "$(SolutionDir)..\Win32\*.pdb" "$(OutDir)"
 
-xcopy /e /y "$(SolutionDir)..\Example\thirdparty\opengl\bin\Debug\*.dll" "$(OutDir)"</Command>
+xcopy /e /y "$(SolutionDir)..\Example\thirdparty\opengl\bin\Release\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
