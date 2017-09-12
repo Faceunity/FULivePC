@@ -111,6 +111,8 @@ void NE::Nama::Init(const int width, const int height)
 	}	
 	if (false == m_cap->OpenCamera(chooseCamera, false, m_frameWidth, m_frameHeight))
 	{
+		std::cout << "缺少摄像头，推荐使用 Logitech C920，然后安装官方驱动。" << std::endl ;
+		Sleep(3000);
 		exit(1);
 	}
 

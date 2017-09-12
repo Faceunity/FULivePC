@@ -91,6 +91,8 @@ bool CCameraDS::OpenCamera(int nCamID, bool bDisplayProperties, int nWidth, int 
 
 	if (m_pDeviceFilter==NULL)
 	{
+		printf("\n+++++++++ 缺少摄像头，推荐使用 Logitech C920，安装官方驱动。 ++++++++\n" );
+		Sleep(2000);
 		exit(1);
 	}
 	CComPtr<IEnumPins> pEnum;
