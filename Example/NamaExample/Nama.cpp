@@ -146,7 +146,6 @@ void NE::Nama::Init(const int width, const int height)
 		//"nature", "delta", "electric", "slowlived", "tokyo", "warm"等参数的设置
 		fuItemSetParams(m_beautyHandles, "filter_name", &_filters[m_curFilterIdx][0]);
 		fuItemSetParamd(m_beautyHandles, "is_opengl_es", 0);
-
 		fuItemSetParamd(m_beautyHandles, "color_level", m_curColorLevel);
 		fuItemSetParamd(m_beautyHandles, "blur_level", m_curBlurLevel);
 		fuItemSetParamd(m_beautyHandles, "cheek_thinning", m_curCheekThinning);
@@ -245,10 +244,60 @@ void NE::Nama::UpdateBeauty()
 	fuItemSetParamd(m_beautyHandles, "red_level", m_redLevel);
 	//fuItemSetParamd(m_beautyHandles, "face_shape", m_face_shape);
 }
+std::tr1::shared_ptr<unsigned char> NE::Nama::RevertFrameBuffer(std::tr1::shared_ptr<unsigned char> frame)
+{
+	int size = m_frameWidth*m_frameHeight * 4;
+	auto temp_frame = std::tr1::shared_ptr<unsigned char>(new unsigned char[size]);
+
+	for (int i = 0; i < m_frameHeight; i++)
+	{
+		auto ptr = frame.get() + i*m_frameWidth * 4 + m_frameWidth * 4;
+		auto qptr = temp_frame.get() + i*m_frameWidth * 4;
+		for (int j = 0; j < m_frameWidth; j++)
+		{
+			qptr[0] = ptr[0];
+			qptr[1] = ptr[1];
+			qptr[2] = ptr[2];
+			qptr[3] = ptr[3];
+			ptr -= 4;
+			qptr += 4;
+		}
+	}
+
+	return temp_frame;
+}
+
+void NE::Nama::ScissorFrameBuffer(std::tr1::shared_ptr<unsigned char> frame)
+{
+	int size = m_frameWidth*m_frameHeight * 4;
+	for (int i = 0; i < m_frameHeight; i++)
+	{
+		auto ptr = frame.get() + i*m_frameWidth * 4 + m_frameWidth * 4;
+		auto qptr = frame.get() + i*m_frameWidth * 4;
+		for (int j = 0; j < m_frameWidth * 0.31640625f; j++)
+		{
+			qptr[0] = 0;
+			qptr[1] = 0;
+			qptr[2] = 0;
+			qptr[3] = 0;
+			qptr += 4;
+			ptr[0] = 0;
+			ptr[1] = 0;
+			ptr[2] = 0;
+			ptr[3] = 0;
+			ptr -= 4;
+		}
+	}
+}
+
 //同时调用nama里的所有模块
 std::tr1::shared_ptr<unsigned char> NE::Nama::Render()
 {
 	std::tr1::shared_ptr<unsigned char> frame = m_cap->QueryFrame();
+	//ScissorFrameBuffer(frame);
+	frame = RevertFrameBuffer(frame);
+	
+	
 	switch (m_mode)
 	{
 	case PROP:
@@ -258,7 +307,7 @@ std::tr1::shared_ptr<unsigned char> NE::Nama::Render()
 			fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, handle, 2);
 		}
 		else if (1 == m_isDrawProp && 0 == m_isBeautyOn)
-		{
+		{			
 			fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, &m_propHandles[m_curBundleIdx], 1);
 		}
 		else if (1 == m_isBeautyOn && 0 == m_isDrawProp)
@@ -276,7 +325,7 @@ std::tr1::shared_ptr<unsigned char> NE::Nama::Render()
 	}
 
 	++m_frameID;
-
+	frame = RevertFrameBuffer(frame);
 	return frame;
 }
 //只调用nama里的美颜模块

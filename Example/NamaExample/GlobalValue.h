@@ -14,7 +14,7 @@ const std::string g_propName[] = {
 	"Mood.bundle",
 	"yazui.bundle",	
 	"lixiaolong.bundle",
-	"mask_matianyu.bundle"
+	//"mask_matianyu.bundle"
 };
 const int g_propCount = sizeof(g_propName) / sizeof(g_propName[0]);
 

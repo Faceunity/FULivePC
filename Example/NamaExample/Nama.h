@@ -26,6 +26,8 @@ namespace NE
 		void NextShape();
 		void UpdateFilter();
 		void UpdateBeauty();
+		std::tr1::shared_ptr<unsigned char> RevertFrameBuffer(std::tr1::shared_ptr<unsigned char> frame);
+		void ScissorFrameBuffer(std::tr1::shared_ptr<unsigned char> frame);
 		std::tr1::shared_ptr<unsigned char> Render();
 		std::tr1::shared_ptr<unsigned char> RenderEx();
 	private:
