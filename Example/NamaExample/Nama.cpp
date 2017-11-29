@@ -248,7 +248,12 @@ std::tr1::shared_ptr<unsigned char> NE::Nama::RevertFrameBuffer(std::tr1::shared
 {
 	int size = m_frameWidth*m_frameHeight * 4;
 	auto temp_frame = std::tr1::shared_ptr<unsigned char>(new unsigned char[size]);
-
+	auto test_ptr = frame.get() + 1 * m_frameWidth * 4 + m_frameWidth * 4;
+	if (IsBadReadPtr(test_ptr, 4))//can't debug run
+	{
+		printf("The camera is usered by other programs£¡\n");
+		return temp_frame;
+	}
 	for (int i = 0; i < m_frameHeight; i++)
 	{
 		auto ptr = frame.get() + i*m_frameWidth * 4 + m_frameWidth * 4;
