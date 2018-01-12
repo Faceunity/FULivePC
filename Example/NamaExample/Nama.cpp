@@ -93,7 +93,12 @@ NE::Nama::~Nama()
 
 void NE::Nama::Init(const int width, const int height)
 {
+#ifdef _WIN64
+
+#else
 	SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
+#endif // _WIN64
+	
 	m_frameWidth = width;
 	m_frameHeight = height;
 	m_cap = std::tr1::shared_ptr<CCameraDS>(new CCameraDS);
@@ -124,6 +129,12 @@ void NE::Nama::Init(const int width, const int height)
 			exit(1);
 		}		
 		fuSetup(reinterpret_cast<float*>(&v3data[0]), NULL, g_auth_package, sizeof(g_auth_package));
+		std::vector<char> anim_model_data;
+		if (false == NE::LoadBundle(g_fuDataDir + g_anim_model, anim_model_data))
+		{
+			exit(1);
+		}
+		fuLoadAnimModel(reinterpret_cast<float*>(&anim_model_data[0]), anim_model_data.size());
 		m_hasSetup = true;
 	}
 	else
@@ -294,6 +305,33 @@ void NE::Nama::ScissorFrameBuffer(std::tr1::shared_ptr<unsigned char> frame)
 		}
 	}
 }
+std::tr1::shared_ptr<unsigned char> NE::Nama::ConvertBetweenBGRAandRGBA(std::tr1::shared_ptr<unsigned char> frame)
+{
+	int size = m_frameWidth*m_frameHeight * 4;
+	auto temp_frame = std::tr1::shared_ptr<unsigned char>(new unsigned char[size]);
+	int offset = 0;
+	if (IsBadReadPtr(frame.get(), 4))//can't debug run
+	{
+		printf("The camera is usered by other programs！\n");
+		return temp_frame;
+	}
+	auto output = temp_frame.get();
+	auto input = frame.get();
+	for (int i = 0; i < m_frameHeight; i++)
+	{
+		for (int j = 0; j < m_frameWidth; j++)
+		{
+			output[offset] = input[offset + 2];
+			output[offset + 1] = input[offset + 1];
+			output[offset + 2] = input[offset];
+			output[offset + 3] = input[offset + 3];
+
+			offset += 4;
+		}
+	}
+
+	return temp_frame;
+}
 
 //同时调用nama里的所有模块
 std::tr1::shared_ptr<unsigned char> NE::Nama::Render()
@@ -301,7 +339,7 @@ std::tr1::shared_ptr<unsigned char> NE::Nama::Render()
 	std::tr1::shared_ptr<unsigned char> frame = m_cap->QueryFrame();
 	//ScissorFrameBuffer(frame);
 	frame = RevertFrameBuffer(frame);
-	
+	//frame = ConvertBetweenBGRAandRGBA(frame);
 	
 	switch (m_mode)
 	{
@@ -309,6 +347,8 @@ std::tr1::shared_ptr<unsigned char> NE::Nama::Render()
 		if (1 == m_isBeautyOn && 1 == m_isDrawProp)
 		{
 			int handle[2] = { m_beautyHandles, m_propHandles[m_curBundleIdx] };
+			//如果获取到的数据不是BGRA的，可以使用fuRenderItemsEx替换fuRenderItems。 支持的格式有FU_FORMAT_BGRA_BUFFER 、 FU_FORMAT_NV21_BUFFER 、FU_FORMAT_I420_BUFFER 、FU_FORMAT_RGBA_BUFFER
+			//fuRenderItemsEx(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()),m_frameWidth, m_frameHeight, m_frameID, handle, 2);
 			fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, handle, 2);
 		}
 		else if (1 == m_isDrawProp && 0 == m_isBeautyOn)

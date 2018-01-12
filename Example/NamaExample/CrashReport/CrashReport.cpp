@@ -1,5 +1,8 @@
 #include "CrashReport.h"
 
+#ifdef _WIN64
+
+#else
 LPSymInitialize	SymInitializeI;
 LPSymCleanup SymCleanupI;
 LPStackWalk64 StackWalk64I;
@@ -729,3 +732,4 @@ int ehook_inited = 0;
 
 typedef void(__cdecl*CALLBACK_SPAP_ERROR_HOOK)(char*, char*);
 typedef CALLBACK_SPAP_ERROR_HOOK(__cdecl*TspapSetErrorHook)(CALLBACK_SPAP_ERROR_HOOK);
+#endif // _WIN64

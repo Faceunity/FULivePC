@@ -13,7 +13,7 @@ const std::string g_propName[] = {
 	"yuguan.bundle",		
 	"Mood.bundle",
 	"yazui.bundle",	
-	"lixiaolong.bundle",
+	"houzi5.bundle",
 	//"mask_matianyu.bundle"
 };
 const int g_propCount = sizeof(g_propName) / sizeof(g_propName[0]);
@@ -21,3 +21,5 @@ const int g_propCount = sizeof(g_propName) / sizeof(g_propName[0]);
 const std::string g_faceBeautification = "face_beautification.bundle";
 
 const std::string g_gestureRecongnition = "heart.bundle";
+
+const std::string g_anim_model = "anim_model.bundle";
