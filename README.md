@@ -17,7 +17,7 @@ FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，�
 与新版SDK一起，我们也推出更方便和好用的2D/3D贴纸道具制作工具——FUEditor，助力视频应用快速应对市场，推出具有个性化和吸引力的道具和玩法。相关文档和下载在[这里](https://github.com/Faceunity/FUEditor)，制作过程中遇到问题可以联系我司技术支持。
 
 此外，我们优化了SDK的系统稳定性，在网络条件波动的情况下保持SDK正常运行，并提供了获取SDK系统错误信息的接口，方便应用灵活处理。
-具体更新内容可以到[这里](https://github.com/Faceunity/FULivePC/dev/docs/FUNama SDK v4.5.md)查看详细文档。
+具体更新内容可以到[这里](https://github.com/Faceunity/FULivePC/blob/dev/docs/FUNama%20SDK%20v4.5.md)查看详细文档。
 ## 运行环境
 
 目前我们提供了32位和64位双平台的库文件，运行前要保证初始化好OpenGL环境，并确保当前有可用的OpenGL context。
