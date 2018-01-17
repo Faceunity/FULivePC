@@ -4,13 +4,6 @@
 #include <QTextStream>
 int main(int argc, char *argv[])
 {
-	//QCoreApplication::addLibraryPath("./");
-	//QCoreApplication::addLibraryPath("./bins");
-	//QCoreApplication::addLibraryPath("./bins/platforms");
-	//QCoreApplication::addLibraryPath("../");
-	//QCoreApplication::addLibraryPath("../bins");
-	//QCoreApplication::addLibraryPath("../bins/platforms");
-
 	//将exe控制台打印信息重定向到nama_log.txt文件中
 	freopen("nama_log.txt", "w", stdout);
 	
