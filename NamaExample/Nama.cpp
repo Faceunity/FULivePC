@@ -90,6 +90,9 @@ Nama::~Nama()
 		fuDestroyAllItems();//Note: 切忌使用一个已经destroy的item
 		fuOnDeviceLost();//Note: 这个调用销毁nama创建的OpenGL资源
 	}		
+	//fuSetup整个程序只需要运行一次，销毁某个子窗口时只需要调用上述两个函数。 
+	//Tips:如果其他窗口还会用这些资源，那么资源创建应该在父窗口。程序运行期间一直持有这些资源.
+	
 }
 
 int Nama::CameraCount()
@@ -464,7 +467,7 @@ void Nama::DrawPoint(std::tr1::shared_ptr<unsigned char> frame, int x, int y, un
 	{
 		int xx = x + offsetX[i];
 		int yy = y + offsetY[i];
-		if (0 > xx || xx > m_frameWidth || 0 > yy || yy > m_frameHeight)
+		if (0 > xx || xx >= m_frameWidth || 0 > yy || yy >= m_frameHeight)
 		{
 			continue;
 		}
