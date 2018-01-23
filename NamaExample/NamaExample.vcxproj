@@ -205,6 +205,9 @@ xcopy /e /y "$(SolutionDir)Win32\*.pdb" "$(OutDir)"
     <ClCompile Include="image\stb_image.c" />
     <ClCompile Include="image\stb_image_write.c" />
     <ClCompile Include="image\stb_truetype.c" />
+    <ClCompile Include="ipc\ipcbridge.cpp" />
+    <ClCompile Include="ipc\mutex.cpp" />
+    <ClCompile Include="ipc\waitcondition.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Nama.cpp" />
     <ClCompile Include="NamaExample.cpp" />
@@ -257,6 +260,10 @@ xcopy /e /y "$(SolutionDir)Win32\*.pdb" "$(OutDir)"
     <ClInclude Include="image\stb_image_write.h" />
     <ClInclude Include="image\stb_truetype.h" />
     <ClInclude Include="image\wrapper_defines.h" />
+    <ClInclude Include="ipc\filtercommons.h" />
+    <ClInclude Include="ipc\ipcbridge.h" />
+    <ClInclude Include="ipc\mutex.h" />
+    <ClInclude Include="ipc\waitcondition.h" />
     <ClInclude Include="Nama.h" />
     <CustomBuild Include="GLWidget.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

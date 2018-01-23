@@ -107,6 +107,12 @@ void NamaExample::on_popLabelTimeOut()
 	ui.poplabel_0->hide();
 }
 
+void NamaExample::on_virtualCameraCheckStateChanged()
+{
+	QCheckBox *checkBox = qobject_cast<QCheckBox*>(sender());
+	ui.glwidget->is_need_ipc_write = checkBox->isChecked();
+}
+
 void NamaExample::on_pushButtonConnect_clicked0()
 {
 	ui.glwidget->nama->SetCurrentBundle(0);

@@ -4,6 +4,10 @@
 #include <QtOpenGL>
 #include "freeglut.h"
 #include "Nama.h"
+//for virtual camera
+#include "ipc/filtercommons.h"
+#include "ipc/ipcbridge.h"
+#include <uuids.h>
 
 class GLWidget : public QGLWidget
 {
@@ -17,6 +21,7 @@ private:
 	float deltaTime;
 	int frameRate = 25;
 	float xy_aspect;
+	IpcBridge ipcBridge;
 	
 public:
 	GLWidget(QWidget *parent);
@@ -24,6 +29,7 @@ public:
 
 	std::tr1::shared_ptr<NamaExampleNameSpace::Nama> nama;
 	bool is_need_draw_landmarks;
+	bool is_need_ipc_write;
 
 	void initializeGL();
 	void resizeGL(int w, int h);

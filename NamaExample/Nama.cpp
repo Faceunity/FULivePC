@@ -57,7 +57,7 @@ namespace NamaExampleNameSpace
 	}
 }
 
-std::string Nama::_filters[6] = { "nature", "delta", "electric", "slowlived", "tokyo", "warm" };
+std::string Nama::_filters[6] = { "origin", "delta", "electric", "slowlived", "tokyo", "warm" };
 
 Nama::Nama()
 	:m_frameID(0),
@@ -173,7 +173,7 @@ void Nama::Init(const int width, const int height)
 
 		m_beautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
 
-		//"nature", "delta", "electric", "slowlived", "tokyo", "warm"等参数的设置
+		//"origin", "delta", "electric", "slowlived", "tokyo", "warm"等参数的设置
 		fuItemSetParams(m_beautyHandles, "filter_name", &_filters[m_curFilterIdx][0]);
 		fuItemSetParamd(m_beautyHandles, "is_opengl_es", 0);
 		fuItemSetParamd(m_beautyHandles, "color_level", m_curColorLevel);
@@ -200,6 +200,7 @@ void Nama::Init(const int width, const int height)
 	//加载一个bundle
 	m_curBundleIdx = -1;
 	NextBundle();
+	fuSetDefaultOrientation(0);
 }
 
 void Nama::SwitchRenderMode()

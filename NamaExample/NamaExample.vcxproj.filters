@@ -44,6 +44,9 @@
     <Filter Include="Header Files\image">
       <UniqueIdentifier>{68f6caef-ad7f-46c1-869b-f4de71f1cb2b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ipc">
+      <UniqueIdentifier>{d0c80c2b-4a56-4e85-b489-ad8a53f52713}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -94,6 +97,15 @@
     <ClCompile Include="GeneratedFiles\qrc_style.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="ipc\mutex.cpp">
+      <Filter>Source Files\ipc</Filter>
+    </ClCompile>
+    <ClCompile Include="ipc\waitcondition.cpp">
+      <Filter>Source Files\ipc</Filter>
+    </ClCompile>
+    <ClCompile Include="ipc\ipcbridge.cpp">
+      <Filter>Source Files\ipc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="NamaExample.h">
@@ -139,6 +151,18 @@
     </ClInclude>
     <ClInclude Include="image\stb_truetype.h">
       <Filter>Header Files\image</Filter>
+    </ClInclude>
+    <ClInclude Include="ipc\mutex.h">
+      <Filter>Source Files\ipc</Filter>
+    </ClInclude>
+    <ClInclude Include="ipc\waitcondition.h">
+      <Filter>Source Files\ipc</Filter>
+    </ClInclude>
+    <ClInclude Include="ipc\filtercommons.h">
+      <Filter>Source Files\ipc</Filter>
+    </ClInclude>
+    <ClInclude Include="ipc\ipcbridge.h">
+      <Filter>Source Files\ipc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

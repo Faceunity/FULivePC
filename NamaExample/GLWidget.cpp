@@ -5,6 +5,12 @@ GLWidget::GLWidget(QWidget *parent)
 {
 	nama = std::tr1::shared_ptr<NamaExampleNameSpace::Nama>(new NamaExampleNameSpace::Nama);
 	is_need_draw_landmarks = false;
+	is_need_ipc_write = false;
+
+	if (!ipcBridge.open(IPC_FILE_NAME, IpcBridge::OpenMode::Write))
+	{
+		printf("open ipc file failed!");
+	}
 }
 
 GLWidget::~GLWidget()
@@ -45,6 +51,10 @@ void GLWidget::paintGL()
 
 	std::tr1::shared_ptr<unsigned char> frame = nama->QueryFrame();
 	nama->RenderItems(frame);
+	if (is_need_ipc_write)
+	{
+		size_t frameSize = ipcBridge.write(MEDIASUBTYPE_RGB32, wndWidth, wndHeight, frame.get());
+	}	
 	setTextureData(frame);
 	drawFrame();
 	if (is_need_draw_landmarks)

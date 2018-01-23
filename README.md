@@ -1,15 +1,17 @@
 # FULivePC
-FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，作为一款集成示例。。
+FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，作为一款集成示例。
 
-## SDK v4.0 更新
-在v4.0版本中，我们全面升级了移动端实时深度学习框架，更好地支持视频应用中日益增长的AI需求。随之推出的第一个功能是背景分割，开启该功能的道具可以在相机画面中自动分割出人像，并替换背景为其他内容。
+## FuNama SDK v4.6
+
+本次更新主要包含以下改动：
+- 增强表情优化功能，在人脸快速转动时提高表情稳定性
 
 由于深度学习框架的升级，SDK的库文件从之前的 ~3M 增加到了 ~5M，如果不需要AI相关功能，可以下载[SDK lite版](https://github.com/Faceunity/FULivePC/releases)，库文件大小和老版本保持一致。
 
 与新版SDK一起，我们也推出更方便和好用的2D/3D贴纸道具制作工具——FUEditor，助力视频应用快速应对市场，推出具有个性化和吸引力的道具和玩法。相关文档和下载在[这里](https://github.com/Faceunity/FUEditor)，制作过程中遇到问题可以联系我司技术支持。
 
 此外，我们优化了SDK的系统稳定性，在网络条件波动的情况下保持SDK正常运行，并提供了获取SDK系统错误信息的接口，方便应用灵活处理。
-
+具体更新内容可以到docs/目录下查看详细文档。
 ## 运行环境
 
 目前我们提供了32位和64位双平台的库文件，运行前要保证初始化好OpenGL环境，并确保当前有可用的OpenGL context。
@@ -70,18 +72,18 @@ fuRenderItems(0, img, stride/4, h, g_frame_id, g_items, 2);
 
 在目前版本中提供以下滤镜：
 ```C
-"nature", "delta", "electric", "slowlived", "tokyo", "warm"
+"origin", "delta", "electric", "slowlived", "tokyo", "warm"
 ```
 
-其中 "nature" 作为默认的美白滤镜，其他滤镜属于风格化滤镜。切换滤镜时，通过 fuItemSetParams 设置美颜道具的参数，如：
+其中 "origin" 作为默认的美白滤镜，其他滤镜属于风格化滤镜。切换滤镜时，通过 fuItemSetParams 设置美颜道具的参数，如：
 ```C
 //  Set item parameters - filter
-fuItemSetParams(g_items[1], "filter_name", "nature");
+fuItemSetParams(g_items[1], "filter_name", "origin");
 ```
 
 #### 美白和红润
 
-当滤镜设置为美白滤镜 "nature" 时，通过参数 color_level 来控制美白程度。当滤镜为其他风格化滤镜时，该参数用于控制风格化程度。该参数取值为大于等于0的浮点数，0为无效果，1为默认效果，大于1为继续增强效果。
+当滤镜设置为美白滤镜 "origin" 时，通过参数 color_level 来控制美白程度。当滤镜为其他风格化滤镜时，该参数用于控制风格化程度。该参数取值为大于等于0的浮点数，0为无效果，1为默认效果，大于1为继续增强效果。
 
 设置参数的例子代码如下：
 
