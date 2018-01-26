@@ -152,7 +152,10 @@ void Nama::Init(const int width, const int height)
 			std::cout << "Error:缺少数据文件。" << g_fuDataDir + g_anim_model << std::endl;
 			exit(2);
 		}
+		// 表情系数稳定
 		fuLoadAnimModel(reinterpret_cast<float*>(&anim_model_data[0]), anim_model_data.size());
+		fuSetExpressionCalibration(1);
+
 		m_hasSetup = true;
 	}
 	else
