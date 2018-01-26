@@ -25,7 +25,7 @@ public slots:
 	void on_shapeSliderConnect_moved();
 	void on_popLabelTimeOut();
 	void on_virtualCameraCheckStateChanged();
-	
+	void on_chooseCheckStateChanged();	
 	void on_pushButtonConnect_clicked0();
 	void on_pushButtonConnect_clicked1();
 	void on_pushButtonConnect_clicked2();

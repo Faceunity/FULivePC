@@ -97,7 +97,7 @@
             <rect>
              <x>10</x>
              <y>0</y>
-             <width>571</width>
+             <width>611</width>
              <height>71</height>
             </rect>
            </property>
@@ -109,15 +109,24 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>638</width>
+              <width>601</width>
               <height>71</height>
              </rect>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
-              <widget class="QLabel" name="label">
+              <widget class="QRadioButton" name="radioButton0_tiezhi">
                <property name="text">
                 <string>贴纸</string>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>16</width>
+                 <height>16</height>
+                </size>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -340,7 +349,17 @@
              <height>51</height>
             </rect>
            </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="1,5,5,5">
+            <item>
+             <widget class="QRadioButton" name="radioButton0_meiyan">
+              <property name="text">
+               <string>美颜</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
             <item>
              <widget class="QGroupBox" name="group0_3">
               <property name="title">
@@ -463,9 +482,9 @@
           <widget class="QGroupBox" name="group0_2">
            <property name="geometry">
             <rect>
-             <x>580</x>
+             <x>640</x>
              <y>0</y>
-             <width>451</width>
+             <width>401</width>
              <height>71</height>
             </rect>
            </property>
@@ -477,13 +496,13 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>434</width>
+              <width>391</width>
               <height>71</height>
              </rect>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,4,4,4,4,4,4">
              <item>
-              <widget class="QLabel" name="label_2">
+              <widget class="QLabel" name="label">
                <property name="text">
                 <string>滤镜</string>
                </property>
@@ -1284,6 +1303,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>radioButton0_tiezhi</sender>
+   <signal>clicked()</signal>
+   <receiver>NamaExampleClass</receiver>
+   <slot>on_chooseCheckStateChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>45</x>
+     <y>743</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>639</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton0_meiyan</sender>
+   <signal>clicked()</signal>
+   <receiver>NamaExampleClass</receiver>
+   <slot>on_chooseCheckStateChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>45</x>
+     <y>803</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>639</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>on_pushButtonConnect_clicked0()</slot>
@@ -1302,6 +1353,7 @@
   <slot>on_comboBoxCurrentIndexChanged()</slot>
   <slot>on_popLabelTimeOut()</slot>
   <slot>on_virtualCameraCheckStateChanged()</slot>
+  <slot>on_chooseCheckStateChanged()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="buttonGroup0_1"/>

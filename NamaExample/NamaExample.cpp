@@ -121,6 +121,27 @@ void NamaExample::on_virtualCameraCheckStateChanged()
 	ui.glwidget->is_need_ipc_write = checkBox->isChecked();
 }
 
+void NamaExample::on_chooseCheckStateChanged()
+{
+	QRadioButton *checkBox = qobject_cast<QRadioButton*>(sender());
+	QString name = checkBox->objectName();
+	std::string sp = name.split("_")[1].toStdString();
+	if (sp == "tiezhi")
+	{
+		ui.glwidget->nama->m_isDrawProp = checkBox->isChecked();
+	}
+	else if(sp == "lvjing")
+	{
+		ui.glwidget->nama->m_isBeautyOn = checkBox->isChecked();
+	}
+	else if (sp == "meiyan")
+	{
+		ui.glwidget->nama->m_isBeautyOn = checkBox->isChecked();
+	}
+
+	
+}
+
 void NamaExample::on_pushButtonConnect_clicked0()
 {
 	ui.glwidget->nama->SetCurrentBundle(0);
