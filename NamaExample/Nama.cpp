@@ -314,33 +314,6 @@ void Nama::CreateBundle(const int idx)
 		m_propHandles[idx] = fuCreateItemFromPackage(&propData[0], propData.size());		
 	}
 }
-//左右翻转图像内容
-void Nama::FlipFrameBuffer(std::tr1::shared_ptr<unsigned char> frame)
-{
-	int size = m_frameWidth*m_frameHeight * 4;
-	auto temp_frame = std::tr1::shared_ptr<unsigned char>(new unsigned char[size]);
-	auto test_ptr = frame.get() + 1 * m_frameWidth * 4 + m_frameWidth * 4;
-	if (IsBadReadPtr(test_ptr, 4))//can't debug run
-	{
-		printf("The camera is usered by other programs！\n");
-		return;
-	}
-	for (int i = 0; i < m_frameHeight; i++)
-	{
-		auto ptr = frame.get() + i*m_frameWidth * 4 + m_frameWidth * 4;
-		auto qptr = temp_frame.get() + i*m_frameWidth * 4;
-		for (int j = 0; j < m_frameWidth; j++)
-		{
-			qptr[0] = ptr[0];
-			qptr[1] = ptr[1];
-			qptr[2] = ptr[2];
-			qptr[3] = ptr[3];
-			ptr -= 4;
-			qptr += 4;
-		}
-	}
-	memcpy(frame.get(), temp_frame.get(), size);
-}
 //裁剪图像内容
 void Nama::ScissorFrameBuffer(std::tr1::shared_ptr<unsigned char> frame)
 {
@@ -396,38 +369,35 @@ std::tr1::shared_ptr<unsigned char> Nama::ConvertBetweenBGRAandRGBA(std::tr1::sh
 //渲染函数
 void Nama::RenderItems(std::tr1::shared_ptr<unsigned char> frame)
 {	
-	FlipFrameBuffer(frame);
-
 	switch (m_mode)
 	{
 	case PROP:
 		if (1 == m_isBeautyOn && 1 == m_isDrawProp)
 		{
 			int handle[2] = { m_beautyHandles, m_propHandles[m_curBundleIdx] };
-			//如果输入的数据不是BGRA的，可以调用fuRenderItemsEx替换调用fuRenderItems。 支持的格式有FU_FORMAT_BGRA_BUFFER 、 FU_FORMAT_NV21_BUFFER 、FU_FORMAT_I420_BUFFER 、FU_FORMAT_RGBA_BUFFER
-			//fuRenderItemsEx(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()),m_frameWidth, m_frameHeight, m_frameID, handle, 2);
-			fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, handle, 2);
+			//支持的格式有FU_FORMAT_BGRA_BUFFER 、 FU_FORMAT_NV21_BUFFER 、FU_FORMAT_I420_BUFFER 、FU_FORMAT_RGBA_BUFFER			
+			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()), 
+				m_frameWidth, m_frameHeight, m_frameID, handle, 2, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);			
 		}
 		else if (1 == m_isDrawProp && 0 == m_isBeautyOn)
-		{			
-			fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, &m_propHandles[m_curBundleIdx], 1);
+		{						
+			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
+				m_frameWidth, m_frameHeight, m_frameID, &m_propHandles[m_curBundleIdx], 1, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);
 		}
 		else if (1 == m_isBeautyOn && 0 == m_isDrawProp)
-		{
-			fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, &m_beautyHandles, 1);
-		}
-		//fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, &m_gestureHandles, 1);
+		{			
+			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
+				m_frameWidth, m_frameHeight, m_frameID, &m_beautyHandles, 1, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);
+		}		
 		break;
-	case LANDMARK:
-		fuRenderItems(0, reinterpret_cast<int*>(frame.get()), m_frameWidth, m_frameHeight, m_frameID, NULL, 0);
+	case LANDMARK:		
 		DrawLandmarks(frame);
 		break;
 	default:
 		break;
 	}
 
-	++m_frameID;
-	FlipFrameBuffer(frame);
+	++m_frameID;	
 	return;
 }
 //只调用nama里的美颜模块
@@ -455,7 +425,7 @@ void Nama::DrawLandmarks(std::tr1::shared_ptr<unsigned char> frame)
 	ret = fuGetFaceInfo(0, "landmarks", landmarks, sizeof(landmarks) / sizeof(landmarks[0]));	
 	for (int i(0); i != 75; ++i)
 	{
-		DrawPoint(frame, m_frameWidth - static_cast<int>(landmarks[2 * i]), static_cast<int>(landmarks[2 * i + 1]));
+		DrawPoint(frame, static_cast<int>(landmarks[2 * i]), static_cast<int>(landmarks[2 * i + 1]));
 	}
 
 }

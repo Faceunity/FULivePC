@@ -33,7 +33,6 @@ namespace NamaExampleNameSpace
 		void NextShape();
 		void UpdateFilter();
 		void UpdateBeauty();
-		void FlipFrameBuffer(std::tr1::shared_ptr<unsigned char> frame);
 		void ScissorFrameBuffer(std::tr1::shared_ptr<unsigned char> frame);
 		std::tr1::shared_ptr<unsigned char> ConvertBetweenBGRAandRGBA(std::tr1::shared_ptr<unsigned char> frame);
 		void RenderItems(std::tr1::shared_ptr<unsigned char> frame);
