@@ -17,9 +17,12 @@ NamaExample::NamaExample(QWidget *parent)
 	ui.statusBar->addPermanentWidget(ui.official_website_label);
 	timer_show = new QTimer(this);
 	timer_log = new QTimer(this);
+	timer_fps = new QTimer(this);
 	connect(timer_show, SIGNAL(timeout()), this, SLOT(on_popLabelTimeOut()));	
 	connect(timer_log, SIGNAL(timeout()), this, SLOT(SetStatusBar()));	
+	connect(timer_fps, SIGNAL(timeout()), this, SLOT(SetFPSLaybel()));
 	timer_log->start(1000);
+	timer_fps->start(1000);
 	log_file_size = 0;
 }
 
@@ -40,6 +43,11 @@ void NamaExample::SetStatusBar()
 		log_file_size = f.size();
 	}	
 	f.close();
+}
+
+void NamaExample::SetFPSLaybel()
+{	
+	ui.label_fps->setText(QString(std::to_string(ui.glwidget->fps).c_str()));
 }
 
 void NamaExample::on_comboBoxCurrentIndexChanged()

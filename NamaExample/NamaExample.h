@@ -15,10 +15,12 @@ private:
 	Ui::NamaExampleClass ui;
 	QTimer *timer_show;
 	QTimer *timer_log;
+	QTimer *timer_fps;
 	int log_file_size;
 public slots:
 	void SetStatusBar();
 	void on_SliderConnect_moved0();
+	void SetFPSLaybel();
 	void on_comboBoxCurrentIndexChanged();
 	void on_shapeSliderConnect_moved();
 	void on_popLabelTimeOut();

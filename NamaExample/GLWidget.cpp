@@ -42,6 +42,24 @@ void GLWidget::initializeGL()
 	nama->Init(wndWidth, wndHeight);
 }
 
+int get_fps()
+{
+	static int fps = 0;
+	static int lastTime = GetTickCount(); // ms
+	static int frameCount = 0;
+
+	++frameCount;
+
+	int curTime = GetTickCount();
+	if (curTime - lastTime > 1000) // 取固定时间间隔为1秒
+	{		
+		fps = frameCount;
+		frameCount = 0;
+		lastTime = curTime;
+	}
+	return fps;
+}
+
 void GLWidget::paintGL()
 {
 	makeCurrent();
@@ -49,6 +67,7 @@ void GLWidget::paintGL()
 	glClearColor(1.0, 1.0, 0.0, 1.0);
 	glDisable(GL_BLEND);
 
+	fps = get_fps();	
 	std::tr1::shared_ptr<unsigned char> frame = nama->QueryFrame();
 	nama->RenderItems(frame);
 	if (is_need_ipc_write)

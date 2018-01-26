@@ -30,6 +30,7 @@ public:
 	std::tr1::shared_ptr<NamaExampleNameSpace::Nama> nama;
 	bool is_need_draw_landmarks;
 	bool is_need_ipc_write;
+	int fps = 60;
 
 	void initializeGL();
 	void resizeGL(int w, int h);

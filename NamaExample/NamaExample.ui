@@ -70,6 +70,19 @@
           <bool>true</bool>
          </property>
         </widget>
+        <widget class="QLabel" name="label_fps">
+         <property name="geometry">
+          <rect>
+           <x>1220</x>
+           <y>10</y>
+           <width>21</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>60</string>
+         </property>
+        </widget>
        </widget>
       </item>
       <item>
@@ -96,7 +109,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>561</width>
+              <width>638</width>
               <height>71</height>
              </rect>
             </property>
@@ -443,9 +456,6 @@
                 </item>
                </layout>
               </widget>
-              <zorder>layoutWidget</zorder>
-              <zorder>layoutWidget</zorder>
-              <zorder>layoutWidget</zorder>
              </widget>
             </item>
            </layout>
