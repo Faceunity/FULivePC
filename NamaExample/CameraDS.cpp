@@ -43,6 +43,7 @@ void CCameraDS::CloseCamera()
 	m_pNullInputPin = NULL;
 
 	m_bConnected = false;
+	m_bIsCurrentDeviceBusy = false;
 	m_nWidth = 0;
 	m_nHeight = 0;
 	m_bLock = false;
@@ -52,6 +53,14 @@ void CCameraDS::CloseCamera()
 
 bool CCameraDS::OpenCamera(int nCamID, bool bDisplayProperties, int nWidth, int nHeight)
 {
+	char cam_name_temp[1024];
+	int buffer_size = 1024;
+	CameraName(nCamID, cam_name_temp, buffer_size);
+	if (IsDeviceBusy(cam_name_temp))
+	{
+		m_bIsCurrentDeviceBusy = true;
+		return false;
+	}
 
 	HRESULT hr = S_OK;
 
@@ -209,9 +218,195 @@ bool CCameraDS::OpenCamera(int nCamID, bool bDisplayProperties, int nWidth, int 
 	pEnum = NULL;
 	return true;
 }
+
 bool CCameraDS::IsConnected()
 {
 	return m_bConnected;
+}
+
+int CCameraDS::IsDeviceBusy(char *videoName)
+{
+	HRESULT hr;
+	HRESULT hhr;
+	int ret = 0;
+	int videoBusy = 1;
+
+	CoInitialize(NULL);
+
+	ICreateDevEnum* pSysDevEnum = NULL;
+
+	hr = CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER, IID_ICreateDevEnum, (void**)&pSysDevEnum);
+
+	IEnumMoniker* pEnumCat;
+
+	hr = pSysDevEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory, &pEnumCat, 0);
+
+	if (hr == S_OK)
+	{
+		IMoniker* pMoniker = NULL;
+		IMoniker* pm1 = NULL;
+		ULONG cFetched;
+
+		while (pEnumCat->Next(1, &pMoniker, &cFetched) == S_OK)
+		{
+			IPropertyBag* pPropBag;
+			hr = pMoniker->BindToStorage(0, 0, IID_IPropertyBag, (void**)&pPropBag);
+
+			if (SUCCEEDED(hr))
+			{
+
+				VARIANT varName;
+				varName.vt = VT_BSTR;
+
+				VariantInit(&varName);
+
+				hr = pPropBag->Read(L"FriendlyName", &varName, 0);
+
+				USES_CONVERSION;
+				LPTSTR lpstrMsg = W2T(varName.bstrVal);
+
+				if (SUCCEEDED(hr))
+				{
+					if (!strcmp(videoName, (const char *)lpstrMsg))//存在设备  
+					{
+						LPBC *pbc = NULL;
+						IBaseFilter *P_VCamTrans = NULL;
+						IBaseFilter *pCap = NULL;
+
+						CreateBindCtx(0, pbc);
+
+						hr = pMoniker->BindToObject((IBindCtx *)pbc, 0, IID_IBaseFilter, (void **)&pCap);
+
+						ICaptureGraphBuilder2 *m_pCapGB;
+						IGraphBuilder *m_pGB;
+						IMediaControl *m_pMC;
+						IVideoWindow   *m_pVW;
+
+						hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC, IID_IGraphBuilder, (void **)&m_pGB);
+
+						if (FAILED(hr)) return hr;
+
+						m_pGB->AddFilter(pCap, NULL);
+
+						hr = CoCreateInstance(CLSID_CaptureGraphBuilder2, NULL, CLSCTX_INPROC_SERVER, IID_ICaptureGraphBuilder2, (void **)&m_pCapGB);
+
+						if (FAILED(hr)) return hr;
+
+						m_pCapGB->SetFiltergraph(m_pGB);
+
+						IAMCrossbar *pXBar1 = NULL;
+
+						hr = m_pCapGB->FindInterface(&LOOK_UPSTREAM_ONLY, NULL, pCap, IID_IAMCrossbar, (void **)&pXBar1);
+
+						if (SUCCEEDED(hr))
+						{
+							long OutputPinCount;
+							long InputPinCount;
+							long PinIndexRelated;
+							long PhysicalType;
+							long inPort = 0;
+							long outPort = 0;
+
+							pXBar1->get_PinCounts(&OutputPinCount, &InputPinCount);
+
+							//对于存在输入输出引脚的摄像头。此处采用轮询所有的引脚   
+							for (int i = 0; i < InputPinCount; i++)
+							{
+								pXBar1->get_CrossbarPinInfo(TRUE, i, &PinIndexRelated, &PhysicalType);
+
+								if (PhysConn_Video_Composite == PhysicalType)
+								{
+									inPort = i;
+									break;
+								}
+
+							}
+
+							for (int i = 0; i < OutputPinCount; i++)
+							{
+								pXBar1->get_CrossbarPinInfo(FALSE, i, &PinIndexRelated, &PhysicalType);
+
+								if (PhysConn_Video_VideoDecoder == PhysicalType)
+								{
+									outPort = i;
+									break;
+								}
+							}
+
+							for (int i = 0; i < InputPinCount; i++)
+							{
+								for (int j = 0; j < OutputPinCount; j++)
+								{
+									if (S_OK == pXBar1->CanRoute(j, i))
+									{
+										pXBar1->Route(j, i);
+
+										m_pGB->AddFilter(pCap, L"Capture Filter");
+										m_pGB->QueryInterface(IID_IMediaControl, (void **)&m_pMC);
+										hr = m_pGB->QueryInterface(IID_IVideoWindow, (LPVOID*)&m_pVW);
+										hr = m_pCapGB->RenderStream(NULL, NULL, pCap, NULL, P_VCamTrans);
+
+										hr = m_pVW->put_Owner((OAHWND)NULL);
+										hr = m_pVW->put_WindowStyle(WS_CHILD | WS_CLIPCHILDREN);
+										hr = m_pVW->put_Visible(OAFALSE);
+										hr = m_pVW->put_AutoShow(OAFALSE);
+
+										hhr = m_pMC->StopWhenReady();
+
+										if (SUCCEEDED(hhr))
+										{
+											videoBusy = 0;
+										}
+
+									}
+								}
+							}
+
+							if (videoBusy == 1)
+							{
+								ret = -1; //视频设备占用  
+							}
+						}
+						else
+						{
+							m_pGB->AddFilter(pCap, L"Capture Filter");
+							m_pGB->QueryInterface(IID_IMediaControl, (void **)&m_pMC);
+							hr = m_pGB->QueryInterface(IID_IVideoWindow, (LPVOID*)&m_pVW);
+							hr = m_pCapGB->RenderStream(NULL, NULL, pCap, NULL, P_VCamTrans);
+
+							hr = m_pVW->put_Owner((OAHWND)NULL);
+							hr = m_pVW->put_WindowStyle(WS_CHILD | WS_CLIPCHILDREN);
+							hr = m_pVW->put_Visible(OAFALSE);
+							hr = m_pVW->put_AutoShow(OAFALSE);
+
+							hhr = m_pMC->StopWhenReady();
+
+							if (FAILED(hhr))
+							{
+								ret = -1;  //视频设备占用  
+							}
+
+						}
+
+					}
+
+				}
+
+				pPropBag->Release();
+
+			}
+			pMoniker->Release();
+		}
+
+	}
+
+
+
+	pSysDevEnum->Release();
+
+	CoUninitialize();
+
+	return ret;
 }
 
 bool CCameraDS::BindFilter(int nCamID, IBaseFilter **pFilter)

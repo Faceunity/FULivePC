@@ -30,7 +30,7 @@ private:
 	std::tr1::shared_ptr<unsigned char> m_frame;
 
 	//IplImage * m_pFrame;
-	bool m_bConnected;
+	bool m_bConnected;	
 	int m_nWidth;
 	int m_nHeight;
 	bool m_bLock;
@@ -64,6 +64,8 @@ public:
 
 	bool IsConnected();
 
+	int IsDeviceBusy(char * videoName);
+
 	//关闭摄像头，析构函数会自动调用这个函数
 	void CloseCamera();
 
@@ -84,6 +86,8 @@ public:
 
 	//返回图像数据为RGBA布局
 	std::tr1::shared_ptr<unsigned char> QueryFrame();
+
+	bool m_bIsCurrentDeviceBusy;
 };
 
 #endif 

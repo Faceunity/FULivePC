@@ -31,6 +31,7 @@ public:
 	bool is_need_draw_landmarks;
 	bool is_need_ipc_write;
 	int fps = 60;
+	bool is_frame_null;
 
 	void initializeGL();
 	void resizeGL(int w, int h);

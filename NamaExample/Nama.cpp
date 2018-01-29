@@ -114,7 +114,7 @@ void Nama::ReOpenCamera()
 {
 	if (m_cap->IsConnected())
 	{		
-		m_cap->CloseCamera();
+		m_cap->CloseCamera();		
 		if (false == m_cap->OpenCamera(m_curCameraIdx, false, m_frameWidth, m_frameHeight))
 		{
 			std::cout << "缺少摄像头，推荐使用 Logitech C920，然后安装官方驱动。" << std::endl;

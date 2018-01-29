@@ -6,6 +6,7 @@ GLWidget::GLWidget(QWidget *parent)
 	nama = std::tr1::shared_ptr<NamaExampleNameSpace::Nama>(new NamaExampleNameSpace::Nama);
 	is_need_draw_landmarks = false;
 	is_need_ipc_write = false;
+	is_frame_null = false;
 
 	if (!ipcBridge.open(IPC_FILE_NAME, IpcBridge::OpenMode::Write))
 	{
@@ -39,7 +40,7 @@ void GLWidget::initializeGL()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	
-	nama->Init(wndWidth, wndHeight);
+	nama->Init(wndWidth, wndHeight);	
 }
 
 int get_fps()
@@ -64,11 +65,16 @@ void GLWidget::paintGL()
 {
 	makeCurrent();
 	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(1.0, 1.0, 0.0, 1.0);
+	glClearColor(0.5, 0.5, 0.0, 1.0);
 	glDisable(GL_BLEND);
 
 	fps = get_fps();	
 	std::tr1::shared_ptr<unsigned char> frame = nama->QueryFrame();
+	if (!frame)
+	{
+		is_frame_null = true;
+		return;
+	}
 	nama->RenderItems(frame);
 	if (is_need_ipc_write)
 	{
