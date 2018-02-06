@@ -14,8 +14,8 @@ FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，�
 具体更新内容可以到docs/目录下查看详细文档。
 ## 运行环境
 
-目前我们提供了32位和64位双平台的库文件，运行前要保证初始化好OpenGL环境，并确保当前有可用的OpenGL context。
-
+目前我们提供了32位和64位双平台的库文件，运行前要保证初始化好OpenGL环境，并【确保】当前有可用的OpenGL context。
+程序界面现在使用Qt5.31 vs2013 opengl版，下载:[x64](http://download.qt.io/archive/qt/5.3/5.3.1/qt-opensource-windows-x86-msvc2013_64_opengl-5.3.1.exe),[x86](http://download.qt.io/archive/qt/5.3/5.3.1/qt-opensource-windows-x86-msvc2013_opengl-5.3.1.exe)。
 ## 文件列表
   - funama.h 函数调用接口头文件
   - Win32/Win64 库文件
