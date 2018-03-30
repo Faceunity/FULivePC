@@ -376,17 +376,17 @@ void Nama::RenderItems(std::tr1::shared_ptr<unsigned char> frame)
 		{
 			int handle[2] = { m_beautyHandles, m_propHandles[m_curBundleIdx] };
 			//支持的格式有FU_FORMAT_BGRA_BUFFER 、 FU_FORMAT_NV21_BUFFER 、FU_FORMAT_I420_BUFFER 、FU_FORMAT_RGBA_BUFFER			
-			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()), 
+			fuRenderItemsEx2(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
 				m_frameWidth, m_frameHeight, m_frameID, handle, 2, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);			
 		}
 		else if (1 == m_isDrawProp && 0 == m_isBeautyOn)
 		{						
-			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
+			fuRenderItemsEx2(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
 				m_frameWidth, m_frameHeight, m_frameID, &m_propHandles[m_curBundleIdx], 1, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);
 		}
 		else if (1 == m_isBeautyOn && 0 == m_isDrawProp)
 		{			
-			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
+			fuRenderItemsEx2(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
 				m_frameWidth, m_frameHeight, m_frameID, &m_beautyHandles, 1, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);
 		}		
 		break;
