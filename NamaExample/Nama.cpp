@@ -369,6 +369,7 @@ std::tr1::shared_ptr<unsigned char> Nama::ConvertBetweenBGRAandRGBA(std::tr1::sh
 //äÖÈ¾º¯Êý
 void Nama::RenderItems(std::tr1::shared_ptr<unsigned char> frame)
 {	
+	fuSetMaxFaces(4);
 	switch (m_mode)
 	{
 	case PROP:
