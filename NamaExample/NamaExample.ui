@@ -86,7 +86,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="5,1">
+       <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="4,1">
         <item>
          <widget class="QGroupBox" name="groupBox_leftbottom">
           <property name="title">
@@ -496,7 +496,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>391</width>
+              <width>351</width>
               <height>71</height>
              </rect>
             </property>
@@ -672,11 +672,11 @@
             <rect>
              <x>710</x>
              <y>80</y>
-             <width>321</width>
+             <width>291</width>
              <height>31</height>
             </rect>
            </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="3,1">
+           <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="2,1">
             <item>
              <widget class="QComboBox" name="comboBox"/>
             </item>
@@ -701,7 +701,7 @@
             <rect>
              <x>0</x>
              <y>10</y>
-             <width>208</width>
+             <width>241</width>
              <height>20</height>
             </rect>
            </property>
@@ -756,7 +756,7 @@
             <rect>
              <x>10</x>
              <y>30</y>
-             <width>191</width>
+             <width>231</width>
              <height>106</height>
             </rect>
            </property>

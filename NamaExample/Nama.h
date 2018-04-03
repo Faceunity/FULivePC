@@ -26,6 +26,7 @@ namespace NamaExampleNameSpace
 		void Init(const int width = 1280, const int height = 720);
 		void SwitchRenderMode();
 		void SwitchBeauty();
+		int  IsTracking();
 		void PreBundle();
 		void NextBundle();
 		void SetCurrentBundle(int index);

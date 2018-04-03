@@ -206,6 +206,12 @@ void Nama::Init(const int width, const int height)
 	fuSetDefaultOrientation(0);
 }
 
+
+int Nama::IsTracking()
+{
+	return fuIsTracking();
+}
+
 void Nama::SwitchRenderMode()
 {
 	static MODE nextMode[] = { LANDMARK , PROP };

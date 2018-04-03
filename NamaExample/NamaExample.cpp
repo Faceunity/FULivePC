@@ -24,10 +24,21 @@ NamaExample::NamaExample(QWidget *parent)
 	timer_log->start(1000);
 	timer_fps->start(1000);
 	log_file_size = 0;
+	
 }
 
 void NamaExample::SetStatusBar()
 {
+	if (ui.glwidget->nama->IsTracking())
+	{
+		ui.poplabel_0->hide();
+	}
+	else
+	{
+		ui.poplabel_0->setText(QStringLiteral("Î´Ê¶±ğ"));
+		ui.poplabel_0->show();
+	}
+	//
 	QFile f("nama_log.txt");
 	f.open(QFile::ReadOnly | QFile::Text);
 	
@@ -144,18 +155,21 @@ void NamaExample::on_chooseCheckStateChanged()
 
 void NamaExample::on_pushButtonConnect_clicked0()
 {
+	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(0);
 	ui.glwidget->is_need_draw_landmarks = false;
 }
 
 void NamaExample::on_pushButtonConnect_clicked1()
 {
+	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(1);
 	ui.glwidget->is_need_draw_landmarks = false;
 }
 
 void NamaExample::on_pushButtonConnect_clicked2()
 {
+	ui.poplabel_0->setText(QStringLiteral("Çëà½×ì"));
 	ui.poplabel_0->show();	
 	timer_show->start(2000);
 	timer_show->setSingleShot(true);
@@ -165,36 +179,45 @@ void NamaExample::on_pushButtonConnect_clicked2()
 
 void NamaExample::on_pushButtonConnect_clicked3()
 {
+	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(3);
 	ui.glwidget->is_need_draw_landmarks = false;
 }
 
 void NamaExample::on_pushButtonConnect_clicked4()
 {
+	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(4);
 	ui.glwidget->is_need_draw_landmarks = false;
 }
 
 void NamaExample::on_pushButtonConnect_clicked5()
 {
+	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(5);
 	ui.glwidget->is_need_draw_landmarks = true;
 }
 
 void NamaExample::on_pushButtonConnect_clicked6()
 {
+	ui.poplabel_0->setText(QStringLiteral("ÇëÎ¢Ğ¦"));
+	ui.poplabel_0->show();
+	timer_show->start(2000);
+	timer_show->setSingleShot(true);
 	ui.glwidget->nama->SetCurrentBundle(6);
 	ui.glwidget->is_need_draw_landmarks = false;
 }
 
 void NamaExample::on_pushButtonConnect_clicked7()
 {
+	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(7);
 	ui.glwidget->is_need_draw_landmarks = false;
 }
 
 void NamaExample::on_pushButtonConnect_clicked8()
 {
+	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(8);
 	ui.glwidget->is_need_draw_landmarks = false;
 }
