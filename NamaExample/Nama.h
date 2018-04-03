@@ -70,6 +70,7 @@ namespace NamaExampleNameSpace
 		float m_curEyeEnlarging;
 		float m_faceShapeLevel;
 		float m_redLevel;
+		int m_maxFace;
 		std::string m_curTranslation;
 		std::string m_curRotation;
 		static std::string _filters[6];

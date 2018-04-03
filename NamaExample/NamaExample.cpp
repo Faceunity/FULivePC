@@ -156,6 +156,7 @@ void NamaExample::on_chooseCheckStateChanged()
 void NamaExample::on_pushButtonConnect_clicked0()
 {
 	ui.poplabel_0->hide();
+	ui.glwidget->nama->m_maxFace = 4;
 	ui.glwidget->nama->SetCurrentBundle(0);
 	ui.glwidget->is_need_draw_landmarks = false;
 }
@@ -163,12 +164,14 @@ void NamaExample::on_pushButtonConnect_clicked0()
 void NamaExample::on_pushButtonConnect_clicked1()
 {
 	ui.poplabel_0->hide();
+	ui.glwidget->nama->m_maxFace = 4;
 	ui.glwidget->nama->SetCurrentBundle(1);
 	ui.glwidget->is_need_draw_landmarks = false;
 }
 
 void NamaExample::on_pushButtonConnect_clicked2()
 {
+	ui.glwidget->nama->m_maxFace = 4;
 	ui.poplabel_0->setText(QStringLiteral("Çëà½×ì"));
 	ui.poplabel_0->show();	
 	timer_show->start(2000);
@@ -179,6 +182,7 @@ void NamaExample::on_pushButtonConnect_clicked2()
 
 void NamaExample::on_pushButtonConnect_clicked3()
 {
+	ui.glwidget->nama->m_maxFace = 4;
 	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(3);
 	ui.glwidget->is_need_draw_landmarks = false;
@@ -186,6 +190,7 @@ void NamaExample::on_pushButtonConnect_clicked3()
 
 void NamaExample::on_pushButtonConnect_clicked4()
 {
+	ui.glwidget->nama->m_maxFace = 4;
 	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(4);
 	ui.glwidget->is_need_draw_landmarks = false;
@@ -193,6 +198,7 @@ void NamaExample::on_pushButtonConnect_clicked4()
 
 void NamaExample::on_pushButtonConnect_clicked5()
 {
+	ui.glwidget->nama->m_maxFace = 1;
 	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(5);
 	ui.glwidget->is_need_draw_landmarks = true;
@@ -200,6 +206,7 @@ void NamaExample::on_pushButtonConnect_clicked5()
 
 void NamaExample::on_pushButtonConnect_clicked6()
 {
+	ui.glwidget->nama->m_maxFace = 4;
 	ui.poplabel_0->setText(QStringLiteral("ÇëÎ¢Ğ¦"));
 	ui.poplabel_0->show();
 	timer_show->start(2000);
@@ -210,6 +217,7 @@ void NamaExample::on_pushButtonConnect_clicked6()
 
 void NamaExample::on_pushButtonConnect_clicked7()
 {
+	ui.glwidget->nama->m_maxFace = 4;
 	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(7);
 	ui.glwidget->is_need_draw_landmarks = false;
@@ -217,6 +225,7 @@ void NamaExample::on_pushButtonConnect_clicked7()
 
 void NamaExample::on_pushButtonConnect_clicked8()
 {
+	ui.glwidget->nama->m_maxFace = 4;
 	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(8);
 	ui.glwidget->is_need_draw_landmarks = false;

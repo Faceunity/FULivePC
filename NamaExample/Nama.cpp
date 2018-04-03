@@ -77,7 +77,8 @@ Nama::Nama()
 	m_curEyeEnlarging(0.0f),
 	m_face_shape(3),
 	m_redLevel(0.6f),
-	m_faceShapeLevel(0.0f)
+	m_faceShapeLevel(0.0f),
+	m_maxFace(4)
 {
 	m_curCameraIdx = 0;
 	m_cap = std::tr1::shared_ptr<CCameraDS>(new CCameraDS);
@@ -375,7 +376,7 @@ std::tr1::shared_ptr<unsigned char> Nama::ConvertBetweenBGRAandRGBA(std::tr1::sh
 //äÖÈ¾º¯Êý
 void Nama::RenderItems(std::tr1::shared_ptr<unsigned char> frame)
 {	
-	fuSetMaxFaces(4);
+	fuSetMaxFaces(m_maxFace);
 	switch (m_mode)
 	{
 	case PROP:
