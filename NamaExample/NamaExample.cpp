@@ -1,4 +1,4 @@
-#include "NamaExample.h"
+ï»¿#include "NamaExample.h"
 
 NamaExample::NamaExample(QWidget *parent)
 	: QMainWindow(parent)
@@ -35,7 +35,7 @@ void NamaExample::SetStatusBar()
 	}
 	else
 	{
-		ui.poplabel_0->setText(QStringLiteral("Î´Ê¶±ð"));
+		ui.poplabel_0->setText(QStringLiteral("æœªè¯†åˆ«"));
 		ui.poplabel_0->show();
 	}
 	//
@@ -172,7 +172,7 @@ void NamaExample::on_pushButtonConnect_clicked1()
 void NamaExample::on_pushButtonConnect_clicked2()
 {
 	ui.glwidget->nama->m_maxFace = 4;
-	ui.poplabel_0->setText(QStringLiteral("Çëà½×ì"));
+	ui.poplabel_0->setText(QStringLiteral("è¯·å˜Ÿå˜´"));
 	ui.poplabel_0->show();	
 	timer_show->start(2000);
 	timer_show->setSingleShot(true);
@@ -207,7 +207,7 @@ void NamaExample::on_pushButtonConnect_clicked5()
 void NamaExample::on_pushButtonConnect_clicked6()
 {
 	ui.glwidget->nama->m_maxFace = 4;
-	ui.poplabel_0->setText(QStringLiteral("ÇëÎ¢Ð¦"));
+	ui.poplabel_0->setText(QStringLiteral("è¯·å¾®ç¬‘"));
 	ui.poplabel_0->show();
 	timer_show->start(2000);
 	timer_show->setSingleShot(true);

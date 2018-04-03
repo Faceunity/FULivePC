@@ -23,7 +23,7 @@ namespace NamaExampleNameSpace
 		std::tr1::shared_ptr<unsigned char> QueryFrame();
 		int CameraName(int nCamID, char * sName, int nBufferSize);
 		void ReOpenCamera();
-		void Init(const int width = 1280, const int height = 720);
+		void Init(int& width, int& height);
 		void SwitchRenderMode();
 		void SwitchBeauty();
 		int  IsTracking();

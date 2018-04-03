@@ -125,17 +125,15 @@ void Nama::ReOpenCamera()
 	}
 }
 
-void Nama::Init(const int width, const int height)
+void Nama::Init(int& width, int& height)
 {
-	m_frameWidth = width;
-	m_frameHeight = height;
-	
-	if (false == m_cap->OpenCamera(m_curCameraIdx, false, m_frameWidth, m_frameHeight))
+	if (false == m_cap->OpenCamera(m_curCameraIdx, false, width, height))
 	{
 		std::cout << "缺少摄像头，推荐使用 Logitech C920，然后安装官方驱动。\n Error: Missing camera! " << std::endl ;
 		exit(1);
 	}
-
+	m_frameWidth = width;
+	m_frameHeight = height;
 	if (false == m_hasSetup)
 	{
 		//读取nama数据库，初始化nama

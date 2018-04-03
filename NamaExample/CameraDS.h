@@ -60,7 +60,7 @@ public:
 	//打开摄像头，nCamID指定打开哪个摄像头，取值可以为0,1,2,...
 	//bDisplayProperties指示是否自动弹出摄像头属性页
 	//nWidth和nHeight设置的摄像头的宽和高，如果摄像头不支持所设定的宽度和高度，则返回false
-	bool CCameraDS::OpenCamera(int nCamID, bool bDisplayProperties = true, int nWidth = 320, int nHeight = 240);
+	bool CCameraDS::OpenCamera(int nCamID, bool bDisplayProperties, int &nWidth, int& nHeight);
 
 	bool IsConnected();
 

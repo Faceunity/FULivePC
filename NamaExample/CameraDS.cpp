@@ -51,7 +51,7 @@ void CCameraDS::CloseCamera()
 	m_nBufferSize = 0;
 }
 
-bool CCameraDS::OpenCamera(int nCamID, bool bDisplayProperties, int nWidth, int nHeight)
+bool CCameraDS::OpenCamera(int nCamID, bool bDisplayProperties, int &nWidth, int &nHeight)
 {
 	char cam_name_temp[1024];
 	int buffer_size = 1024;
@@ -153,8 +153,7 @@ bool CCameraDS::OpenCamera(int nCamID, bool bDisplayProperties, int nWidth, int 
 		pPages = NULL;
 	}
 	else
-	{
-		int _Width = nWidth, _Height = nHeight;
+	{		
 		IAMStreamConfig*   iconfig;
 		iconfig = NULL;
 		hr = m_pCameraOutput->QueryInterface(IID_IAMStreamConfig, (void**)&iconfig);
@@ -169,12 +168,26 @@ bool CCameraDS::OpenCamera(int nCamID, bool bDisplayProperties, int nWidth, int 
 		VIDEOINFOHEADER*   phead;
 		if (pmt->formattype == FORMAT_VideoInfo)
 		{
+			nWidth = 1280; nHeight = 720;
 			phead = (VIDEOINFOHEADER*)pmt->pbFormat;
-			phead->bmiHeader.biWidth = _Width;
-			phead->bmiHeader.biHeight = _Height;
+			phead->bmiHeader.biWidth = nWidth;
+			phead->bmiHeader.biHeight = nHeight;
 			if ((hr = iconfig->SetFormat(pmt)) != S_OK)
 			{
-				return   false;
+				nWidth = 640; nHeight = 480;
+				phead->bmiHeader.biWidth = 640;
+				phead->bmiHeader.biHeight = 480;
+				if ((hr = iconfig->SetFormat(pmt)) != S_OK)
+				{
+					nWidth = 320; nHeight = 240;
+					phead->bmiHeader.biWidth = 320;
+					phead->bmiHeader.biHeight = 240;
+					if ((hr = iconfig->SetFormat(pmt)) != S_OK)
+					{
+						return   false;
+					}
+				}
+				//return   false;
 			}
 
 		}

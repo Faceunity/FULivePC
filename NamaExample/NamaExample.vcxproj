@@ -151,6 +151,9 @@ xcopy /e /y "$(SolutionDir)Win32\*.pdb" "$(OutDir)"
     <PostBuildEvent>
       <Command>xcopy /e /y "$(SolutionDir)Win32\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
+    <ResourceCompile>
+      <Culture>0x0004</Culture>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CameraDS.cpp" />

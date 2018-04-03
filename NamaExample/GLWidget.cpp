@@ -20,6 +20,8 @@ GLWidget::~GLWidget()
 
 void GLWidget::initializeGL()
 {
+	nama->Init(wndWidth, wndHeight);
+
 	glDisable(GL_LIGHTING);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
@@ -40,7 +42,7 @@ void GLWidget::initializeGL()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	
-	nama->Init(wndWidth, wndHeight);	
+	
 }
 
 int get_fps()
