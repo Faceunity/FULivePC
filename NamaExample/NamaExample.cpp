@@ -21,7 +21,7 @@ NamaExample::NamaExample(QWidget *parent)
 	connect(timer_show, SIGNAL(timeout()), this, SLOT(on_popLabelTimeOut()));	
 	connect(timer_log, SIGNAL(timeout()), this, SLOT(SetStatusBar()));	
 	connect(timer_fps, SIGNAL(timeout()), this, SLOT(SetFPSLaybel()));
-	timer_log->start(1000);
+	timer_log->start(500);
 	timer_fps->start(1000);
 	log_file_size = 0;
 	

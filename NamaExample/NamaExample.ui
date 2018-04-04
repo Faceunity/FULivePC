@@ -35,54 +35,162 @@
      <layout class="QVBoxLayout" name="verticalLayout_4" stretch="5,1">
       <item>
        <widget class="GLWidget" name="glwidget" native="true">
-        <widget class="QLabel" name="poplabel_0">
-         <property name="geometry">
-          <rect>
-           <x>530</x>
-           <y>550</y>
-           <width>101</width>
-           <height>41</height>
-          </rect>
+        <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0,0,0">
+         <property name="leftMargin">
+          <number>9</number>
          </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>24</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>请嘟嘴</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="official_website_label">
-         <property name="geometry">
-          <rect>
-           <x>1210</x>
-           <y>700</y>
-           <width>61</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>&lt;style&gt; a {text-decoration: none} &lt;/style&gt;&lt;a href=&quot;http://www.faceunity.com/&quot;&gt;打开官网</string>
-         </property>
-         <property name="openExternalLinks">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_fps">
-         <property name="geometry">
-          <rect>
-           <x>1220</x>
-           <y>10</y>
-           <width>21</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>60</string>
-         </property>
-        </widget>
+         <item row="1" column="1">
+          <spacer name="verticalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="2" column="3">
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="2" column="0">
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="9" column="4">
+          <widget class="QLabel" name="official_website_label">
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>80</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>&lt;style&gt; a {text-decoration: none} &lt;/style&gt;&lt;a href=&quot;http://www.faceunity.com/&quot;&gt;打开官网</string>
+           </property>
+           <property name="openExternalLinks">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="4">
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="0">
+          <spacer name="horizontalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="4">
+          <widget class="QLabel" name="label_fps">
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>23</width>
+             <height>23</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>60</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLabel" name="poplabel_0">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>60</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>144</width>
+             <height>80</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>微软雅黑</family>
+             <pointsize>24</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>请嘟嘴</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="3" column="1">
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
@@ -92,27 +200,8 @@
           <property name="title">
            <string/>
           </property>
-          <widget class="QGroupBox" name="group0">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>0</y>
-             <width>611</width>
-             <height>71</height>
-            </rect>
-           </property>
-           <property name="title">
-            <string/>
-           </property>
-           <widget class="QWidget" name="layoutWidget">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>601</width>
-              <height>71</height>
-             </rect>
-            </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="0" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
               <widget class="QRadioButton" name="radioButton0_tiezhi">
@@ -338,171 +427,11 @@
               </widget>
              </item>
             </layout>
-           </widget>
-          </widget>
-          <widget class="QWidget" name="layoutWidget">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>70</y>
-             <width>691</width>
-             <height>51</height>
-            </rect>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="1,5,5,5">
-            <item>
-             <widget class="QRadioButton" name="radioButton0_meiyan">
-              <property name="text">
-               <string>美颜</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QGroupBox" name="group0_3">
-              <property name="title">
-               <string/>
-              </property>
-              <widget class="QWidget" name="layoutWidget">
-               <property name="geometry">
-                <rect>
-                 <x>10</x>
-                 <y>10</y>
-                 <width>201</width>
-                 <height>24</height>
-                </rect>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_5">
-                <item>
-                 <widget class="QLabel" name="label_3">
-                  <property name="text">
-                   <string>磨皮</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSlider" name="horizontalSlider0_0">
-                  <property name="cursor">
-                   <cursorShape>SizeHorCursor</cursorShape>
-                  </property>
-                  <property name="maximum">
-                   <number>599</number>
-                  </property>
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </widget>
-            </item>
-            <item>
-             <widget class="QGroupBox" name="group0_4">
-              <property name="title">
-               <string/>
-              </property>
-              <widget class="QWidget" name="layoutWidget">
-               <property name="geometry">
-                <rect>
-                 <x>10</x>
-                 <y>10</y>
-                 <width>201</width>
-                 <height>24</height>
-                </rect>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_6">
-                <item>
-                 <widget class="QLabel" name="label_5">
-                  <property name="text">
-                   <string>美白</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSlider" name="horizontalSlider0_1">
-                  <property name="cursor">
-                   <cursorShape>SizeHorCursor</cursorShape>
-                  </property>
-                  <property name="maximum">
-                   <number>99</number>
-                  </property>
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </widget>
-            </item>
-            <item>
-             <widget class="QGroupBox" name="group0_5">
-              <property name="title">
-               <string/>
-              </property>
-              <widget class="QWidget" name="layoutWidget">
-               <property name="geometry">
-                <rect>
-                 <x>10</x>
-                 <y>10</y>
-                 <width>201</width>
-                 <height>24</height>
-                </rect>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_7">
-                <item>
-                 <widget class="QLabel" name="label_6">
-                  <property name="text">
-                   <string>红润</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSlider" name="horizontalSlider0_2">
-                  <property name="cursor">
-                   <cursorShape>SizeHorCursor</cursorShape>
-                  </property>
-                  <property name="maximum">
-                   <number>99</number>
-                  </property>
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QGroupBox" name="group0_2">
-           <property name="geometry">
-            <rect>
-             <x>640</x>
-             <y>0</y>
-             <width>401</width>
-             <height>71</height>
-            </rect>
-           </property>
-           <property name="title">
-            <string/>
-           </property>
-           <widget class="QWidget" name="layoutWidget">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>351</width>
-              <height>71</height>
-             </rect>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,4,4,4,4,4,4">
+           </item>
+           <item row="0" column="1" colspan="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="1,4,4,4,4,4,4">
              <item>
-              <widget class="QLabel" name="label">
+              <widget class="QLabel" name="label_2">
                <property name="text">
                 <string>滤镜</string>
                </property>
@@ -529,9 +458,6 @@
                <property name="flat">
                 <bool>false</bool>
                </property>
-               <attribute name="buttonGroup">
-                <string notr="true">buttonGroup0_1</string>
-               </attribute>
               </widget>
              </item>
              <item>
@@ -555,9 +481,6 @@
                <property name="flat">
                 <bool>false</bool>
                </property>
-               <attribute name="buttonGroup">
-                <string notr="true">buttonGroup0_1</string>
-               </attribute>
               </widget>
              </item>
              <item>
@@ -581,9 +504,6 @@
                <property name="flat">
                 <bool>false</bool>
                </property>
-               <attribute name="buttonGroup">
-                <string notr="true">buttonGroup0_1</string>
-               </attribute>
               </widget>
              </item>
              <item>
@@ -607,9 +527,6 @@
                <property name="flat">
                 <bool>false</bool>
                </property>
-               <attribute name="buttonGroup">
-                <string notr="true">buttonGroup0_1</string>
-               </attribute>
               </widget>
              </item>
              <item>
@@ -633,9 +550,6 @@
                <property name="flat">
                 <bool>false</bool>
                </property>
-               <attribute name="buttonGroup">
-                <string notr="true">buttonGroup0_1</string>
-               </attribute>
               </widget>
              </item>
              <item>
@@ -659,36 +573,111 @@
                <property name="flat">
                 <bool>false</bool>
                </property>
-               <attribute name="buttonGroup">
-                <string notr="true">buttonGroup0_1</string>
-               </attribute>
               </widget>
              </item>
             </layout>
-           </widget>
-          </widget>
-          <widget class="QWidget" name="layoutWidget">
-           <property name="geometry">
-            <rect>
-             <x>710</x>
-             <y>80</y>
-             <width>291</width>
-             <height>31</height>
-            </rect>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="2,1">
-            <item>
-             <widget class="QComboBox" name="comboBox"/>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="virtual_camera_checkBox">
-              <property name="text">
-               <string>虚拟化</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,0,0,0">
+             <item>
+              <widget class="QRadioButton" name="radioButton0_meiyan">
+               <property name="text">
+                <string>美颜</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QLabel" name="label_3">
+                 <property name="text">
+                  <string>磨皮</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="horizontalSlider0_0">
+                 <property name="cursor">
+                  <cursorShape>SizeHorCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>599</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_6">
+               <item>
+                <widget class="QLabel" name="label_5">
+                 <property name="text">
+                  <string>美白</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="horizontalSlider0_1">
+                 <property name="cursor">
+                  <cursorShape>SizeHorCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_7">
+               <item>
+                <widget class="QLabel" name="label_6">
+                 <property name="text">
+                  <string>红润</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="horizontalSlider0_2">
+                 <property name="cursor">
+                  <cursorShape>SizeHorCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item row="1" column="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="2,1">
+             <item>
+              <widget class="QComboBox" name="comboBox"/>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="virtual_camera_checkBox">
+               <property name="text">
+                <string>虚拟化</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>
@@ -696,145 +685,131 @@
           <property name="title">
            <string/>
           </property>
-          <widget class="QWidget" name="layoutWidget">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>10</y>
-             <width>241</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QRadioButton" name="radioButton0_0">
-              <property name="text">
-               <string>女神</string>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup0_2</string>
-              </attribute>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="radioButton0_1">
-              <property name="text">
-               <string>网红</string>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup0_2</string>
-              </attribute>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="radioButton0_2">
-              <property name="text">
-               <string>自然</string>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup0_2</string>
-              </attribute>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="radioButton0_3">
-              <property name="text">
-               <string>推荐</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup0_2</string>
-              </attribute>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="layoutWidget">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>30</y>
-             <width>231</width>
-             <height>106</height>
-            </rect>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout">
-              <item>
-               <widget class="QLabel" name="label_7">
-                <property name="text">
-                 <string>程度</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSlider" name="verticalSlider0_0">
-                <property name="cursor">
-                 <cursorShape>SizeVerCursor</cursorShape>
-                </property>
-                <property name="maximum">
-                 <number>99</number>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_2">
-              <item>
-               <widget class="QLabel" name="label_8">
-                <property name="text">
-                 <string>大眼</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSlider" name="verticalSlider0_1">
-                <property name="cursor">
-                 <cursorShape>SizeVerCursor</cursorShape>
-                </property>
-                <property name="maximum">
-                 <number>99</number>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_3">
-              <item>
-               <widget class="QLabel" name="label_9">
-                <property name="text">
-                 <string>瘦脸</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSlider" name="verticalSlider0_2">
-                <property name="cursor">
-                 <cursorShape>SizeVerCursor</cursorShape>
-                </property>
-                <property name="maximum">
-                 <number>99</number>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="0" column="0">
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QRadioButton" name="radioButton0_0">
+               <property name="text">
+                <string>女神</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">buttonGroup0_2</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="radioButton0_1">
+               <property name="text">
+                <string>网红</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">buttonGroup0_2</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="radioButton0_2">
+               <property name="text">
+                <string>自然</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">buttonGroup0_2</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="radioButton0_3">
+               <property name="text">
+                <string>推荐</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">buttonGroup0_2</string>
+               </attribute>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="1" column="0">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout">
+               <item>
+                <widget class="QLabel" name="label_7">
+                 <property name="text">
+                  <string>程度</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="verticalSlider0_0">
+                 <property name="cursor">
+                  <cursorShape>SizeVerCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <item>
+                <widget class="QLabel" name="label_8">
+                 <property name="text">
+                  <string>大眼</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="verticalSlider0_1">
+                 <property name="cursor">
+                  <cursorShape>SizeVerCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_3">
+               <item>
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>瘦脸</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="verticalSlider0_2">
+                 <property name="cursor">
+                  <cursorShape>SizeVerCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
@@ -1356,7 +1331,6 @@
   <slot>on_chooseCheckStateChanged()</slot>
  </slots>
  <buttongroups>
-  <buttongroup name="buttonGroup0_1"/>
   <buttongroup name="buttonGroup0_2"/>
  </buttongroups>
 </ui>
