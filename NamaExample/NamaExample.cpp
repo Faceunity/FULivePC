@@ -164,7 +164,7 @@ void NamaExample::on_pushButtonConnect_clicked0()
 void NamaExample::on_pushButtonConnect_clicked1()
 {
 	ui.poplabel_0->hide();
-	ui.glwidget->nama->m_maxFace = 4;
+	ui.glwidget->nama->m_maxFace = 1;
 	ui.glwidget->nama->SetCurrentBundle(1);
 	ui.glwidget->is_need_draw_landmarks = false;
 }
