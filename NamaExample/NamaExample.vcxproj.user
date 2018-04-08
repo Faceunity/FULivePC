@@ -4,7 +4,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <QTDIR>D:\FUEditor\src\FUEditor\thirdparty\Qt5.3.1\5.3\msvc2013_64_opengl</QTDIR>
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
-    <DebuggerFlavor>WindowsRemoteDebugger</DebuggerFlavor>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <RemoteDebuggerConnection>RemoteWithoutAuthentication</RemoteDebuggerConnection>
     <RemoteDebuggerCommand>C:\Users\Public\Documents\Faceunity-PC-SDKv5.0-dev-exe\x64\Debug\NamaExample.exe</RemoteDebuggerCommand>
     <RemoteDebuggerWorkingDirectory>C:\Users\Public\Documents\Faceunity-PC-SDKv5.0-dev-exe\x64\Debug</RemoteDebuggerWorkingDirectory>
@@ -14,9 +14,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <QTDIR>D:\FUEditor\src\FUEditor\thirdparty\Qt5.3.1\5.3\msvc2013_opengl</QTDIR>
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
-    <DebuggerFlavor>WindowsRemoteDebugger</DebuggerFlavor>
-    <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin%3b$(PATH)</LocalDebuggerEnvironment>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <RemoteDebuggerConnection>RemoteWithoutAuthentication</RemoteDebuggerConnection>
+    <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin%3b$(PATH)</LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QTDIR>D:\FUEditor\src\FUEditor\thirdparty\Qt5.3.1\5.3\msvc2013_64_opengl</QTDIR>
