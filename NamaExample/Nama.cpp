@@ -185,6 +185,7 @@ void Nama::Init(int& width, int& height)
 		fuItemSetParamd(m_beautyHandles, "face_shape_level", m_faceShapeLevel);
 		fuItemSetParamd(m_beautyHandles, "red_level", m_redLevel);
 		fuItemSetParamd(m_beautyHandles, "face_shape", m_face_shape);
+		fuItemSetParamd(m_beautyHandles, "filter_level", 1);
 	}
 	//读取手势识别道具
 	{
@@ -294,6 +295,7 @@ void Nama::UpdateBeauty()
 	fuItemSetParamd(m_beautyHandles, "eye_enlarging", m_curEyeEnlarging);
 	fuItemSetParamd(m_beautyHandles, "face_shape_level", m_faceShapeLevel);
 	fuItemSetParamd(m_beautyHandles, "red_level", m_redLevel);	
+	fuItemSetParamd(m_beautyHandles, "filter_level", 1);
 }
 //加载全部道具，初始化稍慢
 void Nama::CreateBundle()
