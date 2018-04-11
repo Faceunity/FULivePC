@@ -1,11 +1,11 @@
 # FULivePC
 FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，作为一款集成示例。
 ## 目录
-[新特性](#jump0)
-[SDK内容](#jump1)
-[集成说明](#jump2)
-[道具失效等问题](#jump3)
-<span id="jump0"></span>
+[新特性](#sdk-v50)
+[SDK内容](#_2)
+[集成说明](#_5)
+[道具失效等问题](#faq)
+
 ## SDK v5.0 更新
 
 本次更新：
@@ -27,7 +27,7 @@ FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，�
 
 此外，我们优化了SDK的系统稳定性，在网络条件波动的情况下保持SDK正常运行，并提供了获取SDK系统错误信息的接口，方便应用灵活处理。
 具体更新内容可以到docs/目录下查看详细文档。
-<span id="jump1"></span>
+
 ## 运行环境
 
 本SDK目前我们提供了32位和64位双平台的库文件
@@ -46,7 +46,6 @@ FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，�
 
 其中 v3.bundle 是所有道具共用的数据文件，缺少该文件会导致初始化失败。其他每一个文件对应一个道具。自定义道具制作的文档和工具请联系我司获取。
 
-<span id="jump2"></span>
 ## 集成方法
 首先把nama.lib链接到工程中，并确保nama.dll在运行时可以正确加载。包含funama.h之后就可以开始调用我们提供的接口函数。
 
@@ -209,7 +208,6 @@ openssl ca -config ca.conf -gencrl -keyfile CERT_NAME.key -cert CERT_NAME.crt -o
 ```
 static char g_auth_package[]={ ... }
 ```
-<span id="jump3"></span>
 ## FAQ
 
 ## 为什么过了一段时间人脸识别失效了？
