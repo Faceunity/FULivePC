@@ -1,6 +1,11 @@
 # FULivePC
 FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，作为一款集成示例。
-
+## 目录
+[新特性](#jump0)
+[SDK内容](#jump1)
+[集成说明](#jump2)
+[道具失效等问题](#jump3)
+<span id="jump0"></span>
 ## SDK v5.0 更新
 
 本次更新：
@@ -22,6 +27,7 @@ FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，�
 
 此外，我们优化了SDK的系统稳定性，在网络条件波动的情况下保持SDK正常运行，并提供了获取SDK系统错误信息的接口，方便应用灵活处理。
 具体更新内容可以到docs/目录下查看详细文档。
+<span id="jump1"></span>
 ## 运行环境
 
 本SDK目前我们提供了32位和64位双平台的库文件
@@ -29,7 +35,7 @@ FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，�
 - [SDK]内部的API执行前要保证初始化好OpenGL环境，【确保】fuSetup等API调用时OpenGL context是可用的。
 
 - [Demo]为了演示SDK功能我们制作了Demo程序，界面绘制使用Qt5.31 vs2013 opengl版，下载:[x64](http://download.qt.io/archive/qt/5.3/5.3.1/qt-opensource-windows-x86-msvc2013_64_opengl-5.3.1.exe),[x86](http://download.qt.io/archive/qt/5.3/5.3.1/qt-opensource-windows-x86-msvc2013_opengl-5.3.1.exe)。该界面库有多个vs版本而且区分32位和64位，下载对应开发环境对应的版本才可正常编译。QT插件[下载](http://download.qt.io/archive/vsaddin/)
-注：SDK仅包含下述文件列表内容里的\*.dll,\*.lib和\*.h文件，它是不依赖任何界面库的，如需更换其他界面库如MFC或者不具备编译环境等，可选择不编译此Demo，直接参考代码将SDK的dll等[集成](#jump)到您的新工程。
+注：SDK仅包含下述文件列表内容里的\*.dll,\*.lib和\*.h文件，它是不依赖任何界面库的，如需更换其他界面库如MFC或者不具备编译环境等，可选择不编译此Demo，直接参考代码将SDK的dll等[集成](#jump2)到您的新工程。
 ## 文件列表
   - funama.h 函数调用接口头文件
   - Win32/Win64 库文件
@@ -39,7 +45,8 @@ FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，�
 目录 assets 下的 \*.bundle 为程序的数据文件。数据文件中都是二进制数据，与扩展名无关。实际使用时，打包在程序内或者从网络接口下载这些数据都是可行的，只要在相应的函数接口传入正确的二进制数据即可。
 
 其中 v3.bundle 是所有道具共用的数据文件，缺少该文件会导致初始化失败。其他每一个文件对应一个道具。自定义道具制作的文档和工具请联系我司获取。
-<span id="jump"></span>
+
+<span id="jump2"></span>
 ## 集成方法
 首先把nama.lib链接到工程中，并确保nama.dll在运行时可以正确加载。包含funama.h之后就可以开始调用我们提供的接口函数。
 
@@ -202,316 +209,13 @@ openssl ca -config ca.conf -gencrl -keyfile CERT_NAME.key -cert CERT_NAME.crt -o
 ```
 static char g_auth_package[]={ ... }
 ```
-
-用户在库环境初始化时，需要提供该数组进行鉴权，具体参考 fuSetup 接口。没有证书、证书失效、网络连接失败等情况下，会造成鉴权失败，在控制台或者Android平台的log里面打出 "not authenticated" 信息，并在运行一段时间后停止渲染道具。
-
-任何其他关于授权问题，请email：support@faceunity.com
-
+<span id="jump3"></span>
 ## FAQ
 
 ## 为什么过了一段时间人脸识别失效了？
 
 检查证书。如证书是否正确使用，是否过期。您需要拥有我司颁发的证书才能使用我们的SDK的功能，获取证书方法：1、拨打电话 **0571-88069272** 2、发送邮件至 **marketing@faceunity.com** 进行咨询。
 
-## 函数接口及参数说明
-
-```C
-/**
-\brief Initialize and authenticate your SDK instance to the FaceUnity server, must be called exactly once before all other functions.
-  The buffers should NEVER be freed while the other functions are still being called.
-  You can call this function multiple times to "switch pointers".
-\param v3data should point to contents of the "v3.bin" we provide
-\param ardata should be NULL
-\param authdata is the pointer to the authentication data pack we provide. You must avoid storing the data in a file.
-  Normally you can just `#include "authpack.h"` and put `g_auth_package` here.
-\param sz_authdata is the authentication data size, we use plain int to avoid cross-language compilation issues.
-  Normally you can just `#include "authpack.h"` and put `sizeof(g_auth_package)` here.
-\return non-zero for success, zero for failure
-*/
-FUNAMA_API int fuSetup(float* v3data,float* ardata,void* authdata,int sz_authdata);
-/**
-\brief Call this function when the GLES context has been lost and recreated.
-  That isn't a normal thing, so this function could leak resources on each call.
-*/
-FUNAMA_API void fuOnDeviceLost();
-/**
-\brief Call this function to reset the face tracker on camera switches
-*/
-FUNAMA_API void fuOnCameraChange();
-/**
-\brief Create an accessory item from a binary package, you can discard the data after the call.
-  This function MUST be called in the same GLES context / thread as fuRenderItems.
-\param data is the pointer to the data
-\param sz is the data size, we use plain int to avoid cross-language compilation issues
-\return an integer handle representing the item
-*/
-FUNAMA_API int fuCreateItemFromPackage(void* data,int sz);
-/**
-\brief Destroy an accessory item.
-  This function MUST be called in the same GLES context / thread as the original fuCreateItemFromPackage.
-\param item is the handle to be destroyed
-*/
-FUNAMA_API void fuDestroyItem(int item);
-/**
-\brief Destroy all accessory items ever created.
-  This function MUST be called in the same GLES context / thread as the original fuCreateItemFromPackage.
-*/
-FUNAMA_API void fuDestroyAllItems();
-
-FUNAMA_API void fuClearRenderData();
-/**
-\brief Render a list of items on top of a GLES texture or a memory buffer.
-  This function needs a GLES 2.0+ context.
-\param texid specifies a GLES texture. Set it to 0u if you want to render to a memory buffer.
-\param img specifies a memory buffer. Set it to NULL if you want to render to a texture.
-  If img is non-NULL, it will be overwritten by the rendered image when fuRenderItems returns
-\param w specifies the image width
-\param h specifies the image height
-\param frameid specifies the current frame id.
-  To get animated effects, please increase frame_id by 1 whenever you call this.
-\param p_items points to the list of items
-\param n_items is the number of items
-\return a new GLES texture containing the rendered image in the texture mode
-*/
-FUNAMA_API int fuRenderItems(int texid,int* img,int w,int h,int frame_id, int* p_items,int n_items);
-
-/**
-\brief Generalized interface for rendering a list of items.
-  This function needs a GLES 2.0+ context.
-\param out_format is the output format
-\param out_ptr receives the rendering result, which is either a GLuint texture handle or a memory buffer
-  Note that in the texture cases, we will overwrite *out_ptr with a texture we generate.
-\param in_format is the input format
-\param in_ptr points to the input image, which is either a GLuint texture handle or a memory buffer
-\param w specifies the image width
-\param h specifies the image height
-\param frameid specifies the current frame id.
-  To get animated effects, please increase frame_id by 1 whenever you call this.
-\param p_items points to the list of items
-\param n_items is the number of items
-\return a GLuint texture handle containing the rendering result if out_format isn't FU_FORMAT_GL_CURRENT_FRAMEBUFFER
-*/
-FUNAMA_API int fuRenderItemsEx(
-  int out_format,void* out_ptr,
-  int in_format,void* in_ptr,
-  int w,int h,int frame_id, int* p_items,int n_items);
-
-/**
-\brief Generalized interface for rendering a list of items.
-  This function needs a GLES 2.0+ context.
-\param out_format is the output format
-\param out_ptr receives the rendering result, which is either a GLuint texture handle or a memory buffer
-  Note that in the texture cases, we will overwrite *out_ptr with a texture we generate.
-\param in_format is the input format
-\param in_ptr points to the input image, which is either a GLuint texture handle or a memory buffer
-\param w specifies the image width
-\param h specifies the image height
-\param frameid specifies the current frame id.
-  To get animated effects, please increase frame_id by 1 whenever you call this.
-\param p_items points to the list of items
-\param n_items is the number of items
-\param p_masks indicates a list of masks for each item, bitwisely work on certain face
-\return a GLuint texture handle containing the rendering result if out_format isn't FU_FORMAT_GL_CURRENT_FRAMEBUFFER
-*/
-FUNAMA_API int fuRenderItemsMasked(
-  int out_format,void* out_ptr,
-  int in_format,void* in_ptr,
-  int w,int h,int frame_id, int* p_items,int n_items, int* p_masks);
-
-/**
-\brief Generalized interface for beautifying image.
-  Disable face tracker and item rendering.
-  This function needs a GLES 2.0+ context.
-\param out_format is the output format
-\param out_ptr receives the rendering result, which is either a GLuint texture handle or a memory buffer
-  Note that in the texture cases, we will overwrite *out_ptr with a texture we generate.
-\param in_format is the input format
-\param in_ptr points to the input image, which is either a GLuint texture handle or a memory buffer
-\param w specifies the image width
-\param h specifies the image height
-\param frameid specifies the current frame id.
-  To get animated effects, please increase frame_id by 1 whenever you call this.
-\param p_items points to the list of items
-\param n_items is the number of items
-\return a GLuint texture handle containing the rendering result if out_format isn't FU_FORMAT_GL_CURRENT_FRAMEBUFFER
-*/
-FUNAMA_API int fuBeautifyImage(
-  int out_format,void* out_ptr,
-  int in_format,void* in_ptr,
-  int w,int h,int frame_id, int* p_items,int n_items);
-
-/**
-\brief Generalized interface for tracking face.
-  Disable item rendering and image beautifying.
-  This function needs a GLES 2.0+ context.
-\param out_format is the output format
-\param out_ptr receives the rendering result, which is either a GLuint texture handle or a memory buffer
-  Note that in the texture cases, we will overwrite *out_ptr with a texture we generate.
-\param in_format is the input format
-\param in_ptr points to the input image, which is either a GLuint texture handle or a memory buffer
-\param w specifies the image width
-\param h specifies the image height
-\param frameid specifies the current frame id.
-  To get animated effects, please increase frame_id by 1 whenever you call this.
-\param p_items points to the list of items
-\param n_items is the number of items
-\return a GLuint texture handle containing the rendering result if out_format isn't FU_FORMAT_GL_CURRENT_FRAMEBUFFER
-*/
-FUNAMA_API int fuTrackFace(int in_format,void* in_ptr,int w,int h);
-
-/**
-\brief Generalized interface for rendering a list of items with extension.
-  This function needs a GLES 2.0+ context.
-\param out_format is the output format
-\param out_ptr receives the rendering result, which is either a GLuint texture handle or a memory buffer
-  Note that in the texture cases, we will overwrite *out_ptr with a texture we generate.
-\param in_format is the input format
-\param in_ptr points to the input image, which is either a GLuint texture handle or a memory buffer
-\param w specifies the image width
-\param h specifies the image height
-\param frameid specifies the current frame id.
-  To get animated effects, please increase frame_id by 1 whenever you call this.
-\param p_items points to the list of items
-\param n_items is the number of items
-\param func_flag flags indicate all changable functionalities of render interface
-\param p_masks indicates a list of masks for each item, bitwisely work on certain face
-\return a GLuint texture handle containing the rendering result if out_format isn't FU_FORMAT_GL_CURRENT_FRAMEBUFFER
-*/
-FUNAMA_API int fuRenderItemsEx2(
-  int out_format,void* out_ptr,
-  int in_format,void* in_ptr,
-  int w,int h,int frame_id, int* p_items,int n_items,
-  int func_flag, void* p_item_masks);
-
-/**************************************************************
-The set / get functions do not make sense on their own. Refer to
-the documentation of specific items for their get/set-able
-parameters. Most items do not have any.
-**************************************************************/
-
-/**
-\brief Set an item parameter to a double value
-\param item specifies the item
-\param name is the parameter name
-\param value is the parameter value to be set
-\return zero for failure, non-zero for success
-*/
-FUNAMA_API int fuItemSetParamd(int item,char* name,double value);
-/**
-\brief Set an item parameter to a double array
-\param item specifies the item
-\param name is the parameter name
-\param value points to an array of doubles
-\param n specifies the number of elements in value
-\return zero for failure, non-zero for success
-*/
-FUNAMA_API int fuItemSetParamdv(int item,char* name,double* value,int n);
-/**
-\brief Set an item parameter to a string value
-\param item specifies the item
-\param name is the parameter name
-\param value is the parameter value to be set
-\return zero for failure, non-zero for success
-*/
-FUNAMA_API int fuItemSetParams(int item,char* name,char* value);
-/**
-\brief Get an item parameter as a double value
-\param item specifies the item
-\param name is the parameter name
-\return double value of the parameter
-*/
-FUNAMA_API double fuItemGetParamd(int item,char* name);
-/**
-\brief Get an item parameter as a string
-\param item specifies the item
-\param name is the parameter name
-\param buf receives the string value
-\param sz is the number of bytes available at buf
-\return the length of the string value, or -1 if the parameter is not a string.
-*/
-FUNAMA_API int fuItemGetParams(int item,char* name,char* buf,int sz);
-
-/**
-\brief Turn off the camera
-*/
-FUNAMA_API void fuTurnOffCamera();
-/**
-\brief Get the camera image size
-\param pret points to two integers, which receive the size
-*/
-FUNAMA_API void fuGetCameraImageSize(int* pret);
-/**
-\brief Get the face tracking status
-\return The number of valid faces currently being tracked
-*/
-FUNAMA_API int fuIsTracking();
-/**
-\brief Set the default orientation for face detection. The correct orientation would make the initial detection much faster.
-\param rmode is the default orientation to be set to, one of 0..3 should work.
-*/
-FUNAMA_API void fuSetDefaultOrientation(int rmode);
-/**
-\brief Set the maximum number of faces we track. The default value is 1.
-\param n is the new maximum number of faces to track
-\return The previous maximum number of faces tracked
-*/
-FUNAMA_API int fuSetMaxFaces(int n);
-/**
-\brief Set the quality-performance tradeoff.
-\param quality is the new quality value.
-       It's a floating point number between 0 and 1.
-       Use 0 for maximum performance and 1 for maximum quality.
-       The default quality is 1 (maximum quality).
-*/
-FUNAMA_API void fuSetQualityTradeoff(float quality);
-
-/**
-\brief Get face info. Certificate aware interface.
-\param face_id is the id of face, index is smaller than which is set in fuSetMaxFaces
-\param name is among "landmarks", "eye_rotation", "translation", "rotation"
-\param pret allocated memory space as container
-\param num is number of float allocated in pret
-  eg:     "landmarks" - 75*2 float
-        "landmarks_ar" - 75*3 float
-        "eye_rotation" - 4
-        "translation" - 3
-        "rotation" - 4
-        "projection_matrix" - 16
-\return 1 means successful fetch, container filled with info
-  0 means failure, general failure is due to invalid face info
-  other specific failure will print on the console
-*/
-FUNAMA_API int fuGetFaceInfo(int face_id, char* name, float* pret, int num);
-
-/**
-\brief Bind items to an avatar, already bound items won't be unbound
-\param avatar_item is the avatar item handle
-\param p_items points to a list of item handles to be bound to the avatar
-\param n_items is the number of item handles in p_items
-\param p_contracts points to a list of contract handles for authorizing items
-\param n_contracts is the number of contract handles in p_contracts
-\return the number of items newly bound to the avatar
-*/
-FUNAMA_API int fuAvatarBindItems(int avatar_item, int* p_items,int n_items, int* p_contracts,int n_contracts);
-/**
-\brief Unbind items from an avatar
-\param avatar_item is the avatar item handle
-\param p_items points to a list of item handles to be unbound from the avatar
-\param n_items is the number of item handles in p_items
-\return the number of items unbound from the avatar
-*/
-FUNAMA_API int fuAvatarUnbindItems(int avatar_item, int* p_items,int n_items);
-
-//
-FUNAMA_API int fuBindItems(int item_src, int* p_items,int n_items);
-FUNAMA_API int fuUnbindAllItems(int item_src);
-
-/**
-\brief Get SDK version string
-\return SDK version string in const char*
-*/
-FUNAMA_API const char* fuGetVersion();
-```
 用户在库环境初始化时，需要提供该数组进行鉴权，具体参考 fuSetup 接口。没有证书、证书失效、网络连接失败等情况下，会造成鉴权失败，在控制台或者Android平台的log里面打出 "not authenticated" 信息，并在运行一段时间后停止渲染道具。
 
 任何其他关于授权问题，请email：support@faceunity.com
