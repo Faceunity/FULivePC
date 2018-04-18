@@ -405,6 +405,11 @@ void Nama::RenderItems(std::tr1::shared_ptr<unsigned char> frame)
 		break;
 	}
 
+	if (fuGetSystemError())
+	{
+		printf("%s \n", fuGetSystemErrorString(fuGetSystemError()));
+	}
+	
 	++m_frameID;	
 	return;
 }
