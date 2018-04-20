@@ -54,6 +54,7 @@ namespace NamaExampleNameSpace
 		std::vector<int> m_propHandles;
 		int m_beautyHandles;
 		int m_gestureHandles;
+		int m_fxaaHandles;
 		int m_frameWidth, m_frameHeight;
 		static bool m_hasSetup;
 	public:

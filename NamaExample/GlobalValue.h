@@ -23,3 +23,5 @@ const std::string g_faceBeautification = "face_beautification.bundle";
 const std::string g_gestureRecongnition = "heart.bundle";
 
 const std::string g_anim_model = "anim_model.bundle";
+
+const std::string g_fxaa = "fxaa.bundle";

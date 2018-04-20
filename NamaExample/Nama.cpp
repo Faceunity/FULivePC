@@ -1,8 +1,8 @@
-/**
-* FU SDKÊ¹ÓÃÕß¿ÉÒÔ½«ÄÃµ½´¦ÀíºóµÄframeÍ¼ÏñÓë×Ô¼ºµÄÔ­ÓĞÏîÄ¿¶Ô½Ó
-* ÇëFU SDKÊ¹ÓÃÕßÖ±½Ó²Î¿¼Ê¾Àı·ÅÖÁ´úÂëÖÁ¶ÔÓ¦Î»ÖÃ
+ï»¿/**
+* FU SDKä½¿ç”¨è€…å¯ä»¥å°†æ‹¿åˆ°å¤„ç†åçš„frameå›¾åƒä¸è‡ªå·±çš„åŸæœ‰é¡¹ç›®å¯¹æ¥
+* è¯·FU SDKä½¿ç”¨è€…ç›´æ¥å‚è€ƒç¤ºä¾‹æ”¾è‡³ä»£ç è‡³å¯¹åº”ä½ç½®
 *
-* FU SDKÓëcameraÎŞñîºÏ£¬²»¹ØĞÄÊı¾İµÄÀ´Ô´£¬Ö»ÒªÍ¼ÏñÄÚÈİÕıÈ·ÇÒºÍ¿í¸ßÎÇºÏ¼´¿É
+* FU SDKä¸cameraæ— è€¦åˆï¼Œä¸å…³å¿ƒæ•°æ®çš„æ¥æºï¼Œåªè¦å›¾åƒå†…å®¹æ­£ç¡®ä¸”å’Œå®½é«˜å»åˆå³å¯
 *
 * Created by liujia on 2018/1/3 mybbs2200@gmail.com.
 */
@@ -11,10 +11,10 @@
 #include <fstream>
 #include <iostream>
 
-#include "GlobalValue.h"        //nama SDK µÄ×ÊÔ´ÎÄ¼ş
-#include <funama.h>				//nama SDK µÄÍ·ÎÄ¼ş
-#include <../authpack.h>		//nama SDK µÄkeyÎÄ¼ş
-#pragma comment(lib, "nama.lib")//nama SDK µÄlibÎÄ¼ş
+#include "GlobalValue.h"        //nama SDK çš„èµ„æºæ–‡ä»¶
+#include <funama.h>				//nama SDK çš„å¤´æ–‡ä»¶
+#include <../authpack.h>		//nama SDK çš„keyæ–‡ä»¶
+#pragma comment(lib, "nama.lib")//nama SDK çš„libæ–‡ä»¶
 
 using namespace NamaExampleNameSpace;
 bool Nama::m_hasSetup = false;
@@ -88,11 +88,11 @@ Nama::~Nama()
 {	
 	if (true== m_hasSetup)
 	{
-		fuDestroyAllItems();//Note: ÇĞ¼ÉÊ¹ÓÃÒ»¸öÒÑ¾­destroyµÄitem
-		fuOnDeviceLost();//Note: Õâ¸öµ÷ÓÃÏú»Ùnama´´½¨µÄOpenGL×ÊÔ´
+		fuDestroyAllItems();//Note: åˆ‡å¿Œä½¿ç”¨ä¸€ä¸ªå·²ç»destroyçš„item
+		fuOnDeviceLost();//Note: è¿™ä¸ªè°ƒç”¨é”€æ¯namaåˆ›å»ºçš„OpenGLèµ„æº
 	}		
-	//fuSetupÕû¸ö³ÌĞòÖ»ĞèÒªÔËĞĞÒ»´Î£¬Ïú»ÙÄ³¸ö×Ó´°¿ÚÊ±Ö»ĞèÒªµ÷ÓÃÉÏÊöÁ½¸öº¯Êı¡£ 
-	//Tips:Èç¹ûÆäËû´°¿Ú»¹»áÓÃÕâĞ©×ÊÔ´£¬ÄÇÃ´×ÊÔ´´´½¨Ó¦¸ÃÔÚ¸¸´°¿Ú¡£³ÌĞòÔËĞĞÆÚ¼äÒ»Ö±³ÖÓĞÕâĞ©×ÊÔ´.
+	//fuSetupæ•´ä¸ªç¨‹åºåªéœ€è¦è¿è¡Œä¸€æ¬¡ï¼Œé”€æ¯æŸä¸ªå­çª—å£æ—¶åªéœ€è¦è°ƒç”¨ä¸Šè¿°ä¸¤ä¸ªå‡½æ•°ã€‚ 
+	//Tips:å¦‚æœå…¶ä»–çª—å£è¿˜ä¼šç”¨è¿™äº›èµ„æºï¼Œé‚£ä¹ˆèµ„æºåˆ›å»ºåº”è¯¥åœ¨çˆ¶çª—å£ã€‚ç¨‹åºè¿è¡ŒæœŸé—´ä¸€ç›´æŒæœ‰è¿™äº›èµ„æº.
 	
 }
 
@@ -118,10 +118,10 @@ void Nama::ReOpenCamera()
 		m_cap->CloseCamera();		
 		if (false == m_cap->OpenCamera(m_curCameraIdx, false, m_frameWidth, m_frameHeight))
 		{
-			std::cout << "È±ÉÙÉãÏñÍ·£¬ÍÆ¼öÊ¹ÓÃ Logitech C920£¬È»ºó°²×°¹Ù·½Çı¶¯¡£" << std::endl;
+			std::cout << "ç¼ºå°‘æ‘„åƒå¤´ï¼Œæ¨èä½¿ç”¨ Logitech C920ï¼Œç„¶åå®‰è£…å®˜æ–¹é©±åŠ¨ã€‚" << std::endl;
 			exit(1);
 		}
-		fuOnCameraChange();//Note: ÖØÖÃÈËÁ³¼ì²âµÄĞÅÏ¢
+		fuOnCameraChange();//Note: é‡ç½®äººè„¸æ£€æµ‹çš„ä¿¡æ¯
 	}
 }
 
@@ -129,18 +129,18 @@ void Nama::Init(int& width, int& height)
 {
 	if (false == m_cap->OpenCamera(m_curCameraIdx, false, width, height))
 	{
-		std::cout << "È±ÉÙÉãÏñÍ·£¬ÍÆ¼öÊ¹ÓÃ Logitech C920£¬È»ºó°²×°¹Ù·½Çı¶¯¡£\n Error: Missing camera! " << std::endl ;
+		std::cout << "ç¼ºå°‘æ‘„åƒå¤´ï¼Œæ¨èä½¿ç”¨ Logitech C920ï¼Œç„¶åå®‰è£…å®˜æ–¹é©±åŠ¨ã€‚\n Error: Missing camera! " << std::endl ;
 		exit(1);
 	}
 	m_frameWidth = width;
 	m_frameHeight = height;
 	if (false == m_hasSetup)
 	{
-		//¶ÁÈ¡namaÊı¾İ¿â£¬³õÊ¼»¯nama
+		//è¯»å–namaæ•°æ®åº“ï¼Œåˆå§‹åŒ–nama
 		std::vector<char> v3data;
 		if (false == LoadBundle(g_fuDataDir + g_v3Data, v3data))
 		{
-			std::cout << "Error:È±ÉÙÊı¾İÎÄ¼ş¡£" << g_fuDataDir + g_v3Data << std::endl;
+			std::cout << "Error:ç¼ºå°‘æ•°æ®æ–‡ä»¶ã€‚" << g_fuDataDir + g_v3Data << std::endl;
 			exit(2);
 		}		
 		fuSetup(reinterpret_cast<float*>(&v3data[0]), NULL, g_auth_package, sizeof(g_auth_package));
@@ -148,11 +148,19 @@ void Nama::Init(int& width, int& height)
 		std::vector<char> anim_model_data;
 		if (false == LoadBundle(g_fuDataDir + g_anim_model, anim_model_data))
 		{
-			std::cout << "Error:È±ÉÙÊı¾İÎÄ¼ş¡£" << g_fuDataDir + g_anim_model << std::endl;
+			std::cout << "Error:ç¼ºå°‘æ•°æ®æ–‡ä»¶ã€‚" << g_fuDataDir + g_anim_model << std::endl;
 			exit(2);
 		}
-		// ±íÇéÏµÊıÎÈ¶¨
+		// è¡¨æƒ…ç³»æ•°ç¨³å®š
 		fuLoadAnimModel(reinterpret_cast<float*>(&anim_model_data[0]), anim_model_data.size());
+
+		std::vector<char> fxaa_data;
+		if (false == LoadBundle(g_fuDataDir + g_fxaa, fxaa_data))
+		{
+			std::cout << "Error:ç¼ºå°‘æ•°æ®æ–‡ä»¶ã€‚" << g_fuDataDir + g_fxaa << std::endl;
+			exit(2);
+		}
+		m_fxaaHandles = fuCreateItemFromPackage(fxaa_data.data(), fxaa_data.size());
 		fuSetExpressionCalibration(1);
 
 		m_hasSetup = true;
@@ -163,7 +171,7 @@ void Nama::Init(int& width, int& height)
 		m_hasSetup = false;
 	}
 
-	//¶ÁÈ¡ÃÀÑÕµÀ¾ß£¬ÉèÖÃÃÀÑÕ²ÎÊı
+	//è¯»å–ç¾é¢œé“å…·ï¼Œè®¾ç½®ç¾é¢œå‚æ•°
 	{
 		std::vector<char> propData;
 		if (false == LoadBundle(g_fuDataDir + g_faceBeautification, propData))
@@ -175,7 +183,7 @@ void Nama::Init(int& width, int& height)
 
 		m_beautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
 
-		//"origin", "delta", "electric", "slowlived", "tokyo", "warm"µÈ²ÎÊıµÄÉèÖÃ
+		//"origin", "delta", "electric", "slowlived", "tokyo", "warm"ç­‰å‚æ•°çš„è®¾ç½®
 		fuItemSetParams(m_beautyHandles, "filter_name", &_filters[m_curFilterIdx][0]);
 		fuItemSetParamd(m_beautyHandles, "is_opengl_es", 0);
 		fuItemSetParamd(m_beautyHandles, "color_level", m_curColorLevel);
@@ -187,7 +195,7 @@ void Nama::Init(int& width, int& height)
 		fuItemSetParamd(m_beautyHandles, "face_shape", m_face_shape);
 		fuItemSetParamd(m_beautyHandles, "filter_level", 1);
 	}
-	//¶ÁÈ¡ÊÖÊÆÊ¶±ğµÀ¾ß
+	//è¯»å–æ‰‹åŠ¿è¯†åˆ«é“å…·
 	{
 		std::vector<char> gestureData;
 		if (false == LoadBundle(g_fuDataDir + g_gestureRecongnition, gestureData))
@@ -200,7 +208,7 @@ void Nama::Init(int& width, int& height)
 		m_gestureHandles = fuCreateItemFromPackage(&gestureData[0], gestureData.size());
 	}
 	m_propHandles.resize(g_propCount);
-	//¼ÓÔØÒ»¸öbundle
+	//åŠ è½½ä¸€ä¸ªbundle
 	m_curBundleIdx = -1;
 	NextBundle();
 	fuSetDefaultOrientation(0);
@@ -297,7 +305,7 @@ void Nama::UpdateBeauty()
 	fuItemSetParamd(m_beautyHandles, "red_level", m_redLevel);	
 	fuItemSetParamd(m_beautyHandles, "filter_level", 1);
 }
-//¼ÓÔØÈ«²¿µÀ¾ß£¬³õÊ¼»¯ÉÔÂı
+//åŠ è½½å…¨éƒ¨é“å…·ï¼Œåˆå§‹åŒ–ç¨æ…¢
 void Nama::CreateBundle()
 {
 	for (int i(0); i != g_propCount; ++i)
@@ -305,7 +313,7 @@ void Nama::CreateBundle()
 		CreateBundle(i);
 	}
 }
-//°´Ğè¼ÓÔØµÀ¾ß£¬µ«ÊÇÔÚÇĞ»»µÄÊ±ºò»á¿¨¶ÙÒ»ÏÂ
+//æŒ‰éœ€åŠ è½½é“å…·ï¼Œä½†æ˜¯åœ¨åˆ‡æ¢çš„æ—¶å€™ä¼šå¡é¡¿ä¸€ä¸‹
 void Nama::CreateBundle(const int idx)
 {
 	if (0 == m_propHandles[idx])
@@ -321,7 +329,7 @@ void Nama::CreateBundle(const int idx)
 		m_propHandles[idx] = fuCreateItemFromPackage(&propData[0], propData.size());		
 	}
 }
-//²Ã¼ôÍ¼ÏñÄÚÈİ
+//è£å‰ªå›¾åƒå†…å®¹
 void Nama::ScissorFrameBuffer(std::tr1::shared_ptr<unsigned char> frame)
 {
 	int size = m_frameWidth*m_frameHeight * 4;
@@ -352,7 +360,7 @@ std::tr1::shared_ptr<unsigned char> Nama::ConvertBetweenBGRAandRGBA(std::tr1::sh
 	int offset = 0;
 	if (IsBadReadPtr(frame.get(), 4))//can't debug run
 	{
-		printf("The camera is usered by other programs£¡\n");
+		printf("The camera is usered by other programsï¼\n");
 		return temp_frame;
 	}
 	auto output = temp_frame.get();
@@ -373,7 +381,7 @@ std::tr1::shared_ptr<unsigned char> Nama::ConvertBetweenBGRAandRGBA(std::tr1::sh
 	return temp_frame;
 }
 
-//äÖÈ¾º¯Êı
+//æ¸²æŸ“å‡½æ•°
 void Nama::RenderItems(std::tr1::shared_ptr<unsigned char> frame)
 {	
 	fuSetMaxFaces(m_maxFace);
@@ -382,15 +390,16 @@ void Nama::RenderItems(std::tr1::shared_ptr<unsigned char> frame)
 	case PROP:
 		if (1 == m_isBeautyOn && 1 == m_isDrawProp)
 		{
-			int handle[2] = { m_beautyHandles, m_propHandles[m_curBundleIdx] };
-			//Ö§³ÖµÄ¸ñÊ½ÓĞFU_FORMAT_BGRA_BUFFER ¡¢ FU_FORMAT_NV21_BUFFER ¡¢FU_FORMAT_I420_BUFFER ¡¢FU_FORMAT_RGBA_BUFFER			
+			int handle[3] = { m_beautyHandles, m_propHandles[m_curBundleIdx] ,m_fxaaHandles };
+			//æ”¯æŒçš„æ ¼å¼æœ‰FU_FORMAT_BGRA_BUFFER ã€ FU_FORMAT_NV21_BUFFER ã€FU_FORMAT_I420_BUFFER ã€FU_FORMAT_RGBA_BUFFER		
 			fuRenderItemsEx2(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
-				m_frameWidth, m_frameHeight, m_frameID, handle, 2, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);			
+				m_frameWidth, m_frameHeight, m_frameID, handle, 3, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);			
 		}
 		else if (1 == m_isDrawProp && 0 == m_isBeautyOn)
 		{						
+			int handle[2] = { m_propHandles[m_curBundleIdx] ,m_fxaaHandles };
 			fuRenderItemsEx2(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
-				m_frameWidth, m_frameHeight, m_frameID, &m_propHandles[m_curBundleIdx], 1, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);
+				m_frameWidth, m_frameHeight, m_frameID, handle, 2, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);
 		}
 		else if (1 == m_isBeautyOn && 0 == m_isDrawProp)
 		{			
@@ -413,7 +422,7 @@ void Nama::RenderItems(std::tr1::shared_ptr<unsigned char> frame)
 	++m_frameID;	
 	return;
 }
-//Ö»µ÷ÓÃnamaÀïµÄÃÀÑÕÄ£¿é
+//åªè°ƒç”¨namaé‡Œçš„ç¾é¢œæ¨¡å—
 std::tr1::shared_ptr<unsigned char> Nama::RenderEx()
 {
 	std::tr1::shared_ptr<unsigned char> frame = m_cap->QueryFrame();
@@ -427,7 +436,7 @@ std::tr1::shared_ptr<unsigned char> Nama::RenderEx()
 	return frame;
 }
 
-//»æÖÆÈËÁ³ÌØÕ÷µã
+//ç»˜åˆ¶äººè„¸ç‰¹å¾ç‚¹
 void Nama::DrawLandmarks(std::tr1::shared_ptr<unsigned char> frame)
 {
 	float landmarks[150];
