@@ -105,6 +105,15 @@ void GLWidget::resizeGL(int width, int height)
 	glMatrixMode(GL_MODELVIEW);
 }
 
+void GLWidget::resizeEvent(QResizeEvent *size) 
+{	
+	if (size->size().width() == 0 || size->size().height() == 0)
+		return;
+	int width = size->size().width();
+	int height = size->size().height();
+	glViewport(0, 0, width, height);
+};
+
 void GLWidget::drawFrame()
 {
 	glBindTexture(GL_TEXTURE_2D, textureID);

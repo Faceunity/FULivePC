@@ -35,6 +35,7 @@ public:
 
 	void initializeGL();
 	void resizeGL(int w, int h);
+	void resizeEvent(QResizeEvent *size);
 	void drawFrame();
 	void drawLandMarks();
 	void setTextureData(std::tr1::shared_ptr<unsigned char> frame);
