@@ -29,15 +29,15 @@ NamaExample::NamaExample(QWidget *parent)
 
 void NamaExample::SetStatusBar()
 {
-	if (ui.glwidget->nama->IsTracking())
-	{
-		ui.poplabel_0->hide();
-	}
-	else
-	{
-		ui.poplabel_0->setText(QStringLiteral("未识别"));
-		ui.poplabel_0->show();
-	}
+	//if (ui.glwidget->nama->IsTracking())
+	//{
+	//	ui.poplabel_0->hide();
+	//}
+	//else
+	//{
+	//	ui.poplabel_0->setText(QStringLiteral("未识别"));
+	//	ui.poplabel_0->show();
+	//}
 	//
 	QFile f("nama_log.txt");
 	f.open(QFile::ReadOnly | QFile::Text);
@@ -90,6 +90,15 @@ void NamaExample::on_SliderConnect_moved0()
 	case 2:
 		ui.glwidget->nama->m_redLevel = current_value;
 		break;
+	case 3:
+		ui.glwidget->nama->m_blur_blend_ratio = current_value;
+		break;
+	case 4:
+		ui.glwidget->nama->m_eye_bright_Level = current_value;
+		break;
+	case 5:
+		ui.glwidget->nama->m_tooth_whiten_Level = current_value;
+		break;	
 	default:
 		break;
 	}
@@ -113,6 +122,18 @@ void NamaExample::on_shapeSliderConnect_moved()
 		break;
 	case 2:
 		ui.glwidget->nama->m_curCheekThinning = current_value;
+		break;
+	case 3:
+		ui.glwidget->nama->m_intensity_forehead = current_value;
+		break;
+	case 4:
+		ui.glwidget->nama->m_intensity_chin = current_value;
+		break;
+	case 5:
+		ui.glwidget->nama->m_intensity_nose = current_value;
+		break;
+	case 6:
+		ui.glwidget->nama->m_intensity_mouth = current_value;
 		break;
 	default:
 		break;

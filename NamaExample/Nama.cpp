@@ -77,9 +77,17 @@ Nama::Nama()
 	m_curEyeEnlarging(0.0f),
 	m_face_shape(3),
 	m_redLevel(0.6f),
-	m_faceShapeLevel(0.0f),
+	m_faceShapeLevel(0.99f),
 	m_maxFace(4)
 {
+	m_blur_blend_ratio = 0.0;
+	m_eye_bright_Level = 0.0;
+	m_tooth_whiten_Level = 0.0;
+	m_intensity_forehead = 0.0;
+	m_intensity_chin = 0.0;
+	m_intensity_nose = 0.0;
+	m_intensity_mouth = 0.0;
+
 	m_curCameraIdx = 0;
 	m_cap = std::tr1::shared_ptr<CCameraDS>(new CCameraDS);
 }
@@ -192,8 +200,18 @@ void Nama::Init(int& width, int& height)
 		fuItemSetParamd(m_beautyHandles, "eye_enlarging", m_curEyeEnlarging);
 		fuItemSetParamd(m_beautyHandles, "face_shape_level", m_faceShapeLevel);
 		fuItemSetParamd(m_beautyHandles, "red_level", m_redLevel);
+
+		fuItemSetParamd(m_beautyHandles, "blur_blend_ratio", m_blur_blend_ratio);
+		fuItemSetParamd(m_beautyHandles, "eye_bright", m_eye_bright_Level);
+		fuItemSetParamd(m_beautyHandles, "tooth_whiten", m_tooth_whiten_Level);
+		fuItemSetParamd(m_beautyHandles, "intensity_forehead", m_intensity_forehead);
+		fuItemSetParamd(m_beautyHandles, "intensity_chin", m_intensity_chin);
+		fuItemSetParamd(m_beautyHandles, "intensity_nose", m_intensity_nose);
+		fuItemSetParamd(m_beautyHandles, "intensity_mouth", m_intensity_mouth);
 		fuItemSetParamd(m_beautyHandles, "face_shape", m_face_shape);
 		fuItemSetParamd(m_beautyHandles, "filter_level", 1);
+		fuItemSetParamd(m_beautyHandles, "facewarp_version", 1);
+		fuItemSetParamd(m_beautyHandles, "skin_detect", 1);
 	}
 	//读取手势识别道具
 	{
@@ -303,6 +321,13 @@ void Nama::UpdateBeauty()
 	fuItemSetParamd(m_beautyHandles, "eye_enlarging", m_curEyeEnlarging);
 	fuItemSetParamd(m_beautyHandles, "face_shape_level", m_faceShapeLevel);
 	fuItemSetParamd(m_beautyHandles, "red_level", m_redLevel);	
+	fuItemSetParamd(m_beautyHandles, "heavy_blur", m_blur_blend_ratio);
+	fuItemSetParamd(m_beautyHandles, "eye_bright", m_eye_bright_Level);
+	fuItemSetParamd(m_beautyHandles, "tooth_whiten", m_tooth_whiten_Level);
+	fuItemSetParamd(m_beautyHandles, "intensity_forehead", m_intensity_forehead);
+	fuItemSetParamd(m_beautyHandles, "intensity_chin", m_intensity_chin);
+	fuItemSetParamd(m_beautyHandles, "intensity_nose", m_intensity_nose);
+	fuItemSetParamd(m_beautyHandles, "intensity_mouth", m_intensity_mouth);
 	fuItemSetParamd(m_beautyHandles, "filter_level", 1);
 }
 //加载全部道具，初始化稍慢

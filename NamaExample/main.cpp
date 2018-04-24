@@ -4,8 +4,10 @@
 #include <QTextStream>
 int main(int argc, char *argv[])
 {
+	ShowWindow(GetConsoleWindow(), 0);
 	//将exe控制台打印信息重定向到nama_log.txt文件中
 	freopen("nama_log.txt", "w", stdout);
+	freopen("nama_log.txt", "w", stderr);
 	
 	QApplication a(argc, argv);
 	QFile f(":qdarkstyle/style.qss");

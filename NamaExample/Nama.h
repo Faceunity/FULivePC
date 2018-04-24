@@ -71,6 +71,14 @@ namespace NamaExampleNameSpace
 		float m_curEyeEnlarging;
 		float m_faceShapeLevel;
 		float m_redLevel;
+		float m_blur_blend_ratio;//
+		float m_eye_bright_Level;
+		float m_tooth_whiten_Level;
+		float m_intensity_forehead;
+		float m_intensity_chin;
+		float m_intensity_nose;
+		float m_intensity_mouth;
+
 		int m_maxFace;
 		std::string m_curTranslation;
 		std::string m_curRotation;

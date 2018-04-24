@@ -581,7 +581,7 @@
             </layout>
            </item>
            <item row="1" column="0" colspan="2">
-            <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,0,0,0">
+            <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,0">
              <item>
               <widget class="QRadioButton" name="radioButton0_meiyan">
                <property name="text">
@@ -596,74 +596,155 @@
               </widget>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <layout class="QVBoxLayout" name="verticalLayout_5">
                <item>
-                <widget class="QLabel" name="label_3">
-                 <property name="text">
-                  <string>磨皮</string>
-                 </property>
-                </widget>
+                <layout class="QHBoxLayout" name="horizontalLayout_2">
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_6">
+                   <item>
+                    <widget class="QLabel" name="label_5">
+                     <property name="text">
+                      <string>美白</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSlider" name="horizontalSlider0_1">
+                     <property name="cursor">
+                      <cursorShape>SizeHorCursor</cursorShape>
+                     </property>
+                     <property name="maximum">
+                      <number>99</number>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_5">
+                   <item>
+                    <widget class="QLabel" name="label_3">
+                     <property name="text">
+                      <string>磨皮</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSlider" name="horizontalSlider0_0">
+                     <property name="cursor">
+                      <cursorShape>SizeHorCursor</cursorShape>
+                     </property>
+                     <property name="maximum">
+                      <number>599</number>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_7">
+                   <item>
+                    <widget class="QLabel" name="label_6">
+                     <property name="text">
+                      <string>红润</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSlider" name="horizontalSlider0_2">
+                     <property name="cursor">
+                      <cursorShape>SizeHorCursor</cursorShape>
+                     </property>
+                     <property name="maximum">
+                      <number>99</number>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
                </item>
                <item>
-                <widget class="QSlider" name="horizontalSlider0_0">
-                 <property name="cursor">
-                  <cursorShape>SizeHorCursor</cursorShape>
-                 </property>
-                 <property name="maximum">
-                  <number>599</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_6">
-               <item>
-                <widget class="QLabel" name="label_5">
-                 <property name="text">
-                  <string>美白</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSlider" name="horizontalSlider0_1">
-                 <property name="cursor">
-                  <cursorShape>SizeHorCursor</cursorShape>
-                 </property>
-                 <property name="maximum">
-                  <number>99</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_7">
-               <item>
-                <widget class="QLabel" name="label_6">
-                 <property name="text">
-                  <string>红润</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSlider" name="horizontalSlider0_2">
-                 <property name="cursor">
-                  <cursorShape>SizeHorCursor</cursorShape>
-                 </property>
-                 <property name="maximum">
-                  <number>99</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
+                <layout class="QHBoxLayout" name="horizontalLayout_12">
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_15">
+                   <item>
+                    <widget class="QLabel" name="label_10">
+                     <property name="text">
+                      <string>美牙</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSlider" name="horizontalSlider2_5">
+                     <property name="cursor">
+                      <cursorShape>SizeHorCursor</cursorShape>
+                     </property>
+                     <property name="maximum">
+                      <number>99</number>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_14">
+                   <item>
+                    <widget class="QLabel" name="label_4">
+                     <property name="text">
+                      <string>美肤</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSlider" name="horizontalSlider2_3">
+                     <property name="cursor">
+                      <cursorShape>SizeHorCursor</cursorShape>
+                     </property>
+                     <property name="maximum">
+                      <number>199</number>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_13">
+                   <item>
+                    <widget class="QLabel" name="label">
+                     <property name="text">
+                      <string>亮眼</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSlider" name="horizontalSlider2_4">
+                     <property name="cursor">
+                      <cursorShape>SizeHorCursor</cursorShape>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
                </item>
               </layout>
              </item>
@@ -691,8 +772,183 @@
           <property name="title">
            <string/>
           </property>
-          <layout class="QGridLayout" name="gridLayout_3">
-           <item row="0" column="0">
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_16">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout">
+               <item>
+                <widget class="QLabel" name="label_7">
+                 <property name="text">
+                  <string>程度</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="verticalSlider0_0">
+                 <property name="cursor">
+                  <cursorShape>SizeVerCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="value">
+                  <number>99</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_9">
+               <item>
+                <widget class="QLabel" name="label_14">
+                 <property name="text">
+                  <string>额头</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="verticalSlider3_3">
+                 <property name="cursor">
+                  <cursorShape>SizeVerCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <widget class="QLabel" name="label_12">
+                 <property name="text">
+                  <string>瘦脸</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="verticalSlider3_2">
+                 <property name="cursor">
+                  <cursorShape>SizeVerCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <item>
+                <widget class="QLabel" name="label_8">
+                 <property name="text">
+                  <string>大眼</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="verticalSlider0_1">
+                 <property name="cursor">
+                  <cursorShape>SizeVerCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_6">
+               <item>
+                <widget class="QLabel" name="label_11">
+                 <property name="text">
+                  <string>鼻子</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="verticalSlider3_5">
+                 <property name="cursor">
+                  <cursorShape>SizeVerCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_8">
+               <item>
+                <widget class="QLabel" name="label_13">
+                 <property name="text">
+                  <string>下巴</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="verticalSlider3_4">
+                 <property name="cursor">
+                  <cursorShape>SizeVerCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_3">
+               <item>
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>嘴唇</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="verticalSlider3_6">
+                 <property name="cursor">
+                  <cursorShape>SizeVerCursor</cursorShape>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
               <widget class="QRadioButton" name="radioButton0_0">
@@ -736,82 +992,6 @@
                 <string notr="true">buttonGroup0_2</string>
                </attribute>
               </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="1" column="0">
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <layout class="QVBoxLayout" name="verticalLayout">
-               <item>
-                <widget class="QLabel" name="label_7">
-                 <property name="text">
-                  <string>程度</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSlider" name="verticalSlider0_0">
-                 <property name="cursor">
-                  <cursorShape>SizeVerCursor</cursorShape>
-                 </property>
-                 <property name="maximum">
-                  <number>99</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QVBoxLayout" name="verticalLayout_2">
-               <item>
-                <widget class="QLabel" name="label_8">
-                 <property name="text">
-                  <string>大眼</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSlider" name="verticalSlider0_1">
-                 <property name="cursor">
-                  <cursorShape>SizeVerCursor</cursorShape>
-                 </property>
-                 <property name="maximum">
-                  <number>99</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QVBoxLayout" name="verticalLayout_3">
-               <item>
-                <widget class="QLabel" name="label_9">
-                 <property name="text">
-                  <string>瘦脸</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSlider" name="verticalSlider0_2">
-                 <property name="cursor">
-                  <cursorShape>SizeVerCursor</cursorShape>
-                 </property>
-                 <property name="maximum">
-                  <number>99</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-              </layout>
              </item>
             </layout>
            </item>
@@ -1189,7 +1369,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>verticalSlider0_2</sender>
+   <sender>verticalSlider3_6</sender>
    <signal>sliderMoved(int)</signal>
    <receiver>NamaExampleClass</receiver>
    <slot>on_shapeSliderConnect_moved()</slot>
@@ -1309,6 +1489,118 @@
     <hint type="sourcelabel">
      <x>45</x>
      <y>803</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>639</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>horizontalSlider2_5</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>NamaExampleClass</receiver>
+   <slot>on_SliderConnect_moved0()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>172</x>
+     <y>819</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>639</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>horizontalSlider2_3</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>NamaExampleClass</receiver>
+   <slot>on_SliderConnect_moved0()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>341</x>
+     <y>819</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>639</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>horizontalSlider2_4</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>NamaExampleClass</receiver>
+   <slot>on_SliderConnect_moved0()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>509</x>
+     <y>819</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>639</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>verticalSlider3_3</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>NamaExampleClass</receiver>
+   <slot>on_shapeSliderConnect_moved()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1083</x>
+     <y>767</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>639</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>verticalSlider3_5</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>NamaExampleClass</receiver>
+   <slot>on_shapeSliderConnect_moved()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1179</x>
+     <y>767</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>639</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>verticalSlider3_4</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>NamaExampleClass</receiver>
+   <slot>on_shapeSliderConnect_moved()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1211</x>
+     <y>767</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>639</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>verticalSlider3_2</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>NamaExampleClass</receiver>
+   <slot>on_shapeSliderConnect_moved()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1115</x>
+     <y>767</y>
     </hint>
     <hint type="destinationlabel">
      <x>639</x>
