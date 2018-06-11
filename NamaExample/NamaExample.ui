@@ -1056,6 +1056,16 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
+              <widget class="QRadioButton" name="radioButton0_4">
+               <property name="text">
+                <string>自定义</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">buttonGroup0_2</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
               <widget class="QRadioButton" name="radioButton0_0">
                <property name="text">
                 <string>女神</string>
@@ -1706,6 +1716,22 @@
     <hint type="sourcelabel">
      <x>1115</x>
      <y>767</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>639</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton0_4</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>NamaExampleClass</receiver>
+   <slot>on_shapeButtonConnect_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1016</x>
+     <y>825</y>
     </hint>
     <hint type="destinationlabel">
      <x>639</x>

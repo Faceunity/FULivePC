@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
 	}
 	
 	NamaExample w;		
+	//w.setWindowOpacity(0.7);
 	w.show();
 	QDesktopWidget* desktopWidget = QApplication::desktop();	
 	QRect deskRect = desktopWidget->availableGeometry();

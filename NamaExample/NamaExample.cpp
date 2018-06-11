@@ -24,7 +24,14 @@ NamaExample::NamaExample(QWidget *parent)
 	timer_log->start(500);
 	timer_fps->start(1000);
 	log_file_size = 0;
-	
+	ui.verticalSlider3_3->hide();
+	ui.label_14->hide();
+	ui.verticalSlider3_5->hide();
+	ui.label_11->hide();
+	ui.verticalSlider3_4->hide();
+	ui.label_13->hide();
+	ui.verticalSlider3_6->hide();
+	ui.label_9->hide();
 }
 
 void NamaExample::SetStatusBar()
@@ -268,6 +275,27 @@ void NamaExample::on_shapeButtonConnect_clicked()
 	QRadioButton* btn = qobject_cast<QRadioButton*>(sender());
 	QString name = btn->objectName();
 	int index = name.split("_")[1].toInt();
-	
+	if (index == 4)
+	{
+		ui.verticalSlider3_3->show();
+		ui.label_14->show();
+		ui.verticalSlider3_5->show();
+		ui.label_11->show();
+		ui.verticalSlider3_4->show();
+		ui.label_13->show();
+		ui.verticalSlider3_6->show();
+		ui.label_9->show();
+	} 
+	else
+	{
+		ui.verticalSlider3_3->hide(); 
+		ui.label_14->hide();
+		ui.verticalSlider3_5->hide();
+		ui.label_11->hide();
+		ui.verticalSlider3_4->hide();
+		ui.label_13->hide();
+		ui.verticalSlider3_6->hide();
+		ui.label_9->hide();
+	}
 	ui.glwidget->nama->SetCurrentShape(index);
 }
