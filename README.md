@@ -1,7 +1,7 @@
 # FULivePC
 FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，作为一款集成示例。
 ## 目录
-[新特性](#sdk-v50-更新)
+[新特性](#sdk-v52-更新)
 [SDK内容](#运行环境)
 [集成说明](#集成方法)
 [道具失效等问题](#faq)
@@ -15,7 +15,7 @@ FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，�
 - 新增美颜美型突变过渡效果功能
 - 修复换脸高级融合只显示半脸问题
 
-由于深度学习框架的升级，SDK的库文件从之前的 ~3M 增加到了 ~5M，如果不需要AI相关功能，可以下载[SDK lite版](https://github.com/Faceunity/FULivePC/releases)，库文件大小和老版本保持一致。
+由于深度学习框架的升级，SDK的库文件从之前的 ~3M 增加到了 ~5M，如果不需要AI相关功能，可以下载[SDK lite版](https://github.com/Faceunity/FULivePC/releases)，lite版库是不含深度学习的，库文件大小和老版本保持一致。
 
 与新版SDK一起，我们也推出更方便和好用的2D/3D贴纸道具制作工具——FUEditor，助力视频应用快速应对市场，推出具有个性化和吸引力的道具和玩法。相关文档和下载在[这里](https://github.com/Faceunity/FUEditor)，制作过程中遇到问题可以联系我司技术支持。
 
@@ -181,20 +181,22 @@ fuItemSetParamd(m_beautyHandles, "eye_bright", mBrightEyesLevel);
 fuItemSetParamd(m_beautyHandles, "tooth_whiten", mBeautyTeethLevel);
 ```
 
-#### 美型
+### 六、美型
 
-#### 1、旧美型
+#### 1、基本美型
 
-旧美型支持四种基本脸型：女神、网红、自然、默认。由参数 face_shape 指定：默认（3）、女神（0）、网红（1）、自然（2）。
+美型支持四种基本美型：女神、网红、自然、默认，一种高级美型：自定义。由参数 face_shape 指定：默认（3）、女神（0）、网红（1）、自然（2）、自定义（4）。
+
 ```C
 //  Set item parameters - shaping
 fuItemSetParamd(mItemsArray[1], "face_shape", 3);
 ```
-在上述四种基本脸型的基础上，我们提供了以下三个参数：face_shape_level、eye_enlarging、cheek_thinning。
+在上述四种基本美型及一种高级美型的基础上，我们提供了以下三个参数：face_shape_level、eye_enlarging、cheek_thinning。
 
 参数 face_shape_level 用以控制变化到指定基础脸型的程度。该参数的取值范围为[0, 1]。0为无效果，即关闭美型，1为指定脸型。
 
 若要关闭美型，可将 face_shape_level 设置为0。
+
 ```C
 //  Set item parameters - shaping level
 fuItemSetParamd(mItemsArray[1], "face_shape_level", 1.0);
@@ -210,78 +212,93 @@ fuItemSetParamd(mItemsArray[1], "eye_enlarging", 1.0);
 fuItemSetParamd(mItemsArray[1], "cheek_thinning", 1.0);
 ```
 
-#### 2、新增美型
+- #### 2、高级美型
 
-##### 精细脸型调整功能
+  ##### 精细脸型调整功能
 
-优化瘦脸、大眼的效果，增加额头调整、下巴调整、瘦鼻、嘴型调整4项美颜变形，FULiveDemo中可以在脸型中选择自定义来开启精细脸型调整功能
+  新增优化瘦脸、大眼的效果，增加额头调整、下巴调整、瘦鼻、嘴型调整4项美颜变形，将 face_shape 设为4即可开启精细脸型调整功能，FULiveDemo中可以在脸型中选择自定义来开启精细脸型调整功能
 
-__使用方法__：
-- 加载face_beautification.bundle
-- 调整如下参数
-  facewarp_version: 1,   // 1为开启新脸型模式，0为旧变形
+  __使用方法__：
 
-##### 瘦脸
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
 
-优化瘦脸变形效果，比之前更加自然
+  ##### 瘦脸
 
-__使用方法__：
+  优化瘦脸变形效果，比之前更加自然
 
-- 加载face_beautification.bundle
-- 调整如下参数
-  facewarp_version: 1,   // 1为开启新脸型模式，0为旧变形
-  cheek_thinning: 0.0,   // 使用了原有参数cheek_thinning控制瘦脸 ，范围0 - 1
+  __使用方法__：
 
-##### 大眼
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
+    cheek_thinning: 0.0,   // 使用了原有参数cheek_thinning控制瘦脸 ，范围0 - 1
 
-优化大眼变形效果，比之前更加自然
+  ##### 大眼
 
-__使用方法__：
-- 加载face_beautification.bundle
-- 调整如下参数
-  facewarp_version: 1,   // 1为开启新脸型模式，0为旧变形
-  eye_enlarging: 0.0,   // 使用了原有参数eye_enlarging控制大眼，范围0 - 1
+  优化大眼变形效果，比之前更加自然
 
-##### 额头调整
+  __使用方法__：
 
-新增加的一款美颜变形，可以调整额头大小
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    facewarp_version: 1,   // 1为开启新脸型模式，0为旧变形
+    eye_enlarging: 0.0,   // 使用了原有参数eye_enlarging控制大眼，范围0 - 1
 
-__使用方法__：
-- 加载face_beautification.bundle
-- 调整如下参数
-  facewarp_version: 1,   // 1为开启新脸型模式，0为旧变形
-  intensity_forehead: 0.5,   // 大于0.5 变大，小于0.5变小
+  ##### 额头调整
 
-##### 下巴调整
+  新增加的一款美颜变形，可以调整额头大小
 
-新增加的一款美颜变形，可以调整下巴大小
+  __使用方法__：
 
-__使用方法__：
-- 加载face_beautification.bundle
-- 调整如下参数
-  facewarp_version: 1,   // 1为开启新脸型模式，0为旧变形
-  intensity_chin: 0.5,   // 大于0.5 变大，小于0.5变小
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
+    intensity_forehead: 0.5,   // 大于0.5 变大，小于0.5变小
 
-##### 瘦鼻
+  ##### 下巴调整
 
-新增加的一款美颜变形，可以进行瘦鼻操作
+  新增加的一款美颜变形，可以调整下巴大小
 
-__使用方法__：
-- 加载face_beautification.bundle
-- 调整如下参数
+  __使用方法__：
 
-  facewarp_version: 1,   // 1为开启新脸型模式，0为旧变形
-  intensity_nose: 0.0,   // 0为正常大小，大于0开始瘦鼻，范围0 - 1
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
+    intensity_chin: 0.5,   // 大于0.5 变大，小于0.5变小
 
-##### 嘴型调整
+  ##### 瘦鼻
 
-新增加的一款美颜变形，可以调整嘴型大小
+  新增加的一款美颜变形，可以进行瘦鼻操作
 
-__使用方法__：
-- 加载face_beautification.bundle
-- 调整如下参数
-  facewarp_version: 1,   // 1为开启新脸型模式，0为旧变形
-  intensity_mouth: 0.5,   // 大于0.5变大，小于0.5变小
+  __使用方法__：
+
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
+    intensity_nose: 0.0,   // 0为正常大小，大于0开始瘦鼻，范围0 - 1
+
+  ##### 嘴型调整
+
+  新增加的一款美颜变形，可以调整嘴型大小
+
+  __使用方法__：
+
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
+    intensity_mouth: 0.5,   // 大于0.5变大，小于0.5变小
+
+  ### 七、美颜美型突变过渡效果
+
+  使美颜变形过度的更自然，避免突变效果，可通过参数 change_frames 来控制渐变所需要的帧数，0 渐变关闭 ，大于0开启渐变，值为渐变所需要的帧数。
+
+  设置参数的例子代码如下：
+
+  ```
+  fuItemSetParamd(mItemsArray[1], "change_frames", 10);
+  ```
 
 ## 手势识别
 目前我们的手势识别功能也是以道具的形式进行加载的。一个手势识别的道具中包含了要识别的手势、识别到该手势时触发的动效、及控制脚本。加载该道具的过程和加载普通道具、美颜道具的方法一致。
