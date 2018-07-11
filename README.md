@@ -17,6 +17,8 @@ FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，�
 
 由于深度学习框架的升级，SDK的库文件从之前的 ~3M 增加到了 ~5M，如果不需要AI相关功能，可以下载[SDK lite版](https://github.com/Faceunity/FULivePC/releases)，lite版库是不含深度学习的，库文件大小和老版本保持一致。
 
+**Tip：含有深度学习的版本支持背景分割、手势识别功能**
+
 与新版SDK一起，我们也推出更方便和好用的2D/3D贴纸道具制作工具——FUEditor，助力视频应用快速应对市场，推出具有个性化和吸引力的道具和玩法。相关文档和下载在[这里](https://github.com/Faceunity/FUEditor)，制作过程中遇到问题可以联系我司技术支持。
 
 此外，我们优化了SDK的系统稳定性，在网络条件波动的情况下保持SDK正常运行，并提供了获取SDK系统错误信息的接口，方便应用灵活处理。
@@ -137,7 +139,7 @@ fuItemSetParamd(m_beautyHandles, "red_level", mFaceBeautyRedLevel);
 
 新版美颜中，控制磨皮的参数有五个：blur_level，skin_detect，nonshin_blur_scale，heavy_blur，blur_blend_ratio。
 
-`blur_level` 指定磨皮程度。该参数的推荐取值范围为[0, 6]，0为无效果，对应7个不同的磨皮程度。
+`blur_level` 指定磨皮程度。该参数的推荐取值范围为0.0~6.0，0.0为无效果，原则上不建议参数值大于6.0，不过如果超过6.0也将会继续加大磨皮效果。
 
 `skin_detect`  指定是否开启皮肤检测，开启后，将自动检测是否皮肤，是皮肤的区域将直接根据blur_level指定的磨皮程度进行磨皮，非皮肤区域将减轻磨皮导致模糊的效果。该参数的推荐取值为0-1，0为无效果，1为开启皮肤检测，默认不开启。
 
@@ -243,7 +245,7 @@ fuItemSetParamd(mItemsArray[1], "cheek_thinning", 1.0);
 
   - 加载face_beautification.bundle
   - 调整如下参数
-    facewarp_version: 1,   // 1为开启新脸型模式，0为旧变形
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
     eye_enlarging: 0.0,   // 使用了原有参数eye_enlarging控制大眼，范围0 - 1
 
   ##### 额头调整
