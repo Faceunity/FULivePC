@@ -191,7 +191,10 @@ void NamaExample::on_pushButtonConnect_clicked0()
 
 void NamaExample::on_pushButtonConnect_clicked1()
 {
-	ui.poplabel_0->hide();
+	ui.poplabel_0->setText(QStringLiteral("请嘟嘴"));
+	ui.poplabel_0->show();
+	timer_show->start(2000);
+	timer_show->setSingleShot(true);
 	ui.glwidget->nama->m_maxFace = 1;
 	ui.glwidget->nama->SetCurrentBundle(1);
 	ui.glwidget->is_need_draw_landmarks = false;
@@ -200,7 +203,7 @@ void NamaExample::on_pushButtonConnect_clicked1()
 void NamaExample::on_pushButtonConnect_clicked2()
 {
 	ui.glwidget->nama->m_maxFace = 4;
-	ui.poplabel_0->setText(QStringLiteral("请嘟嘴"));
+	ui.poplabel_0->setText(QStringLiteral("请比心"));
 	ui.poplabel_0->show();	
 	timer_show->start(2000);
 	timer_show->setSingleShot(true);
@@ -221,7 +224,7 @@ void NamaExample::on_pushButtonConnect_clicked4()
 	ui.glwidget->nama->m_maxFace = 4;
 	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(4);
-	ui.glwidget->is_need_draw_landmarks = false;
+	ui.glwidget->is_need_draw_landmarks = true;
 }
 
 void NamaExample::on_pushButtonConnect_clicked5()
@@ -229,16 +232,13 @@ void NamaExample::on_pushButtonConnect_clicked5()
 	ui.glwidget->nama->m_maxFace = 1;
 	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(5);
-	ui.glwidget->is_need_draw_landmarks = true;
+	ui.glwidget->is_need_draw_landmarks = false;
 }
 
 void NamaExample::on_pushButtonConnect_clicked6()
 {
 	ui.glwidget->nama->m_maxFace = 4;
-	ui.poplabel_0->setText(QStringLiteral("请微笑"));
-	ui.poplabel_0->show();
-	timer_show->start(2000);
-	timer_show->setSingleShot(true);
+	ui.poplabel_0->hide();
 	ui.glwidget->nama->SetCurrentBundle(6);
 	ui.glwidget->is_need_draw_landmarks = false;
 }

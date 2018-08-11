@@ -202,7 +202,7 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
            <item row="0" column="0">
-            <layout class="QHBoxLayout" name="horizontalLayout" stretch="4,1,1,1,1,1,1,1,1,1">
+            <layout class="QHBoxLayout" name="horizontalLayout" stretch="4,1,1,1,1,1,1,1,1">
              <property name="spacing">
               <number>6</number>
              </property>
@@ -282,7 +282,7 @@
                </property>
                <property name="icon">
                 <iconset resource="buttonimages.qrc">
-                 <normaloff>:/buttonImages/buttonImages/bgseg.png</normaloff>:/buttonImages/buttonImages/bgseg.png</iconset>
+                 <normaloff>:/buttonImages/buttonImages/fu_zh_duzui.png</normaloff>:/buttonImages/buttonImages/fu_zh_duzui.png</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -311,7 +311,7 @@
                </property>
                <property name="icon">
                 <iconset resource="buttonimages.qrc">
-                 <normaloff>:/buttonImages/buttonImages/fu_zh_duzui.png</normaloff>:/buttonImages/buttonImages/fu_zh_duzui.png</iconset>
+                 <normaloff>:/buttonImages/buttonImages/fu_lm_koreaheart.png</normaloff>:/buttonImages/buttonImages/fu_lm_koreaheart.png</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -340,7 +340,7 @@
                </property>
                <property name="icon">
                 <iconset resource="buttonimages.qrc">
-                 <normaloff>:/buttonImages/buttonImages/yazui.png</normaloff>:/buttonImages/buttonImages/yazui.png</iconset>
+                 <normaloff>:/buttonImages/buttonImages/bluebird.png</normaloff>:/buttonImages/buttonImages/bluebird.png</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -369,7 +369,7 @@
                </property>
                <property name="icon">
                 <iconset resource="buttonimages.qrc">
-                 <normaloff>:/buttonImages/buttonImages/matianyu.png</normaloff>:/buttonImages/buttonImages/matianyu.png</iconset>
+                 <normaloff>:/buttonImages/buttonImages/huangya_Animoji.png</normaloff>:/buttonImages/buttonImages/huangya_Animoji.png</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -398,7 +398,7 @@
                </property>
                <property name="icon">
                 <iconset resource="buttonimages.qrc">
-                 <normaloff>:/buttonImages/buttonImages/houzi.png</normaloff>:/buttonImages/buttonImages/houzi.png</iconset>
+                 <normaloff>:/buttonImages/buttonImages/hez_ztt_fu.png</normaloff>:/buttonImages/buttonImages/hez_ztt_fu.png</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -427,7 +427,7 @@
                </property>
                <property name="icon">
                 <iconset resource="buttonimages.qrc">
-                 <normaloff>:/buttonImages/buttonImages/mood.png</normaloff>:/buttonImages/buttonImages/mood.png</iconset>
+                 <normaloff>:/buttonImages/buttonImages/mask_tongliya.png</normaloff>:/buttonImages/buttonImages/mask_tongliya.png</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -457,35 +457,6 @@
                <property name="icon">
                 <iconset resource="buttonimages.qrc">
                  <normaloff>:/buttonImages/buttonImages/gradient.png</normaloff>:/buttonImages/buttonImages/gradient.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>50</width>
-                 <height>50</height>
-                </size>
-               </property>
-               <property name="flat">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="itemButton0_8">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="cursor">
-                <cursorShape>PointingHandCursor</cursorShape>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset resource="buttonimages.qrc">
-                 <normaloff>:/buttonImages/buttonImages/yuguan.png</normaloff>:/buttonImages/buttonImages/yuguan.png</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -1267,22 +1238,6 @@
    <hints>
     <hint type="sourcelabel">
      <x>697</x>
-     <y>804</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>647</x>
-     <y>457</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>itemButton0_8</sender>
-   <signal>clicked()</signal>
-   <receiver>NamaExampleClass</receiver>
-   <slot>on_pushButtonConnect_clicked8()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>785</x>
      <y>804</y>
     </hint>
     <hint type="destinationlabel">

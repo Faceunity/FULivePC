@@ -1,5 +1,10 @@
 <RCC>
   <qresource prefix="/buttonImages">
+    <file>buttonImages/bluebird.png</file>
+    <file>buttonImages/fu_lm_koreaheart.png</file>
+    <file>buttonImages/hez_ztt_fu.png</file>
+    <file>buttonImages/huangya_Animoji.png</file>
+    <file>buttonImages/mask_tongliya.png</file>
     <file>buttonImages/houzi.png</file>
     <file>NamaExample.png</file>
     <file>buttonImages/bgseg.png</file>

@@ -6,15 +6,14 @@ extern const std::string g_fuDataDir;
 extern const std::string g_v3Data;
 
 const std::string g_propName[] = {	
-	"EatRabbi.bundle",
-	"bg_seg.bundle",
+	"item0204.bundle",
 	"fu_zh_duzui.bundle",
-	"yazui.bundle",	
-	"mask_matianyu.bundle",
-	"houzi5.bundle",
-	"Mood.bundle",
-	"gradient.bundle",
-	"yuguan.bundle"
+	"fu_lm_koreaheart.bundle",
+	"bluebird.bundle",	
+	"huangya_Animoji.bundle",
+	"hez_ztt_fu.bundle",
+	"mask_tongliya.bundle",
+	"gradient.bundle"
 };
 const int g_propCount = sizeof(g_propName) / sizeof(g_propName[0]);
 
