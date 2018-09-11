@@ -380,36 +380,35 @@ void Nama::ScissorFrameBuffer(std::tr1::shared_ptr<unsigned char> frame)
 
 std::tr1::shared_ptr<unsigned char> Nama::ConvertBetweenBGRAandRGBA(std::tr1::shared_ptr<unsigned char> frame)
 {
-	int size = m_frameWidth*m_frameHeight * 4;
-	auto temp_frame = std::tr1::shared_ptr<unsigned char>(new unsigned char[size]);
+	int size = m_frameWidth*m_frameHeight * 4;	
 	int offset = 0;
 	if (IsBadReadPtr(frame.get(), 4))//can't debug run
 	{
 		printf("The camera is usered by other programs！\n");
-		return temp_frame;
+		return frame;
 	}
-	auto output = temp_frame.get();
-	auto input = frame.get();
+	auto data = frame.get();
 	for (int i = 0; i < m_frameHeight; i++)
 	{
 		for (int j = 0; j < m_frameWidth; j++)
 		{
-			output[offset] = input[offset + 2];
-			output[offset + 1] = input[offset + 1];
-			output[offset + 2] = input[offset];
-			output[offset + 3] = input[offset + 3];
-
+			static unsigned char t;
+			t = data[offset];
+			data[offset] = data[offset + 2];			
+			data[offset + 2] = t;
+			
 			offset += 4;
 		}
 	}
 
-	return temp_frame;
+	return frame;
 }
 
 //渲染函数
 void Nama::RenderItems(std::tr1::shared_ptr<unsigned char> frame)
 {	
 	fuSetMaxFaces(m_maxFace);
+	frame = ConvertBetweenBGRAandRGBA(frame);
 	switch (m_mode)
 	{
 	case PROP:
@@ -417,18 +416,18 @@ void Nama::RenderItems(std::tr1::shared_ptr<unsigned char> frame)
 		{
 			int handle[3] = { m_beautyHandles, m_propHandles[m_curBundleIdx] ,m_fxaaHandles };
 			//支持的格式有FU_FORMAT_BGRA_BUFFER 、 FU_FORMAT_NV21_BUFFER 、FU_FORMAT_I420_BUFFER 、FU_FORMAT_RGBA_BUFFER		
-			fuRenderItemsEx2(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
+			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()),
 				m_frameWidth, m_frameHeight, m_frameID, handle, 3, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);			
 		}
 		else if (1 == m_isDrawProp && 0 == m_isBeautyOn)
 		{						
 			int handle[2] = { m_propHandles[m_curBundleIdx] ,m_fxaaHandles };
-			fuRenderItemsEx2(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
+			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()),
 				m_frameWidth, m_frameHeight, m_frameID, handle, 2, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);
 		}
 		else if (1 == m_isBeautyOn && 0 == m_isDrawProp)
 		{			
-			fuRenderItemsEx2(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
+			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()),
 				m_frameWidth, m_frameHeight, m_frameID, &m_beautyHandles, 1, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);
 		}		
 		break;
@@ -452,8 +451,8 @@ std::tr1::shared_ptr<unsigned char> Nama::RenderEx()
 {
 	std::tr1::shared_ptr<unsigned char> frame = m_cap->QueryFrame();
 
-	fuBeautifyImage(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
-		FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame.get()),
+	fuBeautifyImage(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()),
+		FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame.get()),
 		m_frameWidth, m_frameHeight, m_frameID, &m_beautyHandles, 1);
 
 	++m_frameID;
