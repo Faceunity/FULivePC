@@ -153,5 +153,5 @@ void GLWidget::setTextureData(std::tr1::shared_ptr<unsigned char> frame)
 void GLWidget::setLandMarksTextureData(std::tr1::shared_ptr<unsigned char> frame)
 {
 	glBindTexture(GL_TEXTURE_2D, landmarks_textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, wndWidth, wndHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, frame.get());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, wndWidth, wndHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, frame.get());
 }

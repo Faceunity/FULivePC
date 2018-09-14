@@ -595,7 +595,7 @@
                    <item>
                     <widget class="QLabel" name="label_4">
                      <property name="text">
-                      <string>美肤</string>
+                      <string>融合</string>
                      </property>
                     </widget>
                    </item>
