@@ -1,0 +1,344 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{66D1CC31-F976-4750-AB8D-F98D74D3B526}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>FULivePC</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)x86\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)ThridParty\DirectShow\Include</IncludePath>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)x86\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)ThridParty\DirectShow\Include</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty;$(SolutionDir)include;$(SolutionDir)ThridParty\opencv400\opencv\build\include</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile />
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\GL\x86;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty\DirectShow\Lib;$(SolutionDir)Win32;$(SolutionDir)ThridParty\opencv400\opencv\build\x86\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /s /y "$(SolutionDir)Win32\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty;$(SolutionDir)include;$(SolutionDir)ThridParty\opencv400\opencv\build\include</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile />
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\GL\x64;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty\DirectShow\Lib;$(SolutionDir)Win64;$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /s /y "$(SolutionDir)Win64\*.dll" "$(OutDir)"
+
+xcopy /s /y "$(SolutionDir)ThridParty\GL\x64\*.dll" "$(OutDir)"
+xcopy /s /y "$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\bin\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile />
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty;$(SolutionDir)include;$(SolutionDir)ThridParty\opencv400\opencv\build\include</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\GL\x86;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty\DirectShow\Lib;$(SolutionDir)Win32;$(SolutionDir)ThridParty\opencv400\opencv\build\x86\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /s /y "$(SolutionDir)Win64\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty;$(SolutionDir)include;$(SolutionDir)ThridParty\opencv400\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile />
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\GL\x64;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty\DirectShow\Lib;$(SolutionDir)Win64;$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /s /y "$(SolutionDir)Win64\*.dll" "$(OutDir)"
+
+xcopy /s /y "$(SolutionDir)ThridParty\GL\x64\*.dll" "$(OutDir)"
+xcopy /s /y "$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\bin\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\ThridParty\imgui\imconfig.h" />
+    <ClInclude Include="..\ThridParty\imgui\imgui.h" />
+    <ClInclude Include="..\ThridParty\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="..\ThridParty\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\ThridParty\imgui\imgui_internal.h" />
+    <ClInclude Include="..\ThridParty\imgui\imgui_tabs.h" />
+    <ClInclude Include="..\ThridParty\imgui\stb_rect_pack.h" />
+    <ClInclude Include="..\ThridParty\imgui\stb_textedit.h" />
+    <ClInclude Include="..\ThridParty\imgui\stb_truetype.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="GUI\Gui.h" />
+    <ClInclude Include="GUI\Loader.h" />
+    <ClInclude Include="GUI\Texture.h" />
+    <ClInclude Include="ipc\filtercommons.h" />
+    <ClInclude Include="ipc\ipcbridge.h" />
+    <ClInclude Include="ipc\mutex.h" />
+    <ClInclude Include="ipc\waitcondition.h" />
+    <ClInclude Include="Nama.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="rapidjson\rapidjson.h" />
+    <ClInclude Include="Sound\MP3.h" />
+    <ClInclude Include="UIBridge.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\ThridParty\imgui\gl3w.c" />
+    <ClCompile Include="..\ThridParty\imgui\imgui.cpp" />
+    <ClCompile Include="..\ThridParty\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\ThridParty\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\ThridParty\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\ThridParty\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\ThridParty\imgui\imgui_tabs.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FULivePC.cpp" />
+    <ClCompile Include="GUI\Gui.cpp" />
+    <ClCompile Include="GUI\Loader.cpp" />
+    <ClCompile Include="GUI\Texture.cpp" />
+    <ClCompile Include="ipc\ipcbridge.cpp" />
+    <ClCompile Include="ipc\mutex.cpp" />
+    <ClCompile Include="ipc\waitcondition.cpp" />
+    <ClCompile Include="Nama.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Sound\MP3.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\ThridParty\imgui\imgui.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\res\frame.png" />
+    <Image Include="..\res\frame0.png" />
+    <Image Include="..\res\FULIVEdemo.png" />
+    <Image Include="..\res\home_icon_Camera%402x.png" />
+    <Image Include="..\res\home_icon_Camera%403x.png" />
+    <Image Include="..\res\home_icon_Camera.png" />
+    <Image Include="..\res\icon_Leftkey%402x.png" />
+    <Image Include="..\res\icon_Leftkey%403x.png" />
+    <Image Include="..\res\icon_Leftkey.png" />
+    <Image Include="..\res\icon_Leftkey_sel.png" />
+    <Image Include="..\res\icon_Movebutton_nor.png" />
+    <Image Include="..\res\icon_Popup_hover.png" />
+    <Image Include="..\res\icon_Questionmark_hover.png" />
+    <Image Include="..\res\icon_Questionmark_nor.png" />
+    <Image Include="..\res\icon_Rightkey%402x.png" />
+    <Image Include="..\res\icon_Rightkey%403x.png" />
+    <Image Include="..\res\icon_Rightkey.png" />
+    <Image Include="..\res\icon_Rightkey_sel.png" />
+    <Image Include="..\res\list _iconBeautiful teeth_Close.png" />
+    <Image Include="..\res\list _icon_Bright eye_open.png" />
+    <Image Include="..\res\list _icon_Ruddy_open.png" />
+    <Image Include="..\res\list _icon_Skin whitening_open.png" />
+    <Image Include="..\res\list_iconBeautifulteeth_Close.png" />
+    <Image Include="..\res\list_iconBeautifulteeth_open.png" />
+    <Image Include="..\res\list_icon_annimoji_hover.png" />
+    <Image Include="..\res\list_icon_annimoji_nor.png" />
+    <Image Include="..\res\list_icon_AR_hover.png" />
+    <Image Include="..\res\list_icon_AR_nor.png" />
+    <Image Include="..\res\list_icon_BeautyMode_Close.png" />
+    <Image Include="..\res\list_icon_BeautyMode_open.png" />
+    <Image Include="..\res\list_icon_Bg segmentation_nor.png" />
+    <Image Include="..\res\list_icon_Bgsegmentation_hover.png" />
+    <Image Include="..\res\list_icon_Bgsegmentation_nor.png" />
+    <Image Include="..\res\list_icon_Bigeye_Close.png" />
+    <Image Include="..\res\list_icon_Bigeye_open.png" />
+    <Image Include="..\res\list_icon_Brighteye_Close.png" />
+    <Image Include="..\res\list_icon_Brighteye_open.png" />
+    <Image Include="..\res\list_icon_Change face_nor.png" />
+    <Image Include="..\res\list_icon_Changeface_hover.png" />
+    <Image Include="..\res\list_icon_Changeface_nor.png" />
+    <Image Include="..\res\list_icon_chin_Close.png" />
+    <Image Include="..\res\list_icon_chin_open.png" />
+    <Image Include="..\res\list_icon_Expression recognition_no.png" />
+    <Image Include="..\res\list_icon_Expressionrecognition_hover.png" />
+    <Image Include="..\res\list_icon_Expressionrecognition_no.png" />
+    <Image Include="..\res\list_icon_Facetype_open.png" />
+    <Image Include="..\res\list_icon_forehead_Close.png" />
+    <Image Include="..\res\list_icon_forehead_open.png" />
+    <Image Include="..\res\list_icon_gesture recognition_nor.png" />
+    <Image Include="..\res\list_icon_gesturerecognition_hover.png" />
+    <Image Include="..\res\list_icon_gesturerecognition_nor.png" />
+    <Image Include="..\res\list_icon_Grindingskin_Close.png" />
+    <Image Include="..\res\list_icon_Grindingskin_open.png" />
+    <Image Include="..\res\list_icon_Ha ha mirror_nor.png" />
+    <Image Include="..\res\list_icon_Hahamirror_hover.png" />
+    <Image Include="..\res\list_icon_Hahamirror_nor.png" />
+    <Image Include="..\res\list_icon_Mouthtype_Close.png" />
+    <Image Include="..\res\list_icon_Mouthtype_open.png" />
+    <Image Include="..\res\list_icon_Music filter_nor.png" />
+    <Image Include="..\res\list_icon_Musicfilter_hover.png" />
+    <Image Include="..\res\list_icon_Musicfilter_nor.png" />
+    <Image Include="..\res\list_icon_Portrait drive_nor.png" />
+    <Image Include="..\res\list_icon_Portraitdrive_hover.png" />
+    <Image Include="..\res\list_icon_Portraitdrive_nor.png" />
+    <Image Include="..\res\list_icon_Propmap_hover.png" />
+    <Image Include="..\res\list_icon_Propmap_nor.png" />
+    <Image Include="..\res\list_icon_Ruddy_Close.png" />
+    <Image Include="..\res\list_icon_Ruddy_open.png" />
+    <Image Include="..\res\list_icon_skinbeauty_Close.png" />
+    <Image Include="..\res\list_icon_skinbeauty_open.png" />
+    <Image Include="..\res\list_icon_Skinwhitening_Close.png" />
+    <Image Include="..\res\list_icon_Skinwhitening_open.png" />
+    <Image Include="..\res\list_icon_Thinface_Close.png" />
+    <Image Include="..\res\list_icon_Thinface_open.png" />
+    <Image Include="..\res\list_icon_Thinnose_Close.png" />
+    <Image Include="..\res\list_icon_Thinnose_open.png" />
+    <Image Include="..\res\list_image_danya.png" />
+    <Image Include="..\res\list_image_delta.png" />
+    <Image Include="..\res\list_image_fennen.png" />
+    <Image Include="..\res\list_image_hongrun.png" />
+    <Image Include="..\res\list_image_origin.png" />
+    <Image Include="..\res\list_image_Originalmap.png" />
+    <Image Include="..\res\list_image_qingxin.png" />
+    <Image Include="..\res\list_image_slowlived.png" />
+    <Image Include="..\res\list_image_tokyo.png" />
+    <Image Include="..\res\list_image_warm.png" />
+    <Image Include="..\res\LOGO.png" />
+    <Image Include="..\res\title.png" />
+    <Image Include="..\res\勾icon.png" />
+    <Image Include="..\res\叉-触光.png" />
+    <Image Include="..\res\圆角三角%402x.png" />
+    <Image Include="..\res\圆角三角%403x.png" />
+    <Image Include="..\res\圆角三角.png" />
+    <Image Include="..\res\摄像头 icon .png" />
+    <Image Include="..\res\椭圆 5.png" />
+    <Image Include="..\res\矩形-矩形.png" />
+    <Image Include="..\res\矩形10%402x.png" />
+    <Image Include="..\res\矩形10%403x.png" />
+    <Image Include="..\res\矩形10.png" />
+    <Image Include="..\res\窗口-触光 .png" />
+    <Image Include="..\res\选中btn%402x.png" />
+    <Image Include="..\res\选中btn%403x.png" />
+    <Image Include="..\res\选中btn.png" />
+    <Image Include="..\res\选择icon%402x.png" />
+    <Image Include="..\res\选择icon%403x.png" />
+    <Image Include="..\res\选择icon.png" />
+    <Image Include="..\res\镜像icon.png" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
