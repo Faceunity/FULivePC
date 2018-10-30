@@ -33,7 +33,7 @@ FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，�
 
 - [SDK]内部的API执行前要保证初始化好OpenGL环境，【确保】fuSetup等API调用时OpenGL context是可用的。
 
-- [Demo]为了演示SDK功能我们制作了Demo程序，界面绘制使用Qt5.31 vs2013 opengl版，下载:[x64](http://download.qt.io/archive/qt/5.3/5.3.1/qt-opensource-windows-x86-msvc2013_64_opengl-5.3.1.exe),[x86](http://download.qt.io/archive/qt/5.3/5.3.1/qt-opensource-windows-x86-msvc2013_opengl-5.3.1.exe)。该界面库有多个vs版本而且区分32位和64位，下载对应开发环境对应的版本才可正常编译。QT插件[下载](http://download.qt.io/archive/vsaddin/)
+- [Demo]为了演示SDK功能我们制作了Demo程序，界面绘制使用imgui。如果需要使用QT，可切换到dev_qt分支进行参考集成。
 注：SDK仅包含下述文件列表内容里的\*.dll,\*.lib和\*.h文件，它是不依赖任何界面库的，如需更换其他界面库如MFC或者不具备编译环境等，可选择不编译此Demo，直接参考代码将SDK的dll等[集成](#jump2)到您的新工程。
 ## 文件列表
   - funama.h 函数调用接口头文件
