@@ -7,16 +7,13 @@ FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，�
 [集成说明](#集成方法)
 [道具失效等问题](#faq)
 
-## SDK v5.6更新
+## SDK v5.7更新
 
 
 更新内容
 
-- 优化背景分割
-- animoji舌头功能
-- animoji物理动效优化模型
-- 降低cpu占用率
-- 优化跟踪抖动 
+- 新增海报换脸功能
+- 优化头发分割效果
 
 由于深度学习框架的升级，SDK的库文件从之前的 ~3M 增加到了 ~5M，如果不需要AI相关功能，可以下载[SDK lite版](https://github.com/Faceunity/FULivePC/releases)，lite版库是不含深度学习的，库文件大小和老版本保持一致。
 
