@@ -117,7 +117,8 @@ void CCameraDS::initCamera(int width, int height,int camID) {
 		{
 			if (!mCapture.isOpened())
 			{
-				mCapture.open(camID);
+				mCapture.open(cv::CAP_DSHOW+camID);
+				//mCapture.open(camID);
 				rs_width = width;
 				rs_height = height;
 				cv::Size maxRes = getCameraResolution();
