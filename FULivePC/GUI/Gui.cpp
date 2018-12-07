@@ -117,7 +117,7 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 #if __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-	/*GLFWwindow**/ window = glfwCreateWindow(width, height, "FU Live Demo PC", NULL, NULL);
+	/*GLFWwindow**/ window = glfwCreateWindow(width, height, "FU Live Demo PC V", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	hWindow = glfwGetWin32Window(window);
 	glfwSwapInterval(0); // Enable vsync
