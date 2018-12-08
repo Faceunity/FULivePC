@@ -147,7 +147,7 @@ xcopy /s /y "$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\bin\*.dll"
       <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\GL\x86;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty\DirectShow\Lib;$(SolutionDir)Win32;$(SolutionDir)ThridParty\opencv400\opencv\build\x86\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /s /y "$(SolutionDir)Win64\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /s /y "$(SolutionDir)Win32\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
