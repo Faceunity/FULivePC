@@ -313,6 +313,14 @@ void Nama::RenderItems(uchar* frame)
 		}		
 	}
 	//int handle[3] = { m_beautyHandles, UIBridge::m_curRenderItem ,m_fxaaHandles };
+	if (UIBridge::bundleCategory == Animoji)
+	{
+		fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 1);
+	}
+	else
+	{
+		fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 0);
+	}
 	int handle[] = { mBeautyHandles, UIBridge::m_curRenderItem };
 	int handleSize = sizeof(handle) / sizeof(handle[0]);
 	//支持的格式有FU_FORMAT_BGRA_BUFFER 、 FU_FORMAT_NV21_BUFFER 、FU_FORMAT_I420_BUFFER 、FU_FORMAT_RGBA_BUFFER		
