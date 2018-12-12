@@ -1,8 +1,14 @@
 
 #include "Gui.h"
 //#include "Config.h"	
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
+//#include <opencv2/highgui.hpp>
+//#include <opencv2/imgproc.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+#define u8(x)  UTEXT(x)
+
 #include "rapidjson\document.h"
 #include "rapidjson\filereadstream.h"
 int oriWindowWidth = 0;
@@ -117,7 +123,7 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 #if __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-	/*GLFWwindow**/ window = glfwCreateWindow(width, height, "FU Live Demo PC V", NULL, NULL);
+	/*GLFWwindow**/ window = glfwCreateWindow(width, height, "FU Live Demo PC V11", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	hWindow = glfwGetWin32Window(window);
 	glfwSwapInterval(0); // Enable vsync
@@ -275,10 +281,14 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 
 	if (GDocs[0].Name == NULL)
 	{
-		GDocs[0].Name = u8"美肤";
-		GDocs[1].Name = u8"美型";
-		GDocs[2].Name = u8"滤镜";
-		GDocs[3].Name = u8"风格";
+		//GDocs[0].Name = u8("美肤").c_str();
+		//GDocs[1].Name = u8("美型").c_str();
+		//GDocs[2].Name = u8("滤镜").c_str();
+		//GDocs[3].Name = u8("风格").c_str();
+		GDocs[0].Name = "skin";
+		GDocs[1].Name = "warp";
+		GDocs[2].Name = "filter";
+		GDocs[3].Name = "style";
 	}
 	ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 1.f));
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(120.f / 255.f, 136.f / 255.f, 234.f / 255.f, 1.f));
@@ -310,35 +320,35 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
 			if (UIBridge::mEnableSkinDect)
 			{
-				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_skinbeauty_open.png", false)->getTextureID(), u8"精准美肤");
+				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_skinbeauty_open.png", false)->getTextureID(), u8("精准美肤").c_str());
 			}
 			else
 			{
-				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_skinbeauty_Close.png", false)->getTextureID(), u8"精准美肤");
+				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_skinbeauty_Close.png", false)->getTextureID(), u8("精准美肤").c_str());
 			}
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
 			//ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
-			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"开启", UIBridge::mEnableSkinDect == 1))
+			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8("开启").c_str(), UIBridge::mEnableSkinDect == 1))
 			{
 				UIBridge::mEnableSkinDect = 1;
 				nama->UpdateBeauty();
 			}
 			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"关闭", UIBridge::mEnableSkinDect == 0))
+			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8("关闭").c_str(), UIBridge::mEnableSkinDect == 0))
 			{
 				UIBridge::mEnableSkinDect = 0;
 				nama->UpdateBeauty();
 			}
-			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_BeautyMode_open.png", false)->getTextureID(), u8"美肤模式");
+			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_BeautyMode_open.png", false)->getTextureID(), u8("美肤模式").c_str());
 			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"清晰磨皮##2", UIBridge::mEnableHeayBlur == 0))
+			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8("清晰磨皮##2").c_str(), UIBridge::mEnableHeayBlur == 0))
 			{
 				UIBridge::mEnableHeayBlur = 0;
 				nama->UpdateBeauty();
 			}
 			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"朦胧磨皮##2", UIBridge::mEnableHeayBlur == 1))
+			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8("朦胧磨皮##2").c_str(), UIBridge::mEnableHeayBlur == 1))
 			{
 				UIBridge::mEnableHeayBlur = 1;
 				nama->UpdateBeauty();
@@ -347,7 +357,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			//ImGui::PopStyleColor();
 			std::string sliderNameArr[10] = { "list_icon_Grindingskin_open","list_icon_Skinwhitening_open", "list_icon_Ruddy_open",
 				"list_icon_Brighteye_open","list_iconBeautifulteeth_open",
-				u8"   磨皮", u8"   美白",u8"   红润", u8"   亮眼", u8"   美牙" };
+				u8("   磨皮").c_str(), u8("   美白").c_str(),u8("   红润").c_str(), u8("   亮眼").c_str(), u8("   美牙").c_str() };
 
 			for (int i = 0; i < 5; i++)
 			{
@@ -373,7 +383,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
 			//ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
-			if (LayoutButton(ImVec2(145, 38), ImVec2(126, 40), u8"恢复默认"))
+			if (LayoutButton(ImVec2(145, 38), ImVec2(126, 40), u8("恢复默认").c_str()))
 			{
 				resetBeautyParam();
 				nama->UpdateBeauty();
@@ -391,9 +401,9 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));
 			//ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
-			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_Facetype_open.png", false)->getTextureID(), u8"   脸型");
+			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_Facetype_open.png", false)->getTextureID(), u8("   脸型").c_str());
 			ImGui::SameLine();
-			std::string faceTypeNameArr[5] = { u8"自定义" ,u8"默认" ,u8"女神",u8"网红" ,u8"自然" };
+			std::string faceTypeNameArr[5] = { u8("自定义").c_str() ,u8("默认").c_str() ,u8("女神").c_str(),u8("网红").c_str() ,u8("自然").c_str() };
 			int shapeHandle[5] = { 4,3,0,1,2 };
 			for (int i = 0; i < 5; i++)
 			{
@@ -407,7 +417,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			ImGui::Spacing();
 			std::string faceShapeIconNameArr[6] = { "list_icon_Thinface_open", "list_icon_Bigeye_open",
 				"list_icon_chin_open", "list_icon_forehead_open", "list_icon_Thinnose_open","list_icon_Mouthtype_open" };
-			std::string faceShapeNameArr[6] = { u8"   瘦脸" ,u8"   大眼" ,u8"   下巴",u8"   额头" ,u8"   瘦鼻",u8"   嘴型" };
+			std::string faceShapeNameArr[6] = { u8("   瘦脸").c_str() ,u8("   大眼").c_str() ,u8("   下巴").c_str(),u8("   额头").c_str() ,u8("   瘦鼻").c_str(),u8("   嘴型").c_str() };
 			for (int i = 0; i < 6; i++)
 			{
 				if (UIBridge::faceType != 0 && i > 1)
@@ -443,7 +453,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			}
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-			if (LayoutButton(ImVec2(145, 38), ImVec2(126, 40), u8"恢复默认"))
+			if (LayoutButton(ImVec2(145, 38), ImVec2(126, 40), u8("恢复默认").c_str()))
 			{
 				resetShapeParam();
 				nama->UpdateBeauty();
@@ -593,7 +603,7 @@ void Gui::render(Nama::UniquePtr& nama)
 			ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 76 * scaleRatioH), ImGuiCond_Always);
 			ImGui::Begin("Window1##2", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 			ImGui::Dummy(ImVec2(21 * scaleRatioW, 11 * scaleRatioH));
-			ImGui::Text(u8"选择摄像头:");
+			ImGui::Text(u8("选择摄像头:").c_str());
 
 			ImGui::SameLine();
 			if (nama->CameraList().size())
@@ -624,18 +634,18 @@ void Gui::render(Nama::UniquePtr& nama)
 			else
 			{
 				ImGui::PushItemWidth(244 * scaleRatioW);				
-				if(ImGui::BeginCombo("##slect camera122", u8"未检测到摄像头")) // The second parameter is the label previewed before opening the combo.				
+				if(ImGui::BeginCombo("##slect camera122", u8("未检测到摄像头").c_str())) // The second parameter is the label previewed before opening the combo.				
 					ImGui::EndCombo();				
 				ImGui::PopItemWidth();
 			}
 
 			ImGui::SameLine();
-			ImGui::Checkbox(u8"虚拟摄像头", &UIBridge::mNeedIpcWrite);
+			ImGui::Checkbox(u8("虚拟摄像头").c_str(), &UIBridge::mNeedIpcWrite);
 			ImGui::SameLine();
-			ShowHelpMarker(u8"勾选后会开启虚拟摄像头功能，详细可参见帮助文档里内容");
+			ShowHelpMarker(u8("勾选后会开启虚拟摄像头功能，详细可参见帮助文档里内容").c_str());
 			ImGui::SameLine(800 * scaleRatioW);
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
-			if (ImGui::Button(u8"打开帮助文档"))
+			if (ImGui::Button(u8("打开帮助文档").c_str()))
 			{
 				WinExec("notepad.exe ../../README.md", SW_SHOW);
 			}
@@ -654,9 +664,9 @@ void Gui::render(Nama::UniquePtr& nama)
 				std::string categoryNameArr[20] = {"list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_AR_nor", "list_icon_Changeface_nor",
 					"list_icon_Expressionrecognition_nor",	"list_icon_Musicfilter_nor","list_icon_Bgsegmentation_nor",
 					"list_icon_gesturerecognition_nor","list_icon_Hahamirror_nor","list_icon_Portraitdrive_nor",
-					"Animoji",u8"道具贴图",u8"AR面具",u8"  换脸",
-					u8"表情识别",u8"音乐滤镜",u8"背景分割",
-					u8"手势识别",u8" 哈哈镜",u8"人像驱动", };
+					"Animoji",u8("道具贴图").c_str(),u8("AR面具").c_str(),u8("  换脸").c_str(),
+					u8("表情识别").c_str(),u8("音乐滤镜").c_str(),u8("背景分割").c_str(),
+					u8("手势识别").c_str(),u8(" 哈哈镜").c_str(),u8("人像驱动").c_str(), };
 				for (int i=0;i<10;i++)
 				{
 					if (UIBridge::bundleCategory == i)
@@ -747,7 +757,7 @@ void Gui::render(Nama::UniquePtr& nama)
 				ImGui::TextColored(ImColor(255, 255, 255, 255), "Resolution:%d*%d", UIBridge::mResolutionWidth, UIBridge::mResolutionHeight);
 				ImGui::TextColored(ImColor(255, 255, 255, 255), "RenderTime:%dms", UIBridge::mRenderTime);
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .0f));
-				if (LayoutButton(ImVec2(100, 0), ImVec2(37, 24), u8"关闭"))
+				if (LayoutButton(ImVec2(100, 0), ImVec2(37, 24), u8("关闭").c_str()))
 				{
 					UIBridge::showDegubInfoWindow = false;
 				}
@@ -765,7 +775,7 @@ void Gui::render(Nama::UniquePtr& nama)
 				ImGui::SetNextWindowPos(ImVec2(26 * scaleRatioW, 172 * scaleRatioH), ImGuiCond_Always);
 				ImGui::SetNextWindowSize(ImVec2(120 * scaleRatioW, 40 * scaleRatioH), ImGuiCond_Always);
 				ImGui::Begin("debugInfo##23", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar /*| ImGuiWindowFlags_NoInputs*/);
-				if (LayoutButton(ImVec2(0, 0), ImVec2(100, 25), u8"显示性能参数"))
+				if (LayoutButton(ImVec2(0, 0), ImVec2(100, 25), u8("显示性能参数").c_str()))
 				{
 					UIBridge::showDegubInfoWindow = true;
 				}

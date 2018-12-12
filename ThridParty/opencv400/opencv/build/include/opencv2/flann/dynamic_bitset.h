@@ -57,14 +57,14 @@ namespace cvflann {
 class DynamicBitset
 {
 public:
-    /** default constructor
+    /** @param default constructor
      */
-    DynamicBitset() : size_(0)
+    DynamicBitset()
     {
     }
 
-    /** only constructor we use in our code
-     * @param sz the size of the bitset (in bits)
+    /** @param only constructor we use in our code
+     * @param the size of the bitset (in bits)
      */
     DynamicBitset(size_t sz)
     {
@@ -87,7 +87,7 @@ public:
         return bitset_.empty();
     }
 
-    /** set all the bits to 0
+    /** @param set all the bits to 0
      */
     void reset()
     {
@@ -95,7 +95,7 @@ public:
     }
 
     /** @brief set one bit to 0
-     * @param index
+     * @param
      */
     void reset(size_t index)
     {
@@ -106,15 +106,15 @@ public:
      * This function is useful when resetting a given set of bits so that the
      * whole bitset ends up being 0: if that's the case, we don't care about setting
      * other bits to 0
-     * @param index
+     * @param
      */
     void reset_block(size_t index)
     {
         bitset_[index / cell_bit_size_] = 0;
     }
 
-    /** resize the bitset so that it contains at least sz bits
-     * @param sz
+    /** @param resize the bitset so that it contains at least size bits
+     * @param size
      */
     void resize(size_t sz)
     {
@@ -122,7 +122,7 @@ public:
         bitset_.resize(sz / cell_bit_size_ + 1);
     }
 
-    /** set a bit to true
+    /** @param set a bit to true
      * @param index the index of the bit to set to 1
      */
     void set(size_t index)
@@ -130,14 +130,14 @@ public:
         bitset_[index / cell_bit_size_] |= size_t(1) << (index % cell_bit_size_);
     }
 
-    /** gives the number of contained bits
+    /** @param gives the number of contained bits
      */
     size_t size() const
     {
         return size_;
     }
 
-    /** check if a bit is set
+    /** @param check if a bit is set
      * @param index the index of the bit to check
      * @return true if the bit is set
      */

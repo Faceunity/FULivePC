@@ -40,10 +40,12 @@
 //
 //M*/
 
-#ifndef OPENCV_MINIFLANN_HPP
-#define OPENCV_MINIFLANN_HPP
+#ifndef _OPENCV_MINIFLANN_HPP_
+#define _OPENCV_MINIFLANN_HPP_
 
-#include "opencv2/core.hpp"
+#ifdef __cplusplus
+
+#include "opencv2/core/core.hpp"
 #include "opencv2/flann/defines.h"
 
 namespace cv
@@ -52,47 +54,28 @@ namespace cv
 namespace flann
 {
 
-enum FlannIndexType {
-    FLANN_INDEX_TYPE_8U = CV_8U,
-    FLANN_INDEX_TYPE_8S = CV_8S,
-    FLANN_INDEX_TYPE_16U = CV_16U,
-    FLANN_INDEX_TYPE_16S = CV_16S,
-    FLANN_INDEX_TYPE_32S = CV_32S,
-    FLANN_INDEX_TYPE_32F = CV_32F,
-    FLANN_INDEX_TYPE_64F = CV_64F,
-    FLANN_INDEX_TYPE_STRING,
-    FLANN_INDEX_TYPE_BOOL,
-    FLANN_INDEX_TYPE_ALGORITHM,
-    LAST_VALUE_FLANN_INDEX_TYPE = FLANN_INDEX_TYPE_ALGORITHM
-};
-
 struct CV_EXPORTS IndexParams
 {
     IndexParams();
     ~IndexParams();
 
-    String getString(const String& key, const String& defaultVal=String()) const;
-    int getInt(const String& key, int defaultVal=-1) const;
-    double getDouble(const String& key, double defaultVal=-1) const;
+    std::string getString(const std::string& key, const std::string& defaultVal=std::string()) const;
+    int getInt(const std::string& key, int defaultVal=-1) const;
+    double getDouble(const std::string& key, double defaultVal=-1) const;
 
-    void setString(const String& key, const String& value);
-    void setInt(const String& key, int value);
-    void setDouble(const String& key, double value);
-    void setFloat(const String& key, float value);
-    void setBool(const String& key, bool value);
+    void setString(const std::string& key, const std::string& value);
+    void setInt(const std::string& key, int value);
+    void setDouble(const std::string& key, double value);
+    void setFloat(const std::string& key, float value);
+    void setBool(const std::string& key, bool value);
     void setAlgorithm(int value);
 
-    // FIXIT: replace by void write(FileStorage& fs) const + read()
-    void getAll(std::vector<String>& names,
-                std::vector<FlannIndexType>& types,
-                std::vector<String>& strValues,
+    void getAll(std::vector<std::string>& names,
+                std::vector<int>& types,
+                std::vector<std::string>& strValues,
                 std::vector<double>& numValues) const;
 
     void* params;
-
-private:
-    IndexParams(const IndexParams &); // copy disabled
-    IndexParams& operator=(const IndexParams &); // assign disabled
 };
 
 struct CV_EXPORTS KDTreeIndexParams : public IndexParams
@@ -108,13 +91,13 @@ struct CV_EXPORTS LinearIndexParams : public IndexParams
 struct CV_EXPORTS CompositeIndexParams : public IndexParams
 {
     CompositeIndexParams(int trees = 4, int branching = 32, int iterations = 11,
-                         cvflann::flann_centers_init_t centers_init = cvflann::FLANN_CENTERS_RANDOM, float cb_index = 0.2f );
+                         cvflann::flann_centers_init_t centers_init = cvflann::FLANN_CENTERS_RANDOM, float cb_index = 0.2 );
 };
 
 struct CV_EXPORTS AutotunedIndexParams : public IndexParams
 {
-    AutotunedIndexParams(float target_precision = 0.8f, float build_weight = 0.01f,
-                         float memory_weight = 0, float sample_fraction = 0.1f);
+    AutotunedIndexParams(float target_precision = 0.8, float build_weight = 0.01,
+                         float memory_weight = 0, float sample_fraction = 0.1);
 };
 
 struct CV_EXPORTS HierarchicalClusteringIndexParams : public IndexParams
@@ -126,7 +109,7 @@ struct CV_EXPORTS HierarchicalClusteringIndexParams : public IndexParams
 struct CV_EXPORTS KMeansIndexParams : public IndexParams
 {
     KMeansIndexParams(int branching = 32, int iterations = 11,
-                      cvflann::flann_centers_init_t centers_init = cvflann::FLANN_CENTERS_RANDOM, float cb_index = 0.2f );
+                      cvflann::flann_centers_init_t centers_init = cvflann::FLANN_CENTERS_RANDOM, float cb_index = 0.2 );
 };
 
 struct CV_EXPORTS LshIndexParams : public IndexParams
@@ -136,7 +119,7 @@ struct CV_EXPORTS LshIndexParams : public IndexParams
 
 struct CV_EXPORTS SavedIndexParams : public IndexParams
 {
-    SavedIndexParams(const String& filename);
+    SavedIndexParams(const std::string& filename);
 };
 
 struct CV_EXPORTS SearchParams : public IndexParams
@@ -159,8 +142,8 @@ public:
                              OutputArray dists, double radius, int maxResults,
                              const SearchParams& params=SearchParams());
 
-    CV_WRAP virtual void save(const String& filename) const;
-    CV_WRAP virtual bool load(InputArray features, const String& filename);
+    CV_WRAP virtual void save(const std::string& filename) const;
+    CV_WRAP virtual bool load(InputArray features, const std::string& filename);
     CV_WRAP virtual void release();
     CV_WRAP cvflann::flann_distance_t getDistance() const;
     CV_WRAP cvflann::flann_algorithm_t getAlgorithm() const;
@@ -173,5 +156,7 @@ protected:
 };
 
 } } // namespace cv::flann
+
+#endif // __cplusplus
 
 #endif

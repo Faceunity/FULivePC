@@ -49,24 +49,65 @@ namespace IPC {
 
             static inline const std::vector<VideoFormat> &formats()
             {
-                static const std::vector<VideoFormat> videoFormats = {
-                    // RGB formats
-                    {MAKEFOURCC('R', 'G', 'B', '4'), MEDIASUBTYPE_RGB32, 32},
-                    {MAKEFOURCC('R', 'G', 'B', '3'), MEDIASUBTYPE_RGB24, 24},
-                    {MAKEFOURCC('R', 'G', 'B', 'P'), MEDIASUBTYPE_RGB565, 16},
-                    {MAKEFOURCC('R', 'G', 'B', 'O'), MEDIASUBTYPE_RGB555, 16},
+				static const std::vector<VideoFormat> videoFormats;
+		/*		static VideoFormat v[11];
+				v[0].fourcc = MAKEFOURCC('R', 'G', 'B', '4');
+				v[0].guid = MEDIASUBTYPE_RGB32;
+				v[0].bpp = 32;
+				v[1].fourcc = MAKEFOURCC('R', 'G', 'B', '3');
+				v[1].guid = MEDIASUBTYPE_RGB24;
+				v[1].bpp = 24;
+				v[2].fourcc =MAKEFOURCC('R', 'G', 'B', 'P');
+				v[2].guid = MEDIASUBTYPE_RGB565;
+				v[2].bpp = 16;
+				v[3].fourcc = MAKEFOURCC('R', 'G', 'B', 'O');
+				v[3].guid = MEDIASUBTYPE_RGB555;
+				v[3].bpp = 16;
 
-                    // Luminance+Chrominance formats
-                    {MAKEFOURCC('U', 'Y', 'V', 'Y'), MEDIASUBTYPE_UYVY, 16},
-                    {MAKEFOURCC('Y', 'U', 'Y', '2'), MEDIASUBTYPE_YUY2, 16},
-                    {MAKEFOURCC('Y', 'U', 'Y', 'V'), MEDIASUBTYPE_YUYV, 16},
-                    {MAKEFOURCC('Y', 'V', '1', '2'), MEDIASUBTYPE_YV12, 12},
-                    {MAKEFOURCC('I', '4', '2', '0'), MEDIASUBTYPE_IYUV, 12},
-                    {MAKEFOURCC('I', 'Y', 'U', 'V'), MEDIASUBTYPE_IYUV, 12},
+				v[4].fourcc = MAKEFOURCC('U', 'Y', 'V', 'Y');
+				v[4].guid = MEDIASUBTYPE_UYVY;
+				v[4].bpp = 16;
+				v[5].fourcc = MAKEFOURCC('Y', 'U', 'Y', '2');
+				v[5].guid = MEDIASUBTYPE_YUY2;
+				v[5].bpp = 16;
+				v[6].fourcc = MAKEFOURCC('Y', 'U', 'Y', 'V');
+				v[6].guid = MEDIASUBTYPE_YUYV;
+				v[6].bpp = 16;
+				v[7].fourcc = MAKEFOURCC('Y', 'V', '1', '2');
+				v[7].guid = MEDIASUBTYPE_YV12;
+				v[7].bpp = 12;
+				v[8].fourcc = MAKEFOURCC('I', '4', '2', '0');
+				v[8].guid = MEDIASUBTYPE_IYUV;
+				v[8].bpp = 12;
+				v[9].fourcc = MAKEFOURCC('I', 'Y', 'U', 'V');
+				v[9].guid = MEDIASUBTYPE_IYUV;
+				v[9].bpp = 12;
+				v[10].fourcc = MAKEFOURCC('N', 'V', '1', '2');
+				v[10].guid = MEDIASUBTYPE_NV12;
+				v[10].bpp = 12;
+				for (int i = 0; i < 11; i++)
+				{
+					videoFormats.push_back(v[i]);
+				}*/
+				
+                //static const std::vector<VideoFormat> videoFormats = {
+                //    // RGB formats
+                //    {MAKEFOURCC('R', 'G', 'B', '4'), MEDIASUBTYPE_RGB32, 32},
+                //    {MAKEFOURCC('R', 'G', 'B', '3'), MEDIASUBTYPE_RGB24, 24},
+                //    {MAKEFOURCC('R', 'G', 'B', 'P'), MEDIASUBTYPE_RGB565, 16},
+                //    {MAKEFOURCC('R', 'G', 'B', 'O'), MEDIASUBTYPE_RGB555, 16},
 
-                    // two planes -- one Y, one Cr + Cb interleaved
-                    {MAKEFOURCC('N', 'V', '1', '2'), MEDIASUBTYPE_NV12, 12},
-                };
+                //    // Luminance+Chrominance formats
+                //    {MAKEFOURCC('U', 'Y', 'V', 'Y'), MEDIASUBTYPE_UYVY, 16},
+                //    {MAKEFOURCC('Y', 'U', 'Y', '2'), MEDIASUBTYPE_YUY2, 16},
+                //    {MAKEFOURCC('Y', 'U', 'Y', 'V'), MEDIASUBTYPE_YUYV, 16},
+                //    {MAKEFOURCC('Y', 'V', '1', '2'), MEDIASUBTYPE_YV12, 12},
+                //    {MAKEFOURCC('I', '4', '2', '0'), MEDIASUBTYPE_IYUV, 12},
+                //    {MAKEFOURCC('I', 'Y', 'U', 'V'), MEDIASUBTYPE_IYUV, 12},
+
+                //    // two planes -- one Y, one Cr + Cb interleaved
+                //    {MAKEFOURCC('N', 'V', '1', '2'), MEDIASUBTYPE_NV12, 12},
+                //};
 
                 return videoFormats;
             }

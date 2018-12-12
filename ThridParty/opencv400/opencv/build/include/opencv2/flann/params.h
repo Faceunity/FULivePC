@@ -39,7 +39,7 @@
 namespace cvflann
 {
 
-typedef std::map<cv::String, any> IndexParams;
+typedef std::map<std::string, any> IndexParams;
 
 struct SearchParams : public IndexParams
 {
@@ -56,7 +56,7 @@ struct SearchParams : public IndexParams
 
 
 template<typename T>
-T get_param(const IndexParams& params, cv::String name, const T& default_value)
+T get_param(const IndexParams& params, std::string name, const T& default_value)
 {
     IndexParams::const_iterator it = params.find(name);
     if (it != params.end()) {
@@ -68,30 +68,27 @@ T get_param(const IndexParams& params, cv::String name, const T& default_value)
 }
 
 template<typename T>
-T get_param(const IndexParams& params, cv::String name)
+T get_param(const IndexParams& params, std::string name)
 {
     IndexParams::const_iterator it = params.find(name);
     if (it != params.end()) {
         return it->second.cast<T>();
     }
     else {
-        throw FLANNException(cv::String("Missing parameter '")+name+cv::String("' in the parameters given"));
-    }
-}
-
-inline void print_params(const IndexParams& params, std::ostream& stream)
-{
-    IndexParams::const_iterator it;
-
-    for(it=params.begin(); it!=params.end(); ++it) {
-        stream << it->first << " : " << it->second << std::endl;
+        throw FLANNException(std::string("Missing parameter '")+name+std::string("' in the parameters given"));
     }
 }
 
 inline void print_params(const IndexParams& params)
 {
-    print_params(params, std::cout);
+    IndexParams::const_iterator it;
+
+    for(it=params.begin(); it!=params.end(); ++it) {
+        std::cout << it->first << " : " << it->second << std::endl;
+    }
 }
+
+
 
 }
 

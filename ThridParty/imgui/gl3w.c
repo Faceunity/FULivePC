@@ -4,6 +4,7 @@
 #pragma warning (disable: 4055) // warning C4055: 'type cast' : from data pointer 'void *' to function pointer
 #pragma warning (disable: 4152) // warning C4152: nonstandard extension, function/data pointer conversion in expression
 #pragma  comment(lib,"opengl32.lib")
+//#pragma comment(lib,"legacy_stdio_definitions.lib")
 #pragma  comment(lib,"glfw3.lib")
 #endif
 

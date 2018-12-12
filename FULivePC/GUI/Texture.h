@@ -33,16 +33,18 @@ class Bitmap
 		}
 	}
 public:
-	Bitmap() = default;
-	uint8_t* mpData = nullptr;
-	uint32_t mWidth = 0;
-	uint32_t mHeight = 0;
+	Bitmap(){};
+	uint8_t* mpData;
+	uint32_t mWidth;
+	uint32_t mHeight;
 };
 
 class Texture
 {
 public:
-	using SharedPtr = std::shared_ptr<Texture>;
+	//using SharedPtr = std::shared_ptr<Texture>;
+//#define SharedPtr std::shared_ptr<Texture>
+	typedef std::shared_ptr<Texture> SharedPtr;
 
 	void create(uint32_t width, uint32_t height, unsigned char* pixels);
 
@@ -67,7 +69,7 @@ public:
 	
 protected:
 private:
-	Texture() = default;
+	Texture(){};
 	GLuint mTextureID;
 	unsigned char* pixels;
 	static std::map<std::string, SharedPtr> mTextureMap;

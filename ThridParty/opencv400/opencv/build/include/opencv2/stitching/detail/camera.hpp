@@ -40,26 +40,19 @@
 //
 //M*/
 
-#ifndef OPENCV_STITCHING_CAMERA_HPP
-#define OPENCV_STITCHING_CAMERA_HPP
+#ifndef __OPENCV_STITCHING_CAMERA_HPP__
+#define __OPENCV_STITCHING_CAMERA_HPP__
 
-#include "opencv2/core.hpp"
+#include "opencv2/core/core.hpp"
 
 namespace cv {
 namespace detail {
 
-//! @addtogroup stitching
-//! @{
-
-/** @brief Describes camera parameters.
-
-@note Translation is assumed to be zero during the whole stitching pipeline. :
- */
 struct CV_EXPORTS CameraParams
 {
     CameraParams();
     CameraParams(const CameraParams& other);
-    CameraParams& operator =(const CameraParams& other);
+    const CameraParams& operator =(const CameraParams& other);
     Mat K() const;
 
     double focal; // Focal length
@@ -70,9 +63,7 @@ struct CV_EXPORTS CameraParams
     Mat t; // Translation
 };
 
-//! @}
-
 } // namespace detail
 } // namespace cv
 
-#endif // #ifndef OPENCV_STITCHING_CAMERA_HPP
+#endif // #ifndef __OPENCV_STITCHING_CAMERA_HPP__

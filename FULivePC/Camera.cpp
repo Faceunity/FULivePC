@@ -55,10 +55,10 @@ DWORD WINAPI TL_FRAME(LPVOID lpParamter)
 
 cv::Size CCameraDS::getCameraResolution()
 {
-	mCapture.set(cv::CAP_PROP_FRAME_WIDTH, 10000);
-	mCapture.set(cv::CAP_PROP_FRAME_HEIGHT, 10000);
-	int w = (int)mCapture.get(cv::CAP_PROP_FRAME_WIDTH);
-	int h = (int)mCapture.get(cv::CAP_PROP_FRAME_HEIGHT);
+	mCapture.set(CV_CAP_PROP_FRAME_WIDTH, 10000);
+	mCapture.set(CV_CAP_PROP_FRAME_HEIGHT, 10000);
+	int w = (int)mCapture.get(CV_CAP_PROP_FRAME_WIDTH);
+	int h = (int)mCapture.get(CV_CAP_PROP_FRAME_HEIGHT);
 	return cv::Size(w, h);
 }
 
@@ -117,7 +117,7 @@ void CCameraDS::initCamera(int width, int height,int camID) {
 		{
 			if (!mCapture.isOpened())
 			{
-				mCapture.open(cv::CAP_DSHOW+camID);
+				mCapture.open(CV_CAP_DSHOW+camID);
 				//mCapture.open(camID);
 				rs_width = width;
 				rs_height = height;
@@ -126,19 +126,19 @@ void CCameraDS::initCamera(int width, int height,int camID) {
 
 				if (maxRes.width < neededRes.width) {
 					double aR = (double)maxRes.width / maxRes.height;
-					mCapture.set(cv::CAP_PROP_FRAME_WIDTH, neededRes.width);
-					mCapture.set(cv::CAP_PROP_FRAME_HEIGHT, neededRes.width / aR);
+					mCapture.set(CV_CAP_PROP_FRAME_WIDTH, neededRes.width);
+					mCapture.set(CV_CAP_PROP_FRAME_HEIGHT, neededRes.width / aR);
 				}
 				else if (maxRes.height < neededRes.height) {
 					double aR = (double)maxRes.width / maxRes.height;
-					mCapture.set(cv::CAP_PROP_FRAME_HEIGHT, neededRes.height);
-					mCapture.set(cv::CAP_PROP_FRAME_WIDTH, neededRes.height*aR);
+					mCapture.set(CV_CAP_PROP_FRAME_HEIGHT, neededRes.height);
+					mCapture.set(CV_CAP_PROP_FRAME_WIDTH, neededRes.height*aR);
 				}
 				else {
-					mCapture.set(cv::CAP_PROP_FRAME_HEIGHT, neededRes.height);
-					mCapture.set(cv::CAP_PROP_FRAME_WIDTH, neededRes.width);
+					mCapture.set(CV_CAP_PROP_FRAME_HEIGHT, neededRes.height);
+					mCapture.set(CV_CAP_PROP_FRAME_WIDTH, neededRes.width);
 				}
-				mCapture.set(cv::CAP_PROP_AUTOFOCUS, 0);
+				//mCapture.set(CV_CAP_PROP_AUTOFOCUS, 0);
 				if (!mCapture.isOpened())
 					throw std::runtime_error("Unable to open video source");
 			}
@@ -174,8 +174,8 @@ void CCameraDS::connectCamera()
 		if (m_capture_type == CAPTURE_FILE)
 		{
 			
-			fps = mCapture.get(cv::CAP_PROP_FPS);   //读取视频的帧率
-			frameCount = mCapture.get(cv::CAP_PROP_FRAME_COUNT);;
+			fps = mCapture.get(CV_CAP_PROP_FPS);   //读取视频的帧率
+			frameCount = mCapture.get(CV_CAP_PROP_FRAME_COUNT);;
 			int vfps = 1000 / fps;                                        //计算每帧播放的时间
 		}
 		else

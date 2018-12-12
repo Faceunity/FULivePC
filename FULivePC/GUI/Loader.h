@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <vector>
+typedef int int32_t;
+typedef int int64_t;
 
 static class Loader
 {

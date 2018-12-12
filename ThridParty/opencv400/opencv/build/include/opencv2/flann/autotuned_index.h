@@ -30,8 +30,6 @@
 #ifndef OPENCV_FLANN_AUTOTUNED_INDEX_H_
 #define OPENCV_FLANN_AUTOTUNED_INDEX_H_
 
-#include <sstream>
-
 #include "general.h"
 #include "nn_index.h"
 #include "ground_truth.h"
@@ -83,7 +81,6 @@ public:
         memory_weight_ = get_param(params, "memory_weight", 0.0f);
         sample_fraction_ = get_param(params,"sample_fraction", 0.1f);
         bestIndex_ = NULL;
-        speedup_ = 0;
     }
 
     AutotunedIndex(const AutotunedIndex&);
@@ -100,31 +97,27 @@ public:
     /**
      *          Method responsible with building the index.
      */
-    virtual void buildIndex() CV_OVERRIDE
+    virtual void buildIndex()
     {
-        std::ostringstream stream;
         bestParams_ = estimateBuildParams();
-        print_params(bestParams_, stream);
         Logger::info("----------------------------------------------------\n");
         Logger::info("Autotuned parameters:\n");
-        Logger::info("%s", stream.str().c_str());
+        print_params(bestParams_);
         Logger::info("----------------------------------------------------\n");
 
         bestIndex_ = create_index_by_type(dataset_, bestParams_, distance_);
         bestIndex_->buildIndex();
         speedup_ = estimateSearchParams(bestSearchParams_);
-        stream.str(std::string());
-        print_params(bestSearchParams_, stream);
         Logger::info("----------------------------------------------------\n");
         Logger::info("Search parameters:\n");
-        Logger::info("%s", stream.str().c_str());
+        print_params(bestSearchParams_);
         Logger::info("----------------------------------------------------\n");
     }
 
     /**
      *  Saves the index to a stream
      */
-    virtual void saveIndex(FILE* stream) CV_OVERRIDE
+    virtual void saveIndex(FILE* stream)
     {
         save_value(stream, (int)bestIndex_->getType());
         bestIndex_->saveIndex(stream);
@@ -134,7 +127,7 @@ public:
     /**
      *  Loads the index from a stream
      */
-    virtual void loadIndex(FILE* stream) CV_OVERRIDE
+    virtual void loadIndex(FILE* stream)
     {
         int index_type;
 
@@ -151,7 +144,7 @@ public:
     /**
      *      Method that searches for nearest-neighbors
      */
-    virtual void findNeighbors(ResultSet<DistanceType>& result, const ElementType* vec, const SearchParams& searchParams) CV_OVERRIDE
+    virtual void findNeighbors(ResultSet<DistanceType>& result, const ElementType* vec, const SearchParams& searchParams)
     {
         int checks = get_param<int>(searchParams,"checks",FLANN_CHECKS_AUTOTUNED);
         if (checks == FLANN_CHECKS_AUTOTUNED) {
@@ -163,7 +156,7 @@ public:
     }
 
 
-    IndexParams getParameters() const CV_OVERRIDE
+    IndexParams getParameters() const
     {
         return bestIndex_->getParameters();
     }
@@ -182,7 +175,7 @@ public:
     /**
      *      Number of features in this index.
      */
-    virtual size_t size() const CV_OVERRIDE
+    virtual size_t size() const
     {
         return bestIndex_->size();
     }
@@ -190,7 +183,7 @@ public:
     /**
      *  The length of each vector in this index.
      */
-    virtual size_t veclen() const CV_OVERRIDE
+    virtual size_t veclen() const
     {
         return bestIndex_->veclen();
     }
@@ -198,7 +191,7 @@ public:
     /**
      * The amount of memory (in bytes) this index uses.
      */
-    virtual int usedMemory() const CV_OVERRIDE
+    virtual int usedMemory() const
     {
         return bestIndex_->usedMemory();
     }
@@ -206,7 +199,7 @@ public:
     /**
      * Algorithm name
      */
-    virtual flann_algorithm_t getType() const CV_OVERRIDE
+    virtual flann_algorithm_t getType() const
     {
         return FLANN_INDEX_AUTOTUNED;
     }
@@ -277,7 +270,7 @@ private:
     //    struct KMeansSimpleDownhillFunctor {
     //
     //        Autotune& autotuner;
-    //        KMeansSimpleDownhillFunctor(Autotune& autotuner_) : autotuner(autotuner_) {}
+    //        KMeansSimpleDownhillFunctor(Autotune& autotuner_) : autotuner(autotuner_) {};
     //
     //        float operator()(int* params) {
     //
@@ -302,7 +295,7 @@ private:
     //    struct KDTreeSimpleDownhillFunctor {
     //
     //        Autotune& autotuner;
-    //        KDTreeSimpleDownhillFunctor(Autotune& autotuner_) : autotuner(autotuner_) {}
+    //        KDTreeSimpleDownhillFunctor(Autotune& autotuner_) : autotuner(autotuner_) {};
     //
     //        float operator()(int* params) {
     //            float maxFloat = numeric_limits<float>::max();
@@ -380,7 +373,6 @@ private:
         // evaluate kdtree for all parameter combinations
         for (size_t i = 0; i < FLANN_ARRAY_LEN(testTrees); ++i) {
             CostData cost;
-            cost.params["algorithm"] = FLANN_INDEX_KDTREE;
             cost.params["trees"] = testTrees[i];
 
             evaluate_kdtree(cost);

@@ -32,6 +32,7 @@
 #define OPENCV_FLANN_BASE_HPP_
 
 #include <vector>
+#include <string>
 #include <cassert>
 #include <cstdio>
 
@@ -61,7 +62,7 @@ inline void log_verbosity(int level)
  */
 struct SavedIndexParams : public IndexParams
 {
-    SavedIndexParams(cv::String filename)
+    SavedIndexParams(std::string filename)
     {
         (* this)["algorithm"] = FLANN_INDEX_SAVED;
         (*this)["filename"] = filename;
@@ -70,7 +71,7 @@ struct SavedIndexParams : public IndexParams
 
 
 template<typename Distance>
-NNIndex<Distance>* load_saved_index(const Matrix<typename Distance::ElementType>& dataset, const cv::String& filename, Distance distance)
+NNIndex<Distance>* load_saved_index(const Matrix<typename Distance::ElementType>& dataset, const std::string& filename, Distance distance)
 {
     typedef typename Distance::ElementType ElementType;
 
@@ -80,11 +81,9 @@ NNIndex<Distance>* load_saved_index(const Matrix<typename Distance::ElementType>
     }
     IndexHeader header = load_header(fin);
     if (header.data_type != Datatype<ElementType>::type()) {
-        fclose(fin);
         throw FLANNException("Datatype of saved index is different than of the one to be created.");
     }
     if ((size_t(header.rows) != dataset.rows)||(size_t(header.cols) != dataset.cols)) {
-        fclose(fin);
         throw FLANNException("The index saved belongs to a different dataset");
     }
 
@@ -112,7 +111,7 @@ public:
         loaded_ = false;
 
         if (index_type == FLANN_INDEX_SAVED) {
-            nnIndex_ = load_saved_index<Distance>(features, get_param<cv::String>(params,"filename"), distance);
+            nnIndex_ = load_saved_index<Distance>(features, get_param<std::string>(params,"filename"), distance);
             loaded_ = true;
         }
         else {
@@ -128,14 +127,14 @@ public:
     /**
      * Builds the index.
      */
-    void buildIndex() CV_OVERRIDE
+    void buildIndex()
     {
         if (!loaded_) {
             nnIndex_->buildIndex();
         }
     }
 
-    void save(cv::String filename)
+    void save(std::string filename)
     {
         FILE* fout = fopen(filename.c_str(), "wb");
         if (fout == NULL) {
@@ -150,7 +149,7 @@ public:
      * \brief Saves the index to a stream
      * \param stream The stream to save the index to
      */
-    virtual void saveIndex(FILE* stream) CV_OVERRIDE
+    virtual void saveIndex(FILE* stream)
     {
         nnIndex_->saveIndex(stream);
     }
@@ -159,7 +158,7 @@ public:
      * \brief Loads the index from a stream
      * \param stream The stream from which the index is loaded
      */
-    virtual void loadIndex(FILE* stream) CV_OVERRIDE
+    virtual void loadIndex(FILE* stream)
     {
         nnIndex_->loadIndex(stream);
     }
@@ -167,7 +166,7 @@ public:
     /**
      * \returns number of features in this index.
      */
-    size_t veclen() const CV_OVERRIDE
+    size_t veclen() const
     {
         return nnIndex_->veclen();
     }
@@ -175,7 +174,7 @@ public:
     /**
      * \returns The dimensionality of the features in this index.
      */
-    size_t size() const CV_OVERRIDE
+    size_t size() const
     {
         return nnIndex_->size();
     }
@@ -183,7 +182,7 @@ public:
     /**
      * \returns The index type (kdtree, kmeans,...)
      */
-    flann_algorithm_t getType() const CV_OVERRIDE
+    flann_algorithm_t getType() const
     {
         return nnIndex_->getType();
     }
@@ -191,7 +190,7 @@ public:
     /**
      * \returns The amount of memory (in bytes) used by the index.
      */
-    virtual int usedMemory() const CV_OVERRIDE
+    virtual int usedMemory() const
     {
         return nnIndex_->usedMemory();
     }
@@ -200,7 +199,7 @@ public:
     /**
      * \returns The index parameters
      */
-    IndexParams getParameters() const CV_OVERRIDE
+    IndexParams getParameters() const
     {
         return nnIndex_->getParameters();
     }
@@ -213,7 +212,7 @@ public:
      * \param[in] knn Number of nearest neighbors to return
      * \param[in] params Search parameters
      */
-    void knnSearch(const Matrix<ElementType>& queries, Matrix<int>& indices, Matrix<DistanceType>& dists, int knn, const SearchParams& params) CV_OVERRIDE
+    void knnSearch(const Matrix<ElementType>& queries, Matrix<int>& indices, Matrix<DistanceType>& dists, int knn, const SearchParams& params)
     {
         nnIndex_->knnSearch(queries, indices, dists, knn, params);
     }
@@ -227,7 +226,7 @@ public:
      * \param[in] params Search parameters
      * \returns Number of neighbors found
      */
-    int radiusSearch(const Matrix<ElementType>& query, Matrix<int>& indices, Matrix<DistanceType>& dists, float radius, const SearchParams& params) CV_OVERRIDE
+    int radiusSearch(const Matrix<ElementType>& query, Matrix<int>& indices, Matrix<DistanceType>& dists, float radius, const SearchParams& params)
     {
         return nnIndex_->radiusSearch(query, indices, dists, radius, params);
     }
@@ -235,7 +234,7 @@ public:
     /**
      * \brief Method that searches for nearest-neighbours
      */
-    void findNeighbors(ResultSet<DistanceType>& result, const ElementType* vec, const SearchParams& searchParams) CV_OVERRIDE
+    void findNeighbors(ResultSet<DistanceType>& result, const ElementType* vec, const SearchParams& searchParams)
     {
         nnIndex_->findNeighbors(result, vec, searchParams);
     }
@@ -243,7 +242,7 @@ public:
     /**
      * \brief Returns actual index
      */
-    CV_DEPRECATED NNIndex<Distance>* getIndex()
+    FLANN_DEPRECATED NNIndex<Distance>* getIndex()
     {
         return nnIndex_;
     }
@@ -252,7 +251,7 @@ public:
      * \brief Returns index parameters.
      * \deprecated use getParameters() instead.
      */
-    CV_DEPRECATED  const IndexParams* getIndexParameters()
+    FLANN_DEPRECATED  const IndexParams* getIndexParameters()
     {
         return &index_params_;
     }
@@ -264,9 +263,6 @@ private:
     bool loaded_;
     /** Parameters passed to the index */
     IndexParams index_params_;
-
-    Index(const Index &); // copy disabled
-    Index& operator=(const Index &); // assign disabled
 };
 
 /**

@@ -7,7 +7,8 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
-#include <opencv2/highgui.hpp>
+//#include <opencv2/highgui.hpp>
+#include<opencv2/opencv.hpp>
 class CCameraDS;
 typedef unsigned char uchar;
 namespace NamaExampleNameSpace
@@ -15,7 +16,9 @@ namespace NamaExampleNameSpace
 	class Nama
 	{		
 	public:
-		using UniquePtr = std::unique_ptr<Nama>;
+		//using UniquePtr = std::unique_ptr<Nama>;
+//#define UniquePtr std::unique_ptr<Nama>
+		typedef std::unique_ptr<Nama> UniquePtr;
 		static UniquePtr create(uint32_t width, uint32_t height);
 
 		Nama();

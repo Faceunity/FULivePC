@@ -1,9 +1,13 @@
 #pragma once
 
 #include <stack>
-#include <opencv2/core.hpp>
+//#include <opencv2/core.hpp>
 #include <opencv2/opencv.hpp>
-#include <opencv2/highgui.hpp>
+//#include <opencv2/highgui.hpp>
+//#include<opencv2/opencv.hpp>
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 #include <dshow.h>
 #include <locale>
@@ -11,9 +15,13 @@
 
 #pragma comment(lib,"Strmiids.lib")
 #ifdef _DEBUG
-#pragma comment(lib,"opencv_world400d.lib")
+#pragma comment(lib,"opencv_core249d.lib")
+#pragma comment(lib,"opencv_highgui249d.lib")
+#pragma comment(lib,"opencv_imgproc249d.lib")
 #else
-#pragma comment(lib,"opencv_world400.lib")
+#pragma comment(lib,"opencv_core249.lib")
+#pragma comment(lib,"opencv_highgui249.lib")
+#pragma comment(lib,"opencv_imgproc249.lib")
 #endif // DEBUG
 
 
@@ -84,7 +92,7 @@ private:
 	
 	std::string m_filepath;
 	PlayStatus status;
-	bool m_isCameraInited = false;
+	bool m_isCameraInited;
 	int m_capture_type;
 	int m_capture_camera_id;
 	int frame_id;
