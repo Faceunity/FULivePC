@@ -3,7 +3,7 @@
 #define CONFIG_H
 
 #include <string>
-#define  MAX_NAMA_BUNDLE_NUM 5
+#define  MAX_NAMA_BUNDLE_NUM 1
 extern const std::string g_fuDataDir;
 extern const std::string g_v3Data;
 

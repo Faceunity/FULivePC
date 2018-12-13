@@ -288,11 +288,20 @@ bool Nama::SelectBundle(std::string bundleName)
 		
 	if (UIBridge::m_curRenderItem == bundleID)
 	{
-		UIBridge::m_curRenderItem = -1;
+		UIBridge::m_curRenderItem = -1;		
 	}
 	else
 	{
 		UIBridge::m_curRenderItem = bundleID;
+		UIBridge::renderBundleCategory = UIBridge::bundleCategory;
+	}
+	if (UIBridge::bundleCategory == PortraitDrive )
+	{
+		mMaxFace = 1;
+	}
+	else
+	{
+		mMaxFace = 4;
 	}
 	return true;
 }
@@ -304,22 +313,36 @@ void Nama::RenderItems(uchar* frame)
 	wglMakeCurrent(GetDC(wnd), new_context);
 	//CheckGLContext();
 	fuSetMaxFaces(mMaxFace);
-	if (UIBridge::mNeedPlayMP3)
-	{		
-		if (mp3Map.find(UIBridge::m_curRenderItem)!= mp3Map.end())
+	if (UIBridge::bundleCategory == MusicFilter)
+	{
+		if (UIBridge::mNeedPlayMP3)
 		{
-			fuItemSetParamd(UIBridge::m_curRenderItem, "music_time", mp3Map[UIBridge::m_curRenderItem]->GetCurrentPosition() / 1e4);
-			mp3Map[UIBridge::m_curRenderItem]->CirculationPlayCheck();
-		}		
+			if (mp3Map.find(UIBridge::m_curRenderItem) != mp3Map.end())
+			{
+				fuItemSetParamd(UIBridge::m_curRenderItem, "music_time", mp3Map[UIBridge::m_curRenderItem]->GetCurrentPosition() / 1e4);
+				mp3Map[UIBridge::m_curRenderItem]->CirculationPlayCheck();
+			}
+		}
+		if(UIBridge::mNeedStopMP3)
+		{
+			std::map<int, Mp3*>::iterator it = mp3Map.begin();
+			for(;it != mp3Map.end();it++)
+			{
+				it->second->Stop();				
+			}
+			UIBridge::m_curRenderItem = -1;
+			UIBridge::mNeedStopMP3 = false;
+		}
 	}
+
 	//int handle[3] = { m_beautyHandles, UIBridge::m_curRenderItem ,m_fxaaHandles };
-	if (UIBridge::bundleCategory == Animoji)
+	if (UIBridge::renderBundleCategory == Animoji)
 	{
 		fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 1);
 	}
 	else
 	{
-		fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 0);
+		fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 0);		
 	}
 	int handle[] = { mBeautyHandles, UIBridge::m_curRenderItem };
 	int handleSize = sizeof(handle) / sizeof(handle[0]);
