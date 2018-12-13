@@ -10,6 +10,7 @@ int oriWindowHeight = 0;
 float scaleRatioW = 1.f;
 float scaleRatioH = 1.f;
 int UIBridge::bundleCategory = -1;
+int UIBridge::renderBundleCategory = -1;
 std::vector<std::string> UIBridge::categoryBundles[BundleCategory::Count];
 int UIBridge::faceType = 0;
 
@@ -35,6 +36,7 @@ float UIBridge::mFaceShapeLevel[6] = {0.0f};
 float UIBridge::mFilterLevel[10] = { 100,100,100,100,100, 100,100,100,100,100};
 bool UIBridge::mNeedIpcWrite =false;
 bool UIBridge::mNeedPlayMP3 = false;
+bool UIBridge::mNeedStopMP3 = false;
 
 void resetBeautyParam()
 {
@@ -818,6 +820,7 @@ void Gui::render(Nama::UniquePtr& nama)
 							UIBridge::mCurRenderItemName = "NONE";
 							UIBridge::mLastTime = 0.0;
 							UIBridge::showItemTipsWindow = false;
+							UIBridge::mNeedStopMP3 = true;
 						}
 						nama->SelectBundle(gBundlePath[UIBridge::bundleCategory] + "/" + itemName);
 					}

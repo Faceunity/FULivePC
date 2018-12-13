@@ -27,14 +27,16 @@ static class UIBridge
 public:
 
 	static int bundleCategory;
-	static int faceType;
+	static int renderBundleCategory;
+	static int faceType; 
 	
 	static bool showItemSelectWindow;
 	static bool showItemTipsWindow;
 	static bool showDegubInfoWindow;
 	static bool showFilterSlider; 
-	static bool mNeedIpcWrite;
+	static bool mNeedIpcWrite; 
 	static bool mNeedPlayMP3;
+	static bool mNeedStopMP3;
 
 	static uint32_t mFPS;
 	static uint32_t mResolutionWidth;
