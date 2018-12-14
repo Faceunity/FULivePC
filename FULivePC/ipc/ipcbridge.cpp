@@ -49,8 +49,9 @@ namespace IPC {
 
             static inline const std::vector<VideoFormat> &formats()
             {
-				std::vector<VideoFormat> v;
+				static std::vector<VideoFormat> v;
 				v.reserve(11);
+				v.resize(11);
 				v[0].fourcc = MAKEFOURCC('R', 'G', 'B', '4');
 				v[0].guid = MEDIASUBTYPE_RGB32;
 				v[0].bpp = 32;
@@ -86,7 +87,7 @@ namespace IPC {
 				v[10].guid = MEDIASUBTYPE_NV12;
 				v[10].bpp = 12;
 
-				static const std::vector<VideoFormat> videoFormats = v;
+				//static const std::vector<VideoFormat> videoFormats = v;
 			
 				
                 //static const std::vector<VideoFormat> videoFormats = {
@@ -108,7 +109,7 @@ namespace IPC {
                 //    {MAKEFOURCC('N', 'V', '1', '2'), MEDIASUBTYPE_NV12, 12},
                 //};
 
-                return videoFormats;
+                return v;
             }
 
             static inline const VideoFormat *byFourCC(DWORD fourcc)
@@ -122,6 +123,7 @@ namespace IPC {
 
             static inline const VideoFormat *byGuid(const GUID &guid)
             {
+				int siz = formats().size();
                 for (size_t i = 0; i < formats().size(); i++)
                     if (formats()[i].guid == guid)
                         return &formats()[i];
