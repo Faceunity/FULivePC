@@ -38,7 +38,7 @@ namespace NamaExampleNameSpace
 		void DrawLandmarks(uchar*  frame);		
 		uchar*  RenderEx(uchar*);
 		void DrawPoint(uchar*  frame, int x, int y, unsigned char r = 255, unsigned char g = 240, unsigned char b = 33);
-		std::tr1::shared_ptr<unsigned char> ConvertBetweenBGRAandRGBA(std::tr1::shared_ptr<unsigned char> frame);
+		unsigned char* ConvertBetweenBGRAandRGBA(unsigned char* frame);
 	public:
 		int mBeautyHandles;
 		int mGestureHandles;
