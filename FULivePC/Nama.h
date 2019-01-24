@@ -16,15 +16,17 @@ namespace NamaExampleNameSpace
 	{		
 	public:
 		using UniquePtr = std::unique_ptr<Nama>;
-		static UniquePtr create(uint32_t width, uint32_t height);
+		static UniquePtr create(int width, int height);
 
 		Nama();
 		~Nama();
 		std::vector<std::string> CameraList();
-		cv::Mat GetFrame();
-		bool ReOpenCamera(int);
+		//cv::Mat GetFrame();
+		std::tr1::shared_ptr<unsigned char> QueryFrame();
+		//bool ReOpenCamera(int);
+		void ReOpenCamera();
 		bool CheckGLContext();
-		bool Init(uint32_t& width, uint32_t& height);
+		bool Init(int& width, int& height);
 		bool IsInited() { return mHasSetup; }
 		bool SelectBundle(std::string bundleName);
 		int  IsTracking();
@@ -36,18 +38,20 @@ namespace NamaExampleNameSpace
 		void DrawLandmarks(uchar*  frame);		
 		uchar*  RenderEx(uchar*);
 		void DrawPoint(uchar*  frame, int x, int y, unsigned char r = 255, unsigned char g = 240, unsigned char b = 33);
-	private:				
+		std::tr1::shared_ptr<unsigned char> ConvertBetweenBGRAandRGBA(std::tr1::shared_ptr<unsigned char> frame);
+	public:
 		int mBeautyHandles;
 		int mGestureHandles;
 		int mFxaaHandles;
-		uint32_t mFrameWidth, mFrameHeight;
+		int mFrameWidth, mFrameHeight;
 		static bool mHasSetup;
 	public:	
 		int mIsBeautyOn;	
 		int mIsDrawPoints;
 		int mMaxFace;
 		int mFrameID;		
-		std::tr1::shared_ptr<CCameraDS> mCapture;
+		//std::tr1::shared_ptr<CCameraDS> mCapture;
+		std::tr1::shared_ptr<CCameraDS> m_cap;
 		static std::string mFilters[6];
 		std::unordered_map<std::string, int> mBundlesMap;
 	};

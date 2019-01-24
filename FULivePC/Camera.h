@@ -1,101 +1,92 @@
-#pragma once
+#ifndef CCAMERA_H
+#define CCAMERA_H
 
-#include <stack>
-#include <opencv2/core.hpp>
-#include <opencv2/opencv.hpp>
-#include <opencv2/highgui.hpp>
+#define WIN32_LEAN_AND_MEAN
 
+#define POINTER_64 __ptr64
+
+#include <windows.h>
+#include <atlbase.h>
 #include <dshow.h>
-#include <locale>
-#include <vector>
+#include <qedit.h>
+#include <memory>
 
-#pragma comment(lib,"Strmiids.lib")
-#ifdef _DEBUG
-#pragma comment(lib,"opencv_world400d.lib")
-#else
-#pragma comment(lib,"opencv_world400.lib")
-#endif // DEBUG
+#define MYFREEMEDIATYPE(mt)	{if ((mt).cbFormat != 0)		\
+					{CoTaskMemFree((PVOID)(mt).pbFormat);	\
+					(mt).cbFormat = 0;						\
+					(mt).pbFormat = NULL;					\
+				}											\
+				if ((mt).pUnk != NULL)						\
+				{											\
+					(mt).pUnk->Release();					\
+					(mt).pUnk = NULL;						\
+				}}									
 
-
-
-#define BLUE    0x0001
-#define GREEN   0x0002
-#define RED     0x0004
-#define GRAY    0x0007
-
-#ifndef SAFE_DELETE
-#define SAFE_DELETE(p)       { if (p) { delete (p);     (p) = nullptr; } }
-#endif
-
-#ifndef loge
-#define loge    printf
-#define logi    printf
-#endif
-enum CAPTURE_TYPE
-{
-	CAPTURE_CAMERA,
-	CAPTURE_FILE
-};
 
 class CCameraDS
 {
+private:
+	std::tr1::shared_ptr<unsigned char> m_frame;
+
+	//IplImage * m_pFrame;
+	bool m_bConnected;
+	int m_nWidth;
+	int m_nHeight;
+	bool m_bLock;
+	bool m_bChanged;
+	long m_nBufferSize;
+
+	CComPtr<IGraphBuilder> m_pGraph;
+	CComPtr<IBaseFilter> m_pDeviceFilter;
+	CComPtr<IMediaControl> m_pMediaControl;
+	CComPtr<IBaseFilter> m_pSampleGrabberFilter;
+	CComPtr<ISampleGrabber> m_pSampleGrabber;
+	CComPtr<IPin> m_pGrabberInput;
+	CComPtr<IPin> m_pGrabberOutput;
+	CComPtr<IPin> m_pCameraOutput;
+	CComPtr<IMediaEvent> m_pMediaEvent;
+	CComPtr<IBaseFilter> m_pNullFilter;
+	CComPtr<IPin> m_pNullInputPin;
+
+private:
+	bool BindFilter(int nCamIDX, IBaseFilter **pFilter);
+	void SetCrossBar();
 
 public:
 	CCameraDS();
-	~CCameraDS();
+	virtual ~CCameraDS();
 
-	void play();
-	void stop();
+	//打开摄像头，nCamID指定打开哪个摄像头，取值可以为0,1,2,...
+	//bDisplayProperties指示是否自动弹出摄像头属性页
+	//nWidth和nHeight设置的摄像头的宽和高，如果摄像头不支持所设定的宽度和高度，则返回false
+	bool CCameraDS::OpenCamera(int nCamID, bool bDisplayProperties, int &nWidth, int& nHeight);
 
-	void initCamera(int,int,int);
-	void closeCamera();
-	void connectCamera();
-	bool openFileDlg();
-	bool isPlaying();
-	void restartCamera();
-	bool isInit() { return m_isCameraInited; }
-	int getStatus() { return status; }
-	void setFilePath(std::string path);
-	void setCaptureType(int _type);
-	void setCaptureCameraID(int _id);
-	cv::Mat getFrame();
-	void _FreeMediaType(AM_MEDIA_TYPE & mt);
-	HRESULT CamCaps(IBaseFilter * pBaseFilter);
-	void process_filter(IBaseFilter * pBaseFilter);
-	int enum_devices();
-	int getDeviceList();
-	std::vector<std::string> getDeviceNameList();
-	void init();
+	bool IsConnected();
 
-	std::vector<std::string> deviceList;
-	cv::Size getCameraResolution();
-	void QueryFrame();
-private:
-	float w, h;
-	typedef enum {
-		STATUS_UN_INIT,
-		STATUS_NAMA_UN_INIT,
-		STATUS_INIT,
-		STATUS_PLAYING,
-		STATUS_STOP,
-		STATUS_NO_CAMERA,
-		STATUS_ERROR
-	}PlayStatus;
-	
-	std::string m_filepath;
-	PlayStatus status;
-	bool m_isCameraInited = false;
-	int m_capture_type;
-	int m_capture_camera_id;
-	int frame_id;
-	int frameCount;
-public:
-	int rs_width;
-	int rs_height;
-	bool useDefaultFrame;
-	cv::VideoCapture mCapture;
-	cv::Mat frame;
-	cv::Mat resize_frame;
-	HANDLE hThread;
+	int IsDeviceBusy(char * videoName);
+
+	//关闭摄像头，析构函数会自动调用这个函数
+	void CloseCamera();
+
+	//返回摄像头的数目
+	static int CameraCount();
+
+	//根据摄像头的编号返回摄像头的名字
+	//nCamID: 摄像头编号
+	//sName: 用于存放摄像头名字的数组
+	//nBufferSize: sName的大小
+	static int CCameraDS::CameraName(int nCamID, char* sName, int nBufferSize);
+
+	//返回图像宽度
+	int GetWidth() { return m_nWidth; }
+
+	//返回图像高度
+	int GetHeight() { return m_nHeight; }
+
+	//返回图像数据为RGBA布局
+	std::tr1::shared_ptr<unsigned char> QueryFrame();
+
+	bool m_bIsCurrentDeviceBusy;
 };
 
+#endif 

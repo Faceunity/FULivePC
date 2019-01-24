@@ -1,8 +1,8 @@
 
 #include "Gui.h"
 //#include "Config.h"	
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
+//#include <opencv2/highgui.hpp>
+//#include <opencv2/imgproc.hpp>
 #include "rapidjson\document.h"
 #include "rapidjson\filereadstream.h"
 int oriWindowWidth = 0;
@@ -613,7 +613,7 @@ void Gui::render(Nama::UniquePtr& nama)
 							if (UIBridge::mSelectedCamera != n)
 							{
 								UIBridge::mSelectedCamera = n;
-								nama->ReOpenCamera(n);
+								nama->ReOpenCamera();
 							}							
 						}							
 						if (is_selected)
@@ -692,48 +692,44 @@ void Gui::render(Nama::UniquePtr& nama)
 			ImGui::Begin("frame##4", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs);			
 			float frameWidth = (float)888.f * scaleRatioW;
 			float frameHeight = (float)500.f * scaleRatioH;
-			ImVec2 frameUV_LB = ImVec2(1, 0);
-			ImVec2 frameUV_RT = ImVec2(0, 1);
+			ImVec2 frameUV_LB = ImVec2(1, 1);
+			ImVec2 frameUV_RT = ImVec2(0, 0);
 				
-			cv::Mat frameMat = nama->GetFrame();
-			
-			cv::Mat processedFrame;			
-			processedFrame = frameMat.clone();		
-			cv::cvtColor(frameMat, processedFrame, cv::COLOR_BGR2RGBA);
-			//float tempTime = GetTickCount();
+			processedFrame = nama->QueryFrame();
+
 			if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
 			{
-				nama->RenderItems(processedFrame.data);
-			}			
-			//printf("RenderItems cost %f \n", GetTickCount()- tempTime);			
-			{
-				cv::Mat bgra[4];
-				cv::split(processedFrame, bgra);
-				bgra[3] = 255.0f;
-				cv::merge(bgra, 4, processedFrame);
+				nama->RenderItems(processedFrame.get());
 			}
-			if (UIBridge::mNeedIpcWrite)
-			{
-				cv::cvtColor(processedFrame, processedFrame, cv::COLOR_RGBA2BGRA);
-				size_t frameSize = ipcBridge.write(MEDIASUBTYPE_RGB32, processedFrame.cols, processedFrame.rows, processedFrame.data);
-				cv::cvtColor(processedFrame, processedFrame, cv::COLOR_BGRA2RGBA);
-			}
+
+			//{
+			//	cv::Mat bgra[4];
+			//	cv::split(processedFrame, bgra);
+			//	bgra[3] = 255.0f;
+			//	cv::merge(bgra, 4, processedFrame);
+			//}
+			//if (UIBridge::mNeedIpcWrite)
+			//{
+			//	cv::cvtColor(processedFrame, processedFrame, cv::COLOR_RGBA2BGRA);
+			//	size_t frameSize = ipcBridge.write(MEDIASUBTYPE_RGB32, processedFrame.cols, processedFrame.rows, processedFrame.data);
+			//	cv::cvtColor(processedFrame, processedFrame, cv::COLOR_BGRA2RGBA);
+			//}
 			UIBridge::mFPS = get_fps();
 			UIBridge::mRenderTime = 1000.f / (float)UIBridge::mFPS;
-			UIBridge::mResolutionWidth = processedFrame.cols;
-			UIBridge::mResolutionHeight = processedFrame.rows;
+			UIBridge::mResolutionWidth = nama->mFrameWidth;
+			UIBridge::mResolutionHeight = nama->mFrameHeight;
 			glBindTexture(GL_TEXTURE_2D, textureID);
-			glPixelStorei(GL_UNPACK_ROW_LENGTH, processedFrame.step / processedFrame.elemSize());
-			glPixelStorei(GL_UNPACK_ALIGNMENT, (processedFrame.step & 3) ? 1 : 4);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, processedFrame.cols, processedFrame.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, processedFrame.data);
+			//glPixelStorei(GL_UNPACK_ROW_LENGTH, processedFrame.step / processedFrame.elemSize());
+			//glPixelStorei(GL_UNPACK_ALIGNMENT, (processedFrame.step & 3) ? 1 : 4);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, nama->mFrameWidth, nama->mFrameHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, processedFrame.get());
 			glBindTexture(GL_TEXTURE_2D, 0);
 			float rotio = (float)UIBridge::mResolutionWidth / (float)UIBridge::mResolutionHeight;
-			if (rotio<1.7f)//确保宽高比1.777显示
-			{
-				float UVSub = (1.0f - 1.0f / 1.776f) / 4.0f;
-				frameUV_LB = ImVec2(1.f, UVSub);
-				frameUV_RT = ImVec2(0.f, 1.f-UVSub);
-			}
+			//if (rotio<1.7f)//确保宽高比1.777显示
+			//{
+			//	float UVSub = (1.0f - 1.0f / 1.776f) / 4.0f;
+			//	frameUV_LB = ImVec2(1.f, UVSub);
+			//	frameUV_RT = ImVec2(0.f, 1.f-UVSub);
+			//}
 			ImGui::Image((void *)(intptr_t)textureID, ImVec2(frameWidth, frameHeight), frameUV_LB, frameUV_RT, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
 			ImGui::End();
 			ImGui::PopStyleColor();

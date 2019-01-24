@@ -23,7 +23,7 @@ static HGLRC new_context;
 
 std::string Nama::mFilters[6] = { "origin", "delta", "electric", "slowlived", "tokyo", "warm" };
 
-Nama::UniquePtr Nama::create(uint32_t width, uint32_t height)
+Nama::UniquePtr Nama::create(int width, int height)
 {
 	UniquePtr pNama = UniquePtr(new Nama);
 	pNama->Init(width, height);
@@ -36,7 +36,7 @@ Nama::Nama()
 	mMaxFace = 1;
 	mIsBeautyOn = true;
 	mBeautyHandles = 0;
-	mCapture = std::tr1::shared_ptr<CCameraDS>(new CCameraDS);
+	m_cap = std::tr1::shared_ptr<CCameraDS>(new CCameraDS);
 }
 
 Nama::~Nama()
@@ -60,23 +60,34 @@ Nama::~Nama()
 
 std::vector<std::string> Nama::CameraList()
 {
-	return mCapture->getDeviceNameList();
-}
-
-cv::Mat Nama::GetFrame()
-{
-	return mCapture->getFrame();
-}
-
-bool Nama::ReOpenCamera(int camID)
-{
-	if (mCapture->isInit())
+	std::vector<std::string> camList;
+	for (int nCamID =0; nCamID<m_cap->CameraCount(); nCamID++)
 	{
-		mCapture->closeCamera();
-		mCapture->initCamera(mCapture->rs_width, mCapture->rs_height,camID);
+		char sName[1024];
+		int nBufferSize = 0;
+		m_cap->CameraName(nCamID, sName, nBufferSize);
+		camList.push_back(std::string(sName, nBufferSize));
+	}
+	return camList;
+}
+
+std::tr1::shared_ptr<unsigned char> Nama::QueryFrame()
+{
+	return m_cap->QueryFrame();
+}
+
+void Nama::ReOpenCamera()
+{
+	if (m_cap->IsConnected())
+	{
+		m_cap->CloseCamera();
+		if (false == m_cap->OpenCamera(0, false, mFrameWidth, mFrameHeight))
+		{
+			std::cout << "缺少摄像头，推荐使用 Logitech C920，然后安装官方驱动。" << std::endl;
+			exit(1);
+		}
 		fuOnCameraChange();//Note: 重置人脸检测的信息
 	}
-	return true;
 }
 
 bool Nama::CheckGLContext()
@@ -90,13 +101,17 @@ bool Nama::CheckGLContext()
 }
 
 
-bool Nama::Init(uint32_t& width, uint32_t& height)
+bool Nama::Init(int& width, int& height)
 {
 	HGLRC context = wglGetCurrentContext();
 	HWND wnd = (HWND)Gui::hWindow;
 	new_context = wglCreateContext(GetDC(wnd));
 	wglMakeCurrent(GetDC(wnd), new_context);
-	mCapture->initCamera(width, height,UIBridge::mSelectedCamera);
+	if (false == m_cap->OpenCamera(0, false, (int)width, (int)height))
+	{
+		std::cout << "缺少摄像头，推荐使用 Logitech C920，然后安装官方驱动。\n Error: Missing camera! " << std::endl;
+		exit(1);
+	}
 	mFrameWidth = width;
 	mFrameHeight = height;
 	if (false == mHasSetup)
@@ -305,6 +320,32 @@ bool Nama::SelectBundle(std::string bundleName)
 	}
 	return true;
 }
+
+std::tr1::shared_ptr<unsigned char> Nama::ConvertBetweenBGRAandRGBA(std::tr1::shared_ptr<unsigned char> frame)
+{
+	int size = mFrameWidth*mFrameHeight * 4;
+	int offset = 0;
+	if (IsBadReadPtr(frame.get(), 4))//can't debug run
+	{
+		printf("The camera is usered by other programs！\n");
+		return frame;
+	}
+	auto data = frame.get();
+	for (int i = 0; i < mFrameHeight; i++)
+	{
+		for (int j = 0; j < mFrameWidth; j++)
+		{
+			static unsigned char t;
+			t = data[offset];
+			data[offset] = data[offset + 2];
+			data[offset + 2] = t;
+
+			offset += 4;
+		}
+	}
+
+	return frame;
+}
 //渲染函数
 void Nama::RenderItems(uchar* frame)
 {
@@ -347,7 +388,7 @@ void Nama::RenderItems(uchar* frame)
 	int handle[] = { mBeautyHandles, UIBridge::m_curRenderItem };
 	int handleSize = sizeof(handle) / sizeof(handle[0]);
 	//支持的格式有FU_FORMAT_BGRA_BUFFER 、 FU_FORMAT_NV21_BUFFER 、FU_FORMAT_I420_BUFFER 、FU_FORMAT_RGBA_BUFFER		
-	fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
+	fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(frame),
 		mFrameWidth, mFrameHeight, mFrameID, handle, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
 	
 	if (fuGetSystemError())

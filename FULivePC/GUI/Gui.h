@@ -42,5 +42,6 @@ private:
 	Gui() = default;
 	static GLFWwindow* window;	
 	IpcBridge ipcBridge;
-	cv::Mat processedFrame;
+	std::tr1::shared_ptr<unsigned char> processedFrame;
+	//cv::Mat processedFrame;
 };
