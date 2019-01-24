@@ -110,6 +110,7 @@ bool Nama::Init(int& width, int& height)
 	if (false == m_cap->OpenCamera(0, false, (int)width, (int)height))
 	{
 		std::cout << "缺少摄像头，推荐使用 Logitech C920，然后安装官方驱动。\n Error: Missing camera! " << std::endl;
+		system("pause");
 		exit(1);
 	}
 	mFrameWidth = width;
@@ -334,8 +335,25 @@ unsigned char* Nama::ConvertBetweenBGRAandRGBA(unsigned char* frame)
 			static unsigned char t;
 			t = data[offset];
 			data[offset] = data[offset + 2];
-			data[offset + 2] = t;
+			data[offset + 2] = t;			
+			offset += 4;
+		}
+	}
 
+	return frame;
+}
+
+unsigned char* Nama::SetAlpha(unsigned char* frame)
+{
+	int size = mFrameWidth*mFrameHeight * 4;
+	int offset = 0;
+
+	auto data = frame;
+	for (int i = 0; i < mFrameHeight; i++)
+	{
+		for (int j = 0; j < mFrameWidth; j++)
+		{
+			data[offset + 3] = 255;
 			offset += 4;
 		}
 	}
@@ -386,8 +404,8 @@ void Nama::RenderItems(uchar* frame)
 	ConvertBetweenBGRAandRGBA(frame);
 	//支持的格式有FU_FORMAT_BGRA_BUFFER 、 FU_FORMAT_NV21_BUFFER 、FU_FORMAT_I420_BUFFER 、FU_FORMAT_RGBA_BUFFER		
 	fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
-		mFrameWidth, mFrameHeight, mFrameID, handle, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
-	
+		mFrameWidth, mFrameHeight, mFrameID, handle, handleSize, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);
+	SetAlpha(frame);
 	if (fuGetSystemError())
 	{
 		printf("%s \n", fuGetSystemErrorString(fuGetSystemError()));

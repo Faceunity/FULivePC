@@ -39,6 +39,7 @@ namespace NamaExampleNameSpace
 		uchar*  RenderEx(uchar*);
 		void DrawPoint(uchar*  frame, int x, int y, unsigned char r = 255, unsigned char g = 240, unsigned char b = 33);
 		unsigned char* ConvertBetweenBGRAandRGBA(unsigned char* frame);
+		unsigned char * SetAlpha(unsigned char * frame);
 	public:
 		int mBeautyHandles;
 		int mGestureHandles;
