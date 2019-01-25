@@ -402,6 +402,7 @@ void Nama::RenderItems(uchar* frame)
 	int handle[] = { mBeautyHandles, UIBridge::m_curRenderItem };
 	int handleSize = sizeof(handle) / sizeof(handle[0]);
 	ConvertBetweenBGRAandRGBA(frame);
+	SetAlpha(frame);
 	//支持的格式有FU_FORMAT_BGRA_BUFFER 、 FU_FORMAT_NV21_BUFFER 、FU_FORMAT_I420_BUFFER 、FU_FORMAT_RGBA_BUFFER		
 	fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
 		mFrameWidth, mFrameHeight, mFrameID, handle, handleSize, NAMA_RENDER_FEATURE_FULL | NAMA_RENDER_OPTION_FLIP_X, NULL);
