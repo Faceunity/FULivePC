@@ -79,14 +79,51 @@ bool Nama::ReOpenCamera(int camID)
 	return true;
 }
 
+PIXELFORMATDESCRIPTOR pfd = {
+	sizeof(PIXELFORMATDESCRIPTOR),
+	1u,
+	PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW,
+	PFD_TYPE_RGBA,
+	32u,
+	0u, 0u, 0u, 0u, 0u, 0u,
+	8u,
+	0u,
+	0u,
+	0u, 0u, 0u, 0u,
+	24u,
+	8u,
+	0u,
+	PFD_MAIN_PLANE,
+	0u,
+	0u, 0u };
+
+void InitOpenGL()
+{
+	HWND hw = CreateWindowExA(
+		0, "EDIT", "", ES_READONLY,
+		0, 0, 1, 1,
+		NULL, NULL,
+		GetModuleHandleA(NULL), NULL);
+	HDC hgldc = GetDC(hw);
+	int spf = ChoosePixelFormat(hgldc, &pfd);
+	int ret = SetPixelFormat(hgldc, spf, &pfd);
+	HGLRC hglrc = wglCreateContext(hgldc);
+	wglMakeCurrent(hgldc, hglrc);
+
+	//hglrc就是创建出的OpenGL context
+	printf("hw=%08x hgldc=%08x spf=%d ret=%d hglrc=%08x\n",
+		hw, hgldc, spf, ret, hglrc);
+}
+
 bool Nama::CheckGLContext()
 {
-	printf("gl ver test (%s:%d): %08x %08x %08x %08x\n", __FILE__, __LINE__,
-		wglGetProcAddress("glGenFramebuffersARB"),
-		wglGetProcAddress("glGenFramebuffersOES"),
-		wglGetProcAddress("glGenFramebuffersEXT"),
-		wglGetProcAddress("glGenFramebuffers"));
-	return true;
+	int add0, add1, add2, add3;
+	add0 = (int)wglGetProcAddress("glGenFramebuffersARB");
+	add1 = (int)wglGetProcAddress("glGenFramebuffersOES");
+	add2 = (int)wglGetProcAddress("glGenFramebuffersEXT");
+	add3 = (int)wglGetProcAddress("glGenFramebuffers");
+	printf("gl ver test (%s:%d): %08x %08x %08x %08x\n", __FILE__, __LINE__,add0, add1, add2, add3);
+	return add0 | add1 | add2 | add3;
 }
 
 
@@ -311,7 +348,12 @@ void Nama::RenderItems(uchar* frame)
 	HGLRC context = wglGetCurrentContext();
 	HWND wnd = (HWND)Gui::hWindow;
 	wglMakeCurrent(GetDC(wnd), new_context);
-	//CheckGLContext();
+	//此处判断供第一次集成查错用，可以在确认OpenGL环境正确的情况下删掉
+	if (CheckGLContext() == false)
+	{
+		InitOpenGL();
+	}
+	
 	fuSetMaxFaces(mMaxFace);
 	if (UIBridge::bundleCategory == MusicFilter)
 	{
