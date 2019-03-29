@@ -146,7 +146,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			return false;
 		}
 		//CheckGLContext();
-		fuSetup(reinterpret_cast<float*>(&v3data[0]), NULL, g_auth_package, sizeof(g_auth_package));
+		fuSetup(reinterpret_cast<float*>(&v3data[0]), v3data.size(), NULL, g_auth_package, sizeof(g_auth_package));
 
 		std::vector<char> anim_model_data;
 		if (false == LoadBundle(g_fuDataDir + g_anim_model, anim_model_data))
@@ -349,10 +349,10 @@ void Nama::RenderItems(uchar* frame)
 	HWND wnd = (HWND)Gui::hWindow;
 	wglMakeCurrent(GetDC(wnd), new_context);
 	//此处判断供第一次集成查错用，可以在确认OpenGL环境正确的情况下删掉
-	if (CheckGLContext() == false)
-	{
-		InitOpenGL();
-	}
+	//if (CheckGLContext() == false)
+	//{
+	//	InitOpenGL();
+	//}
 	
 	fuSetMaxFaces(mMaxFace);
 	if (UIBridge::bundleCategory == MusicFilter)

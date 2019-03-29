@@ -118,6 +118,7 @@ extern "C"{
 	The buffers should NEVER be freed while the other functions are still being called.
 	You can call this function multiple times to "switch pointers".
 \param v3data should point to contents of the "v3.bin" we provide
+\param sz_v3data should point to num-of-bytes of the "v3.bin" we provide
 \param ardata should be NULL
 \param authdata is the pointer to the authentication data pack we provide. You must avoid storing the data in a file.
 	Normally you can just `#include "authpack.h"` and put `g_auth_package` here.
@@ -125,7 +126,11 @@ extern "C"{
 	Normally you can just `#include "authpack.h"` and put `sizeof(g_auth_package)` here.
 \return non-zero for success, zero for failure
 */
-FUNAMA_API int fuSetup(float* v3data,float* ardata,void* authdata,int sz_authdata);
+FUNAMA_API int fuSetup(float* v3data,int sz_v3data,float* ardata,void* authdata,int sz_authdata);
+/**
+\brief if nama is inited return 1,else return 0.
+*/
+FUNAMA_API int fuGetNamaInited();
 /**
 \brief Call this function when the GLES context has been lost and recreated.
 	That isn't a normal thing, so this function could leak resources on each call.
@@ -232,6 +237,8 @@ FUNAMA_API int fuBeautifyImage(
 \return a GLuint texture handle containing the rendering result if out_format isn't FU_FORMAT_GL_CURRENT_FRAMEBUFFER
 */
 FUNAMA_API int fuTrackFace(int in_format,void* in_ptr,int w,int h);
+
+FUNAMA_API int fuTrackFaceWithTongue(int in_format,void* in_ptr,int w,int h);
 	
 /**
 \brief Generalized interface for rendering a list of items with extension.	
@@ -589,6 +596,12 @@ FUNAMA_API void fuSetDefaultRotationMode(int rotationMode);
 FUNAMA_API int fuGetModuleCode(int i);
 
 /**
+\brief Turn on or turn off Tongue Tracking, used in trackface.
+\param enable > 0 means turning on, enable <= 0 means turning off
+*/
+FUNAMA_API int fuSetTongueTracking(int enable);
+
+/**
 \brief Turn on or turn off async track face
 \param enable > 0 means turning on, enable <= 0 means turning off
 */
@@ -599,6 +612,41 @@ FUNAMA_API int fuSetASYNCTrackFace(int enable);
 \return 0 means physics disabled and no need to clear,1 means cleared successfully
 */
 FUNAMA_API int fuClearPhysics();
+
+/**
+\brief Set a face detector parameter.
+\param detector is the detector context, currently it is allowed to set to NULL, i.e., globally set all contexts.
+\param name is the parameter name, it can be:
+	"use_new_cnn_detection": 1 if the new cnn-based detection method is used, 0 else
+	"other_face_detection_frame_step": if one face already exists, then we detect other faces not each frame, but with a step
+	if use_new_cnn_detection == 1, then
+		"min_facesize_small", int[default=18]: minimum size to detect a small face; must be called **BEFORE** fuSetup
+		"min_facesize_big", int[default=27]: minimum size to detect a big face; must be called **BEFORE** fuSetup
+		"small_face_frame_step", int[default=5]: the frame step to detect a small face; it is time cost, thus we do not detect each frame
+		"use_cross_frame_speedup", int[default=0]: perform a half-cnn inference each frame to speedup
+	else
+		"scaling_factor": the scaling across image pyramids, default 1.2f
+		"step_size": the step of each sliding window, default 2.f
+		"size_min": minimal face supported on 640x480 image, default 50.f
+		"size_max": maximal face supported on 640x480 image, default is a large value
+		"min_neighbors": algorithm internal, default 3.f
+		"min_required_variance": algorithm internal, default 15.f
+		"is_mono": specifies the input is monocular or BGRA 
+\param value points to the new parameter value, e.g., 
+	float scaling_factor=1.2f;
+	dde_facedet_set(ctx, "scaling_factor", &scaling_factor);
+	float size_min=100.f;
+	dde_facedet_set(ctx, "size_min", &size_min);
+*/
+FUNAMA_API int fuSetFaceDetParam(char* name, float* pvalue);
+
+/**
+\brief if one face is detected, we may want to detect other faces at lower frequency
+		this method set the frame step
+\param n_frame_step we detect additional faces each n frames.
+\returns the frame step after set
+*/
+FUNAMA_API int fuSetOtherFaceDetStep(int n_frame_step);
 
 /*------------------------------------------*/
 /*************** Deprecated *****************/
