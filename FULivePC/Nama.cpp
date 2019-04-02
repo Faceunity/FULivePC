@@ -299,6 +299,10 @@ void Nama::SetCurrentMakeup(int index)
 			fuCreateTexForItem(mLightMakeUpHandle, const_cast<char*>(mMakeupParams[index][j].typeName.c_str()), pTexture->getData(), pTexture->m_width, pTexture->m_height);
 		}
 	}
+	if (UIBridge::m_curRenderItem != -1)
+	{
+		fuItemSetParamd(mLightMakeUpHandle, "makeup_intensity_blusher", 0);
+	}
 }
 
 void Nama::UpdateFilter(int index)
@@ -412,6 +416,7 @@ bool Nama::SelectBundle(std::string bundleName)
 	{
 		UIBridge::m_curRenderItem = bundleID;
 		UIBridge::renderBundleCategory = UIBridge::bundleCategory;
+		fuItemSetParamd(mLightMakeUpHandle, "makeup_intensity_blusher", 0); 
 	}
 	if (UIBridge::bundleCategory == PortraitDrive )
 	{
