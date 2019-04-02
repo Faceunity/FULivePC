@@ -52,6 +52,7 @@ public:
 	static float mFaceBeautyLevel[5];
 	static float mFaceShapeLevel[6];
 	static float mFilterLevel[10];
+	static float mMakeupLevel[10];
 		
 	static int mSelectedCamera;
 	static double mLastTime;

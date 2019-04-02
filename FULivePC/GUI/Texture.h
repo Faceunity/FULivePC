@@ -64,7 +64,7 @@ public:
 
 	void* getTextureID() { if (!this) throw std::runtime_error("Unable to open texture source"); return (void *)(intptr_t)mTextureID; };
 
-	
+	unsigned int m_width, m_height;
 protected:
 private:
 	Texture() = default;
