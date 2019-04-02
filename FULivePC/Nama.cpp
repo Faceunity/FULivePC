@@ -436,29 +436,25 @@ void Nama::RenderItems(uchar* frame)
 	//}
 	
 	fuSetMaxFaces(mMaxFace);
-	if (UIBridge::bundleCategory == MusicFilter)
+
+	if (UIBridge::mNeedPlayMP3)
 	{
-		if (UIBridge::mNeedPlayMP3)
+		if (mp3Map.find(UIBridge::m_curRenderItem) != mp3Map.end())
 		{
-			if (mp3Map.find(UIBridge::m_curRenderItem) != mp3Map.end())
-			{
-				fuItemSetParamd(UIBridge::m_curRenderItem, "music_time", mp3Map[UIBridge::m_curRenderItem]->GetCurrentPosition() / 1e4);
-				mp3Map[UIBridge::m_curRenderItem]->CirculationPlayCheck();
-			}
-		}
-		if(UIBridge::mNeedStopMP3)
-		{
-			std::map<int, Mp3*>::iterator it = mp3Map.begin();
-			for(;it != mp3Map.end();it++)
-			{
-				it->second->Stop();				
-			}
-			UIBridge::m_curRenderItem = -1;
-			UIBridge::mNeedStopMP3 = false;
+			fuItemSetParamd(UIBridge::m_curRenderItem, "music_time", mp3Map[UIBridge::m_curRenderItem]->GetCurrentPosition() / 1e4);
+			mp3Map[UIBridge::m_curRenderItem]->CirculationPlayCheck();
 		}
 	}
-
-	//int handle[3] = { m_beautyHandles, UIBridge::m_curRenderItem ,m_fxaaHandles };
+	if (UIBridge::mNeedStopMP3)
+	{
+		std::map<int, Mp3*>::iterator it = mp3Map.begin();
+		for (; it != mp3Map.end(); it++)
+		{
+			it->second->Stop();
+		}
+		UIBridge::m_curRenderItem = -1;
+		UIBridge::mNeedStopMP3 = false;
+	}
 	if (UIBridge::renderBundleCategory == Animoji)
 	{
 		fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 1);
