@@ -707,6 +707,7 @@ void Gui::render(Nama::UniquePtr& nama)
 			if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
 			{
 				nama->RenderItems(processedFrame.data);
+				//nama->DrawLandmarks(processedFrame.data);
 			}			
 			//printf("RenderItems cost %f \n", GetTickCount()- tempTime);			
 			{
