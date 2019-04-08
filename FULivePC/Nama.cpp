@@ -316,8 +316,9 @@ void Nama::UpdateMakeupParams()
 {
 	if (5 == UIBridge::m_curFilterIdx || mLightMakeUpHandle == 0)return;
 	for (int j = 0; j < 5; j++)
-		fuItemSetParamd(mLightMakeUpHandle, const_cast<char*>(mMakeupParams[UIBridge::m_curFilterIdx - 6][j].valueName.c_str()), 
+		fuItemSetParamd(mLightMakeUpHandle, const_cast<char*>(mMakeupParams[UIBridge::m_curFilterIdx - 6][j].valueName.c_str()),
 		(UIBridge::mMakeupLevel[UIBridge::m_curFilterIdx] / 100.0f) * (float)mMakeupParams[UIBridge::m_curFilterIdx - 6][j].value / 100.);
+	fuItemSetParamd(mBeautyHandles, "filter_level", UIBridge::mMakeupLevel[UIBridge::m_curFilterIdx] / 100.0f);
 }
 
 void Nama::UpdateBeauty()

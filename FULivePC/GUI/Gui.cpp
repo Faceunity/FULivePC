@@ -520,8 +520,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			{
 				if (LayoutSlider(ImVec2(54, 280), ImVec2(252, 10), "##slider36", &UIBridge::mMakeupLevel[UIBridge::m_curFilterIdx], 0, 100))
 				{
-					nama->UpdateMakeupParams();
-					nama->UpdateBeauty();
+					nama->UpdateMakeupParams();					
 				}
 			}
 		}
