@@ -16,7 +16,7 @@ namespace NamaExampleNameSpace
 	{		
 	public:
 		using UniquePtr = std::unique_ptr<Nama>;
-		static UniquePtr create(uint32_t width, uint32_t height);
+		static UniquePtr create(uint32_t width, uint32_t height,bool enable = true);
 
 		Nama();
 		~Nama();
@@ -46,6 +46,7 @@ namespace NamaExampleNameSpace
 		uint32_t mFrameWidth, mFrameHeight;
 		static bool mHasSetup;
 	public:	
+		static bool mEnableNama;
 		int mIsBeautyOn;	
 		int mIsDrawPoints;
 		int mMaxFace;

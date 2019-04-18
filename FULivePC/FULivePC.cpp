@@ -14,12 +14,16 @@ extern "C"
 	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
-int main()
+int main(int argc, char* argv[])
 {	
+	bool enableNama = true;	
+	if (argc == 2 && _stricmp(argv[1], "-disableNama") == 0)
+		enableNama = false;
+	
 	using namespace NamaExampleNameSpace;
 	Gui::UniquePtr gui = Gui::create(1360, 830);
 
-	Nama::UniquePtr nama = Nama::create(640, 480);
+	Nama::UniquePtr nama = Nama::create(640, 480, enableNama);
 
 	gui->render(nama);
 
