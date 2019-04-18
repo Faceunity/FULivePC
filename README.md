@@ -1,21 +1,41 @@
-# FULivePC
+# FU Live Demo PC
+
 FULivePC 是 Faceunity 的面部跟踪和虚拟道具功能在PC中的集成，作为一款集成示例。
+## 目录
+[新特性](#sdk-v52-更新)
+[SDK内容](#运行环境)
+[集成说明](#集成方法)
+[道具失效等问题](#faq)
 
-## FuNama SDK v4.6
+## SDK v5.8更新
 
-本次更新主要包含以下改动：
-- 增强表情优化功能，在人脸快速转动时提高表情稳定性
 
-由于深度学习框架的升级，SDK的库文件从之前的 ~3M 增加到了 ~5M，如果不需要AI相关功能，可以下载[SDK lite版](https://github.com/Faceunity/FULivePC/releases)，库文件大小和老版本保持一致。
+更新内容
+
+- 支持ETC2压缩纹理，减少内存占用，提高绘制性能
+- 优化美妆唇部效果，更加贴合唇形
+- 新增支持多人物理动效
+- 新增两款艺术滤镜
+- 海报换脸功能优化，支持表情融合
+- 海报换脸性能优化
+
+由于深度学习框架的升级，SDK的库文件从之前的 ~3M 增加到了 ~5M，如果不需要AI相关功能，可以下载[SDK lite版](https://github.com/Faceunity/FULivePC/releases)，lite版库是不含深度学习的，库文件大小和老版本保持一致。
+
+**Tip：含有深度学习的版本支持背景分割、手势识别功能**
 
 与新版SDK一起，我们也推出更方便和好用的2D/3D贴纸道具制作工具——FUEditor，助力视频应用快速应对市场，推出具有个性化和吸引力的道具和玩法。相关文档和下载在[这里](https://github.com/Faceunity/FUEditor)，制作过程中遇到问题可以联系我司技术支持。
 
 此外，我们优化了SDK的系统稳定性，在网络条件波动的情况下保持SDK正常运行，并提供了获取SDK系统错误信息的接口，方便应用灵活处理。
 具体更新内容可以到docs/目录下查看详细文档。
+
 ## 运行环境
 
-目前我们提供了32位和64位双平台的库文件，运行前要保证初始化好OpenGL环境，并【确保】当前有可用的OpenGL context。
-程序界面现在使用Qt5.31 vs2013 opengl版，下载:[x64](http://download.qt.io/archive/qt/5.3/5.3.1/qt-opensource-windows-x86-msvc2013_64_opengl-5.3.1.exe),[x86](http://download.qt.io/archive/qt/5.3/5.3.1/qt-opensource-windows-x86-msvc2013_opengl-5.3.1.exe)。
+本SDK目前我们提供了32位和64位双平台的库文件
+
+- [SDK]内部的API执行前要保证初始化好OpenGL环境，【确保】fuSetup等API调用时OpenGL context是可用的。
+
+- [Demo]为了演示SDK功能我们制作了Demo程序，界面绘制使用imgui。如果需要使用QT，可切换到dev_qt分支进行参考集成。
+注：SDK仅包含下述文件列表内容里的\*.dll,\*.lib和\*.h文件，它是不依赖任何界面库的，如需更换其他界面库如MFC或者不具备编译环境等，可选择不编译此Demo，直接参考代码将SDK的dll等[集成](#jump2)到您的新工程。
 ## 文件列表
   - funama.h 函数调用接口头文件
   - Win32/Win64 库文件
@@ -40,112 +60,309 @@ fuSetup(v3data, nullptr, g_auth_package, sizeof(g_auth_package));
 之后进行道具加载，函数返回的道具 handle 要保存在当前程序中，之后绘制道具时需要提供该 handle 作为道具的标识。其中 data 为指向道具文件内容的指针，size 为该文件的字节大小。
 
 ```C
-static int g_items[2] = {0, 0};
+static int mItemsArray[2] = {0, 0};
 ...
-if (!g_items[0]){
-  g_items[0] = fuCreateItemFromPackage(data, size);
+if (!mItemsArray[0]){
+  mItemsArray[0] = fuCreateItemFromPackage(data, size);
 }
 ```
 
-之后就可以调用绘制函数将已经加载的道具绘制到图像数据中，如下例所示，提供图像数据的指针、宽度stride、高度、当前运行帧号、道具 handle 列表、以及绘制道具数量等信息后，完成绘制操作。其中，图像数据必须是布局为BGRA、类型为unsigned char的数据。
+之后就可以调用绘制函数将已经加载的道具绘制到图像数据中，如下例所示，提供图像数据的指针、宽度m_frameWidth、高度m_frameHeight、当前运行帧号、道具 handle 列表、以及绘制道具数量等信息后，完成绘制操作。其中，输入和输出图像数据是布局为BGRA、类型为unsigned char的数据。
 
-```  
-fuRenderItems(0, img, stride, h, g_frame_id++, g_items, 1);
+```C
+fuRenderItems(0, img, m_frameWidth, m_frameHeight, g_frame_id++, mItemsArray, 1);
 ```
 
 ## 视频美颜
 美颜功能实现步骤与道具类似，首先加载美颜道具，并将fuCreateItemFromPackage返回的美颜道具handle保存下来:
 
 ```C
-g_items[1] = fuCreateItemFromPackage(g_res_zip, (int)g_res_size);
+mItemsArray[1] = fuCreateItemFromPackage(g_res_zip, (int)g_res_size);
 ```
 
 之后，将该handle和其他需要绘制的道具一起传入绘制接口即可。注意 fuRenderItems() 最后一个参数为所绘制的道具数量，这里以一个普通道具和一个美颜道具一起绘制为例。加载美颜道具后不需设置任何参数，即可启用默认设置的美颜的效果。
 
 ```C
-fuRenderItems(0, img, stride/4, h, g_frame_id, g_items, 2);
+fuRenderItems(0, img, m_frameWidth, m_frameHeight, g_frame_id, mItemsArray, 2);
 ```
 
-美颜道具主要包含五个模块的内容，滤镜，美白和红润，磨皮，美型。
+### 参数设置
+美颜道具主要包含七个模块的内容：滤镜、美白、红润、磨皮、亮眼、美牙、美型。每个模块都有默认效果，它们可以调节的参数如下。
 
-#### 滤镜
+### 一、滤镜
 
-在目前版本中提供以下滤镜：
+目前版本中提供以下滤镜：
+
+普通滤镜：
+
 ```C
 "origin", "delta", "electric", "slowlived", "tokyo", "warm"
 ```
 
-其中 "origin" 作为默认的美白滤镜，其他滤镜属于风格化滤镜。切换滤镜时，通过 fuItemSetParams 设置美颜道具的参数，如：
+美颜滤镜：
+
 ```C
-//  Set item parameters - filter
-fuItemSetParams(g_items[1], "filter_name", "origin");
+"ziran", "danya", "fennen", "qingxin", "hongrun"
 ```
 
-#### 美白和红润
+其中 "origin" 为原图滤镜，其他滤镜属于风格化滤镜及美颜滤镜，美颜滤镜具有一定美颜、增白、亮唇等功能。滤镜由参数 filter_name 指定。切换滤镜时，通过 fuItemSetParams 设置美颜道具的参数，如下：
 
-当滤镜设置为美白滤镜 "origin" 时，通过参数 color_level 来控制美白程度。当滤镜为其他风格化滤镜时，该参数用于控制风格化程度。该参数取值为大于等于0的浮点数，0为无效果，1为默认效果，大于1为继续增强效果。
+```C
+fuItemSetParamd(m_beautyHandles, "filter_name", "origin");
+```
+
+另外滤镜开放了滤镜强度接口，可以通过参数 filter_level 来控制当前滤镜程度。该参数的取值范围为[0, 1]，0为无效果，1.0为默认效果。客户端需要针对每个滤镜记录用户的选择的filter_level，当切换滤镜时，设置该参数。
+
+```C
+fuItemSetParamd(m_beautyHandles, "filter_level", mFaceBeautyFilterLevel);
+```
+
+### 二、美白和红润
+
+#### 美白
+
+通过参数 color_level 来控制美白程度。该参数的推荐取值范围为0~1，0为无效果，0.5为默认效果，大于1为继续增强效果。
 
 设置参数的例子代码如下：
 
 ```C
-//  Set item parameters - whiten
-fuItemSetParamd(g_items[1], "color_level", 1.0);
+fuItemSetParamd(m_beautyHandles, "color_level", mFaceBeautyColorLevel);
 ```
 
-新版美颜新增红润调整功能。参数名为 red_level 来控制红润程度。使用方法基本与美白效果一样。该参数的推荐取值范围为[0, 1]，0为无效果，0.5为默认效果，大于1为继续增强效果。
+#### 红润
 
-#### 磨皮
+通过参数 red_level 来控制红润程度。该参数的推荐取值范围为0~1，0为无效果，0.5为默认效果，大于1为继续增强效果。
 
-新版美颜中，控制磨皮的参数有两个：blur_level、use_old_blur。
+```C
+fuItemSetParamd(m_beautyHandles, "red_level", mFaceBeautyRedLevel);
+```
 
-参数 blur_level 指定磨皮程度。该参数的推荐取值范围为[0, 6]，0为无效果，对应7个不同的磨皮程度。
+注: 新增的美颜滤镜如 “shaonv”滤镜本身能够美白肤色，提亮红唇，开启该滤镜时，适当减弱独立的美白红润功能。
 
-参数 use_old_blur 指定是否使用旧磨皮。该参数设置为0即使用新磨皮，设置为大于0即使用旧磨皮
+### 三、磨皮
+
+新版美颜中，控制磨皮的参数有五个：blur_level，skin_detect，nonshin_blur_scale，heavy_blur，blur_blend_ratio。
+
+`blur_level` 指定磨皮程度。该参数的推荐取值范围为0.0~6.0，0.0为无效果，原则上不建议参数值大于6.0，不过如果超过6.0也将会继续加大磨皮效果。
+
+`skin_detect`  指定是否开启皮肤检测，开启后，将自动检测是否皮肤，是皮肤的区域将直接根据blur_level指定的磨皮程度进行磨皮，非皮肤区域将减轻磨皮导致模糊的效果。该参数的推荐取值为0-1，0为无效果，1为开启皮肤检测，默认不开启。
+
+`nonshin_blur_scale` 指定开启皮肤检测后，非皮肤区域减轻磨皮导致模糊的程度。该参数范围是[0.0,1.0]，0表示不磨皮，1表示完全磨皮，默认值为0.45。调整该参数需要先开启 skin_detect。
+
+__新增朦胧美肤:__
+
+`heavy_blur` 指定是否开启朦胧美肤功能。大于1开启朦胧美肤功能。
+
+`blur_blend_ratio` 指定磨皮结果和原图融合率。该参数的推荐取值范围为0-1。
+
+注意：朦胧美肤使用了比较强的模糊算法，优点是会把皮肤磨得更加光滑，瑕疵更少，而且性能比老版磨皮更好，缺点是会降低一些清晰度。另外开启朦胧美肤后blur_level，skin_detect两个参数继续有效，而 nonshin_blur_scale 参数对朦胧美肤无效
 
 设置参数的例子代码如下：
 
 ```C
-//  Set item parameters - blur
-fuItemSetParamd(g_items[1], "blur_level", 5.0);
-//  Set item parameters - use old blur
-fuItemSetParamd(g_items[1], "use_old_blur", 1.0);
+fuItemSetParamd(m_beautyHandles, "skin_detect", mFaceBeautyALLBlurLevel);
+fuItemSetParamd(m_beautyHandles, "heavy_blur", mFaceBeautyType);
+fuItemSetParamd(m_beautyHandles, "blur_level", 6 * mFaceBeautyBlurLevel);
+fuItemSetParamd(m_beautyHandles, "blur_blend_ratio", 0.5);
+fuItemSetParamd(m_beautyHandles, "nonshin_blur_scale", 0.45);
 ```
 
-如果对默认的6个磨皮等级不满意，想进一步自定义磨皮效果，可以联系我司获取内部参数调节的方式。
+### 四、亮眼
 
-#### 美型
+使眼睛区域的纹理变得更加清晰，眼眸更加明亮。可通过参数 eye_bright 来控制亮眼程度。该参数的推荐取值范围为0～1，0为关闭该功能，0到1效果逐渐增强。
 
-目前我们支持四种基本脸型：女神、网红、自然、默认。由参数 face_shape 指定：默认（3）、女神（0）、网红（1）、自然（2）。
+设置参数的例子代码如下：
+
+```C
+fuItemSetParamd(m_beautyHandles, "eye_bright", mBrightEyesLevel);
+```
+
+### 五、美牙
+
+使牙齿区域变得更亮更白。可通过参数 tooth_whiten 来控制美牙程度。该参数的推荐取值范围为0～1，0为关闭该功能，0到1效果逐渐增强。
+
+设置参数的例子代码如下：
+
+```C
+fuItemSetParamd(m_beautyHandles, "tooth_whiten", mBeautyTeethLevel);
+```
+
+### 六、美型
+
+#### 1、基本美型
+
+美型支持四种基本美型：女神、网红、自然、默认，一种高级美型：自定义。由参数 face_shape 指定：默认（3）、女神（0）、网红（1）、自然（2）、自定义（4）。
+
 ```C
 //  Set item parameters - shaping
-fuItemSetParamd(g_items[1], "face_shape", 3);
+fuItemSetParamd(mItemsArray[1], "face_shape", 3);
 ```
-在上述四种基本脸型的基础上，我们提供了以下三个参数：face_shape_level、eye_enlarging、cheek_thinning。
+在上述四种基本美型及一种高级美型的基础上，我们提供了以下三个参数：face_shape_level、eye_enlarging、cheek_thinning。
 
 参数 face_shape_level 用以控制变化到指定基础脸型的程度。该参数的取值范围为[0, 1]。0为无效果，即关闭美型，1为指定脸型。
 
 若要关闭美型，可将 face_shape_level 设置为0。
+
 ```C
 //  Set item parameters - shaping level
-fuItemSetParamd(g_items[1], "face_shape_level", 1.0);
+fuItemSetParamd(mItemsArray[1], "face_shape_level", 1.0);
 ```
 参数 eye_enlarging 用以控制眼睛大小。此参数受参数 face_shape_level 影响。该参数的推荐取值范围为[0, 1]。大于1为继续增强效果。
 ```C
 //  Set item parameters - shaping
-fuItemSetParamd(g_items[1], "eye_enlarging", 1.0);
+fuItemSetParamd(mItemsArray[1], "eye_enlarging", 1.0);
 ```
 参数 cheek_thinning 用以控制脸大小。此参数受参数 face_shape_level 影响。该参数的推荐取值范围为[0, 1]。大于1为继续增强效果。
 ```C
 //  Set item parameters - shaping
-fuItemSetParamd(g_items[1], "cheek_thinning", 1.0);
+fuItemSetParamd(mItemsArray[1], "cheek_thinning", 1.0);
 ```
+
+- #### 2、高级美型
+
+  ##### 精细脸型调整功能
+
+  新增优化瘦脸、大眼的效果，增加额头调整、下巴调整、瘦鼻、嘴型调整4项美颜变形，将 face_shape 设为4即可开启精细脸型调整功能，FULiveDemo中可以在脸型中选择自定义来开启精细脸型调整功能
+
+  __使用方法__：
+
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
+
+  ##### 瘦脸
+
+  优化瘦脸变形效果，比之前更加自然
+
+  __使用方法__：
+
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
+    cheek_thinning: 0.0,   // 使用了原有参数cheek_thinning控制瘦脸 ，范围0 - 1
+
+  ##### 大眼
+
+  优化大眼变形效果，比之前更加自然
+
+  __使用方法__：
+
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
+    eye_enlarging: 0.0,   // 使用了原有参数eye_enlarging控制大眼，范围0 - 1
+
+  ##### 额头调整
+
+  新增加的一款美颜变形，可以调整额头大小
+
+  __使用方法__：
+
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
+    intensity_forehead: 0.5,   // 大于0.5 变大，小于0.5变小
+
+  ##### 下巴调整
+
+  新增加的一款美颜变形，可以调整下巴大小
+
+  __使用方法__：
+
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
+    intensity_chin: 0.5,   // 大于0.5 变大，小于0.5变小
+
+  ##### 瘦鼻
+
+  新增加的一款美颜变形，可以进行瘦鼻操作
+
+  __使用方法__：
+
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
+    intensity_nose: 0.0,   // 0为正常大小，大于0开始瘦鼻，范围0 - 1
+
+  ##### 嘴型调整
+
+  新增加的一款美颜变形，可以调整嘴型大小
+
+  __使用方法__：
+
+  - 加载face_beautification.bundle
+  - 调整如下参数
+    face_shape: 4,   // 4为开启高级美型模式，0～3为基本美型
+    intensity_mouth: 0.5,   // 大于0.5变大，小于0.5变小
+
+  ### 七、美颜美型突变过渡效果
+
+  使美颜变形过度的更自然，避免突变效果，可通过参数 change_frames 来控制渐变所需要的帧数，0 渐变关闭 ，大于0开启渐变，值为渐变所需要的帧数。
+
+  设置参数的例子代码如下：
+
+  ```
+  fuItemSetParamd(mItemsArray[1], "change_frames", 10);
+  ```
 
 ## 手势识别
 目前我们的手势识别功能也是以道具的形式进行加载的。一个手势识别的道具中包含了要识别的手势、识别到该手势时触发的动效、及控制脚本。加载该道具的过程和加载普通道具、美颜道具的方法一致。
 
-线上例子中 heart.bundle 为爱心手势演示道具。将其作为道具加载进行绘制即可启用手势识别功能。手势识别道具可以和普通道具及美颜共存，类似美颜将 g_items 扩展为三个并在最后加载手势道具即可。
+线上例子中 heart_v2.bundle 为爱心手势演示道具。将其作为道具加载进行绘制即可启用手势识别功能。手势识别道具可以和普通道具及美颜共存，类似美颜将 mItemsArray 扩展为三个并在最后加载手势道具即可。
 
 自定义手势道具的流程和2D道具制作一致，具体打包的细节可以联系我司技术支持。
+## 3D绘制抗锯齿功能
+
+高效全屏抗锯齿，使得3D绘制效果更加平滑。
+
+__使用方法__：
+
+- 加载fxaa.bundle，随新版本SDK提供
+- 绘制时将fxaa.bundle放在道具数组最后一个
+
+```
+mItemsArray[ITEM_ARRAYS_EFFECT_ANIMOJI_3D] = fuCreateItemFromPackage(g_res_zip, (int)g_res_size);
+```
+
+## 照片驱动功能
+
+针对照片进行精确的人脸重建，然后支持实时表情驱动，预置表情播放。可以用于实时应用，也可以用于生成表情包等。
+
+该功能的资源有两种方式生成方式：
+
+- 使用FUEditor v4.3.0以上版本离线制作道具
+- 利用相芯提供的云服务在线上传照片生成道具
+  在线云服务的方式请联系技术支持获取更多细节。
+
+__使用方法__：
+
+- 直接加载对应的道具
+- 需要带有照片驱动权限的证书
+
+## 人脸夸张变形功能
+
+新增了5款夸张变形。
+
+__使用方法__：
+
+- 直接加载对应的道具
+- 需要带有照片驱动权限的证书
+
+## 音乐节奏滤镜
+
+效果详见FULiveDemo，道具可以通过FUEditor进行制作（v4.2.1及以上）。
+
+## 优化表情校准功能
+
+增加被动校准模式，将之前的表情校准定义为主动校准模式。
+
+- 被动校准：该种模式下会在整个用户使用过程中逐渐进行表情校准，用户对该过程没有明显感觉。该种校准的强度相比主动校准较弱。
+- 主动校准：老版本的表情校准模式。该种模式下系统会进行快速集中的表情校准，一般为初次识别到人脸之后的2-3秒钟。在该段时间内，需要用户尽量保持无表情状态，该过程结束后再开始使用。该过程的开始和结束可以通过 ```fuGetFaceInfo``` 接口获取参数 ```is_calibrating```。
+
+__使用方法__：
+
+- 调用 ```fuSetExpressionCalibration``` 接口控制表情校准功能的开关及不同模式，参数为0时关闭表情校准，1为主动校准，2为被动校准。
 
 ## 鉴权
 
@@ -188,316 +405,12 @@ openssl ca -config ca.conf -gencrl -keyfile CERT_NAME.key -cert CERT_NAME.crt -o
 ```
 static char g_auth_package[]={ ... }
 ```
-
-用户在库环境初始化时，需要提供该数组进行鉴权，具体参考 fuSetup 接口。没有证书、证书失效、网络连接失败等情况下，会造成鉴权失败，在控制台或者Android平台的log里面打出 "not authenticated" 信息，并在运行一段时间后停止渲染道具。
-
-任何其他关于授权问题，请email：support@faceunity.com
-
 ## FAQ
 
 ## 为什么过了一段时间人脸识别失效了？
 
-检查证书。如证书是否正确使用，是否过期。您需要拥有我司颁发的证书才能使用我们的SDK的功能，获取证书方法：1、拨打电话 **0571-88069272** 2、发送邮件至 **marketing@faceunity.com** 进行咨询。
+检查证书。如证书是否正确使用，是否过期。您需要拥有我司颁发的证书才能使用我们的SDK的功能，获取证书方法：1、拨打电话 **0571-88069272** 2、发送邮件至 **marketing@com** 进行咨询。
 
-## 函数接口及参数说明
-
-```C
-/**
-\brief Initialize and authenticate your SDK instance to the FaceUnity server, must be called exactly once before all other functions.
-  The buffers should NEVER be freed while the other functions are still being called.
-  You can call this function multiple times to "switch pointers".
-\param v3data should point to contents of the "v3.bin" we provide
-\param ardata should be NULL
-\param authdata is the pointer to the authentication data pack we provide. You must avoid storing the data in a file.
-  Normally you can just `#include "authpack.h"` and put `g_auth_package` here.
-\param sz_authdata is the authentication data size, we use plain int to avoid cross-language compilation issues.
-  Normally you can just `#include "authpack.h"` and put `sizeof(g_auth_package)` here.
-\return non-zero for success, zero for failure
-*/
-FUNAMA_API int fuSetup(float* v3data,float* ardata,void* authdata,int sz_authdata);
-/**
-\brief Call this function when the GLES context has been lost and recreated.
-  That isn't a normal thing, so this function could leak resources on each call.
-*/
-FUNAMA_API void fuOnDeviceLost();
-/**
-\brief Call this function to reset the face tracker on camera switches
-*/
-FUNAMA_API void fuOnCameraChange();
-/**
-\brief Create an accessory item from a binary package, you can discard the data after the call.
-  This function MUST be called in the same GLES context / thread as fuRenderItems.
-\param data is the pointer to the data
-\param sz is the data size, we use plain int to avoid cross-language compilation issues
-\return an integer handle representing the item
-*/
-FUNAMA_API int fuCreateItemFromPackage(void* data,int sz);
-/**
-\brief Destroy an accessory item.
-  This function MUST be called in the same GLES context / thread as the original fuCreateItemFromPackage.
-\param item is the handle to be destroyed
-*/
-FUNAMA_API void fuDestroyItem(int item);
-/**
-\brief Destroy all accessory items ever created.
-  This function MUST be called in the same GLES context / thread as the original fuCreateItemFromPackage.
-*/
-FUNAMA_API void fuDestroyAllItems();
-
-FUNAMA_API void fuClearRenderData();
-/**
-\brief Render a list of items on top of a GLES texture or a memory buffer.
-  This function needs a GLES 2.0+ context.
-\param texid specifies a GLES texture. Set it to 0u if you want to render to a memory buffer.
-\param img specifies a memory buffer. Set it to NULL if you want to render to a texture.
-  If img is non-NULL, it will be overwritten by the rendered image when fuRenderItems returns
-\param w specifies the image width
-\param h specifies the image height
-\param frameid specifies the current frame id.
-  To get animated effects, please increase frame_id by 1 whenever you call this.
-\param p_items points to the list of items
-\param n_items is the number of items
-\return a new GLES texture containing the rendered image in the texture mode
-*/
-FUNAMA_API int fuRenderItems(int texid,int* img,int w,int h,int frame_id, int* p_items,int n_items);
-
-/**
-\brief Generalized interface for rendering a list of items.
-  This function needs a GLES 2.0+ context.
-\param out_format is the output format
-\param out_ptr receives the rendering result, which is either a GLuint texture handle or a memory buffer
-  Note that in the texture cases, we will overwrite *out_ptr with a texture we generate.
-\param in_format is the input format
-\param in_ptr points to the input image, which is either a GLuint texture handle or a memory buffer
-\param w specifies the image width
-\param h specifies the image height
-\param frameid specifies the current frame id.
-  To get animated effects, please increase frame_id by 1 whenever you call this.
-\param p_items points to the list of items
-\param n_items is the number of items
-\return a GLuint texture handle containing the rendering result if out_format isn't FU_FORMAT_GL_CURRENT_FRAMEBUFFER
-*/
-FUNAMA_API int fuRenderItemsEx(
-  int out_format,void* out_ptr,
-  int in_format,void* in_ptr,
-  int w,int h,int frame_id, int* p_items,int n_items);
-
-/**
-\brief Generalized interface for rendering a list of items.
-  This function needs a GLES 2.0+ context.
-\param out_format is the output format
-\param out_ptr receives the rendering result, which is either a GLuint texture handle or a memory buffer
-  Note that in the texture cases, we will overwrite *out_ptr with a texture we generate.
-\param in_format is the input format
-\param in_ptr points to the input image, which is either a GLuint texture handle or a memory buffer
-\param w specifies the image width
-\param h specifies the image height
-\param frameid specifies the current frame id.
-  To get animated effects, please increase frame_id by 1 whenever you call this.
-\param p_items points to the list of items
-\param n_items is the number of items
-\param p_masks indicates a list of masks for each item, bitwisely work on certain face
-\return a GLuint texture handle containing the rendering result if out_format isn't FU_FORMAT_GL_CURRENT_FRAMEBUFFER
-*/
-FUNAMA_API int fuRenderItemsMasked(
-  int out_format,void* out_ptr,
-  int in_format,void* in_ptr,
-  int w,int h,int frame_id, int* p_items,int n_items, int* p_masks);
-
-/**
-\brief Generalized interface for beautifying image.
-  Disable face tracker and item rendering.
-  This function needs a GLES 2.0+ context.
-\param out_format is the output format
-\param out_ptr receives the rendering result, which is either a GLuint texture handle or a memory buffer
-  Note that in the texture cases, we will overwrite *out_ptr with a texture we generate.
-\param in_format is the input format
-\param in_ptr points to the input image, which is either a GLuint texture handle or a memory buffer
-\param w specifies the image width
-\param h specifies the image height
-\param frameid specifies the current frame id.
-  To get animated effects, please increase frame_id by 1 whenever you call this.
-\param p_items points to the list of items
-\param n_items is the number of items
-\return a GLuint texture handle containing the rendering result if out_format isn't FU_FORMAT_GL_CURRENT_FRAMEBUFFER
-*/
-FUNAMA_API int fuBeautifyImage(
-  int out_format,void* out_ptr,
-  int in_format,void* in_ptr,
-  int w,int h,int frame_id, int* p_items,int n_items);
-
-/**
-\brief Generalized interface for tracking face.
-  Disable item rendering and image beautifying.
-  This function needs a GLES 2.0+ context.
-\param out_format is the output format
-\param out_ptr receives the rendering result, which is either a GLuint texture handle or a memory buffer
-  Note that in the texture cases, we will overwrite *out_ptr with a texture we generate.
-\param in_format is the input format
-\param in_ptr points to the input image, which is either a GLuint texture handle or a memory buffer
-\param w specifies the image width
-\param h specifies the image height
-\param frameid specifies the current frame id.
-  To get animated effects, please increase frame_id by 1 whenever you call this.
-\param p_items points to the list of items
-\param n_items is the number of items
-\return a GLuint texture handle containing the rendering result if out_format isn't FU_FORMAT_GL_CURRENT_FRAMEBUFFER
-*/
-FUNAMA_API int fuTrackFace(int in_format,void* in_ptr,int w,int h);
-
-/**
-\brief Generalized interface for rendering a list of items with extension.
-  This function needs a GLES 2.0+ context.
-\param out_format is the output format
-\param out_ptr receives the rendering result, which is either a GLuint texture handle or a memory buffer
-  Note that in the texture cases, we will overwrite *out_ptr with a texture we generate.
-\param in_format is the input format
-\param in_ptr points to the input image, which is either a GLuint texture handle or a memory buffer
-\param w specifies the image width
-\param h specifies the image height
-\param frameid specifies the current frame id.
-  To get animated effects, please increase frame_id by 1 whenever you call this.
-\param p_items points to the list of items
-\param n_items is the number of items
-\param func_flag flags indicate all changable functionalities of render interface
-\param p_masks indicates a list of masks for each item, bitwisely work on certain face
-\return a GLuint texture handle containing the rendering result if out_format isn't FU_FORMAT_GL_CURRENT_FRAMEBUFFER
-*/
-FUNAMA_API int fuRenderItemsEx2(
-  int out_format,void* out_ptr,
-  int in_format,void* in_ptr,
-  int w,int h,int frame_id, int* p_items,int n_items,
-  int func_flag, void* p_item_masks);
-
-/**************************************************************
-The set / get functions do not make sense on their own. Refer to
-the documentation of specific items for their get/set-able
-parameters. Most items do not have any.
-**************************************************************/
-
-/**
-\brief Set an item parameter to a double value
-\param item specifies the item
-\param name is the parameter name
-\param value is the parameter value to be set
-\return zero for failure, non-zero for success
-*/
-FUNAMA_API int fuItemSetParamd(int item,char* name,double value);
-/**
-\brief Set an item parameter to a double array
-\param item specifies the item
-\param name is the parameter name
-\param value points to an array of doubles
-\param n specifies the number of elements in value
-\return zero for failure, non-zero for success
-*/
-FUNAMA_API int fuItemSetParamdv(int item,char* name,double* value,int n);
-/**
-\brief Set an item parameter to a string value
-\param item specifies the item
-\param name is the parameter name
-\param value is the parameter value to be set
-\return zero for failure, non-zero for success
-*/
-FUNAMA_API int fuItemSetParams(int item,char* name,char* value);
-/**
-\brief Get an item parameter as a double value
-\param item specifies the item
-\param name is the parameter name
-\return double value of the parameter
-*/
-FUNAMA_API double fuItemGetParamd(int item,char* name);
-/**
-\brief Get an item parameter as a string
-\param item specifies the item
-\param name is the parameter name
-\param buf receives the string value
-\param sz is the number of bytes available at buf
-\return the length of the string value, or -1 if the parameter is not a string.
-*/
-FUNAMA_API int fuItemGetParams(int item,char* name,char* buf,int sz);
-
-/**
-\brief Turn off the camera
-*/
-FUNAMA_API void fuTurnOffCamera();
-/**
-\brief Get the camera image size
-\param pret points to two integers, which receive the size
-*/
-FUNAMA_API void fuGetCameraImageSize(int* pret);
-/**
-\brief Get the face tracking status
-\return The number of valid faces currently being tracked
-*/
-FUNAMA_API int fuIsTracking();
-/**
-\brief Set the default orientation for face detection. The correct orientation would make the initial detection much faster.
-\param rmode is the default orientation to be set to, one of 0..3 should work.
-*/
-FUNAMA_API void fuSetDefaultOrientation(int rmode);
-/**
-\brief Set the maximum number of faces we track. The default value is 1.
-\param n is the new maximum number of faces to track
-\return The previous maximum number of faces tracked
-*/
-FUNAMA_API int fuSetMaxFaces(int n);
-/**
-\brief Set the quality-performance tradeoff.
-\param quality is the new quality value.
-       It's a floating point number between 0 and 1.
-       Use 0 for maximum performance and 1 for maximum quality.
-       The default quality is 1 (maximum quality).
-*/
-FUNAMA_API void fuSetQualityTradeoff(float quality);
-
-/**
-\brief Get face info. Certificate aware interface.
-\param face_id is the id of face, index is smaller than which is set in fuSetMaxFaces
-\param name is among "landmarks", "eye_rotation", "translation", "rotation"
-\param pret allocated memory space as container
-\param num is number of float allocated in pret
-  eg:     "landmarks" - 75*2 float
-        "landmarks_ar" - 75*3 float
-        "eye_rotation" - 4
-        "translation" - 3
-        "rotation" - 4
-        "projection_matrix" - 16
-\return 1 means successful fetch, container filled with info
-  0 means failure, general failure is due to invalid face info
-  other specific failure will print on the console
-*/
-FUNAMA_API int fuGetFaceInfo(int face_id, char* name, float* pret, int num);
-
-/**
-\brief Bind items to an avatar, already bound items won't be unbound
-\param avatar_item is the avatar item handle
-\param p_items points to a list of item handles to be bound to the avatar
-\param n_items is the number of item handles in p_items
-\param p_contracts points to a list of contract handles for authorizing items
-\param n_contracts is the number of contract handles in p_contracts
-\return the number of items newly bound to the avatar
-*/
-FUNAMA_API int fuAvatarBindItems(int avatar_item, int* p_items,int n_items, int* p_contracts,int n_contracts);
-/**
-\brief Unbind items from an avatar
-\param avatar_item is the avatar item handle
-\param p_items points to a list of item handles to be unbound from the avatar
-\param n_items is the number of item handles in p_items
-\return the number of items unbound from the avatar
-*/
-FUNAMA_API int fuAvatarUnbindItems(int avatar_item, int* p_items,int n_items);
-
-//
-FUNAMA_API int fuBindItems(int item_src, int* p_items,int n_items);
-FUNAMA_API int fuUnbindAllItems(int item_src);
-
-/**
-\brief Get SDK version string
-\return SDK version string in const char*
-*/
-FUNAMA_API const char* fuGetVersion();
-```
 用户在库环境初始化时，需要提供该数组进行鉴权，具体参考 fuSetup 接口。没有证书、证书失效、网络连接失败等情况下，会造成鉴权失败，在控制台或者Android平台的log里面打出 "not authenticated" 信息，并在运行一段时间后停止渲染道具。
 
-任何其他关于授权问题，请email：support@faceunity.com
+任何其他关于授权问题，请email：support@com
