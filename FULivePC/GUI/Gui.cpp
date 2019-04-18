@@ -34,6 +34,8 @@ int UIBridge::mSelectedCamera = 0;
 float UIBridge::mFaceBeautyLevel[5] = {0.0f};
 float UIBridge::mFaceShapeLevel[6] = {0.0f};
 float UIBridge::mFilterLevel[10] = { 100,100,100,100,100, 100,100,100,100,100};
+float UIBridge::mMakeupLevel[10] = { 100,100,100,100,100, 100,100,100,100,100 };
+
 bool UIBridge::mNeedIpcWrite =false;
 bool UIBridge::mNeedPlayMP3 = false;
 bool UIBridge::mNeedStopMP3 = false;
@@ -280,7 +282,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 		GDocs[0].Name = u8"美肤";
 		GDocs[1].Name = u8"美型";
 		GDocs[2].Name = u8"滤镜";
-		GDocs[3].Name = u8"风格";
+		GDocs[3].Name = u8"质感美颜";
 	}
 	ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 1.f));
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(120.f / 255.f, 136.f / 255.f, 234.f / 255.f, 1.f));
@@ -461,8 +463,8 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 		case 2:
 		{
 			ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));			
-			std::string filterNameArr[5] = { "list_image_origin", "list_image_danya", "list_image_fennen", "list_image_qingxin", "list_image_hongrun" };
-			for (int i = 0; i < 5; i++)
+			std::string filterNameArr[6] = { "list_image_origin", "list_image_bailiang1", "list_image_fennen1", "list_image_xiaoqingxin1", "list_image_lengsediao1", "list_image_nuansediao1" };
+			for (int i = 0; i < 6; i++)
 			{
 				if (ImGui::ImageButton(Texture::createTextureFromFile(filterNameArr[i] + ".png", false)->getTextureID(), ImVec2(106 * scaleRatioW, 106 * scaleRatioH)))
 				{
@@ -477,7 +479,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 						UIBridge::showFilterSlider = false;
 					}
 				}
-				if (i != 2 && i != 4)
+				if (i != 2 && i != 5)
 				{
 					ImGui::SameLine(0.f, 27.f);
 				}
@@ -493,12 +495,12 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 		case  3:
 		{
 			ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));			
-			std::string filterNameArr[5] = { "list_image_Originalmap", "list_image_delta", "list_image_slowlived", "list_image_tokyo", "list_image_warm" };
+			std::string filterNameArr[5] = { "list_icon_cancel_nor", "list_image_peachblossom", "list_image_grapefruit", "list_image_clear", "list_image_boyfriend" };
 			for (int i = 0; i < 5; i++)
 			{
 				if (ImGui::ImageButton(Texture::createTextureFromFile(filterNameArr[i] + ".png", false)->getTextureID(), ImVec2(106 * scaleRatioW, 106 * scaleRatioH)))
 				{
-					nama->UpdateFilter(i);
+					nama->SetCurrentMakeup(i-1);
 					UIBridge::m_curFilterIdx = 5 + i;
 					if (i != 0)
 					{
@@ -516,9 +518,9 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			}
 			if (UIBridge::showFilterSlider)
 			{
-				if (LayoutSlider(ImVec2(54, 280), ImVec2(252, 10), "##slider36", &UIBridge::mFilterLevel[UIBridge::m_curFilterIdx], 0, 100))
+				if (LayoutSlider(ImVec2(54, 280), ImVec2(252, 10), "##slider36", &UIBridge::mMakeupLevel[UIBridge::m_curFilterIdx], 0, 100))
 				{
-					nama->UpdateBeauty();
+					nama->UpdateMakeupParams();					
 				}
 			}
 		}
@@ -704,6 +706,7 @@ void Gui::render(Nama::UniquePtr& nama)
 			if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
 			{
 				nama->RenderItems(processedFrame.data);
+				//nama->DrawLandmarks(processedFrame.data);
 			}			
 			//printf("RenderItems cost %f \n", GetTickCount()- tempTime);			
 			{

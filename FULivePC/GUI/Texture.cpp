@@ -7,7 +7,9 @@ std::vector<std::string> Texture::m_searchPath;
 void Texture::create(uint32_t width, uint32_t height, unsigned char* pixels)
 {
 	mTextureID = kMaxPossible;														  // Upload texture to graphics system
-	pixels = pixels;
+	this->pixels = pixels;
+	m_width = width;
+	m_height = height;
 	GLint last_texture;
 	glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
 	glGenTextures(1, &mTextureID);

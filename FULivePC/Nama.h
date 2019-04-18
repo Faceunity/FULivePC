@@ -29,7 +29,9 @@ namespace NamaExampleNameSpace
 		bool SelectBundle(std::string bundleName);
 		int  IsTracking();
 		void SetCurrentShape(int index);
+		void SetCurrentMakeup(int index);
 		void UpdateFilter(int);
+		void UpdateMakeupParams();
 		void UpdateBeauty();
 		void SwitchBeauty(bool);
 		void RenderItems(uchar* frame);		
@@ -38,6 +40,7 @@ namespace NamaExampleNameSpace
 		void DrawPoint(uchar*  frame, int x, int y, unsigned char r = 255, unsigned char g = 240, unsigned char b = 33);
 	private:				
 		int mBeautyHandles;
+		int mLightMakeUpHandle;
 		int mGestureHandles;
 		int mFxaaHandles;
 		uint32_t mFrameWidth, mFrameHeight;
@@ -63,3 +66,11 @@ std::string ConvertToString(T value) {
 	ss << value;
 	return ss.str();
 }
+
+struct MakeupParam
+{
+	std::string typeName;
+	std::string valueName;
+	std::string textureName;
+	int value;
+};
