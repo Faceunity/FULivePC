@@ -9,6 +9,7 @@ int oriWindowWidth = 0;
 int oriWindowHeight = 0;
 float scaleRatioW = 1.f;
 float scaleRatioH = 1.f;
+bool showUI = false;
 int UIBridge::bundleCategory = -1;
 int UIBridge::renderBundleCategory = -1;
 std::vector<std::string> UIBridge::categoryBundles[BundleCategory::Count];
@@ -124,7 +125,7 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 	/*GLFWwindow**/ window = glfwCreateWindow(width, height, "FU Live Demo PC V", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	hWindow = glfwGetWin32Window(window);
-	glfwSwapInterval(0); // Enable vsync
+	glfwSwapInterval(1); // Enable vsync
 	gl3wInit();
 	glfwSetWindowSizeCallback(window, window_size_callback);
 	// Setup Dear ImGui binding
@@ -577,7 +578,12 @@ void Gui::render(Nama::UniquePtr& nama)
 		ImGui::NewFrame();
 
 		//Texture::AddSearchPath("");
+		if (ImGui::IsKeyPressed(GLFW_KEY_F2))
+		{
+			showUI = !showUI;
+		}
 		//title window
+		if (showUI)
 		{
 			ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(1360 * scaleRatioW, 60 * scaleRatioH), ImGuiCond_Always);
@@ -592,6 +598,7 @@ void Gui::render(Nama::UniquePtr& nama)
 			ImGui::End();
 		}
 		//navigation window
+		if (showUI)
 		{
 			ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 70 * scaleRatioH), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 76 * scaleRatioH), ImGuiCond_Always);
@@ -625,7 +632,7 @@ void Gui::render(Nama::UniquePtr& nama)
 				}
 				ImGui::PopItemWidth();
 			}
-			else
+			else if (showUI)
 			{
 				ImGui::PushItemWidth(244 * scaleRatioW);				
 				if(ImGui::BeginCombo("##slect camera122", u8"未检测到摄像头")) // The second parameter is the label previewed before opening the combo.				
@@ -648,45 +655,49 @@ void Gui::render(Nama::UniquePtr& nama)
 		}
 		//frame window
 		{
-			ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 156 * scaleRatioH), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 664 * scaleRatioH), ImGuiCond_Always);
-			ImGui::Begin("Window2##2", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus);
-			ImGui::Dummy(ImVec2(888 * scaleRatioW,500 * scaleRatioH));
-			for (int i = 0; i < 7; i++)	ImGui::Spacing();
-
+			if (showUI)
 			{
-				std::string categoryNameArr[20] = {"list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_AR_nor", "list_icon_Changeface_nor",
-					"list_icon_Expressionrecognition_nor",	"list_icon_Musicfilter_nor","list_icon_Bgsegmentation_nor",
-					"list_icon_gesturerecognition_nor","list_icon_Hahamirror_nor","list_icon_Portraitdrive_nor",
-					"Animoji",u8"道具贴图",u8"AR面具",u8"  换脸",
-					u8"表情识别",u8"音乐滤镜",u8"背景分割",
-					u8"手势识别",u8" 哈哈镜",u8"人像驱动", };
-				for (int i=0;i<10;i++)
-				{
-					if (UIBridge::bundleCategory == i)
-					{
-						if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile("selected.png", false)->getTextureID(), 
-							Texture::createTextureFromFile("selected.png", false)->getTextureID(),categoryNameArr[10+i].c_str()))
-						{
-							UIBridge::bundleCategory = -1;							
-							UIBridge::showItemSelectWindow = false;
-						}
-					}
-					else
-					{
-						std::string iconFileName = categoryNameArr[i].substr(0, categoryNameArr[i].find_last_of("_")) + (1? "_hover.png": "_nor.png");						
-						if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile(categoryNameArr[i]+".png", false)->getTextureID(), 
-							Texture::createTextureFromFile(iconFileName, false)->getTextureID(), categoryNameArr[10 + i].c_str()))
-						{//显示道具选择
-							UIBridge::bundleCategory = i;
-							UIBridge::showItemSelectWindow = true;
-						}
-					}
-					ImGui::SameLine(0.f, 27.f * scaleRatioW);
-				}	
-			}			
+				ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 156 * scaleRatioH), ImGuiCond_Always);
+				ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 664 * scaleRatioH), ImGuiCond_Always);
+				ImGui::Begin("Window2##2", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus);
+				ImGui::Dummy(ImVec2(888 * scaleRatioW, 500 * scaleRatioH));
+				for (int i = 0; i < 7; i++)	ImGui::Spacing();
 
-			ImGui::End();
+				{
+					std::string categoryNameArr[20] = { "list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_AR_nor", "list_icon_Changeface_nor",
+						"list_icon_Expressionrecognition_nor",	"list_icon_Musicfilter_nor","list_icon_Bgsegmentation_nor",
+						"list_icon_gesturerecognition_nor","list_icon_Hahamirror_nor","list_icon_Portraitdrive_nor",
+						"Animoji",u8"道具贴图",u8"AR面具",u8"  换脸",
+						u8"表情识别",u8"音乐滤镜",u8"背景分割",
+						u8"手势识别",u8" 哈哈镜",u8"人像驱动", };
+					for (int i = 0; i < 10; i++)
+					{
+						if (UIBridge::bundleCategory == i)
+						{
+							if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile("selected.png", false)->getTextureID(),
+								Texture::createTextureFromFile("selected.png", false)->getTextureID(), categoryNameArr[10 + i].c_str()))
+							{
+								UIBridge::bundleCategory = -1;
+								UIBridge::showItemSelectWindow = false;
+							}
+						}
+						else
+						{
+							std::string iconFileName = categoryNameArr[i].substr(0, categoryNameArr[i].find_last_of("_")) + (1 ? "_hover.png" : "_nor.png");
+							if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile(categoryNameArr[i] + ".png", false)->getTextureID(),
+								Texture::createTextureFromFile(iconFileName, false)->getTextureID(), categoryNameArr[10 + i].c_str()))
+							{//显示道具选择
+								UIBridge::bundleCategory = i;
+								UIBridge::showItemSelectWindow = true;
+							}
+						}
+						ImGui::SameLine(0.f, 27.f * scaleRatioW);
+					}
+				}
+
+				ImGui::End();
+			}
+		
 			//Nama渲染
 			ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(58.f / 255.f, 61.f / 255.f, 82.f / 255.f, 1.f));
 			ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 156 * scaleRatioH), ImGuiCond_Always);
@@ -699,8 +710,7 @@ void Gui::render(Nama::UniquePtr& nama)
 				
 			cv::Mat frameMat = nama->GetFrame();
 			
-			cv::Mat processedFrame;			
-			processedFrame = frameMat.clone();		
+			static cv::Mat processedFrame = frameMat.clone();
 			cv::cvtColor(frameMat, processedFrame, cv::COLOR_BGR2RGBA);
 			//float tempTime = GetTickCount();
 			if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
@@ -722,6 +732,7 @@ void Gui::render(Nama::UniquePtr& nama)
 				cv::cvtColor(processedFrame, processedFrame, cv::COLOR_BGRA2RGBA);
 			}
 			UIBridge::mFPS = get_fps();
+			printf("UIBridge::mFPS: %d\n", UIBridge::mFPS);
 			UIBridge::mRenderTime = 1000.f / (float)UIBridge::mFPS;
 			UIBridge::mResolutionWidth = processedFrame.cols;
 			UIBridge::mResolutionHeight = processedFrame.rows;
@@ -741,101 +752,107 @@ void Gui::render(Nama::UniquePtr& nama)
 			ImGui::End();
 			ImGui::PopStyleColor();
 			//FPS信息显示
-			if(UIBridge::showDegubInfoWindow)
-			{				
-				ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .78f));
-				ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, 0.f));
-				ImGui::SetNextWindowPos(ImVec2(26 * scaleRatioW, 172 * scaleRatioH), ImGuiCond_Always);
-				ImGui::SetNextWindowSize(ImVec2(154 * scaleRatioW, 98 * scaleRatioH), ImGuiCond_Always);
-				ImGui::Begin("debugInfo##2223", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar /*| ImGuiWindowFlags_NoInputs*/);				
-				ImGui::TextColored(ImColor(255, 255, 255, 255), "FPS:%d", UIBridge::mFPS);
-				ImGui::TextColored(ImColor(255, 255, 255, 255), "Resolution:%d*%d", UIBridge::mResolutionWidth, UIBridge::mResolutionHeight);
-				ImGui::TextColored(ImColor(255, 255, 255, 255), "RenderTime:%dms", UIBridge::mRenderTime);
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .0f));
-				if (LayoutButton(ImVec2(100, 0), ImVec2(37, 24), u8"关闭"))
-				{
-					UIBridge::showDegubInfoWindow = false;
-				}
-				ImGui::PopStyleColor();
-				ImGui::PopStyleColor();
-				ImGui::End();
-				ImGui::PopStyleColor();
-			}
-			else
+			if (showUI)
 			{
-				ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .78f));
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .0f));
-				ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, 0.f));
-				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-				ImGui::SetNextWindowPos(ImVec2(26 * scaleRatioW, 172 * scaleRatioH), ImGuiCond_Always);
-				ImGui::SetNextWindowSize(ImVec2(120 * scaleRatioW, 40 * scaleRatioH), ImGuiCond_Always);
-				ImGui::Begin("debugInfo##23", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar /*| ImGuiWindowFlags_NoInputs*/);
-				if (LayoutButton(ImVec2(0, 0), ImVec2(100, 25), u8"显示性能参数"))
+				if (UIBridge::showDegubInfoWindow)
 				{
-					UIBridge::showDegubInfoWindow = true;
+					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .78f));
+					ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, 0.f));
+					ImGui::SetNextWindowPos(ImVec2(26 * scaleRatioW, 172 * scaleRatioH), ImGuiCond_Always);
+					ImGui::SetNextWindowSize(ImVec2(154 * scaleRatioW, 98 * scaleRatioH), ImGuiCond_Always);
+					ImGui::Begin("debugInfo##2223", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar /*| ImGuiWindowFlags_NoInputs*/);
+					ImGui::TextColored(ImColor(255, 255, 255, 255), "FPS:%d", UIBridge::mFPS);
+					ImGui::TextColored(ImColor(255, 255, 255, 255), "Resolution:%d*%d", UIBridge::mResolutionWidth, UIBridge::mResolutionHeight);
+					ImGui::TextColored(ImColor(255, 255, 255, 255), "RenderTime:%dms", UIBridge::mRenderTime);
+					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .0f));
+					if (LayoutButton(ImVec2(100, 0), ImVec2(37, 24), u8"关闭"))
+					{
+						UIBridge::showDegubInfoWindow = false;
+					}
+					ImGui::PopStyleColor();
+					ImGui::PopStyleColor();
+					ImGui::End();
+					ImGui::PopStyleColor();
 				}
-				ImGui::End();
-				ImGui::PopStyleVar();
-				ImGui::PopStyleColor();
-				ImGui::PopStyleColor();
-				ImGui::PopStyleColor();
+				else
+				{
+					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .78f));
+					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .0f));
+					ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, 0.f));
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+					ImGui::SetNextWindowPos(ImVec2(26 * scaleRatioW, 172 * scaleRatioH), ImGuiCond_Always);
+					ImGui::SetNextWindowSize(ImVec2(120 * scaleRatioW, 40 * scaleRatioH), ImGuiCond_Always);
+					ImGui::Begin("debugInfo##23", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar /*| ImGuiWindowFlags_NoInputs*/);
+					if (LayoutButton(ImVec2(0, 0), ImVec2(100, 25), u8"显示性能参数"))
+					{
+						UIBridge::showDegubInfoWindow = true;
+					}
+					ImGui::End();
+					ImGui::PopStyleVar();
+					ImGui::PopStyleColor();
+					ImGui::PopStyleColor();
+					ImGui::PopStyleColor();
+				}
 			}
-
-			//悬浮选择道具
-			if(UIBridge::showItemSelectWindow)
+		
+			if (showUI)
 			{
-				ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .0f));
-				ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 584 * scaleRatioH), ImGuiCond_Always);
-				ImGui::SetNextWindowSize(ImVec2(888 * scaleRatioW, 90 * scaleRatioH), ImGuiCond_Always);
-				ImGui::Begin("itemSelect##1563", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
-				for (int i = 0; i < BundleCategory::Count; i++)
+				//悬浮选择道具
+				if (UIBridge::showItemSelectWindow)
 				{
-					if (UIBridge::categoryBundles[i].size() == 0)
+					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
+					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .0f));
+					ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 584 * scaleRatioH), ImGuiCond_Always);
+					ImGui::SetNextWindowSize(ImVec2(888 * scaleRatioW, 90 * scaleRatioH), ImGuiCond_Always);
+					ImGui::Begin("itemSelect##1563", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
+					for (int i = 0; i < BundleCategory::Count; i++)
 					{
-						UIBridge::FindAllBundle(gBundlePath[i], UIBridge::categoryBundles[i]);
+						if (UIBridge::categoryBundles[i].size() == 0)
+						{
+							UIBridge::FindAllBundle(gBundlePath[i], UIBridge::categoryBundles[i]);
+						}
 					}
-				}
 
 
-				for (int i = 0; i < UIBridge::categoryBundles[UIBridge::bundleCategory].size(); i++)
-				{
-					std::string itemName = UIBridge::categoryBundles[UIBridge::bundleCategory][i];
-
-					std::string iconName = itemName.substr(0, itemName.find_last_of('.'));
-					Texture::SharedPtr tex = Texture::createTextureFromFile(iconName + ".png", false);
-					//找不到图标
-					if (!tex)
+					for (int i = 0; i < UIBridge::categoryBundles[UIBridge::bundleCategory].size(); i++)
 					{
-						tex = Texture::createTextureFromFile("icon_Movebutton_nor.png", false);
-					}
+						std::string itemName = UIBridge::categoryBundles[UIBridge::bundleCategory][i];
 
-					if (ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID,tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH)))
-					{						
-						if (UIBridge::mCurRenderItemName != itemName)
+						std::string iconName = itemName.substr(0, itemName.find_last_of('.'));
+						Texture::SharedPtr tex = Texture::createTextureFromFile(iconName + ".png", false);
+						//找不到图标
+						if (!tex)
 						{
-							UIBridge::mCurRenderItemName = itemName;
-							UIBridge::mLastTime = ImGui::GetTime() + 2.0;
-							UIBridge::showItemTipsWindow = false;
+							tex = Texture::createTextureFromFile("icon_Movebutton_nor.png", false);
 						}
-						else
+
+						if (ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH)))
 						{
-							UIBridge::mCurRenderItemName = "NONE";
-							UIBridge::mLastTime = 0.0;
-							UIBridge::showItemTipsWindow = false;
-							UIBridge::mNeedStopMP3 = true;
+							if (UIBridge::mCurRenderItemName != itemName)
+							{
+								UIBridge::mCurRenderItemName = itemName;
+								UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+								UIBridge::showItemTipsWindow = false;
+							}
+							else
+							{
+								UIBridge::mCurRenderItemName = "NONE";
+								UIBridge::mLastTime = 0.0;
+								UIBridge::showItemTipsWindow = false;
+								UIBridge::mNeedStopMP3 = true;
+							}
+							nama->SelectBundle(gBundlePath[UIBridge::bundleCategory] + "/" + itemName);
 						}
-						nama->SelectBundle(gBundlePath[UIBridge::bundleCategory] + "/" + itemName);
+						ImGui::SameLine(0.f, 27.f * scaleRatioW);
 					}
-					ImGui::SameLine(0.f, 27.f * scaleRatioW);
+					ImGui::End();
+					ImGui::PopStyleColor();
+					ImGui::PopStyleColor();
 				}
-				ImGui::End();
-				ImGui::PopStyleColor();
-				ImGui::PopStyleColor();
 			}
-
 		}
 		//道具提示
+		if (showUI)		
 		{
 			std::string tip;
 			if (doc.HasParseError()) {
@@ -874,6 +891,7 @@ void Gui::render(Nama::UniquePtr& nama)
 		}
 		
 		//right window
+		if (showUI)
 		{
 			ImGui::SetNextWindowPos(ImVec2(934 * scaleRatioW, 70 * scaleRatioH), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(416 * scaleRatioW, 750 * scaleRatioH), ImGuiCond_Always);
