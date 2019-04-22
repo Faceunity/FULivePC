@@ -9,7 +9,7 @@ int oriWindowWidth = 0;
 int oriWindowHeight = 0;
 float scaleRatioW = 1.f;
 float scaleRatioH = 1.f;
-bool showUI = false;
+bool showUI = true;
 int UIBridge::bundleCategory = -1;
 int UIBridge::renderBundleCategory = -1;
 std::vector<std::string> UIBridge::categoryBundles[BundleCategory::Count];
