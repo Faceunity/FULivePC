@@ -86,7 +86,7 @@ int get_fps()
 	int curTime = GetTickCount();
 	if (curTime - lastTime > 1000) // 取固定时间间隔为1秒
 	{
-		fps = frameCount;
+		fps = frameCount-1;
 		frameCount = 0;
 		lastTime = curTime;
 	}
