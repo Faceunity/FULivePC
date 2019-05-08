@@ -732,7 +732,7 @@ void Gui::render(Nama::UniquePtr& nama)
 				cv::cvtColor(processedFrame, processedFrame, cv::COLOR_BGRA2RGBA);
 			}
 			UIBridge::mFPS = get_fps();
-			printf("UIBridge::mFPS: %d\n", UIBridge::mFPS);
+			//printf("UIBridge::mFPS: %d\n", UIBridge::mFPS);
 			UIBridge::mRenderTime = 1000.f / (float)UIBridge::mFPS;
 			UIBridge::mResolutionWidth = processedFrame.cols;
 			UIBridge::mResolutionHeight = processedFrame.rows;

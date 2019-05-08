@@ -35,6 +35,16 @@ MakeupParam mMakeupParams[4][5] = { { { "json","makeup_intensity_lip","mu_lip_01
 										 ,{ { "json","makeup_intensity_lip","mu_lip_20",80 },{ "tex_blusher","makeup_intensity_blusher","mu_blush_22",90 },{ "tex_brow","makeup_intensity_eyeBrow","mu_eyebrow_18",45 },{ "tex_eye","makeup_intensity_eye","mu_eyeshadow_20",65 },{ "","","xiaoqingxin1",80 } }
 										 ,{ { "json","makeup_intensity_lip","mu_lip_18",100 },{ "tex_blusher","makeup_intensity_blusher","mu_blush_20",80 },{ "tex_brow","makeup_intensity_eyeBrow","mu_eyebrow_16",65 },{ "tex_eye","makeup_intensity_eye","mu_eyeshadow_18",90 },{ "","","xiaoqingxin3",90 } } };
 
+std::map<int, int> modules = { {Animoji,16},{ItemSticker,2},{ARMask,32},{ChangeFace,128},
+{ExpressionRecognition,2048},{MusicFilter,131072},{BackgroundSegmentation,256},
+{GestureRecognition,512},{MagicMirror,65536},{PortraitDrive,32768},{Makeup,524288},
+{Hair,524288},{ChangeFaceEx,8388608},{ExpressionGif,16777216}, {Facebeauty,1} ,{LightMakeup,0} ,{Facepup,0} };
+
+std::map<int, int> modules1 = { {Animoji,0},{ItemSticker,0},{ARMask,0},{ChangeFace,0},
+{ExpressionRecognition,0},{MusicFilter,0},{BackgroundSegmentation,0},
+{GestureRecognition,0},{MagicMirror,0},{PortraitDrive,0},{Makeup,0},
+{Hair,0},{ChangeFaceEx,0},{ExpressionGif,0}, {Facebeauty,0} ,{LightMakeup,8} ,{Facepup,16} };
+
 Nama::UniquePtr Nama::create(uint32_t width, uint32_t height,bool enable)
 {
 	UniquePtr pNama = UniquePtr(new Nama);
@@ -161,24 +171,8 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 		}
 		//CheckGLContext();
 		fuSetup(reinterpret_cast<float*>(&v3data[0]), v3data.size(), NULL, g_auth_package, sizeof(g_auth_package));
-
-		std::vector<char> anim_model_data;
-		if (false == LoadBundle(g_fuDataDir + g_anim_model, anim_model_data))
-		{
-			std::cout << "Error:缺少数据文件。" << g_fuDataDir + g_anim_model << std::endl;
-			return false;
-		}
-		// 表情系数稳定
-		fuLoadAnimModel(reinterpret_cast<float*>(&anim_model_data[0]), anim_model_data.size());
-
-		std::vector<char> ardata_ex_data;
-		if (false == LoadBundle(g_fuDataDir + g_ardata_ex, ardata_ex_data))
-		{
-			std::cout << "Error:缺少数据文件。" << g_fuDataDir + g_ardata_ex << std::endl;
-			return false;
-		}
-		// AR
-		fuLoadExtendedARData(reinterpret_cast<float*>(&ardata_ex_data[0]), ardata_ex_data.size());
+		mModuleCode = fuGetModuleCode(0);
+		mModuleCode1 = fuGetModuleCode(1);
 
 		std::vector<char> tongue_model_data;
 		if (false == LoadBundle(g_fuDataDir + g_tongue, tongue_model_data))
@@ -200,6 +194,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 
 
 		//读取美颜道具，设置美颜参数
+		if(CheckModuleCode(Facebeauty))
 		{
 			std::vector<char> propData;
 			if (false == LoadBundle(g_fuDataDir + g_faceBeautification, propData))
@@ -213,6 +208,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 		}
 
 		//读取美妆道具
+		if( CheckModuleCode(LightMakeup))
 		{
 			std::vector<char> propData;
 			if (false == LoadBundle(g_fuDataDir + g_LightMakeup, propData))
@@ -378,6 +374,12 @@ bool Nama::SelectBundle(std::string bundleName)
 	//如果未加载道具，则加载
 	if (0 == mBundlesMap[bundleName])
 	{
+		//证书没有权限读取这个种类的道具
+		if ( !CheckModuleCode(UIBridge::bundleCategory) )
+		{
+			std::cout << "您当前的证书无法加载此类道具." << std::endl;
+			return false;
+		}
 		std::vector<char> propData;
 		if (false == LoadBundle(bundleName, propData))
 		{
@@ -439,6 +441,11 @@ bool Nama::SelectBundle(std::string bundleName)
 		mMaxFace = 4;
 	}
 	return true;
+}
+
+bool Nama::CheckModuleCode(int category)
+{	
+	return (mModuleCode & modules[category])  || (mModuleCode1 & modules1[category]);
 }
 //渲染函数
 void Nama::RenderItems(uchar* frame)

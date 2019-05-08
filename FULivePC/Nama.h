@@ -27,6 +27,7 @@ namespace NamaExampleNameSpace
 		bool Init(uint32_t& width, uint32_t& height);
 		bool IsInited() { return mHasSetup; }
 		bool SelectBundle(std::string bundleName);
+		bool CheckModuleCode(int category);
 		int  IsTracking();
 		void SetCurrentShape(int index);
 		void SetCurrentMakeup(int index);
@@ -51,6 +52,7 @@ namespace NamaExampleNameSpace
 		int mIsDrawPoints;
 		int mMaxFace;
 		int mFrameID;		
+		int mModuleCode, mModuleCode1;
 		std::tr1::shared_ptr<CCameraDS> mCapture;
 		static std::string mFilters[6];
 		std::unordered_map<std::string, int> mBundlesMap;

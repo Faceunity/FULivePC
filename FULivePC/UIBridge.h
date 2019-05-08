@@ -22,6 +22,17 @@ enum BundleCategory
 
 	Count
 };
+enum BundleCategoryEx
+{
+	Makeup = 10,
+	Hair,
+	ChangeFaceEx,
+	ExpressionGif,
+	Facebeauty,
+	LightMakeup,
+	Facepup,
+	CountEx
+};
 static class UIBridge
 {
 public:
