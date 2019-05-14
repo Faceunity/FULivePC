@@ -5,11 +5,13 @@
 #include <opencv2/imgproc.hpp>
 #include "rapidjson\document.h"
 #include "rapidjson\filereadstream.h"
+#include "stdio.h"
 int oriWindowWidth = 0;
 int oriWindowHeight = 0;
 float scaleRatioW = 1.f;
 float scaleRatioH = 1.f;
 bool showUI = true;
+extern HANDLE hMutex;
 int UIBridge::bundleCategory = -1;
 int UIBridge::renderBundleCategory = -1;
 std::vector<std::string> UIBridge::categoryBundles[BundleCategory::Count];
@@ -707,10 +709,10 @@ void Gui::render(Nama::UniquePtr& nama)
 			float frameHeight = (float)500.f * scaleRatioH;
 			ImVec2 frameUV_LB = ImVec2(1, 0);
 			ImVec2 frameUV_RT = ImVec2(0, 1);
-				
-			cv::Mat frameMat = nama->GetFrame();
-			
+			WaitForSingleObject(hMutex, INFINITE);
+			cv::Mat frameMat = nama->GetFrame();			
 			static cv::Mat processedFrame = frameMat.clone();
+			ReleaseMutex(hMutex);
 			cv::cvtColor(frameMat, processedFrame, cv::COLOR_BGR2RGBA);
 			//float tempTime = GetTickCount();
 			if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
