@@ -16,6 +16,7 @@ CCameraDS::~CCameraDS()
 	{		
 		mCapture.release();
 	}
+	status = STATUS_NO_CAMERA;
 }
 
 void CCameraDS::init() {	
