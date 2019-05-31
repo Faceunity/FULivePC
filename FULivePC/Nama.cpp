@@ -70,6 +70,7 @@ Nama::~Nama()
 	{
 		fuDestroyAllItems();//Note: 切忌使用一个已经destroy的item
 		fuOnDeviceLost();//Note: 这个调用销毁nama创建的OpenGL资源
+		fuDestroyLibData();//Note: 这个调用销毁nama创建的线程资源
 	}
 	//fuSetup整个程序只需要运行一次，销毁某个子窗口时只需要调用上述两个函数。 
 	//Tips:如果其他窗口还会用这些资源，那么资源创建应该在父窗口。程序运行期间一直持有这些资源.
@@ -171,6 +172,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 		}
 		//CheckGLContext();
 		fuSetup(reinterpret_cast<float*>(&v3data[0]), v3data.size(), NULL, g_auth_package, sizeof(g_auth_package));
+		::Sleep(1000);
 		mModuleCode = fuGetModuleCode(0);
 		mModuleCode1 = fuGetModuleCode(1);
 
@@ -508,6 +510,9 @@ void Nama::RenderItems(uchar* frame)
 //只调用nama里的美颜模块
 uchar* Nama::RenderEx(uchar* frame)
 {
+	HGLRC context = wglGetCurrentContext();
+	HWND wnd = (HWND)Gui::hWindow;
+	wglMakeCurrent(GetDC(wnd), new_context);
 	if (true == mEnableNama)
 	{
 		fuBeautifyImage(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
@@ -516,6 +521,7 @@ uchar* Nama::RenderEx(uchar* frame)
 
 		++mFrameID;
 	}
+	wglMakeCurrent(GetDC(wnd), context);
 	return frame;
 }
 
