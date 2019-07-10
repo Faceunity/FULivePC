@@ -349,7 +349,15 @@ void Nama::UpdateBeauty()
 	std::string faceShapeParamName[] = { "cheek_thinning","eye_enlarging", "intensity_chin", "intensity_forehead", "intensity_nose","intensity_mouth" };
 	for (int i=0;i<MAX_FACESHAPEPARAMTER;i++)
 	{
-		fuItemSetParamd(mBeautyHandles, const_cast<char*>(faceShapeParamName[i].c_str()), UIBridge::mFaceShapeLevel[i]/100.0f);		
+		if (i == 2 || i == 3 || i == 5  )
+		{
+			UIBridge::mFaceShapeLevel[i] += 50;
+		}
+		fuItemSetParamd(mBeautyHandles, const_cast<char*>(faceShapeParamName[i].c_str()), UIBridge::mFaceShapeLevel[i]/100.0f);	
+		if (i == 2 || i == 3 || i == 5)
+		{
+			UIBridge::mFaceShapeLevel[i] -= 50;
+		}
 	}
 	fuItemSetParamd(mBeautyHandles, "skin_detect", UIBridge::mEnableSkinDect);	
 	fuItemSetParamd(mBeautyHandles, "heavy_blur", UIBridge::mEnableHeayBlur);
