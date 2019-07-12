@@ -17,7 +17,7 @@ void Texture::create(uint32_t width, uint32_t height, unsigned char* pixels)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
 	// Restore state
 	glBindTexture(GL_TEXTURE_2D, last_texture);
@@ -107,7 +107,33 @@ std::string Texture::GetFileFullPathFromeSearchPath(const char * name)
 	//return nullptr;
 	return "";
 }
+/* From FreeImage */
+template <class T> void INPLACESWAP(T& a, T& b) {
+	a ^= b; b ^= a; a ^= b;
+}
+BOOL SwapRedBlue32(FIBITMAP* dib) {
+	if (FreeImage_GetImageType(dib) != FIT_BITMAP) {
+		return FALSE;
+	}
 
+	const unsigned bytesperpixel = FreeImage_GetBPP(dib) / 8;
+	if (bytesperpixel > 4 || bytesperpixel < 3) {
+		return FALSE;
+	}
+
+	const unsigned height = FreeImage_GetHeight(dib);
+	const unsigned pitch = FreeImage_GetPitch(dib);
+	const unsigned lineSize = FreeImage_GetLine(dib);
+
+	BYTE* line = FreeImage_GetBits(dib);
+	for (unsigned y = 0; y < height; ++y, line += pitch) {
+		for (BYTE* pixel = line; pixel < line + lineSize; pixel += bytesperpixel) {
+			INPLACESWAP(pixel[0], pixel[2]);
+		}
+	}
+
+	return TRUE;
+}
 Texture::SharedPtr Texture::createTextureFromFile(const std::string filename, bool generateMips)
 {
 	SharedPtr pTexture = SharedPtr(new Texture);
@@ -172,9 +198,10 @@ Texture::SharedPtr Texture::createTextureFromFile(const std::string filename, bo
 	uint32_t bytesPerPixel = bpp / 8;
 
 	pBmp->mpData = new uint8_t[pBmp->mHeight * pBmp->mWidth * bytesPerPixel];
+	SwapRedBlue32(pDib);
 	FreeImage_ConvertToRawBits(pBmp->mpData, pDib, pBmp->mWidth * bytesPerPixel, bpp, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, true);
 	FreeImage_Unload(pDib);
-
+	
 	pTexture->create(pBmp->mWidth, pBmp->mHeight, pBmp->mpData);
 	mTextureMap[fullpath] = pTexture;
 	return pTexture;
