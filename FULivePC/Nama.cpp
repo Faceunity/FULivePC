@@ -442,7 +442,7 @@ bool Nama::SelectBundle(std::string bundleName)
 		UIBridge::renderBundleCategory = UIBridge::bundleCategory;
 		fuItemSetParamd(mLightMakeUpHandle, "makeup_intensity_blusher", 0); 
 	}
-	if (UIBridge::bundleCategory == PortraitDrive )
+	if (UIBridge::bundleCategory == PortraitDrive || UIBridge::bundleCategory == Animoji)
 	{
 		mMaxFace = 1;
 	}
