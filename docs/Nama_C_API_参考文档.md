@@ -9,6 +9,11 @@ SDK版本: 6.2.0
 ### 最新更新内容：
 
 <!--这个小节写每次最新以及次新的更新记录，时间，更新内容。新增函数，函数接口定义更新-->
+
+2019-08-14 v6.3.0:
+
+1. 新增fuSetFaceTrackParam函数，用于设置人脸跟踪参数。
+
 2019-06-27 v6.2.0:
 
 1. fuSetFaceDetParam函数新增加参数，enable_large_pose_detection。
@@ -569,6 +574,27 @@ __返回值:__
 __备注:__  
 
 `name == "min_facesize_small"`，`name == "min_facesize_small"`参数必须在`fuSetup`前设置。
+
+------
+##### fuSetFaceTrackParam 函数
+设置人脸表情跟踪相关参数，__建议使用默认参数__。
+
+```C
+int fuSetFaceTrackParam(char* name, float* pvalue);
+```
+__参数:__  
+
+*name*：参数名。
+
+*pvalue*: 参数值。
+
+- 设置 `name == "mouth_expression_more_flexible"` ，`pvalue = [0,1]`，默认 `pvalue = 0` ，从0到1，数值越大，嘴部表情越灵活。  
+
+__返回值:__  
+
+设置后状态，1 设置成功，0 设置失败。 
+
+__备注:__  
 
 ------
 ##### fuSetTongueTracking 函数

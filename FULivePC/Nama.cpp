@@ -175,7 +175,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 		::Sleep(1000);
 		mModuleCode = fuGetModuleCode(0);
 		mModuleCode1 = fuGetModuleCode(1);
-
+		printf("Nama version:%s \n", fuGetVersion());
 		std::vector<char> tongue_model_data;
 		if (false == LoadBundle(g_fuDataDir + g_tongue, tongue_model_data))
 		{
@@ -221,8 +221,20 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			std::cout << "load face makeup data." << std::endl;
 
 			mLightMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+
+			propData.clear();
+			if (false == LoadBundle(g_fuDataDir + g_NewFaceTracker, propData))
+			{
+				std::cout << "load face newfacetracker data failed." << std::endl;
+				return false;
+			}
+			std::cout << "load face newfacetracker data." << std::endl;
+
+			int newFaceTracker = fuCreateItemFromPackage(&propData[0], propData.size());			
 		}
 		fuSetDefaultOrientation(0);
+		float fValue = 0.5f;
+		fuSetFaceTrackParam("mouth_expression_more_flexible", &fValue);
 		mHasSetup = true;
 	}
 	else
