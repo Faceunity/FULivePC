@@ -353,12 +353,12 @@ face_shape 为0 1 2 3时
 对应0：女神 1：网红 2：自然 3：默认
 可以使用参数
 eye_enlarging:  默认0.5,  //大眼程度范围0.0-1.0
-cheek_thinning: 默认0.0,   //v脸程度范围0.0-1.0
+cheek_thinning: 默认0.0,   //瘦脸程度范围0.0-1.0
 2.
 face_shape 为4时，为精细变形，添加了鼻子额头嘴巴下巴的调整
 可以使用参数
 eye_enlarging:  默认0.5,  //大眼程度范围0.0-1.0
-cheek_thinning: 默认0.0,   //v脸程度范围0.0-1.0
+cheek_thinning: 默认0.0,   //瘦脸程度范围0.0-1.0
 intensity_nose: 默认0.0,       //瘦鼻程度范围0.0-1.0
 intensity_forehead: 默认0.5,   //额头调整程度范围0.0-1.0
 intensity_mouth:默认0.5,       //嘴巴调整程度范围0.0-1.0

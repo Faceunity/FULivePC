@@ -17,11 +17,11 @@
 
 - [美妆道具功能文档](美妆道具功能文档.md)
 
-- [海报换脸功能文档](海报换脸功能文档.md) *
+- [海报换脸功能文档](海报换脸功能文档.md)
 
-- [表情动图功能文档](表情动图功能文档.md) *
+- [表情动图功能文档](表情动图功能文档.md)
 
-  *注：海报换脸功能，表情动图功能暂时没有在windows版的demo中体现，如需体验可下载本公司Android或IOS的demo进行体验。
+  注：海报换脸功能，表情动图功能暂时没有在windows版的demo中体现，如需体验可下载本公司Android或IOS的demo进行体验。
 
 工程案例更新：
 
@@ -87,7 +87,7 @@ vs2015
 - [下载demo代码](<https://github.com/Faceunity/FULivePC> )
 - 获取证书:
   1. 拨打电话 **0571-88069272** 
-  2. 发送邮件至 **marketing@faceunity.com** 进行咨询。
+  2. 发送邮件至 **marketing@faceunity.com** 进行咨询。  
 #### 3.3 相关配置
 
 - 将证书文件authpack.h放置到include文件夹内（authpack.h由3.2步骤申请到）。
