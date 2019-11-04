@@ -9,9 +9,9 @@ extern const std::string g_v3Data;
 
 const std::string g_faceBeautification = "face_beautification.bundle";
 
-const std::string g_LightMakeup = "light_makeup.bundle";
+const std::string g_Makeup = "face_makeup.bundle";
 
-const std::string g_NewFaceTracker = "new_face_tracker_normal_v3.bundle";
+const std::string g_NewFaceTracker = "new_face_tracker.bundle";
 
 const std::string g_gestureRecongnition = "heart.bundle";
 

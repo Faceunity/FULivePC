@@ -21,6 +21,7 @@ bool UIBridge::showItemSelectWindow = false;
 bool UIBridge::showItemTipsWindow = false;
 bool UIBridge::showDegubInfoWindow = false;
 bool UIBridge::showFilterSlider = false;
+bool UIBridge::showMakeUpWindow = false;
  uint32_t UIBridge::mFPS = 60;
  uint32_t UIBridge::mResolutionWidth = 1280;
  uint32_t UIBridge::mResolutionHeight = 720;
@@ -124,7 +125,7 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 #if __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-	/*GLFWwindow**/ window = glfwCreateWindow(width, height, "FU Live Demo PC V", NULL, NULL);
+	/*GLFWwindow**/ window = glfwCreateWindow(width, height, "FU Live Demo PC", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	hWindow = glfwGetWin32Window(window);
 	glfwSwapInterval(1); // Enable vsync
@@ -274,7 +275,7 @@ struct MyDocument
 	void DoSave() { Dirty = false; }
 };
 
-static MyDocument GDocs[4];
+static MyDocument GDocs[3];
 
 static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 {
@@ -285,7 +286,6 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 		GDocs[0].Name = u8"美肤";
 		GDocs[1].Name = u8"美型";
 		GDocs[2].Name = u8"滤镜";
-		GDocs[3].Name = u8"质感美颜";
 	}
 	ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 1.f));
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(120.f / 255.f, 136.f / 255.f, 234.f / 255.f, 1.f));
@@ -300,7 +300,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 		//ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
 		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding,ImVec2(0.0f,5.0f));
 		//ImGui::PushItemWidth(52);
-		const bool selected = ImGui::TabItem(ImVec2(101 * scaleRatioW,30* scaleRatioH),doc.Name, &doc.Open, 0);
+		const bool selected = ImGui::TabItem(ImVec2(135 * scaleRatioW,30* scaleRatioH),doc.Name, &doc.Open, 0);
 		
 		//ImGui::PopItemWidth();
 		//ImGui::PopStyleVar();
@@ -495,39 +495,6 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			}
 		}
 		break;
-		case  3:
-		{
-			ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));			
-			std::string filterNameArr[5] = { "list_icon_cancel_nor", "list_image_peachblossom", "list_image_grapefruit", "list_image_clear", "list_image_boyfriend" };
-			for (int i = 0; i < 5; i++)
-			{
-				if (ImGui::ImageButton(Texture::createTextureFromFile(filterNameArr[i] + ".png", false)->getTextureID(), ImVec2(106 * scaleRatioW, 106 * scaleRatioH)))
-				{
-					nama->SetCurrentMakeup(i-1);
-					UIBridge::m_curFilterIdx = 5 + i;
-					if (i != 0)
-					{
-						UIBridge::showFilterSlider = true;
-					}
-					else
-					{
-						UIBridge::showFilterSlider = false;
-					}
-				}
-				if (i != 2 && i != 4)
-				{
-					ImGui::SameLine(0.f, 27.f);
-				}
-			}
-			if (UIBridge::showFilterSlider)
-			{
-				if (LayoutSlider(ImVec2(54, 280), ImVec2(252, 10), "##slider36", &UIBridge::mMakeupLevel[UIBridge::m_curFilterIdx], 0, 100))
-				{
-					nama->UpdateMakeupParams();					
-				}
-			}
-		}
-		break;
 		}
 	}
 	ImGui::EndTabBar();
@@ -666,18 +633,29 @@ void Gui::render(Nama::UniquePtr& nama)
 				for (int i = 0; i < 7; i++)	ImGui::Spacing();
 
 				{
-					std::string categoryNameArr[20] = { "list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_AR_nor", "list_icon_Changeface_nor",
+					std::string *categoryNameArr = nullptr;
+					std::string allCategory[]= { "list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_AR_nor", "list_icon_Changeface_nor",
 						"list_icon_Expressionrecognition_nor",	"list_icon_Musicfilter_nor","list_icon_Bgsegmentation_nor",
 						"list_icon_gesturerecognition_nor","list_icon_Hahamirror_nor","list_icon_Portraitdrive_nor",
 						"Animoji",u8"道具贴图",u8"AR面具",u8"  换脸",
 						u8"表情识别",u8"音乐滤镜",u8"背景分割",
 						u8"手势识别",u8" 哈哈镜",u8"人像驱动", };
-					for (int i = 0; i < 10; i++)
+					int amount = 10;
+					categoryNameArr = allCategory;
+					std::string makeupCategory[] = {"list_icon_propmap_collapse_nor",u8"美妆"};
+					if (UIBridge::showMakeUpWindow)
 					{
-						if (UIBridge::bundleCategory == i)
+						categoryNameArr = makeupCategory;
+						amount =1;
+						ImGui::Dummy(ImVec2(431 * scaleRatioW, 1)); ImGui::SameLine();
+					}
+					
+					for (int i = 0; i < amount; i++)
+					{
+						if (UIBridge::bundleCategory == i || UIBridge::bundleCategory == BundleCategory::Makeup)
 						{
-							if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile("selected.png", false)->getTextureID(),
-								Texture::createTextureFromFile("selected.png", false)->getTextureID(), categoryNameArr[10 + i].c_str()))
+							if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_propmap_collapse.png", false)->getTextureID(),
+								Texture::createTextureFromFile("list_icon_propmap_collapse.png", false)->getTextureID(), categoryNameArr[amount + i].c_str()))
 							{
 								UIBridge::bundleCategory = -1;
 								UIBridge::showItemSelectWindow = false;
@@ -687,17 +665,44 @@ void Gui::render(Nama::UniquePtr& nama)
 						{
 							std::string iconFileName = categoryNameArr[i].substr(0, categoryNameArr[i].find_last_of("_")) + (1 ? "_hover.png" : "_nor.png");
 							if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile(categoryNameArr[i] + ".png", false)->getTextureID(),
-								Texture::createTextureFromFile(iconFileName, false)->getTextureID(), categoryNameArr[10 + i].c_str()))
+								Texture::createTextureFromFile(iconFileName, false)->getTextureID(), categoryNameArr[amount + i].c_str()))
 							{//显示道具选择
 								UIBridge::bundleCategory = i;
+								if (UIBridge::showMakeUpWindow)
+								{
+									UIBridge::bundleCategory = BundleCategory::Makeup;
+								}
 								UIBridge::showItemSelectWindow = true;
 							}
 						}
 						ImGui::SameLine(0.f, 27.f * scaleRatioW);
 					}
 				}
-
+				ImGui::Dummy(ImVec2(1,1));
+				ImGui::Dummy(ImVec2(321 * scaleRatioW, 1)); ImGui::SameLine();
+				ImGui::PushItemWidth(272 * scaleRatioW);
+				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+				ImGui::PushStyleVar(ImGuiStyleVar_GrabRounding, 6.0f);
+				ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));				
+				//ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
+				if (ImGui::SliderString("##modeSlider", u8"AR功能", u8"美妆", (int*)&UIBridge::showMakeUpWindow, 0, 1))
+				{
+					if (UIBridge::showMakeUpWindow)
+					{
+						UIBridge::showItemSelectWindow = true;
+						UIBridge::bundleCategory = BundleCategory::Makeup;
+					}
+					else
+					{
+						UIBridge::showItemSelectWindow = false;
+						UIBridge::bundleCategory = -1;
+					}
+				}
+				ImGui::PopStyleVar(2);
+				ImGui::PopStyleColor(1);
+				ImGui::PopItemWidth();
 				ImGui::End();
+				
 			}
 		
 			//Nama渲染
@@ -811,11 +816,14 @@ void Gui::render(Nama::UniquePtr& nama)
 					{
 						if (UIBridge::categoryBundles[i].size() == 0)
 						{
+							if (i> sizeof(gBundlePath) / sizeof(gBundlePath[0]))
+							{
+								break;
+							}
 							UIBridge::FindAllBundle(gBundlePath[i], UIBridge::categoryBundles[i]);
 						}
 					}
-
-
+					
 					for (int i = 0; i < UIBridge::categoryBundles[UIBridge::bundleCategory].size(); i++)
 					{
 						std::string itemName = UIBridge::categoryBundles[UIBridge::bundleCategory][i];

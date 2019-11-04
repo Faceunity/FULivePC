@@ -1068,3 +1068,49 @@ void ImGui::ShowTabsDebug()
     }
     ImGui::End();
 }
+
+
+bool ImGui::SliderString(const char* label, char* text0,char* text1, int* v, int v_min, int v_max, const char* format, float power)
+{
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
+
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+	const ImGuiID id = window->GetID(label);
+	const float w = CalcItemWidth();
+
+	const ImVec2 label_size = CalcTextSize(label, NULL, true);
+	const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y*2.0f));
+	const ImRect total_bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
+
+	// NB- we don't call ItemSize() yet because we may turn into a text edit box below
+	if (!ItemAdd(total_bb, id, &frame_bb))
+	{
+		ItemSize(total_bb, style.FramePadding.y);
+		return false;
+	}
+	const bool tab_focus_requested = FocusableItemRegister(window, id);
+	const bool hovered = ItemHoverable(frame_bb, id);
+	if (tab_focus_requested || (hovered && g.IO.MouseClicked[0]) || g.NavActivateId == id || (g.NavInputId == id && g.ScalarAsInputTextId != id))
+	{
+		SetActiveID(id, window);
+		SetFocusID(id, window);
+		FocusWindow(window);
+		g.ActiveIdAllowNavDirFlags = (1 << ImGuiDir_Up) | (1 << ImGuiDir_Down);
+	}
+	// Actual slider behavior + render grab
+	ItemSize(total_bb, style.FramePadding.y);
+	const bool value_changed = SliderBehavior(frame_bb, id, ImGuiDataType_S32, v, &v_min, &v_max, format, power);
+	if (value_changed)
+		MarkItemValueChanged(id);
+
+	RenderTextClipped(frame_bb.Min, frame_bb.Max, text0, text0 + strlen(text0), NULL, ImVec2(0.2f, 0.5f));
+	RenderTextClipped(frame_bb.Min, frame_bb.Max, text1, text1 + strlen(text1), NULL, ImVec2(0.8f, 0.5f));
+
+	if (label_size.x > 0.0f)
+		RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
+
+	return value_changed;
+}

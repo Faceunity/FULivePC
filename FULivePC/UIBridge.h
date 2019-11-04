@@ -19,20 +19,17 @@ enum BundleCategory
 	GestureRecognition,
 	MagicMirror,
 	PortraitDrive,
-
-	Count
-};
-enum BundleCategoryEx
-{
-	Makeup = 10,
+	Makeup ,
 	Hair,
 	ChangeFaceEx,
 	ExpressionGif,
 	Facebeauty,
 	LightMakeup,
 	Facepup,
-	CountEx
+
+	Count
 };
+
 static class UIBridge
 {
 public:
@@ -45,6 +42,7 @@ public:
 	static bool showItemTipsWindow;
 	static bool showDegubInfoWindow;
 	static bool showFilterSlider; 
+	static bool showMakeUpWindow;
 	static bool mNeedIpcWrite; 
 	static bool mNeedPlayMP3;
 	static bool mNeedStopMP3;
@@ -104,11 +102,9 @@ public:
 			{
 				if (FindFileData.cFileName[0] != '.')
 				{
-					char szFile[MAX_PATH];
-					strcpy(szFile, lpPath);
-					strcat(szFile, "\\");
-					strcat(szFile, (char*)(FindFileData.cFileName));
-					IteratorFolder(szFile, fileList);
+					std::string folderName;
+					Wchar_tToString(folderName, FindFileData.cFileName);
+					fileList.push_back(folderName);
 				}
 			}
 			else
@@ -140,5 +136,6 @@ const std::string gBundlePath[] = {
 	g_assetDir + "items/" + "GestureRecognition",
 	g_assetDir + "items/" + "MagicMirror",
 	g_assetDir + "items/" + "PortraitDrive",
+	g_assetDir + "items/" + "Makeup",
 };
 #endif

@@ -8337,7 +8337,8 @@ bool ImGui::ImageRoundButton(ImGuiID& gui_id, ImTextureID user_texture_id, const
 	}
 	if (bg_col.w > 0.0f)
 		window->DrawList->AddRectFilled(image_bb.Min, image_bb.Max, GetColorU32(bg_col));
-	window->DrawList->AddImage(user_texture_id, image_bb.Min, image_bb.Max, uv0, uv1, GetColorU32(tint_col));
+	//window->DrawList->AddImage(user_texture_id, image_bb.Min, image_bb.Max, uv0, uv1, GetColorU32(tint_col));
+	window->DrawList->AddImageRounded(user_texture_id, image_bb.Min, image_bb.Max, uv0, uv1, GetColorU32(tint_col), bb.GetWidth() / 2.f);
 
 	return pressed;
 }

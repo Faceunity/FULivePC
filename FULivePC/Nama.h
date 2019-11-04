@@ -12,6 +12,24 @@ class CCameraDS;
 typedef unsigned char uchar;
 namespace NamaExampleNameSpace
 {
+	enum MakeupParamType
+	{
+		MString,
+		MArray,
+		MInt,
+		MFloat,
+	};
+	struct MakeupParam
+	{
+		int type;
+		std::string name;
+		float value;
+		std::vector<float> colorArr;
+		std::string tex;
+		int lip_type;
+		float brow_warp;
+		int brow_warp_type;
+	};
 	class Nama
 	{		
 	public:
@@ -30,9 +48,9 @@ namespace NamaExampleNameSpace
 		bool CheckModuleCode(int category);
 		int  IsTracking();
 		void SetCurrentShape(int index);
-		void SetCurrentMakeup(int index);
-		void UpdateFilter(int);
-		void UpdateMakeupParams();
+		int CreateMakeupBundle(std::string bundleName);
+		void SelectMakeupBundle(std::string bundleName);
+		void UpdateFilter(int);		
 		void UpdateBeauty();
 		void SwitchBeauty(bool);
 		void RenderItems(uchar* frame);		
@@ -41,7 +59,8 @@ namespace NamaExampleNameSpace
 		void DrawPoint(uchar*  frame, int x, int y, unsigned char r = 255, unsigned char g = 240, unsigned char b = 33);
 	private:				
 		int mBeautyHandles;
-		int mLightMakeUpHandle;
+		int mMakeUpHandle;
+		int mNewFaceTracker;
 		int mGestureHandles;
 		int mFxaaHandles;
 		uint32_t mFrameWidth, mFrameHeight;
@@ -56,8 +75,9 @@ namespace NamaExampleNameSpace
 		std::tr1::shared_ptr<CCameraDS> mCapture;
 		static std::string mFilters[6];
 		std::unordered_map<std::string, int> mBundlesMap;
+		std::unordered_map<std::string, std::vector<MakeupParam>> mMakeupsMap;
 	};
-
+	   
 	size_t FileSize(std::ifstream& file);
 
 	bool LoadBundle(const std::string& filepath, std::vector<char>& data);

@@ -18,6 +18,8 @@ IMGUI_API void          SetTabItemSelected(const char* label);
 IMGUI_API void          ShowTabsDemo(const char* title, bool* p_open = NULL);
 IMGUI_API void          ShowTabsDebug();
 
+IMGUI_API bool			SliderString(const char * label, char * text0, char * text1, int * v, int v_min, int v_max, const char* format = "%d", float power = 1.0f);
+
 };
 
 enum ImGuiTabBarFlags_
