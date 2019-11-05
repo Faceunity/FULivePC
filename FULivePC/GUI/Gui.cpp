@@ -861,7 +861,7 @@ void Gui::render(Nama::UniquePtr& nama)
 							}
 							nama->SelectBundle(gBundlePath[UIBridge::bundleCategory] + "/" + itemName);
 						}
-						ImGui::SameLine(0.f, 27.f * scaleRatioW);
+						ImGui::SameLine(0.f, 22.f * scaleRatioW);
 					}
 					ImGui::End();
 					ImGui::PopStyleColor();
