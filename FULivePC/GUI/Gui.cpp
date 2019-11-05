@@ -21,7 +21,7 @@ bool UIBridge::showItemSelectWindow = false;
 bool UIBridge::showItemTipsWindow = false;
 bool UIBridge::showDegubInfoWindow = false;
 bool UIBridge::showFilterSlider = false;
-bool UIBridge::showMakeUpWindow = false;
+int UIBridge::showMakeUpWindow = false;
  uint32_t UIBridge::mFPS = 60;
  uint32_t UIBridge::mResolutionWidth = 1280;
  uint32_t UIBridge::mResolutionHeight = 720;
@@ -34,6 +34,7 @@ std::string UIBridge::mCurRenderItemName = "";
 double UIBridge::mLastTime=0.0;
 int UIBridge::mEnableSkinDect = 1;
 int UIBridge::mEnableHeayBlur = 0;
+int UIBridge::mEnableExBlur = 0;
 int UIBridge::mSelectedCamera = 0;
 float UIBridge::mFaceBeautyLevel[5] = {0.0f};
 float UIBridge::mFaceShapeLevel[6] = {0.0f};
@@ -48,6 +49,7 @@ void resetBeautyParam()
 {
 	UIBridge::mEnableSkinDect = 1;
 	UIBridge::mEnableHeayBlur = 0;
+	UIBridge::mEnableExBlur = 0;
 	UIBridge::mFaceBeautyLevel[0] = 70;
 	UIBridge::mFaceBeautyLevel[1] = 50;
 	UIBridge::mFaceBeautyLevel[2] = 50;
@@ -339,15 +341,21 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			}
 			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_BeautyMode_open.png", false)->getTextureID(), u8"ÃÀ·ôÄ£Ê½");
 			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"ÇåÎúÄ¥Æ¤##2", UIBridge::mEnableHeayBlur == 0))
+			if (LayoutSelectable(ImVec2(22, 11), ImVec2(78, 30), u8"¾«Ï¸Ä¥Æ¤##3", UIBridge::mEnableHeayBlur == 0))
 			{
 				UIBridge::mEnableHeayBlur = 0;
 				nama->UpdateBeauty();
 			}
 			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"ëüëÊÄ¥Æ¤##2", UIBridge::mEnableHeayBlur == 1))
+			if (LayoutSelectable(ImVec2(5, 11), ImVec2(78, 30), u8"ÇåÎúÄ¥Æ¤##2", UIBridge::mEnableHeayBlur == 1))
 			{
 				UIBridge::mEnableHeayBlur = 1;
+				nama->UpdateBeauty();
+			}
+			ImGui::SameLine();
+			if (LayoutSelectable(ImVec2(5, 11), ImVec2(78, 30), u8"ëüëÊÄ¥Æ¤##2", UIBridge::mEnableHeayBlur == 2))
+			{
+				UIBridge::mEnableHeayBlur = 2;
 				nama->UpdateBeauty();
 			}
 			ImGui::PopStyleColor();

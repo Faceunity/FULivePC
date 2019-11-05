@@ -42,7 +42,7 @@ public:
 	static bool showItemTipsWindow;
 	static bool showDegubInfoWindow;
 	static bool showFilterSlider; 
-	static bool showMakeUpWindow;
+	static int showMakeUpWindow;
 	static bool mNeedIpcWrite; 
 	static bool mNeedPlayMP3;
 	static bool mNeedStopMP3;
@@ -58,6 +58,7 @@ public:
 	
 	static int mEnableSkinDect;
 	static int mEnableHeayBlur;
+	static int mEnableExBlur;
 	static float mFaceBeautyLevel[5];
 	static float mFaceShapeLevel[6];
 	static float mFilterLevel[10];

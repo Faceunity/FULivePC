@@ -184,7 +184,8 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 		mFxaaHandles = fuCreateItemFromPackage(fxaa_data.data(), fxaa_data.size());
 		fuSetExpressionCalibration(1);
 
-
+		mModuleCode = fuGetModuleCode(0);
+		mModuleCode1 = fuGetModuleCode(1);
 		//读取美颜道具，设置美颜参数
 		if(CheckModuleCode(Facebeauty))
 		{
@@ -225,8 +226,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 		fuSetDefaultOrientation(0);
 		float fValue = 0.5f;
 		fuSetFaceTrackParam("mouth_expression_more_flexible", &fValue);
-		mModuleCode = fuGetModuleCode(0);
-		mModuleCode1 = fuGetModuleCode(1);
+
 		mHasSetup = true;
 	}
 	else
@@ -417,8 +417,9 @@ void Nama::UpdateBeauty()
 			UIBridge::mFaceShapeLevel[i] -= 50;
 		}
 	}
-	fuItemSetParamd(mBeautyHandles, "skin_detect", UIBridge::mEnableSkinDect);	
-	fuItemSetParamd(mBeautyHandles, "heavy_blur", UIBridge::mEnableHeayBlur);
+	fuItemSetParamd(mBeautyHandles, "skin_detect", UIBridge::mEnableSkinDect);
+	std::map<int, int> blurType = { {0,2},{1,0},{2,1} };
+	fuItemSetParamd(mBeautyHandles, "blur_type", blurType[UIBridge::mEnableHeayBlur]);
 	fuItemSetParamd(mBeautyHandles, "face_shape_level", 1);
 	fuItemSetParamd(mBeautyHandles, "filter_level", UIBridge::mFilterLevel[UIBridge::m_curFilterIdx]/100.0f);
 }
@@ -499,6 +500,11 @@ bool Nama::SelectBundle(std::string bundleName)
 	else
 	{
 		bundleID = mBundlesMap[bundleName];		
+		//绑定美妆道具
+		if (UIBridge::bundleCategory == BundleCategory::Makeup)
+		{
+			fuBindItems(mMakeUpHandle, &bundleID, 1);
+		}
 		if (UIBridge::bundleCategory == BundleCategory::MusicFilter)
 		{
 			mp3Map[bundleID]->Play();
@@ -589,7 +595,7 @@ void Nama::RenderItems(uchar* frame)
 
 		if (UIBridge::showMakeUpWindow)
 		{
-			int handle[] = { mMakeUpHandle, mNewFaceTracker };
+			int handle[] = { mMakeUpHandle, mNewFaceTracker ,mBeautyHandles };
 			int handleSize = sizeof(handle) / sizeof(handle[0]);
 			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
 				mFrameWidth, mFrameHeight, mFrameID, handle, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
