@@ -54,6 +54,7 @@ Nama::Nama()
 	mBeautyHandles = 0;
 	mMakeUpHandle = 0;
 	mCapture = std::tr1::shared_ptr<CCameraDS>(new CCameraDS);
+	mNewFaceTracker = -1;
 }
 
 Nama::~Nama()
@@ -212,16 +213,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			std::cout << "load face makeup data." << std::endl;
 
 			mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
-
-			propData.clear();
-			if (false == LoadBundle(g_fuDataDir + g_NewFaceTracker, propData))
-			{
-				std::cout << "load face newfacetracker data failed." << std::endl;
-				return false;
-			}
-			std::cout << "load face newfacetracker data." << std::endl;
-
-			mNewFaceTracker = fuCreateItemFromPackage(&propData[0], propData.size());			
+					
 		}
 		fuSetDefaultOrientation(0);
 		float fValue = 0.5f;
@@ -480,7 +472,16 @@ bool Nama::SelectBundle(std::string bundleName)
 			//绑定美妆道具
 			if (UIBridge::bundleCategory == BundleCategory::Makeup)
 			{
+				if (UIBridge::m_curBindedItem != -1)
+				{
+					fuUnbindItems(mMakeUpHandle, &UIBridge::m_curBindedItem, 1);
+				}
 				fuBindItems(mMakeUpHandle, &bundleID, 1);
+				UIBridge::m_curBindedItem = bundleID;
+			}
+			else
+			{
+				//fuItemSetParamd(mMakeUpHandle, "is_makeup_on", 0);
 			}
 			//加载并播放音乐
 			if (UIBridge::bundleCategory == BundleCategory::MusicFilter)
@@ -503,7 +504,16 @@ bool Nama::SelectBundle(std::string bundleName)
 		//绑定美妆道具
 		if (UIBridge::bundleCategory == BundleCategory::Makeup)
 		{
+			if (UIBridge::m_curBindedItem != -1)
+			{
+				fuUnbindItems(mMakeUpHandle, &UIBridge::m_curBindedItem, 1);
+			}
 			fuBindItems(mMakeUpHandle, &bundleID, 1);
+			UIBridge::m_curBindedItem = bundleID;
+		}
+		else
+		{
+			//fuItemSetParamd(mMakeUpHandle, "is_makeup_on", 0);
 		}
 		if (UIBridge::bundleCategory == BundleCategory::MusicFilter)
 		{
@@ -518,6 +528,7 @@ bool Nama::SelectBundle(std::string bundleName)
 		if (UIBridge::bundleCategory == BundleCategory::Makeup)
 		{
 			fuUnbindItems(mMakeUpHandle, &UIBridge::m_curRenderItem, 1);
+			UIBridge::m_curBindedItem = -1;
 		}
 		UIBridge::m_curRenderItem = -1;
 		//if (UIBridge::bundleCategory == BundleCategory::Makeup)
@@ -595,13 +606,30 @@ void Nama::RenderItems(uchar* frame)
 
 		if (UIBridge::showMakeUpWindow)
 		{
-			int handle[] = { mMakeUpHandle, mNewFaceTracker ,mBeautyHandles };
+			if (mNewFaceTracker == -1)
+			{
+				std::vector<char> propData;
+				if (false == LoadBundle(g_fuDataDir + g_NewFaceTracker, propData))
+				{
+					std::cout << "load face newfacetracker data failed." << std::endl;
+					return;
+				}
+				std::cout << "load face newfacetracker data." << std::endl;
+
+				mNewFaceTracker = fuCreateItemFromPackage(&propData[0], propData.size());
+			}
+			int handle[] = { mBeautyHandles,mMakeUpHandle, mNewFaceTracker };
 			int handleSize = sizeof(handle) / sizeof(handle[0]);
 			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
 				mFrameWidth, mFrameHeight, mFrameID, handle, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
 		}
 		else
 		{
+			if (mNewFaceTracker != -1)
+			{
+				fuDestroyItem(mNewFaceTracker);
+				mNewFaceTracker = -1;
+			}
 			int handle[] = { mBeautyHandles, UIBridge::m_curRenderItem };
 			int handleSize = sizeof(handle) / sizeof(handle[0]);
 			//支持的格式有FU_FORMAT_BGRA_BUFFER 、 FU_FORMAT_NV21_BUFFER 、FU_FORMAT_I420_BUFFER 、FU_FORMAT_RGBA_BUFFER		

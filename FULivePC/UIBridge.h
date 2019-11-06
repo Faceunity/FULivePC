@@ -54,6 +54,7 @@ public:
 
 	static int m_curFilterIdx;
 	static int m_curRenderItem;	
+	static int m_curBindedItem; ;
 	static ImGuiID m_curRenderItemUIID;
 	
 	static int mEnableSkinDect;

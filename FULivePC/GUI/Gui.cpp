@@ -29,6 +29,7 @@ int UIBridge::showMakeUpWindow = false;
 
 int UIBridge::m_curFilterIdx;
 int UIBridge::m_curRenderItem = -1; 
+int UIBridge::m_curBindedItem = -1;
 ImGuiID UIBridge::m_curRenderItemUIID = -1;
 std::string UIBridge::mCurRenderItemName = "";
 double UIBridge::mLastTime=0.0;
@@ -731,7 +732,7 @@ void Gui::render(Nama::UniquePtr& nama)
 			if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
 			{
 				nama->RenderItems(processedFrame.data);
-				//nama->DrawLandmarks(processedFrame.data);
+				nama->DrawLandmarks(processedFrame.data);
 			}			
 			//printf("RenderItems cost %f \n", GetTickCount()- tempTime);			
 			{
