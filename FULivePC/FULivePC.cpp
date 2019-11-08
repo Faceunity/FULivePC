@@ -23,7 +23,8 @@ int main(int argc, char* argv[])
 	using namespace NamaExampleNameSpace;
 	Gui::UniquePtr gui = Gui::create(1360, 830);
 
-	Nama::UniquePtr nama = Nama::create(640, 480, enableNama);
+	//Nama::UniquePtr nama = Nama::create(640, 480, enableNama);
+	Nama::UniquePtr nama = Nama::create(1920, 1080, enableNama);
 
 	gui->render(nama);
 
