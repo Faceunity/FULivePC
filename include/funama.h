@@ -585,17 +585,6 @@ FUNAMA_API void fuSetFocalLengthScale(float scale);
 FUNAMA_API int fuLoadExtendedARData(void* data,int sz);
 
 /**
-\warning: deprecated API
-\brief Load facial animation model data, to enable expression optimization
-\param data - the pointer to facial animation model data 'anim_model.bundle', 
-	which is along beside lib files in SDK package
-\param sz - the data size, we use plain int to avoid cross-language compilation issues
-\return zero for failure, one for success
-*/
-FUNAMA_API int fuLoadAnimModel(void* dat, int dat_sz);
-FUNAMA_API int fuLoadAnimModelSrc(void* dat, int dat_sz);
-
-/**
 \brief Load Tongue Detector data, to support tongue animation.
 \param data - the pointer to tongue model data 'tongue.bundle', 
 	which is along beside lib files in SDK package
@@ -633,6 +622,12 @@ FUNAMA_API int fuGetModuleCode(int i);
 \param enable > 0 means turning on, enable <= 0 means turning off
 */
 FUNAMA_API int fuSetTongueTracking(int enable);
+
+/**
+\brief Turn on or turn off multisample anti-alising, msaa has an impact on performance.
+\param samples > 0 means turning on, samples <= 0 means turning off, 0 by default. samples<=GL_MAX_SAMPLES(usually 4).
+*/
+FUNAMA_API int fuSetMultiSamples(int samples);
 
 /**
 \brief Turn on or turn off async track face
