@@ -5,7 +5,7 @@
 #include <string>
 #define MAX_PATH_LENGTH 1024  
 #define MAX_BEAUTYFACEPARAMTER 5 
-#define MAX_FACESHAPEPARAMTER 6
+#define MAX_FACESHAPEPARAMTER 9
 
 enum BundleCategory 
 {
@@ -61,7 +61,7 @@ public:
 	static int mEnableHeayBlur;
 	static int mEnableExBlur;
 	static float mFaceBeautyLevel[5];
-	static float mFaceShapeLevel[6];
+	static float mFaceShapeLevel[9];
 	static float mFilterLevel[10];
 	static float mMakeupLevel[10];
 		

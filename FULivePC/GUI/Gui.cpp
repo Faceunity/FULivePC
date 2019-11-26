@@ -38,7 +38,7 @@ int UIBridge::mEnableHeayBlur = 0;
 int UIBridge::mEnableExBlur = 0;
 int UIBridge::mSelectedCamera = 0;
 float UIBridge::mFaceBeautyLevel[5] = {0.0f};
-float UIBridge::mFaceShapeLevel[6] = {0.0f};
+float UIBridge::mFaceShapeLevel[9] = {0.0f};
 float UIBridge::mFilterLevel[10] = { 100,100,100,100,100, 100,100,100,100,100};
 float UIBridge::mMakeupLevel[10] = { 100,100,100,100,100, 100,100,100,100,100 };
 
@@ -67,6 +67,10 @@ void resetShapeParam()
 	UIBridge::mFaceShapeLevel[3] = -20;
 	UIBridge::mFaceShapeLevel[4] = 50;
 	UIBridge::mFaceShapeLevel[5] = -10;
+
+	UIBridge::mFaceShapeLevel[6] = 0;
+	UIBridge::mFaceShapeLevel[7] = 0;
+	UIBridge::mFaceShapeLevel[8] = 0;
 }
 
 bool doesFileExist(const std::string& filename)
@@ -421,10 +425,14 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 				ImGui::SameLine();
 			}
 			ImGui::Spacing();
-			std::string faceShapeIconNameArr[6] = { "list_icon_Thinface_open", "list_icon_Bigeye_open",
-				"list_icon_chin_open", "list_icon_forehead_open", "list_icon_Thinnose_open","list_icon_Mouthtype_open" };
-			std::string faceShapeNameArr[6] = { u8"   ÊÝÁ³" ,u8"   ´óÑÛ" ,u8"   ÏÂ°Í",u8"   ¶îÍ·" ,u8"   ÊÝ±Ç",u8"   ×ìÐÍ" };
-			for (int i = 0; i < 6; i++)
+			std::string faceShapeIconNameArr[9] = { "list_icon_Thinface_open", "list_icon_Bigeye_open",
+				"list_icon_chin_open", "list_icon_forehead_open", "list_icon_Thinnose_open","list_icon_Mouthtype_open",
+				"list_icon_v_open","list_icon_narrow_face_open","list_icon_little_face_open" };
+			std::string faceShapeNameArr[9] = { u8"   ÊÝÁ³" ,u8"   ´óÑÛ" ,u8"   ÏÂ°Í",u8"   ¶îÍ·" ,u8"   ÊÝ±Ç",u8"   ×ìÐÍ",u8"   VÁ³",u8"   Õ­Á³",u8"   Ð¡Á³" };
+			ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 1.f));
+			ImGui::BeginChild("faceShape##2223",ImVec2(400,550) );
+			ImGui::PopStyleColor();
+			for (int i = 0; i < 9; i++)
 			{
 				if (UIBridge::faceType != 0 && i > 1)
 				{
@@ -457,9 +465,12 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 				}
 				ImGui::PopStyleVar();
 			}
+			
+			ImGui::EndChild();
+			
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-			if (LayoutButton(ImVec2(145, 38), ImVec2(126, 40), u8"»Ö¸´Ä¬ÈÏ"))
+			if (LayoutButton(ImVec2(145, 15), ImVec2(126, 40), u8"»Ö¸´Ä¬ÈÏ"))
 			{
 				resetShapeParam();
 				nama->UpdateBeauty();

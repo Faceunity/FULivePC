@@ -396,7 +396,8 @@ void Nama::UpdateBeauty()
 			fuItemSetParamd(mBeautyHandles, const_cast<char*>(faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i] / 100.f);
 		}		
 	}
-	std::string faceShapeParamName[] = { "cheek_thinning","eye_enlarging", "intensity_chin", "intensity_forehead", "intensity_nose","intensity_mouth" };
+	std::string faceShapeParamName[] = { "cheek_thinning","eye_enlarging", "intensity_chin", "intensity_forehead", "intensity_nose","intensity_mouth",
+		"cheek_v","cheek_narrow","cheek_small" };
 	for (int i=0;i<MAX_FACESHAPEPARAMTER;i++)
 	{
 		if (i == 2 || i == 3 || i == 5  )
