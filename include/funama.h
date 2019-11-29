@@ -381,6 +381,15 @@ FUNAMA_API int fuItemGetParams(int item,char* name,char* buf,int sz);
 FUNAMA_API int fuItemGetParamu8v(int item,char* name,char* buf,int sz);
 
 /**
+\brief Get an item parameter as a double array
+\param item specifies the item
+\param name is the parameter name
+\param buf receives the double array value
+\param n specifies the number of elements in value
+\return the length of the double array value, or -1 if the parameter is not a double array.
+*/
+FUNAMA_API int fuItemGetParamdv(int item,char* name,double* buf,int n);
+/**
 \brief Get the face tracking status
 \return The number of valid faces currently being tracked
 */
