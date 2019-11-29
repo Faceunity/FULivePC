@@ -443,61 +443,51 @@ bool Nama::SelectBundle(std::string bundleName)
 			std::cout << "您当前的证书无法加载此类道具." << std::endl;
 			return false;
 		}
-		//if (UIBridge::bundleCategory == BundleCategory::Makeup)
-		//{
-		//	fuItemSetParamd(mMakeUpHandle, "is_makeup_on", 1);
-		//	bundleID = CreateMakeupBundle(bundleName);
-		//	mBundlesMap[bundleName] = bundleID;
-		//}
-		//else
-		//{
-			//fuItemSetParamd(mMakeUpHandle, "is_makeup_on", 0);
-			std::vector<char> propData;
-			if (false == LoadBundle(bundleName, propData))
-			{
-				std::cout << "load prop data failed." << std::endl;
-				UIBridge::m_curRenderItem = -1;
-				return false;
-			}
-			std::cout << "load prop data." << std::endl;
-			//Map大小进行控制
-			if (mBundlesMap.size() > MAX_NAMA_BUNDLE_NUM)
-			{
-				fuDestroyItem(mBundlesMap.begin()->second);
-				mBundlesMap.erase(mBundlesMap.begin());
-				printf("cur map size : %d \n", mBundlesMap.size());
-			}
+		std::vector<char> propData;
+		if (false == LoadBundle(bundleName, propData))
+		{
+			std::cout << "load prop data failed." << std::endl;
+			UIBridge::m_curRenderItem = -1;
+			return false;
+		}
+		std::cout << "load prop data." << std::endl;
+		//Map大小进行控制
+		if (mBundlesMap.size() > MAX_NAMA_BUNDLE_NUM)
+		{
+			fuDestroyItem(mBundlesMap.begin()->second);
+			mBundlesMap.erase(mBundlesMap.begin());
+			printf("cur map size : %d \n", mBundlesMap.size());
+		}
 
-			bundleID = fuCreateItemFromPackage(&propData[0], propData.size());
-			mBundlesMap[bundleName] = bundleID;
-			//绑定美妆道具
-			if (UIBridge::bundleCategory == BundleCategory::Makeup)
+		bundleID = fuCreateItemFromPackage(&propData[0], propData.size());
+		mBundlesMap[bundleName] = bundleID;
+		//绑定美妆道具
+		if (UIBridge::bundleCategory == BundleCategory::Makeup)
+		{
+			if (UIBridge::m_curBindedItem != -1)
 			{
-				if (UIBridge::m_curBindedItem != -1)
-				{
-					fuUnbindItems(mMakeUpHandle, &UIBridge::m_curBindedItem, 1);
-				}
-				fuBindItems(mMakeUpHandle, &bundleID, 1);
-				UIBridge::m_curBindedItem = bundleID;
+				fuUnbindItems(mMakeUpHandle, &UIBridge::m_curBindedItem, 1);
 			}
-			else
+			fuBindItems(mMakeUpHandle, &bundleID, 1);
+			UIBridge::m_curBindedItem = bundleID;
+		}
+		else
+		{
+			//fuItemSetParamd(mMakeUpHandle, "is_makeup_on", 0);
+		}
+		//加载并播放音乐
+		if (UIBridge::bundleCategory == BundleCategory::MusicFilter)
+		{
+			std::string itemName = UIBridge::mCurRenderItemName.substr(0, UIBridge::mCurRenderItemName.find_last_of("."));
+			if (mp3Map.find(bundleID) == mp3Map.end())
 			{
-				//fuItemSetParamd(mMakeUpHandle, "is_makeup_on", 0);
+				Mp3 *mp3 = new Mp3;
+				mp3->Load("../../assets/items/MusicFilter/" + itemName + ".mp3");
+				mp3Map[bundleID] = mp3;
 			}
-			//加载并播放音乐
-			if (UIBridge::bundleCategory == BundleCategory::MusicFilter)
-			{
-				std::string itemName = UIBridge::mCurRenderItemName.substr(0, UIBridge::mCurRenderItemName.find_last_of("."));
-				if (mp3Map.find(bundleID) == mp3Map.end())
-				{
-					Mp3 *mp3 = new Mp3;
-					mp3->Load("../../assets/items/MusicFilter/" + itemName + ".mp3");
-					mp3Map[bundleID] = mp3;
-				}
-				mp3Map[bundleID]->Play();
-				UIBridge::mNeedPlayMP3 = true;
-			}
-		//}
+			mp3Map[bundleID]->Play();
+			UIBridge::mNeedPlayMP3 = true;
+		}
 	}
 	else
 	{
@@ -532,19 +522,11 @@ bool Nama::SelectBundle(std::string bundleName)
 			UIBridge::m_curBindedItem = -1;
 		}
 		UIBridge::m_curRenderItem = -1;
-		//if (UIBridge::bundleCategory == BundleCategory::Makeup)
-		//{
-		//	SelectMakeupBundle("");
-		//}
 	}
 	else
 	{
 		UIBridge::m_curRenderItem = bundleID;
 		UIBridge::renderBundleCategory = UIBridge::bundleCategory;
-		//if (UIBridge::bundleCategory == BundleCategory::Makeup)
-		//{
-		//	SelectMakeupBundle(bundleName);
-		//}
 	}
 	if (UIBridge::bundleCategory == PortraitDrive || UIBridge::bundleCategory == Animoji)
 	{
@@ -553,6 +535,14 @@ bool Nama::SelectBundle(std::string bundleName)
 	else
 	{
 		mMaxFace = 4;
+	}
+	if (UIBridge::renderBundleCategory == Animoji)
+	{
+		fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 1);
+	}
+	else
+	{
+		fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 0);
 	}
 	return true;
 }
@@ -595,15 +585,6 @@ void Nama::RenderItems(uchar* frame)
 			UIBridge::m_curRenderItem = -1;
 			UIBridge::mNeedStopMP3 = false;
 		}
-		if (UIBridge::renderBundleCategory == Animoji)
-		{
-			fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 1);
-		}
-		else
-		{
-			fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 0);
-		}
-		
 
 		if (UIBridge::showMakeUpWindow)
 		{
