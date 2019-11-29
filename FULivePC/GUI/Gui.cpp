@@ -672,6 +672,7 @@ void Gui::render(Nama::UniquePtr& nama)
 					
 					for (int i = 0; i < amount; i++)
 					{
+						if (i == 3)continue;//sb product logic
 						if (UIBridge::bundleCategory == i || UIBridge::bundleCategory == BundleCategory::Makeup)
 						{
 							if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_propmap_collapse.png", false)->getTextureID(),
