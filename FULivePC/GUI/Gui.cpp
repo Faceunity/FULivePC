@@ -804,7 +804,7 @@ void Gui::render(Nama::UniquePtr& nama)
 					{
 						if (UIBridge::categoryBundles[i].size() == 0)
 						{
-							if (i> sizeof(gBundlePath) / sizeof(gBundlePath[0]))
+							if (i>= sizeof(gBundlePath) / sizeof(gBundlePath[0]))
 							{
 								break;
 							}
