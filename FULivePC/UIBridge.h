@@ -30,55 +30,45 @@ enum BundleCategory
 	Count
 };
 
-static class UIBridge
+namespace UIBridge
 {
-public:
-
-	static int bundleCategory;
-	static int renderBundleCategory;
-	static int faceType; 
+	static int bundleCategory = -1;
+	static int renderBundleCategory  = -1;
+	static int faceType = 0; 
 	
-	static bool showItemSelectWindow;
-	static bool showItemTipsWindow;
-	static bool showDegubInfoWindow;
-	static bool showFilterSlider; 
-	static int showMakeUpWindow;
-	static bool mNeedIpcWrite; 
-	static bool mNeedPlayMP3;
-	static bool mNeedStopMP3;
+	static bool showItemSelectWindow = false;
+	static bool showItemTipsWindow = false;
+	static bool showDegubInfoWindow = false;
+	static bool showFilterSlider = false;
+	static int showMakeUpWindow = false;
+	static bool mNeedIpcWrite = false;
+	static bool mNeedPlayMP3 = false;
+	static bool mNeedStopMP3 = false;
 
-	static uint32_t mFPS;
-	static uint32_t mResolutionWidth;
-	static uint32_t mResolutionHeight;
-	static uint32_t mRenderTime;
+	static uint32_t mFPS = 60;
+	static uint32_t mResolutionWidth = 1280;
+	static uint32_t mResolutionHeight = 720;
+	static uint32_t mRenderTime = 33;
 
-	static int m_curFilterIdx;
-	static int m_curRenderItem;	
-	static int m_curBindedItem; ;
-	static ImGuiID m_curRenderItemUIID;
+	static int m_curFilterIdx = -1;
+	static int m_curRenderItem =-1;	
+	static int m_curBindedItem = -1; ;
+	static ImGuiID m_curRenderItemUIID = -1;
 	
-	static int mEnableSkinDect;
-	static int mEnableHeayBlur;
-	static int mEnableExBlur;
-	static float mFaceBeautyLevel[5];
-	static float mFaceShapeLevel[9];
-	static float mFilterLevel[10];
-	static float mMakeupLevel[10];
+	static int mEnableSkinDect =1;
+	static int mEnableHeayBlur = 0;
+	static int mEnableExBlur = 0;
+	static float mFaceBeautyLevel[5] = { 0.0f };
+	static float mFaceShapeLevel[9] = { 0.0f };
+	static float mFilterLevel[10] = { 100,100,100,100,100, 100,100,100,100,100 };
+	static float mMakeupLevel[10] = { 100,100,100,100,100, 100,100,100,100,100 };
 		
-	static int mSelectedCamera;
-	static double mLastTime;
+	static int mSelectedCamera = 0;
+	static double mLastTime = 0.0;
 	static std::string mCurRenderItemName;
 	static std::vector<std::string> categoryBundles[BundleCategory::Count];
 
-	static void UIBridge::FindAllBundle(std::string folder,std::vector<std::string> &files)
-	{		
-		IteratorFolder(folder.c_str(), files);
-		//for each (auto file in files)
-		//{
-		//	std::cout << file << std::endl;
-		//}
-	}
-	static void UIBridge::Wchar_tToString(std::string& szDst, wchar_t *wchar)
+	static void Wchar_tToString(std::string& szDst, wchar_t *wchar)
 	{
 		wchar_t * wText = wchar;
 		DWORD dwNum = WideCharToMultiByte(CP_OEMCP, NULL, wText, -1, NULL, 0, NULL, FALSE);// WideCharToMultiByte的运用
@@ -88,7 +78,8 @@ public:
 		szDst = psText;// std::string赋值
 		delete[]psText;// psText的清除
 	}
-	static void UIBridge::IteratorFolder(const char* lpPath, std::vector<std::string> &fileList) {
+
+	static void IteratorFolder(const char* lpPath, std::vector<std::string> &fileList) {
 		char szFind[MAX_PATH];
 		WIN32_FIND_DATA FindFileData;
 		strcpy(szFind, lpPath);
@@ -114,17 +105,25 @@ public:
 				//std::cout << FindFileData.cFileName << std::endl;			
 				std::string str;
 				Wchar_tToString(str, FindFileData.cFileName);
-				if (str.find(".bundle")!= std::string::npos)
+				if (str.find(".bundle") != std::string::npos)
 				{
 					fileList.push_back(str);
-				}				
+				}
 			}
 			if (!FindNextFile(hFind, &FindFileData))    break;
 		}
 		FindClose(hFind);
 	}
-protected:
-private:
+
+	static void FindAllBundle(std::string folder,std::vector<std::string> &files)
+	{		
+		IteratorFolder(folder.c_str(), files);
+		//for each (auto file in files)
+		//{
+		//	std::cout << file << std::endl;
+		//}
+	}
+	
 };
 const std::string g_assetDir = "../../assets/";
 const std::string gBundlePath[] = {

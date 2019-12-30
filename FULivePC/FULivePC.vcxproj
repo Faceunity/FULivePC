@@ -160,6 +160,7 @@ xcopy /s /y "$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\bin\*.dll"
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty;$(SolutionDir)include;$(SolutionDir)ThridParty\opencv400\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile />
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
