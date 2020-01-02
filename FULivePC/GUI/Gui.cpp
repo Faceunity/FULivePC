@@ -12,6 +12,39 @@ float scaleRatioW = 1.f;
 float scaleRatioH = 1.f;
 bool showUI = true;
 extern HANDLE hMutex;
+int UIBridge::bundleCategory = -1;
+int UIBridge::renderBundleCategory = -1;
+std::vector<std::string> UIBridge::categoryBundles[BundleCategory::Count];
+int UIBridge::faceType = 0;
+
+bool UIBridge::showItemSelectWindow = false;
+bool UIBridge::showItemTipsWindow = false;
+bool UIBridge::showDegubInfoWindow = false;
+bool UIBridge::showFilterSlider = false;
+int UIBridge::showMakeUpWindow = false;
+ uint32_t UIBridge::mFPS = 60;
+ uint32_t UIBridge::mResolutionWidth = 1280;
+ uint32_t UIBridge::mResolutionHeight = 720;
+ uint32_t UIBridge::mRenderTime = 33;
+
+int UIBridge::m_curFilterIdx;
+int UIBridge::m_curRenderItem = -1; 
+int UIBridge::m_curBindedItem = -1;
+ImGuiID UIBridge::m_curRenderItemUIID = -1;
+std::string UIBridge::mCurRenderItemName = "";
+double UIBridge::mLastTime=0.0;
+int UIBridge::mEnableSkinDect = 1;
+int UIBridge::mEnableHeayBlur = 0;
+int UIBridge::mEnableExBlur = 0;
+int UIBridge::mSelectedCamera = 0;
+float UIBridge::mFaceBeautyLevel[5] = {0.0f};
+float UIBridge::mFaceShapeLevel[9] = {0.0f};
+float UIBridge::mFilterLevel[10] = { 100,100,100,100,100, 100,100,100,100,100};
+float UIBridge::mMakeupLevel[10] = { 100,100,100,100,100, 100,100,100,100,100 };
+
+bool UIBridge::mNeedIpcWrite =false;
+bool UIBridge::mNeedPlayMP3 = false;
+bool UIBridge::mNeedStopMP3 = false;
 
 void resetBeautyParam()
 {
