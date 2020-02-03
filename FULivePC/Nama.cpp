@@ -176,6 +176,22 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 		// 舌头识别
 		fuLoadTongueModel(reinterpret_cast<float*>(&tongue_model_data[0]), tongue_model_data.size());
 
+		std::vector<char> ai_model_data;
+		if (false == LoadBundle(g_fuDataDir + g_ai_faceprocessor, ai_model_data))
+		{
+			std::cout << "Error:缺少数据文件。" << g_fuDataDir + g_ai_faceprocessor << std::endl;
+			return false;
+		}		
+		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_model_data[0]), ai_model_data.size(), FUAITYPE::FUAITYPE_FACEPROCESSOR);
+
+		std::vector<char> ai239_model_data;
+		if (false == LoadBundle(g_fuDataDir + g_ai_landmark239, ai239_model_data))
+		{
+			std::cout << "Error:缺少数据文件。" << g_fuDataDir + g_ai_landmark239 << std::endl;
+			return false;
+		}
+		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai239_model_data[0]), ai239_model_data.size(), FUAITYPE::FUAITYPE_FACELANDMARKS239);
+
 		std::vector<char> fxaa_data;
 		if (false == LoadBundle(g_fuDataDir + g_fxaa, fxaa_data))
 		{

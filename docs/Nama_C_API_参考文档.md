@@ -2,13 +2,36 @@
 <!--每次更新文档，更新时间-->
 
 级别：Public   
-更新日期：2019-06-27   
-SDK版本: 6.2.0  
+更新日期：2020-01-19   
+SDK版本: 6.6.0  
 
 ------
 ### 最新更新内容：
 
 <!--这个小节写每次最新以及次新的更新记录，时间，更新内容。新增函数，函数接口定义更新-->
+2020-01-19 v6.6.0:
+注意: 更新SDK 6.6.0时，在fuSetup之后，需要马上调用 fuLoadAIModelFromPackage 加载ai_faceprocessor.bundle 到 FUAITYPE::FUAITYPE_FACEPROCESSOR!!!
+
+在Nama 6.6.0及以上，AI能力的调用会按道具需求调用，避免同一帧多次调用；同时由Nama AI子系统管理推理，简化调用过程；将能力和产品功能进行拆分，避免在道具bundle内的冗余AI模型资源，方便维护升级，同时加快道具的加载；方便各新旧AI能力集成，后续的升级迭代。
+
+基本逻辑：Nama初始化后，可以预先加载一个或多个将来可能使用到的AI能力模块。调用实时render处理接口时，Nama主pipe会在最开始的时候，分析当前全部道具需要AI能力，然后由AI子系统执行相关能力推理，然后开始调用各个道具的‘生命周期’函数，各道具只需要按需在特定的‘生命周期’函数调用JS接口获取AI推理的结果即可，并用于相关逻辑处理或渲染。
+
+1. 新增加接口 fuLoadAIModelFromPackage 用于加载AI能力模型。
+2. 新增加接口 fuReleaseAIModel 用于释放AI能力模型。
+3. 新增加接口 fuIsAIModelLoaded 判断AI能力是否已经加载。
+
+例子1：背景分割
+	a. 加载AI能力模型，fuLoadAIModelFromPackage加载ai_bgseg.bundle 到 FUAITYPE::FUAITYPE_BACKGROUNDSEGMENTATION上。
+	b. 加载产品业务道具A，A道具使用了背景分割能力。
+	c. 切换产品业务道具B，B道具同样使用了背景分割能力，但这时AI能力不需要重新加载。
+
+2019-11-29 v6.5.0:
+
+1. 新增fuSetMultiSamples接口，MSAA抗锯齿接口，解决虚拟形象等内容边缘锯齿问题。
+
+2019-09-25 v6.4.0:
+
+1. v6.4.0 接口无变动。
 
 2019-08-14 v6.3.0:
 
@@ -121,6 +144,137 @@ __备注:__
 需要在有GL Context的地方进行初始化。  
 
 第一次需要联网鉴权，鉴权成功后，保存新的证书，后面不要联网。
+
+##### fuLoadAIModelFromPackage 函数
+SDK6.6.0 新增接口，在fuSetup后，可以预先加载未来可能需要使用到的AI能力。AI模型和SDK一起发布，在Assets目录下。
+
+```C
+/**
+\brief Load AI model data, to support tongue animation.
+\param data - the pointer to AI model data 'ai_xxx.bundle', 
+	which is along beside lib files in SDK package
+\param sz - the data size, we use plain int to avoid cross-language compilation issues
+\param type - define in FUAITYPE enumeration.
+\return zero for failure, one for success.
+*/
+FUNAMA_API int fuLoadAIModelFromPackage(void* data,int sz,FUAITYPE type);
+```
+
+__参数:__
+
+*data [in]*： 内存指针，指向SDK提供的 ai****.bundle 文件内容，为AI能力模型。
+
+*sz [in]*: data文件字节数
+
+*type [in]*：描述bundle对应的AI能力类型，如下：
+```
+typedef enum FUAITYPE{
+	FUAITYPE_BACKGROUNDSEGMENTATION=1<<1,
+	FUAITYPE_HAIRSEGMENTATION=1<<2,
+	FUAITYPE_HANDGESTURE=1<<3,
+	FUAITYPE_TONGUETRACKING=1<<4,
+	FUAITYPE_FACELANDMARKS75=1<<5,
+	FUAITYPE_FACELANDMARKS209=1<<6,
+	FUAITYPE_FACELANDMARKS239=1<<7,
+	FUAITYPE_HUMANPOSE2D=1<<8,
+	FUAITYPE_BACKGROUNDSEGMENTATION_GREEN=1<<9,
+	FUAITYPE_FACEPROCESSOR=1<<10
+}FUAITYPE;
+```
+
+__返回值:__
+
+返回1值代表成功，返回0代表失败。可以通过fuReleaseAIModel释放模型，以及通过fuIsAIModelLoaded查询是否AI能力模型是否已经加载。
+
+__备注:__  
+
+AI能力会随SDK一起发布，存放在assets/AI_Model目录中。
+- ai_bgseg.bundle 为背景分割AI能力模型。
+- ai_hairseg.bundle 为头发分割AI能力模型。
+- ai_gesture.bundle 为手势识别AI能力模型。
+- ai_facelandmarks75.bundle 为脸部特征点75点AI能力模型。
+- ai_facelandmarks209.bundle 为脸部特征点209点AI能力模型。
+- ai_facelandmarks239.bundle 为脸部特征点239点AI能力模型。
+- ai_humanpose.bundle 为人体2D点位AI能力模型。
+- ai_bgseg_green.bundle 为绿幕背景分割AI能力模型。
+- ai_face_processor 为人脸面具以及人脸面罩AI能力模型，需要默认加载。
+
+##### fuReleaseAIModel 函数
+当不需要是使用特定的AI能力时，可以释放其资源，节省内存空间。1为已释放，0为未释放。
+
+```C
+/**
+\brief Release AI Model, when no more need some type of AI albility.
+\param type - define in FUAITYPE enumeration.
+\return zero for failure, one for success.
+*/
+FUNAMA_API int fuReleaseAIModel(FUAITYPE type);
+```
+
+__参数:__
+
+*type [in]*：描述bundle对应的AI能力类型，如下：
+```
+typedef enum FUAITYPE{
+	FUAITYPE_BACKGROUNDSEGMENTATION=1<<1,
+	FUAITYPE_HAIRSEGMENTATION=1<<2,
+	FUAITYPE_HANDGESTURE=1<<3,
+	FUAITYPE_TONGUETRACKING=1<<4,
+	FUAITYPE_FACELANDMARKS75=1<<5,
+	FUAITYPE_FACELANDMARKS209=1<<6,
+	FUAITYPE_FACELANDMARKS239=1<<7,
+	FUAITYPE_HUMANPOSE2D=1<<8,
+	FUAITYPE_BACKGROUNDSEGMENTATION_GREEN=1<<9,
+	FUAITYPE_FACEPROCESSOR=1<<10
+}FUAITYPE;
+```
+
+__返回值:__
+
+1为已释放，0为未释放。
+
+__备注:__  
+
+AI能力模型内存占用不高，建议长驻内存。  
+
+------
+##### fuIsAIModelLoaded 函数
+获取AI能力是否已经加载的状态，0为未加载，1为加载。
+
+```C
+/**
+\brief Get AI Model load status
+\param type - define in FUAITYPE enumeration.
+\return zero for unloaded, one for loaded.
+*/
+FUNAMA_API int fuIsAIModelLoaded(FUAITYPE type);
+```
+
+__参数:__
+
+*type [in]*：描述bundle对应的AI能力类型，如下：
+```
+typedef enum FUAITYPE{
+	FUAITYPE_BACKGROUNDSEGMENTATION=1<<1,
+	FUAITYPE_HAIRSEGMENTATION=1<<2,
+	FUAITYPE_HANDGESTURE=1<<3,
+	FUAITYPE_TONGUETRACKING=1<<4,
+	FUAITYPE_FACELANDMARKS75=1<<5,
+	FUAITYPE_FACELANDMARKS209=1<<6,
+	FUAITYPE_FACELANDMARKS239=1<<7,
+	FUAITYPE_HUMANPOSE2D=1<<8,
+	FUAITYPE_BACKGROUNDSEGMENTATION_GREEN=1<<9,
+	FUAITYPE_FACEPROCESSOR=1<<10
+}FUAITYPE;
+```
+
+__返回值:__
+
+0为未加载，1为加载。
+
+__备注:__  
+
+AI能力模型内存占用不高，建议长驻内存。
 
 ------
 
@@ -631,6 +785,24 @@ __备注:__
 默认处于关闭状态。开启后，人脸跟踪会和渲染绘制异步并行，cpu占用略有上升，但整体速度提升，帧率提升。
 
 ------
+#####  fuSetMultiSamples 函数
+设置MSAA抗锯齿功能的采样数。默认为0，处于关闭状态。
+```C
+int fuSetMultiSamples(int samples);
+```
+__参数:__  
+
+*samples[int]*：默认为0，处于关闭状态。samples要小于等于设备GL_MAX_SAMPLES，通常可以设置4。
+
+__返回值: __ 
+
+设置后系统的采样数，设置成功返回samples。 
+
+__备注:__  
+
+该功能为硬件抗锯齿功能，需要ES3的Context。
+
+------
 #####  fuIsTracking 函数
 获取当前人脸跟踪状态，返回正在跟踪的人脸数量。
 ```C
@@ -697,25 +869,26 @@ __备注:__
 
 所有支持获取的信息、含义、权限要求如下：
 
-| 信息名称       | 长度 | 含义                                                         | 权限     |
-| -------------- | ---- | ------------------------------------------------------------ | -------- |
-| face_rect      | 4    | 人脸矩形框，图像分辨率坐标，数据为 (x_min, y_min, x_max, y_max) | 默认     |
-| rotation_mode  | 1    | 识别人脸相对于设备图像的旋转朝向，取值范围 0-3，分别代表旋转0度、90度、180度、270度 | 默认     |
-| failure_rate   | 1    | 人脸跟踪的失败率，表示人脸跟踪的质量。取值范围为 0-2，取值越低代表人脸跟踪的质量越高 | 默认     |
-| is_calibrating | 1    | 表示是否SDK正在进行主动表情校准，取值为 0 或 1。             | 默认     |
-| focal_length   | 1    | SDK当前三维人脸跟踪所采用的焦距数值                          | 默认     |
-| landmarks      | 75x2 | 人脸 75 个特征点，图像分辨率坐标                             | Landmark |
-| rotation       | 4    | 人脸三维旋转，数据为旋转四元数\*                              | Landmark |
-| translation    | 3    | 人脸三维平移，数据为 (x, y, z)                               | Landmark |
-| eye_rotation   | 4    | 眼球旋转，数据为旋转四元数\*，上下22度，左右30度。                                  | Landmark |
-| eye_rotation_xy   | 2    | 眼球旋转，数据范围为[-1,1]，第一个通道表示水平方向转动，第二个通道表示垂直方向转动                                  | Landmark |
-| expression     | 46   | 人脸表情系数，表情系数含义可以参考《Expression Guide》       | Avatar   |
-| expression_with_tongue     | 56   | 1-46为人脸表情系数，同上expression，表情系数含义可以参考《Expression Guide》。47-56为舌头blendshape系数       | Avatar   |
-| armesh_vertex_num     | 1   | armesh三维网格顶点数量       | armesh   |
-| armesh_face_num     | 1   | armesh三维网格三角面片数量       | armesh   |
-| armesh_vertices     | armesh_vertex_num*3   | armesh三维网格顶点位置数据       | armesh   |
-| armesh_uvs     | armesh_vertex_num*2   | armesh三维网格顶点纹理数据       | armesh   |
-| armesh_faces     | armesh_face_num*3   | armesh三维网格三角片数据       | armesh   |
+| 信息名称       | 长度 | 类型|含义                                                         | 权限     |
+| -------------- | ---- | ------------------------------------------------------------ | -------- | -------- |
+| face_rect      | 4    | float |人脸矩形框，图像分辨率坐标，数据为 (x_min, y_min, x_max, y_max) | 默认     |
+| rotation_mode  | 1    | int |识别人脸相对于设备图像的旋转朝向，取值范围 0-3，分别代表旋转0度、90度、180度、270度 | 默认     |
+| failure_rate   | 1    | float |人脸跟踪的失败率，表示人脸跟踪的质量。取值范围为 0-2，取值越低代表人脸跟踪的质量越高 | 默认     |
+| is_calibrating | 1    | int |表示是否SDK正在进行主动表情校准，取值为 0 或 1。             | 默认     |
+| focal_length   | 1    | float| SDK当前三维人脸跟踪所采用的焦距数值                          | 默认     |
+| landmarks      | 75x2 | float|人脸 75 个特征点，图像分辨率坐标                             | Landmark |
+| rotation       | 4    | float|人脸三维旋转，数据为旋转四元数\*                              | Landmark |
+| translation    | 3    | float|人脸三维平移，数据为 (x, y, z)                               | Landmark |
+| eye_rotation   | 4    | float| 眼球旋转，数据为旋转四元数\*，上下22度，左右30度。                                  | Landmark |
+| eye_rotation_xy   | 2    | float| 眼球旋转，数据范围为[-1,1]，第一个通道表示水平方向转动，第二个通道表示垂直方向转动                                  | Landmark |
+| expression     | 46   | float| 人脸表情系数，表情系数含义可以参考《Expression Guide》       | Avatar   |
+| expression_with_tongue     | 56   | float | 1-46为人脸表情系数，同上expression，表情系数含义可以参考《Expression Guide》。47-56为舌头blendshape系数       | Avatar   |
+| armesh_vertex_num     | 1   |int| armesh三维网格顶点数量       | armesh   |
+| armesh_face_num     | 1   | int| armesh三维网格三角面片数量       | armesh   |
+| armesh_vertices     | armesh_vertex_num * 3   |float| armesh三维网格顶点位置数据       | armesh   |
+| armesh_uvs     | armesh_vertex_num * 2   |float| armesh三维网格顶点纹理数据       | armesh   |
+| armesh_faces     | armesh_face_num * 3   |int| armesh三维网格三角片数据       | armesh  |
+| armesh_trans_mat     | 4x4 |float| armesh 的transformation。 __注意:__ 1. 获取'armesh_trans_mat'前需要先获取对应脸的'armesh_vertices'。2. 该trans_mat,相比使用'position'和'rotation'重算的transform更加准确，配合armesh，更好贴合人脸。 | armesh  |
 *注：旋转四元数转换为欧拉角可以参考 [该网页](https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles)。
 
 获取三维网格代码参考
@@ -728,13 +901,21 @@ __备注:__
 	logi("armesh_face_num %d:", facecnt);
 	vector<float> v, vt;
 	vector<int>f;
+	vector<float> trans;
 	v.resize(vercnt * 3);
 	vt.resize(vercnt * 2);
 	f.resize(facecnt* 3);
+	trans.resize(16);
 	int ret1 = fuGetFaceInfo(0, "armesh_vertices", v.data(), v.size());
 	int ret2 = fuGetFaceInfo(0, "armesh_uvs", vt.data(), vt.size());
 	int ret3 = fuGetFaceInfo(0, "armesh_faces", (float*)f.data(), f.size());
-	logi("ret1: %d ret2: %d ret3: %d \n", ret1, ret2, ret3);
+	int ret4 = fuGetFaceInfo(0, "armesh_trans_mat", (float*)trans.data(), trans.size());//after 'armesh_vertices'
+	logi("ret1: %d ret2: %d ret3: %d ret4: %d\n", ret1, ret2, ret3, ret4);
+	logi("armesh_trans_mat:[");
+	for (auto i = 0; i < 15; i++) {
+		logi("%f,", trans[i]);
+	}
+	logi("%f]\n", trans[15]);
 	string str = "";
 	ostringstream osstr(str);
 	for (int i = 0; i < vercnt; i++) {
