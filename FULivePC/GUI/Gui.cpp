@@ -492,7 +492,9 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 				if (ImGui::ImageButton(Texture::createTextureFromFile(filterNameArr[i] + ".png", false)->getTextureID(), ImVec2(106 * scaleRatioW, 106 * scaleRatioH)))
 				{
 					nama->UpdateFilter(i);
+					
 					UIBridge::m_curFilterIdx = i;
+					nama->UpdateBeauty();
 					if (i != 0)
 					{
 						UIBridge::showFilterSlider = true;
