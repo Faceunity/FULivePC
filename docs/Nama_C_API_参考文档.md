@@ -19,15 +19,12 @@ SDK版本: 6.6.0
 1. 新增加接口 fuLoadAIModelFromPackage 用于加载AI能力模型。
 2. 新增加接口 fuReleaseAIModel 用于释放AI能力模型。
 3. 新增加接口 fuIsAIModelLoaded 判断AI能力是否已经加载。
+4. 新增fuSetMultiSamples接口，MSAA抗锯齿接口，解决虚拟形象等内容边缘锯齿问题。
 
 例子1：背景分割
 	a. 加载AI能力模型，fuLoadAIModelFromPackage加载ai_bgseg.bundle 到 FUAITYPE::FUAITYPE_BACKGROUNDSEGMENTATION上。
 	b. 加载产品业务道具A，A道具使用了背景分割能力。
 	c. 切换产品业务道具B，B道具同样使用了背景分割能力，但这时AI能力不需要重新加载。
-
-2019-11-29 v6.5.0:
-
-1. 新增fuSetMultiSamples接口，MSAA抗锯齿接口，解决虚拟形象等内容边缘锯齿问题。
 
 2019-09-25 v6.4.0:
 
