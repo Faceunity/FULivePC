@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -22,32 +22,32 @@
     <ProjectGuid>{66D1CC31-F976-4750-AB8D-F98D74D3B526}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>FULivePC</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -72,21 +72,23 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)x86\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)bin\win\$(PlatformTarget)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)ThridParty\DirectShow\Include</IncludePath>
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+    <OutDir>$(SolutionDir)bin\win\$(PlatformTarget)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)x86\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)bin\win\$(PlatformTarget)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)ThridParty\DirectShow\Include</IncludePath>
+    <OutDir>$(SolutionDir)bin\win\$(PlatformTarget)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -94,17 +96,17 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty;$(SolutionDir)include;$(SolutionDir)ThridParty\opencv400\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\Windows\GL;$(SolutionDir)ThridParty\Windows;$(SolutionDir)include;$(SolutionDir)ThridParty\Windows\opencv400\include;$(SolutionDir)include\common;$(SolutionDir)include\rapidjson;$(SolutionDir)\FULivePC\GUI;$(SolutionDir)ThridParty\Windows\FreeImage;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile />
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\GL\x86;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty\DirectShow\Lib;$(SolutionDir)Win32;$(SolutionDir)ThridParty\opencv400\opencv\build\x86\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\Windows\DirectShow\Lib;$(SolutionDir)bin\win\Win32;$(SolutionDir)ThridParty\Windows\opencv400\lib\win32\lib;$(SolutionDir)ThridParty\Windows\GL\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /s /y "$(SolutionDir)Win32\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /s /y "$(SolutionDir)bin\win\Win32\*.dll" "$(SolutionDir)bin\win\$(PlatformTarget)\$(Configuration)\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -113,19 +115,16 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty;$(SolutionDir)include;$(SolutionDir)ThridParty\opencv400\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\Windows\GL;$(SolutionDir)ThridParty\Windows;$(SolutionDir)include;$(SolutionDir)ThridParty\Windows\opencv400\include;$(SolutionDir)include\common;$(SolutionDir)include\rapidjson;$(SolutionDir)\FULivePC\GUI;$(SolutionDir)ThridParty\Windows\FreeImage;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile />
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\GL\x64;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty\DirectShow\Lib;$(SolutionDir)Win64;$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\Windows\DirectShow\Lib;$(SolutionDir)bin\win\Win64;$(SolutionDir)ThridParty\Windows\opencv400\lib\win64\lib;$(SolutionDir)ThridParty\Windows\GL\lib\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /s /y "$(SolutionDir)Win64\*.dll" "$(OutDir)"
-
-xcopy /s /y "$(SolutionDir)ThridParty\GL\x64\*.dll" "$(OutDir)"
-xcopy /s /y "$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\bin\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /s /y "$(SolutionDir)bin\win\Win64\*.dll" "$(SolutionDir)bin\win\$(PlatformTarget)\$(Configuration)\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -137,28 +136,28 @@ xcopy /s /y "$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\bin\*.dll"
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile />
-      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty;$(SolutionDir)include;$(SolutionDir)ThridParty\opencv400\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\Windows\GL;$(SolutionDir)ThridParty\Windows;$(SolutionDir)include;$(SolutionDir)ThridParty\Windows\opencv400\include;$(SolutionDir)include\common;$(SolutionDir)include\rapidjson;$(SolutionDir)\FULivePC\GUI;$(SolutionDir)ThridParty\Windows\FreeImage;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\GL\x86;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty\DirectShow\Lib;$(SolutionDir)Win32;$(SolutionDir)ThridParty\opencv400\opencv\build\x86\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\Windows\DirectShow\Lib;$(SolutionDir)bin\win\Win32;$(SolutionDir)ThridParty\Windows\opencv400\lib\win32\lib;$(SolutionDir)ThridParty\Windows\GL\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /s /y "$(SolutionDir)Win32\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /s /y "$(SolutionDir)bin\win\Win32\*.dll" "$(SolutionDir)bin\win\$(PlatformTarget)\$(Configuration)\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty;$(SolutionDir)include;$(SolutionDir)ThridParty\opencv400\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(SolutionDir)ThridParty\Windows\GL;$(SolutionDir)ThridParty\Windows;$(SolutionDir)include;$(SolutionDir)ThridParty\Windows\opencv400\include;$(SolutionDir)include\common;$(SolutionDir)include\rapidjson;$(SolutionDir)\FULivePC\GUI;$(SolutionDir)ThridParty\Windows\FreeImage;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile />
     </ClCompile>
     <Link>
@@ -166,28 +165,28 @@ xcopy /s /y "$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\bin\*.dll"
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\GL\x64;$(SolutionDir)ThridParty\GL;$(SolutionDir)ThridParty\DirectShow\Lib;$(SolutionDir)Win64;$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThridParty\Windows\DirectShow\Lib;$(SolutionDir)bin\win\Win64;$(SolutionDir)ThridParty\Windows\opencv400\lib\win64\lib;$(SolutionDir)ThridParty\Windows\GL\lib\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /s /y "$(SolutionDir)Win64\*.dll" "$(OutDir)"
-
-xcopy /s /y "$(SolutionDir)ThridParty\GL\x64\*.dll" "$(OutDir)"
-xcopy /s /y "$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\bin\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /s /y "$(SolutionDir)bin\win\Win64\*.dll" "$(SolutionDir)bin\win\$(PlatformTarget)\$(Configuration)\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\ThridParty\imgui\imconfig.h" />
-    <ClInclude Include="..\ThridParty\imgui\imgui.h" />
-    <ClInclude Include="..\ThridParty\imgui\imgui_impl_glfw.h" />
-    <ClInclude Include="..\ThridParty\imgui\imgui_impl_opengl3.h" />
-    <ClInclude Include="..\ThridParty\imgui\imgui_internal.h" />
-    <ClInclude Include="..\ThridParty\imgui\imgui_tabs.h" />
-    <ClInclude Include="..\ThridParty\imgui\stb_rect_pack.h" />
-    <ClInclude Include="..\ThridParty\imgui\stb_textedit.h" />
-    <ClInclude Include="..\ThridParty\imgui\stb_truetype.h" />
+    <ClInclude Include="..\include\common\fu_tool.h" />
+    <ClInclude Include="..\ThridParty\Windows\imgui\gl3w.h" />
+    <ClInclude Include="..\ThridParty\Windows\imgui\glcorearb.h" />
+    <ClInclude Include="..\ThridParty\Windows\imgui\imconfig.h" />
+    <ClInclude Include="..\ThridParty\Windows\imgui\imgui.h" />
+    <ClInclude Include="..\ThridParty\Windows\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="..\ThridParty\Windows\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\ThridParty\Windows\imgui\imgui_internal.h" />
+    <ClInclude Include="..\ThridParty\Windows\imgui\imgui_tabs.h" />
+    <ClInclude Include="..\ThridParty\Windows\imgui\stb_rect_pack.h" />
+    <ClInclude Include="..\ThridParty\Windows\imgui\stb_textedit.h" />
+    <ClInclude Include="..\ThridParty\Windows\imgui\stb_truetype.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="GUI\Gui.h" />
     <ClInclude Include="GUI\Loader.h" />
@@ -198,19 +197,19 @@ xcopy /s /y "$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\bin\*.dll"
     <ClInclude Include="ipc\waitcondition.h" />
     <ClInclude Include="Nama.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="rapidjson\rapidjson.h" />
     <ClInclude Include="Sound\MP3.h" />
     <ClInclude Include="UIBridge.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\ThridParty\imgui\gl3w.c" />
-    <ClCompile Include="..\ThridParty\imgui\imgui.cpp" />
-    <ClCompile Include="..\ThridParty\imgui\imgui_demo.cpp" />
-    <ClCompile Include="..\ThridParty\imgui\imgui_draw.cpp" />
-    <ClCompile Include="..\ThridParty\imgui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="..\ThridParty\imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="..\ThridParty\imgui\imgui_tabs.cpp" />
+    <ClCompile Include="..\ThridParty\Windows\imgui\gl3w.c" />
+    <ClCompile Include="..\ThridParty\Windows\imgui\imgui.cpp" />
+    <ClCompile Include="..\ThridParty\Windows\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\ThridParty\Windows\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\ThridParty\Windows\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\ThridParty\Windows\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\ThridParty\Windows\imgui\imgui_tabs.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="common\fu_tool.cpp" />
     <ClCompile Include="FULivePC.cpp" />
     <ClCompile Include="GUI\Gui.cpp" />
     <ClCompile Include="GUI\Loader.cpp" />
@@ -225,9 +224,7 @@ xcopy /s /y "$(SolutionDir)ThridParty\opencv400\opencv\build\x64\vc14\bin\*.dll"
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Sound\MP3.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="..\ThridParty\imgui\imgui.natvis" />
+    <ClCompile Include="UIBridge.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\res\frame.png" />

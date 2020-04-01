@@ -107,10 +107,18 @@ void * Loader::OpenFileFromeSearchPath(const char * name)
 			fullPath.append(name);
 
 #ifdef DEBUG
-			fprintf(stderr, "Trying to open %s\n", fullPath.c_str());
+			//fprintf(stderr, "Trying to open %s\n", fullPath.c_str());
 #endif
+#ifdef _WIN32
 			if ((fopen_s(&fp, fullPath.c_str(), "rb") == 0) || (fp != NULL))
 				return (void*)fp;
+#else
+            fp = fopen(fullPath.c_str(), "rb");
+            if(fp)
+            {
+                return (void*)fp;
+            }
+#endif
 		}
 
 		upPath.append("../");

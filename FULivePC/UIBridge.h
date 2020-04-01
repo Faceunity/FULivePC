@@ -3,9 +3,12 @@
 #define UIBRIDGE_H
 
 #include <string>
+#include <vector>
+#include "imgui/imgui.h"
+
 #define MAX_PATH_LENGTH 1024  
-#define MAX_BEAUTYFACEPARAMTER 5 
-#define MAX_FACESHAPEPARAMTER 9
+#define MAX_BEAUTYFACEPARAMTER 7
+#define MAX_FACESHAPEPARAMTER 15
 
 enum BundleCategory 
 {
@@ -30,7 +33,7 @@ enum BundleCategory
 	Count
 };
 
-static class UIBridge
+class UIBridge
 {
 public:
 
@@ -60,8 +63,8 @@ public:
 	static int mEnableSkinDect;
 	static int mEnableHeayBlur;
 	static int mEnableExBlur;
-	static float mFaceBeautyLevel[5];
-	static float mFaceShapeLevel[9];
+	static float mFaceBeautyLevel[MAX_BEAUTYFACEPARAMTER];
+	static float mFaceShapeLevel[MAX_FACESHAPEPARAMTER];
 	static float mFilterLevel[10];
 	static float mMakeupLevel[10];
 		
@@ -70,63 +73,32 @@ public:
 	static std::string mCurRenderItemName;
 	static std::vector<std::string> categoryBundles[BundleCategory::Count];
 
-	static void UIBridge::FindAllBundle(std::string folder,std::vector<std::string> &files)
-	{		
-		IteratorFolder(folder.c_str(), files);
-		//for each (auto file in files)
-		//{
-		//	std::cout << file << std::endl;
-		//}
-	}
-	static void UIBridge::Wchar_tToString(std::string& szDst, wchar_t *wchar)
-	{
-		wchar_t * wText = wchar;
-		DWORD dwNum = WideCharToMultiByte(CP_OEMCP, NULL, wText, -1, NULL, 0, NULL, FALSE);// WideCharToMultiByte的运用
-		char *psText; // psText为char*的临时数组，作为赋值给std::string的中间变量
-		psText = new char[dwNum];
-		WideCharToMultiByte(CP_OEMCP, NULL, wText, -1, psText, dwNum, NULL, FALSE);// WideCharToMultiByte的再次运用
-		szDst = psText;// std::string赋值
-		delete[]psText;// psText的清除
-	}
-	static void UIBridge::IteratorFolder(const char* lpPath, std::vector<std::string> &fileList) {
-		char szFind[MAX_PATH];
-		WIN32_FIND_DATA FindFileData;
-		strcpy(szFind, lpPath);
-		strcat(szFind, "\\*.*");
-		int len = MultiByteToWideChar(CP_ACP, 0, (LPCSTR)szFind, -1, NULL, 0);
-		wchar_t * wszUtf8 = new wchar_t[len + 1];
-		memset(wszUtf8, 0, len * 2 + 2);
-		MultiByteToWideChar(CP_ACP, 0, (LPCSTR)szFind, -1, (LPWSTR)wszUtf8, len);
-		HANDLE hFind = ::FindFirstFileW(wszUtf8, &FindFileData);
-		if (INVALID_HANDLE_VALUE == hFind)    return;
-		while (true) {
-			if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			{
-				if (FindFileData.cFileName[0] != '.')
-				{
-					std::string folderName;
-					Wchar_tToString(folderName, FindFileData.cFileName);
-					fileList.push_back(folderName);
-				}
-			}
-			else
-			{
-				//std::cout << FindFileData.cFileName << std::endl;			
-				std::string str;
-				Wchar_tToString(str, FindFileData.cFileName);
-				if (str.find(".bundle")!= std::string::npos)
-				{
-					fileList.push_back(str);
-				}				
-			}
-			if (!FindNextFile(hFind, &FindFileData))    break;
-		}
-		FindClose(hFind);
-	}
+    static void FindAllBundle(std::string folder,std::vector<std::string> &files);
+    
 protected:
 private:
 };
-const std::string g_assetDir = "../../assets/";
+
+const std::string g_faceBeautyParamName[MAX_BEAUTYFACEPARAMTER] = { "blur_level","color_level", "red_level", "eye_bright", "tooth_whiten" ,"remove_pouch_strength", "remove_nasolabial_folds_strength" };
+
+const std::string g_faceShapeParamName[MAX_FACESHAPEPARAMTER] = { "cheek_thinning","eye_enlarging", "intensity_chin", "intensity_forehead", "intensity_nose","intensity_mouth",
+		"cheek_v","cheek_narrow","cheek_small", 
+	"intensity_canthus", "intensity_eye_space", "intensity_eye_rotate", "intensity_long_nose",
+	"intensity_philtrum", "intensity_smile" };
+
+//区分是否从中间值开始突变的Flag 0:变化从0->1 1:0->0.5 0.5->1
+
+#define FACE_SHAPE_SHOW_FLAG_NORMAL (0)
+#define FACE_SHAPE_SHOW_FLAG_MIDDLE (1)
+const int g_faceShapeParamShowFlag[MAX_FACESHAPEPARAMTER] = { 0,0,1,1,0,
+1,0,0,0,0,
+1,1,1,1,0 };
+
+#ifdef __APPLE__
+const std::string g_assetDir = "";
+#else
+const std::string g_assetDir = "assets/";
+#endif
 const std::string gBundlePath[] = {
 	g_assetDir + "items/" + "Animoji",
 	g_assetDir + "items/" + "ItemSticker",

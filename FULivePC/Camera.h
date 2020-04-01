@@ -5,7 +5,10 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
 
+#ifdef _WIN32
 #include <dshow.h>
+#endif
+
 #include <locale>
 #include <vector>
 
@@ -59,9 +62,12 @@ public:
 	void setCaptureType(int _type);
 	void setCaptureCameraID(int _id);
 	cv::Mat getFrame();
+    
+#ifdef _WIN32
 	void _FreeMediaType(AM_MEDIA_TYPE & mt);
 	HRESULT CamCaps(IBaseFilter * pBaseFilter);
 	void process_filter(IBaseFilter * pBaseFilter);
+#endif
 	int enum_devices();
 	int getDeviceList();
 	std::vector<std::string> getDeviceNameList();
@@ -96,6 +102,12 @@ public:
 	cv::VideoCapture mCapture;
 	cv::Mat frame;
 	cv::Mat resize_frame;
+	cv::Size m_dstFrameSize;
+    
+#ifdef _WIN32
 	HANDLE hThread;
+#else
+    pthread_t m_pid;
+#endif
 };
 

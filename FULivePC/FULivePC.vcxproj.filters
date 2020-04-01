@@ -18,48 +18,27 @@
     <Filter Include="Source Files\ipc">
       <UniqueIdentifier>{9c1d8c01-1a65-4d53-80e9-9df12ec276be}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\rapidjson">
-      <UniqueIdentifier>{cc70c070-fc6b-4206-9e7f-697688f5d225}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Sound">
       <UniqueIdentifier>{b3d48699-75a7-4c4a-b8af-c7bcf50eb9a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\imgui">
+      <UniqueIdentifier>{957638e0-f17a-4a33-bf44-8c0030885b22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gl3w">
+      <UniqueIdentifier>{74f27357-7d2e-41ba-8f8c-bd280bbe3cc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\common">
+      <UniqueIdentifier>{4e25b2fd-98d5-43f1-b14c-009f8faf162d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\ThridParty\imgui\imconfig.h">
-      <Filter>Source Files\GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThridParty\imgui\imgui.h">
-      <Filter>Source Files\GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThridParty\imgui\imgui_impl_glfw.h">
-      <Filter>Source Files\GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThridParty\imgui\imgui_impl_opengl3.h">
-      <Filter>Source Files\GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThridParty\imgui\imgui_internal.h">
-      <Filter>Source Files\GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThridParty\imgui\stb_rect_pack.h">
-      <Filter>Source Files\GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThridParty\imgui\stb_textedit.h">
-      <Filter>Source Files\GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThridParty\imgui\stb_truetype.h">
-      <Filter>Source Files\GUI</Filter>
-    </ClInclude>
     <ClInclude Include="GUI\Gui.h">
       <Filter>Source Files\GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\Texture.h">
-      <Filter>Source Files\GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThridParty\imgui\imgui_tabs.h">
       <Filter>Source Files\GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\Loader.h">
@@ -86,45 +65,57 @@
     <ClInclude Include="ipc\ipcbridge.h">
       <Filter>Source Files\ipc</Filter>
     </ClInclude>
-    <ClInclude Include="rapidjson\rapidjson.h">
-      <Filter>Source Files\rapidjson</Filter>
-    </ClInclude>
     <ClInclude Include="Sound\MP3.h">
       <Filter>Source Files\Sound</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Source Files\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="..\ThridParty\Windows\imgui\imgui.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThridParty\Windows\imgui\imgui_impl_glfw.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThridParty\Windows\imgui\imgui_impl_opengl3.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThridParty\Windows\imgui\imgui_internal.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThridParty\Windows\imgui\imgui_tabs.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThridParty\Windows\imgui\stb_rect_pack.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThridParty\Windows\imgui\stb_textedit.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThridParty\Windows\imgui\stb_truetype.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThridParty\Windows\imgui\imconfig.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThridParty\Windows\imgui\gl3w.h">
+      <Filter>Source Files\gl3w</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThridParty\Windows\imgui\glcorearb.h">
+      <Filter>Source Files\gl3w</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\common\fu_tool.h">
+      <Filter>Source Files\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FULivePC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ThridParty\imgui\imgui_impl_opengl3.cpp">
-      <Filter>Source Files\GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThridParty\imgui\gl3w.c">
-      <Filter>Source Files\GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThridParty\imgui\imgui.cpp">
-      <Filter>Source Files\GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThridParty\imgui\imgui_demo.cpp">
-      <Filter>Source Files\GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThridParty\imgui\imgui_draw.cpp">
-      <Filter>Source Files\GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThridParty\imgui\imgui_impl_glfw.cpp">
-      <Filter>Source Files\GUI</Filter>
-    </ClCompile>
     <ClCompile Include="GUI\Gui.cpp">
       <Filter>Source Files\GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\Texture.cpp">
-      <Filter>Source Files\GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThridParty\imgui\imgui_tabs.cpp">
       <Filter>Source Files\GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\Loader.cpp">
@@ -148,11 +139,33 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\Camera</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="..\ThridParty\imgui\imgui.natvis">
-      <Filter>Source Files\GUI</Filter>
-    </Natvis>
+    <ClCompile Include="..\ThridParty\Windows\imgui\imgui.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThridParty\Windows\imgui\imgui_demo.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThridParty\Windows\imgui\imgui_draw.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThridParty\Windows\imgui\imgui_impl_glfw.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThridParty\Windows\imgui\imgui_impl_opengl3.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThridParty\Windows\imgui\imgui_tabs.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="UIBridge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThridParty\Windows\imgui\gl3w.c">
+      <Filter>Source Files\gl3w</Filter>
+    </ClCompile>
+    <ClCompile Include="common\fu_tool.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\res\frame.png">

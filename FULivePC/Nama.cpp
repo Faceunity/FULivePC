@@ -1,29 +1,37 @@
 /**
-* FU SDK使用者可以将拿到处理后的frame图像与自己的原有项目对接
-* 请FU SDK使用者直接参考示例放至代码至对应位置
-*
-* FU SDK与camera无耦合，不关心数据的来源，只要图像内容正确且和宽高吻合即可
 *
 * Created by liujia on 2018/1/3 mybbs2200@gmail.com.
 */
 #include "Camera.h"
 #include "Nama.h"
 #include "Config.h"	
-#include "Gui/Gui.h"
-
+#include "Gui.h"
+#include "fu_tool.h"
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/document.h"
 
-#include <funama.h>				//nama SDK 的头文件
-#include <authpack.h>			//nama SDK 的key文件
-#pragma comment(lib, "nama.lib")//nama SDK 的lib文件
-//音乐播放
-#include "Sound/MP3.h"
-std::map<int,Mp3*> mp3Map;
+#include <funama.h>				//nama SDK
+#include <authpack.h>			//nama SDK
+
+
 using namespace NamaExampleNameSpace;
+
 bool Nama::mHasSetup = false;
 bool Nama::mEnableNama = false;
+
+#ifdef _WIN32
+
+#include "Sound/MP3.h"
+std::map<int,Mp3*> mp3Map;
 static HGLRC new_context;
+#pragma comment(lib, "nama.lib")//nama SDK
+
+#else
+
+#include "NaMaGLContext.h"
+static void * new_context;
+
+#endif
 
 std::string Nama::mFilters[6] = { "origin", "bailiang1", "fennen1", "xiaoqingxin1", "lengsediao1", "nuansediao1" };
 
@@ -53,8 +61,11 @@ Nama::Nama()
 	mIsBeautyOn = true;
 	mBeautyHandles = 0;
 	mMakeUpHandle = 0;
+#ifdef _WIN32
 	mCapture = std::tr1::shared_ptr<CCameraDS>(new CCameraDS);
-	mNewFaceTracker = -1;
+#else
+    mCapture = std::shared_ptr<CCameraDS>(new CCameraDS);
+#endif
 }
 
 Nama::~Nama()
@@ -65,9 +76,9 @@ Nama::~Nama()
 		fuOnDeviceLost();//Note: 这个调用销毁nama创建的OpenGL资源
 		fuDestroyLibData();//Note: 这个调用销毁nama创建的线程资源
 	}
-	//fuSetup整个程序只需要运行一次，销毁某个子窗口时只需要调用上述两个函数。 
-	//Tips:如果其他窗口还会用这些资源，那么资源创建应该在父窗口。程序运行期间一直持有这些资源.
 
+#ifdef _WIN32
+    
 	std::map<int, Mp3*>::iterator it;
 	for (it = mp3Map.begin(); it != mp3Map.end(); it++)
 	{
@@ -75,6 +86,8 @@ Nama::~Nama()
 		delete it->second;
 		UIBridge::mNeedPlayMP3 = false;
 	}
+    
+#endif
 }
 
 std::vector<std::string> Nama::CameraList()
@@ -98,6 +111,8 @@ bool Nama::ReOpenCamera(int camID)
 	return true;
 }
 
+#ifdef _WIN32
+
 PIXELFORMATDESCRIPTOR pfd = {
 	sizeof(PIXELFORMATDESCRIPTOR),
 	1u,
@@ -116,8 +131,11 @@ PIXELFORMATDESCRIPTOR pfd = {
 	0u,
 	0u, 0u };
 
+#endif
+
 void InitOpenGL()
 {
+#ifdef _WIN32
 	HWND hw = CreateWindowExA(
 		0, "EDIT", "", ES_READONLY,
 		0, 0, 1, 1,
@@ -132,70 +150,95 @@ void InitOpenGL()
 	//hglrc就是创建出的OpenGL context
 	printf("hw=%08x hgldc=%08x spf=%d ret=%d hglrc=%08x\n",
 		hw, hgldc, spf, ret, hglrc);
+    
+#endif
+    
+    //Init GL and Window
 }
 
 bool Nama::CheckGLContext()
 {
+
 	int add0, add1, add2, add3;
+    
+#ifdef _WIN32
 	add0 = (int)wglGetProcAddress("glGenFramebuffersARB");
 	add1 = (int)wglGetProcAddress("glGenFramebuffersOES");
 	add2 = (int)wglGetProcAddress("glGenFramebuffersEXT");
 	add3 = (int)wglGetProcAddress("glGenFramebuffers");
-	printf("gl ver test (%s:%d): %08x %08x %08x %08x\n", __FILE__, __LINE__,add0, add1, add2, add3);
+#else
+    add0 = (int)glfwGetProcAddress("glGenFramebuffersARB");
+    add1 = (int)glfwGetProcAddress("glGenFramebuffersOES");
+    add2 = (int)glfwGetProcAddress("glGenFramebuffersEXT");
+    add3 = (int)glfwGetProcAddress("glGenFramebuffers");
+#endif
+
+	const GLubyte* OpenGLVersion = glGetString(GL_VERSION);
+    
+	printf("gl ver test (%s:%d):version:%s  %08x %08x %08x %08x\n", __FILE__, __LINE__, OpenGLVersion, add0, add1, add2, add3);
 	return add0 | add1 | add2 | add3;
+    
 }
 
 bool Nama::Init(uint32_t& width, uint32_t& height)
 {
+#ifdef _WIN32
 	HGLRC context = wglGetCurrentContext();
 	HWND wnd = (HWND)Gui::hWindow;
 	new_context = wglCreateContext(GetDC(wnd));
 	wglMakeCurrent(GetDC(wnd), new_context);
+#else
+    void * curCtx = NaMaGetCurrentGLCtx();
+    new_context = NaMaCreateGLCtx(Gui::hWindow);
+    NaMaMakeAsCurrentCtx(new_context);
+#endif
+    
 	mCapture->initCamera(width, height,UIBridge::mSelectedCamera);
-	mFrameWidth = width;
-	mFrameHeight = height;
+	mFrameWidth = mCapture->m_dstFrameSize.width;
+	mFrameHeight = mCapture->m_dstFrameSize.height;
 	if (false == mHasSetup && true ==  mEnableNama)
 	{
-		//读取nama数据库，初始化nama
 		std::vector<char> v3data;
-		if (false == LoadBundle(g_fuDataDir + g_v3Data, v3data))
+		if (false == FuTool::LoadBundle(g_v3Data, v3data))
 		{
-			std::cout << "Error:缺少数据文件。" << g_fuDataDir + g_v3Data << std::endl;
+			std::cout << "Error:" << g_fuDataDir + g_v3Data << std::endl;
 			return false;
 		}
-		//CheckGLContext();
-		fuSetup(reinterpret_cast<float*>(&v3data[0]), v3data.size(), NULL, g_auth_package, sizeof(g_auth_package));
+		
+        CheckGLContext();
+		
+        fuSetup(reinterpret_cast<float*>(&v3data[0]), v3data.size(), NULL, g_auth_package, sizeof(g_auth_package));
 
 		printf("Nama version:%s \n", fuGetVersion());
 		std::vector<char> tongue_model_data;
-		if (false == LoadBundle(g_fuDataDir + g_tongue, tongue_model_data))
+		if (false == FuTool::LoadBundle(g_tongue, tongue_model_data))
 		{
-			std::cout << "Error:缺少数据文件。" << g_fuDataDir + g_tongue << std::endl;
+			std::cout << "Error:缺少数据文件。" << g_tongue << std::endl;
 			return false;
 		}
 		// 舌头识别
 		fuLoadTongueModel(reinterpret_cast<float*>(&tongue_model_data[0]), tongue_model_data.size());
 
 		std::vector<char> ai_model_data;
-		if (false == LoadBundle(g_fuDataDir + g_ai_faceprocessor, ai_model_data))
+		if (false == FuTool::LoadBundle(g_ai_faceprocessor, ai_model_data))
 		{
-			std::cout << "Error:缺少数据文件。" << g_fuDataDir + g_ai_faceprocessor << std::endl;
+			std::cout << "Error:缺少数据文件。" << g_ai_faceprocessor << std::endl;
 			return false;
 		}		
 		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_model_data[0]), ai_model_data.size(), FUAITYPE::FUAITYPE_FACEPROCESSOR);
 
 		std::vector<char> ai239_model_data;
-		if (false == LoadBundle(g_fuDataDir + g_ai_landmark239, ai239_model_data))
+		if (false == FuTool::LoadBundle(g_ai_landmark239, ai239_model_data))
 		{
-			std::cout << "Error:缺少数据文件。" << g_fuDataDir + g_ai_landmark239 << std::endl;
+			std::cout << "Error:缺少数据文件。" << g_ai_landmark239 << std::endl;
 			return false;
 		}
 		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai239_model_data[0]), ai239_model_data.size(), FUAITYPE::FUAITYPE_FACELANDMARKS239);
 
 		std::vector<char> fxaa_data;
-		if (false == LoadBundle(g_fuDataDir + g_fxaa, fxaa_data))
+		if (false == FuTool::LoadBundle(g_fxaa, fxaa_data))
 		{
-			std::cout << "Error:缺少数据文件。" << g_fuDataDir + g_fxaa << std::endl;
+			std::cout << "Error: Set Bundle" << g_fxaa << std::endl;
 			return false;
 		}
 		mFxaaHandles = fuCreateItemFromPackage(fxaa_data.data(), fxaa_data.size());
@@ -203,11 +246,10 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 
 		mModuleCode = fuGetModuleCode(0);
 		mModuleCode1 = fuGetModuleCode(1);
-		//读取美颜道具，设置美颜参数
 		if(CheckModuleCode(Facebeauty))
 		{
 			std::vector<char> propData;
-			if (false == LoadBundle(g_fuDataDir + g_faceBeautification, propData))
+			if (false == FuTool::LoadBundle(g_faceBeautification, propData))
 			{
 				std::cout << "load face beautification data failed." << std::endl;
 				return false;
@@ -221,7 +263,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 		if( CheckModuleCode(Makeup))
 		{
 			std::vector<char> propData;
-			if (false == LoadBundle(g_fuDataDir + g_Makeup, propData))
+			if (false == FuTool::LoadBundle(g_Makeup, propData))
 			{
 				std::cout << "load face makeup data failed." << std::endl;
 				return false;
@@ -229,7 +271,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			std::cout << "load face makeup data." << std::endl;
 
 			mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
-					
+			fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1); //切换时清空之前的妆容
 		}
 		fuSetDefaultOrientation(0);
 		float fValue = 0.5f;
@@ -243,7 +285,12 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 		mHasSetup = false;
 	}
 
+#ifdef _WIN32
 	wglMakeCurrent(GetDC(wnd), context);
+#else
+    NaMaMakeAsCurrentCtx(curCtx);
+#endif
+    
 	return true;
 }
 
@@ -272,16 +319,18 @@ void Nama::SetCurrentShape(int index)
 
 int Nama::CreateMakeupBundle(std::string bundleName)
 {
+    int fakeBundleID = 0;
+
 	if (false == mEnableNama || false == mIsBeautyOn || mMakeUpHandle == 0)return 0;
 	using namespace std;
 	using namespace rapidjson;
-	int fakeBundleID = 0;
+	
 	auto pos = mMakeupsMap.find(bundleName);
 	if (pos == mMakeupsMap.end())
 	{
-		Document doc;
+		rapidjson::Document doc;
 
-		Document& dd = doc;
+		rapidjson::Document& dd = doc;
 		std::string jsonpath = bundleName + "/makeup.json";
 
 		FILE* fp = fopen(jsonpath.c_str(), "rb");
@@ -341,6 +390,7 @@ int Nama::CreateMakeupBundle(std::string bundleName)
 		mMakeupsMap[bundleName] = paramArr;
 		fakeBundleID = mMakeupsMap.size() + 666;
 	}
+    
 	return fakeBundleID;
 }
 
@@ -405,23 +455,32 @@ void Nama::UpdateBeauty()
 	{		
 		if (i==0)//磨皮
 		{
-			fuItemSetParamd(mBeautyHandles, const_cast<char*>(faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i] *6.0/ 100.f);
+			fuItemSetParamd(mBeautyHandles, const_cast<char*>(g_faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i] *6.0/ 100.f);
 		} 
 		else
 		{
-			fuItemSetParamd(mBeautyHandles, const_cast<char*>(faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i] / 100.f);
+			fuItemSetParamd(mBeautyHandles, const_cast<char*>(g_faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i] / 100.f);
 		}		
 	}
-	std::string faceShapeParamName[] = { "cheek_thinning","eye_enlarging", "intensity_chin", "intensity_forehead", "intensity_nose","intensity_mouth",
-		"cheek_v","cheek_narrow","cheek_small" };
+	
 	for (int i=0;i<MAX_FACESHAPEPARAMTER;i++)
 	{
-		if (i == 2 || i == 3 || i == 5  )
+		if (g_faceShapeParamShowFlag[i] == FACE_SHAPE_SHOW_FLAG_MIDDLE)
 		{
 			UIBridge::mFaceShapeLevel[i] += 50;
 		}
-		fuItemSetParamd(mBeautyHandles, const_cast<char*>(faceShapeParamName[i].c_str()), UIBridge::mFaceShapeLevel[i]/100.0f);	
-		if (i == 2 || i == 3 || i == 5)
+		fuItemSetParamd(mBeautyHandles, const_cast<char*>(g_faceShapeParamName[i].c_str()), UIBridge::mFaceShapeLevel[i]/100.0f);
+
+		/*if (i == 12)
+		{
+			wchar_t szBuf[2048] = { 0 };
+			wsprintf(szBuf,L"liufei set data %d", (int)UIBridge::mFaceShapeLevel[i]);
+			OutputDebugString(szBuf);
+
+		}*/
+		
+
+		if (g_faceShapeParamShowFlag[i] == FACE_SHAPE_SHOW_FLAG_MIDDLE)
 		{
 			UIBridge::mFaceShapeLevel[i] -= 50;
 		}
@@ -441,7 +500,8 @@ bool Nama::SelectBundle(std::string bundleName)
 	}
 
 	int bundleID = -1;	
-	//停止播放音乐
+	
+#ifdef _WIN32
 	std::map<int, Mp3*>::iterator it;
 	for (it = mp3Map.begin(); it != mp3Map.end(); it++)
 	{
@@ -450,7 +510,8 @@ bool Nama::SelectBundle(std::string bundleName)
 		it->second->Stop();
 		UIBridge::mNeedPlayMP3 = false;
 	}
-	//如果未加载道具，则加载
+#endif
+	
 	if (0 == mBundlesMap[bundleName])
 	{
 		//证书没有权限读取这个种类的道具
@@ -460,7 +521,7 @@ bool Nama::SelectBundle(std::string bundleName)
 			return false;
 		}
 		std::vector<char> propData;
-		if (false == LoadBundle(bundleName, propData))
+		if (false == FuTool::LoadBundle(bundleName, propData))
 		{
 			std::cout << "load prop data failed." << std::endl;
 			UIBridge::m_curRenderItem = -1;
@@ -477,7 +538,7 @@ bool Nama::SelectBundle(std::string bundleName)
 
 		bundleID = fuCreateItemFromPackage(&propData[0], propData.size());
 		mBundlesMap[bundleName] = bundleID;
-		//绑定美妆道具
+
 		if (UIBridge::bundleCategory == BundleCategory::Makeup)
 		{
 			if (UIBridge::m_curBindedItem != -1)
@@ -491,24 +552,26 @@ bool Nama::SelectBundle(std::string bundleName)
 		{
 			//fuItemSetParamd(mMakeUpHandle, "is_makeup_on", 0);
 		}
-		//加载并播放音乐
+
 		if (UIBridge::bundleCategory == BundleCategory::MusicFilter)
 		{
+#ifdef _WIN32
 			std::string itemName = UIBridge::mCurRenderItemName.substr(0, UIBridge::mCurRenderItemName.find_last_of("."));
 			if (mp3Map.find(bundleID) == mp3Map.end())
 			{
 				Mp3 *mp3 = new Mp3;
-				mp3->Load("../../assets/items/MusicFilter/" + itemName + ".mp3");
+				mp3->Load("assets/items/MusicFilter/" + itemName + ".mp3");
 				mp3Map[bundleID] = mp3;
 			}
 			mp3Map[bundleID]->Play();
 			UIBridge::mNeedPlayMP3 = true;
+#endif
 		}
 	}
 	else
 	{
 		bundleID = mBundlesMap[bundleName];		
-		//绑定美妆道具
+		
 		if (UIBridge::bundleCategory == BundleCategory::Makeup)
 		{
 			if (UIBridge::m_curBindedItem != -1)
@@ -524,8 +587,10 @@ bool Nama::SelectBundle(std::string bundleName)
 		}
 		if (UIBridge::bundleCategory == BundleCategory::MusicFilter)
 		{
+#ifdef _WIN32
 			mp3Map[bundleID]->Play();
 			UIBridge::mNeedPlayMP3 = true;
+#endif
 		}
 	}
 		
@@ -567,22 +632,23 @@ bool Nama::CheckModuleCode(int category)
 {	
 	return (mModuleCode & modules[category])  || (mModuleCode1 & modules1[category]);
 }
-//渲染函数
+
 void Nama::RenderItems(uchar* frame)
 {
+#ifdef _WIN32
 	HGLRC context = wglGetCurrentContext();
 	HWND wnd = (HWND)Gui::hWindow;
 	wglMakeCurrent(GetDC(wnd), new_context);
-	//此处判断供第一次集成查错用，可以在确认OpenGL环境正确的情况下删掉
-	//if (CheckGLContext() == false)
-	//{
-	//	InitOpenGL();
-	//}
+#else
+    void * curCtx = NaMaGetCurrentGLCtx();
+    NaMaMakeAsCurrentCtx(new_context);
+#endif
 	
 	if (true == mEnableNama )
 	{
 		fuSetMaxFaces(mMaxFace);
 
+#ifdef _WIN32
 		if (UIBridge::mNeedPlayMP3)
 		{
 			if (mp3Map.find(UIBridge::m_curRenderItem) != mp3Map.end())
@@ -601,33 +667,17 @@ void Nama::RenderItems(uchar* frame)
 			UIBridge::m_curRenderItem = -1;
 			UIBridge::mNeedStopMP3 = false;
 		}
+#endif
 
 		if (UIBridge::showMakeUpWindow)
 		{
-			if (mNewFaceTracker == -1)
-			{
-				std::vector<char> propData;
-				if (false == LoadBundle(g_fuDataDir + g_NewFaceTracker, propData))
-				{
-					std::cout << "load face newfacetracker data failed." << std::endl;
-					return;
-				}
-				std::cout << "load face newfacetracker data." << std::endl;
-
-				mNewFaceTracker = fuCreateItemFromPackage(&propData[0], propData.size());
-			}
-			int handle[] = { mBeautyHandles,mMakeUpHandle, mNewFaceTracker };
+			int handle[] = { mBeautyHandles, mMakeUpHandle }; //  mNewFaceTracker(old use)
 			int handleSize = sizeof(handle) / sizeof(handle[0]);
 			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
 				mFrameWidth, mFrameHeight, mFrameID, handle, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
 		}
 		else
 		{
-			if (mNewFaceTracker != -1)
-			{
-				fuDestroyItem(mNewFaceTracker);
-				mNewFaceTracker = -1;
-			}
 			int handle[] = { mBeautyHandles, UIBridge::m_curRenderItem };
 			int handleSize = sizeof(handle) / sizeof(handle[0]);
 			//支持的格式有FU_FORMAT_BGRA_BUFFER 、 FU_FORMAT_NV21_BUFFER 、FU_FORMAT_I420_BUFFER 、FU_FORMAT_RGBA_BUFFER		
@@ -642,15 +692,27 @@ void Nama::RenderItems(uchar* frame)
 		++mFrameID;
 	}
 
+#ifdef _WIN32
 	wglMakeCurrent(GetDC(wnd), context);
+#else
+    NaMaMakeAsCurrentCtx(curCtx);
+#endif
+    
 	return;
 }
 //只调用nama里的美颜模块
 uchar* Nama::RenderEx(uchar* frame)
 {
+#ifdef _WIN32
+    
 	HGLRC context = wglGetCurrentContext();
 	HWND wnd = (HWND)Gui::hWindow;
 	wglMakeCurrent(GetDC(wnd), new_context);
+#else
+    void * curCtx = NaMaGetCurrentGLCtx();
+    NaMaMakeAsCurrentCtx(new_context);
+#endif
+    
 	if (true == mEnableNama)
 	{
 		fuBeautifyImage(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
@@ -659,7 +721,13 @@ uchar* Nama::RenderEx(uchar* frame)
 
 		++mFrameID;
 	}
+    
+#ifdef _WIN32
 	wglMakeCurrent(GetDC(wnd), context);
+#else
+    NaMaMakeAsCurrentCtx(curCtx);
+#endif
+    
 	return frame;
 }
 
@@ -701,39 +769,4 @@ void Nama::DrawPoint(uchar* frame, int x, int y, unsigned char r, unsigned char 
 		data[yy * 4 * mFrameWidth + xx * 4 + 2] = r;
 	}
 
-}
-
-namespace NamaExampleNameSpace {
-
-	size_t FileSize(std::ifstream& file)
-	{
-		std::streampos oldPos = file.tellg();
-		file.seekg(0, std::ios::beg);
-		std::streampos beg = file.tellg();
-		file.seekg(0, std::ios::end);
-		std::streampos end = file.tellg();
-		file.seekg(oldPos, std::ios::beg);
-		return static_cast<size_t>(end - beg);
-	}
-
-	bool LoadBundle(const std::string& filepath, std::vector<char>& data)
-	{
-		std::ifstream fin(filepath, std::ios::binary);
-		if (false == fin.good())
-		{
-			fin.close();
-			return false;
-		}
-		size_t size = FileSize(fin);
-		if (0 == size)
-		{
-			fin.close();
-			return false;
-		}
-		data.resize(size);
-		fin.read(reinterpret_cast<char*>(&data[0]), size);
-
-		fin.close();
-		return true;
-	}
 }

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __NAMA_H__
+#define __NAMA_H__
 
 #include <vector>
 #include <memory>
@@ -60,7 +61,6 @@ namespace NamaExampleNameSpace
 	private:				
 		int mBeautyHandles;
 		int mMakeUpHandle;
-		int mNewFaceTracker;
 		int mGestureHandles;
 		int mFxaaHandles;
 		uint32_t mFrameWidth, mFrameHeight;
@@ -72,15 +72,15 @@ namespace NamaExampleNameSpace
 		int mMaxFace;
 		int mFrameID;		
 		int mModuleCode, mModuleCode1;
+#ifdef _WIN32
 		std::tr1::shared_ptr<CCameraDS> mCapture;
+#else
+        std::shared_ptr<CCameraDS> mCapture;
+#endif
 		static std::string mFilters[6];
 		std::unordered_map<std::string, int> mBundlesMap;
 		std::unordered_map<std::string, std::vector<MakeupParam>> mMakeupsMap;
 	};
-	   
-	size_t FileSize(std::ifstream& file);
-
-	bool LoadBundle(const std::string& filepath, std::vector<char>& data);
 }
 
 template < class T>
@@ -97,3 +97,5 @@ struct MakeupParam
 	std::string textureName;
 	int value;
 };
+
+#endif

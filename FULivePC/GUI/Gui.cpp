@@ -1,17 +1,19 @@
-
+ï»¿
 #include "Gui.h"
 //#include "Config.h"	
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include "rapidjson\document.h"
-#include "rapidjson\filereadstream.h"
+#include "rapidjson/document.h"
+#include "rapidjson/filereadstream.h"
 #include "stdio.h"
+#include "fu_tool.h"
+
 int oriWindowWidth = 0;
 int oriWindowHeight = 0;
 float scaleRatioW = 1.f;
 float scaleRatioH = 1.f;
 bool showUI = true;
-extern HANDLE hMutex;
+
 int UIBridge::bundleCategory = -1;
 int UIBridge::renderBundleCategory = -1;
 std::vector<std::string> UIBridge::categoryBundles[BundleCategory::Count];
@@ -27,7 +29,7 @@ int UIBridge::showMakeUpWindow = false;
  uint32_t UIBridge::mResolutionHeight = 720;
  uint32_t UIBridge::mRenderTime = 33;
 
-int UIBridge::m_curFilterIdx;
+int UIBridge::m_curFilterIdx = 2;  //é»˜è®¤ç²‰å«©
 int UIBridge::m_curRenderItem = -1; 
 int UIBridge::m_curBindedItem = -1;
 ImGuiID UIBridge::m_curRenderItemUIID = -1;
@@ -37,14 +39,19 @@ int UIBridge::mEnableSkinDect = 1;
 int UIBridge::mEnableHeayBlur = 0;
 int UIBridge::mEnableExBlur = 0;
 int UIBridge::mSelectedCamera = 0;
-float UIBridge::mFaceBeautyLevel[5] = {0.0f};
-float UIBridge::mFaceShapeLevel[9] = {0.0f};
-float UIBridge::mFilterLevel[10] = { 100,100,100,100,100, 100,100,100,100,100};
+float UIBridge::mFaceBeautyLevel[MAX_BEAUTYFACEPARAMTER] = {0.0f};
+
+float UIBridge::mFaceShapeLevel[MAX_FACESHAPEPARAMTER] = {0.0f};
+float UIBridge::mFilterLevel[10] = { 100,100,40,100,100, 100,100,100,100,100};
 float UIBridge::mMakeupLevel[10] = { 100,100,100,100,100, 100,100,100,100,100 };
 
 bool UIBridge::mNeedIpcWrite =false;
 bool UIBridge::mNeedPlayMP3 = false;
 bool UIBridge::mNeedStopMP3 = false;
+
+
+//{ "blur_level","color_level", "red_level", "eye_bright", "tooth_whiten" ,"remove_pouch_strength", "remove_nasolabial_folds_strength" };
+
 
 void resetBeautyParam()
 {
@@ -52,10 +59,12 @@ void resetBeautyParam()
 	UIBridge::mEnableHeayBlur = 0;
 	UIBridge::mEnableExBlur = 0;
 	UIBridge::mFaceBeautyLevel[0] = 70;
-	UIBridge::mFaceBeautyLevel[1] = 50;
-	UIBridge::mFaceBeautyLevel[2] = 50;
+	UIBridge::mFaceBeautyLevel[1] = 30;
+	UIBridge::mFaceBeautyLevel[2] = 30;
 	UIBridge::mFaceBeautyLevel[3] = 70;
 	UIBridge::mFaceBeautyLevel[4] = 0;
+	UIBridge::mFaceBeautyLevel[5] = 0;
+	UIBridge::mFaceBeautyLevel[6] = 0;
 }
 
 void resetShapeParam()
@@ -68,38 +77,67 @@ void resetShapeParam()
 	UIBridge::mFaceShapeLevel[4] = 50;
 	UIBridge::mFaceShapeLevel[5] = -10;
 
-	UIBridge::mFaceShapeLevel[6] = 0;
+	UIBridge::mFaceShapeLevel[6] = 50;
 	UIBridge::mFaceShapeLevel[7] = 0;
 	UIBridge::mFaceShapeLevel[8] = 0;
+	UIBridge::mFaceShapeLevel[9] = 0;
+	UIBridge::mFaceShapeLevel[10] = 0;
+	UIBridge::mFaceShapeLevel[11] = 0;
+	UIBridge::mFaceShapeLevel[12] = 0;
+	UIBridge::mFaceShapeLevel[13] = 0;
+	UIBridge::mFaceShapeLevel[14] = 0;
 }
 
 bool doesFileExist(const std::string& filename)
 {
+#ifdef _WIN32
 	DWORD attr = GetFileAttributesA(filename.c_str());
 	return (attr != INVALID_FILE_ATTRIBUTES);
+#endif
+    
+    return true;
 }
 
 bool isDirectoryExists(const std::string& filename)
 {
+#ifdef _WIN32
 	DWORD attr = GetFileAttributesA(filename.c_str());
 	return ((attr != INVALID_FILE_ATTRIBUTES) && (attr & FILE_ATTRIBUTE_DIRECTORY));
+#endif
+    
+    return true;
 }
+
+#ifndef _WIN32
+
+static uint64_t GetTickCount()
+{
+    struct timespec tTemp = {0, 0};
+    clock_gettime(CLOCK_MONOTONIC, &tTemp);
+    uint64_t lRunMS = tTemp.tv_sec*1000 + tTemp.tv_nsec/1000000 ;
+
+    return lRunMS;
+}
+
+#endif
 
 int get_fps()
 {
 	static int fps = 0;
-	static int lastTime = GetTickCount(); // ms
+    
+	static uint64_t lastTime = GetTickCount(); // ms
 	static int frameCount = 0;
 
 	++frameCount;
 
-	int curTime = GetTickCount();
-	if (curTime - lastTime > 1000) // È¡¹Ì¶¨Ê±¼ä¼ä¸ôÎª1Ãë
+	uint64_t curTime = GetTickCount();
+	if (curTime - lastTime > 1000)
 	{
 		fps = frameCount-1;
 		frameCount = 0;
 		lastTime = curTime;
 	}
+    
 	return fps;
 }
 
@@ -115,7 +153,13 @@ static void window_size_callback(GLFWwindow* window, int width, int height)
 	scaleRatioW =(float)width/(float)oriWindowWidth ;
 	scaleRatioH = (float)height / (float)oriWindowHeight;
 }
+
+#ifdef _WIN32
 HWND Gui::hWindow;
+#else
+void * Gui::hWindow = NULL;
+#endif
+
 GLFWwindow* Gui::window;
 Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 {
@@ -134,7 +178,11 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 #endif
 	/*GLFWwindow**/ window = glfwCreateWindow(width, height, "FU Live Demo PC", NULL, NULL);
 	glfwMakeContextCurrent(window);
-	hWindow = glfwGetWin32Window(window);
+#if __APPLE__
+	hWindow = glfwGetCocoaWindow(window);
+#else
+    hWindow = glfwGetWin32Window(window);
+#endif
 	glfwSwapInterval(1); // Enable vsync
 	gl3wInit();
 	glfwSetWindowSizeCallback(window, window_size_callback);
@@ -162,8 +210,7 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 	colors[ImGuiCol_ScrollbarGrabHovered] = ImColor(112, 136, 237, 255);
 	colors[ImGuiCol_PopupBg] = ImColor(252, 253, 255, 255);
 
-	//std::string fontFile = "c:\\Windows\\Fonts\\msyh.ttc";
-	std::string fontFile = "../../res/msyh.ttc";
+	std::string fontFile = FuTool::GetFileFullPathFromeSearchPath("msyh.ttc");
 
 	if (doesFileExist(fontFile))
 	{
@@ -207,9 +254,9 @@ static void ShowHelpMarker(const char* desc)
 static bool ImageButtonWithLabel(const char* text)
 {
 	ImGui::BeginGroup();
-	//ImGui::ImageButton()
 	ImGui::Text("%s",text);
 	ImGui::EndGroup();
+    return true;
 }
 
 static bool LayoutButton(const ImVec2& pos,const ImVec2& size, const char* label)
@@ -290,9 +337,9 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 
 	if (GDocs[0].Name == NULL)
 	{
-		GDocs[0].Name = u8"ÃÀ·ô";
-		GDocs[1].Name = u8"ÃÀÐÍ";
-		GDocs[2].Name = u8"ÂË¾µ";
+		GDocs[0].Name = u8"ç¾Žè‚¤";
+		GDocs[1].Name = u8"ç¾Žåž‹";
+		GDocs[2].Name = u8"æ»¤é•œ";
 	}
 	ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 1.f));
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(120.f / 255.f, 136.f / 255.f, 234.f / 255.f, 1.f));
@@ -324,61 +371,63 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
 			if (UIBridge::mEnableSkinDect)
 			{
-				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_skinbeauty_open.png", false)->getTextureID(), u8"¾«×¼ÃÀ·ô");
+				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_skinbeauty_open.png", false)->getTextureID(), u8"ç²¾å‡†ç¾Žè‚¤");
 			}
 			else
 			{
-				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_skinbeauty_Close.png", false)->getTextureID(), u8"¾«×¼ÃÀ·ô");
+				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_skinbeauty_close.png", false)->getTextureID(), u8"ç²¾å‡†ç¾Žè‚¤");
 			}
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
-			//ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
-			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"¿ªÆô", UIBridge::mEnableSkinDect == 1))
+			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"å¼€å¯", UIBridge::mEnableSkinDect == 1))
 			{
 				UIBridge::mEnableSkinDect = 1;
 				nama->UpdateBeauty();
 			}
 			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"¹Ø±Õ", UIBridge::mEnableSkinDect == 0))
+			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"å…³é—­", UIBridge::mEnableSkinDect == 0))
 			{
 				UIBridge::mEnableSkinDect = 0;
 				nama->UpdateBeauty();
 			}
-			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_BeautyMode_open.png", false)->getTextureID(), u8"ÃÀ·ôÄ£Ê½");
+			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_BeautyMode_open.png", false)->getTextureID(), u8"ç¾Žè‚¤æ¨¡å¼");
 			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(22, 11), ImVec2(78, 30), u8"¾«Ï¸Ä¥Æ¤##3", UIBridge::mEnableHeayBlur == 0))
+			if (LayoutSelectable(ImVec2(22, 11), ImVec2(78, 30), u8"ç²¾ç»†ç£¨çš®##3", UIBridge::mEnableHeayBlur == 0))
 			{
 				UIBridge::mEnableHeayBlur = 0;
 				nama->UpdateBeauty();
 			}
 			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(5, 11), ImVec2(78, 30), u8"ÇåÎúÄ¥Æ¤##2", UIBridge::mEnableHeayBlur == 1))
+			if (LayoutSelectable(ImVec2(5, 11), ImVec2(78, 30), u8"æ¸…æ™°ç£¨çš®##2", UIBridge::mEnableHeayBlur == 1))
 			{
 				UIBridge::mEnableHeayBlur = 1;
 				nama->UpdateBeauty();
 			}
 			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(5, 11), ImVec2(78, 30), u8"ëüëÊÄ¥Æ¤##2", UIBridge::mEnableHeayBlur == 2))
+			if (LayoutSelectable(ImVec2(5, 11), ImVec2(78, 30), u8"æœ¦èƒ§ç£¨çš®##2", UIBridge::mEnableHeayBlur == 2))
 			{
 				UIBridge::mEnableHeayBlur = 2;
 				nama->UpdateBeauty();
 			}
 			ImGui::PopStyleColor();
 			//ImGui::PopStyleColor();
-			std::string sliderNameArr[10] = { "list_icon_Grindingskin_open","list_icon_Skinwhitening_open", "list_icon_Ruddy_open",
-				"list_icon_Brighteye_open","list_iconBeautifulteeth_open",
-				u8"   Ä¥Æ¤", u8"   ÃÀ°×",u8"   ºìÈó", u8"   ÁÁÑÛ", u8"   ÃÀÑÀ" };
 
-			for (int i = 0; i < 5; i++)
+			std::string sliderIconNameArr[MAX_BEAUTYFACEPARAMTER] = { "list_icon_Grindingskin_open","list_icon_Skinwhitening_open", "list_icon_Ruddy_open",
+				"list_icon_Brighteye_open","list_iconBeautifulteeth_open",
+				"list_icon_dark_circles_open","list_icon_wrinkle_open" };
+
+			std::string sliderNameArr[MAX_BEAUTYFACEPARAMTER] = { u8"   ç£¨çš®", u8"   ç¾Žç™½",u8"   çº¢æ¶¦", u8"   äº®çœ¼", u8"   ç¾Žç‰™" ,u8"åŽ»é»‘çœ¼åœˆ", u8"åŽ»æ³•ä»¤çº¹" };
+			
+			for (int i = 0; i < MAX_BEAUTYFACEPARAMTER; i++)
 			{
 				if (UIBridge::mFaceBeautyLevel[i] == 0)
 				{
-					std::string closeIconFile = sliderNameArr[i].substr(0, sliderNameArr[i].find_last_of('_')) + "_Close";
-					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(closeIconFile + ".png", false)->getTextureID(), sliderNameArr[5 + i].c_str());
+					std::string closeIconFile = sliderIconNameArr[i].substr(0, sliderIconNameArr[i].find_last_of('_')) + "_close";
+					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(closeIconFile + ".png", false)->getTextureID(), sliderNameArr[i].c_str());
 				}
 				else
 				{
-					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(sliderNameArr[i] + ".png", false)->getTextureID(), sliderNameArr[5 + i].c_str());
+					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(sliderIconNameArr[i] + ".png", false)->getTextureID(), sliderNameArr[i].c_str());
 				}
 				ImGui::SameLine();
 				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
@@ -393,7 +442,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
 			//ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
-			if (LayoutButton(ImVec2(145, 38), ImVec2(126, 40), u8"»Ö¸´Ä¬ÈÏ"))
+			if (LayoutButton(ImVec2(145, 38), ImVec2(126, 40), u8"æ¢å¤é»˜è®¤"))
 			{
 				resetBeautyParam();
 				nama->UpdateBeauty();
@@ -411,9 +460,9 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));
 			//ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
-			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_Facetype_open.png", false)->getTextureID(), u8"   Á³ÐÍ");
+			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_Facetype_open.png", false)->getTextureID(), u8"   è„¸åž‹");
 			ImGui::SameLine();
-			std::string faceTypeNameArr[5] = { u8"×Ô¶¨Òå" ,u8"Ä¬ÈÏ" ,u8"Å®Éñ",u8"Íøºì" ,u8"×ÔÈ»" };
+			std::string faceTypeNameArr[5] = { u8"è‡ªå®šä¹‰" ,u8"é»˜è®¤" ,u8"å¥³ç¥ž",u8"ç½‘çº¢" ,u8"è‡ªç„¶" };
 			int shapeHandle[5] = { 4,3,0,1,2 };
 			for (int i = 0; i < 5; i++)
 			{
@@ -425,14 +474,25 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 				ImGui::SameLine();
 			}
 			ImGui::Spacing();
-			std::string faceShapeIconNameArr[9] = { "list_icon_Thinface_open", "list_icon_Bigeye_open",
+
+
+			std::string faceShapeIconNameArr[MAX_FACESHAPEPARAMTER] = { "list_icon_Thinface_open", "list_icon_Bigeye_open",
 				"list_icon_chin_open", "list_icon_forehead_open", "list_icon_Thinnose_open","list_icon_Mouthtype_open",
-				"list_icon_v_open","list_icon_narrow_face_open","list_icon_little_face_open" };
-			std::string faceShapeNameArr[9] = { u8"   ÊÝÁ³" ,u8"   ´óÑÛ" ,u8"   ÏÂ°Í",u8"   ¶îÍ·" ,u8"   ÊÝ±Ç",u8"   ×ìÐÍ",u8"   VÁ³",u8"   Õ­Á³",u8"   Ð¡Á³" };
+				"list_icon_v_open","list_icon_narrow_face_open","list_icon_little_face_open",
+			"list_icon_open_eyes_open" ,"list_icon_eye_distance_open" ,"list_icon_eye_angle_open" ,
+			"list_icon_proboscis_open" ,"list_icon_shrinking_open" ,"list_icon_smile_mouth_open" };
+
+			//çœ¼è§’ã€çœ¼è·ã€çœ¼ç›è§’åº¦ã€é•¿é¼»ã€ç¼©äººä¸­ã€å¾®ç¬‘å˜´è§’
+
+			std::string faceShapeNameArr[MAX_FACESHAPEPARAMTER] = { u8"   ç˜¦è„¸" ,u8"   å¤§çœ¼" ,u8"   ä¸‹å·´",u8"   é¢å¤´" ,
+				u8"   ç˜¦é¼»",u8"   å˜´åž‹",u8"   Vè„¸",u8"   çª„è„¸",u8"   å°è„¸" ,
+			 u8"  å¼€çœ¼è§’", u8"   çœ¼è·", u8"çœ¼ç›è§’åº¦", u8"   é•¿é¼»", u8"  ç¼©äººä¸­", u8"å¾®ç¬‘å˜´è§’"};
+
+
 			ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 1.f));
-			ImGui::BeginChild("faceShape##2223",ImVec2(400,550) );
+			ImGui::BeginChild("faceShape##2223",ImVec2(400*scaleRatioW,550*scaleRatioH) );
 			ImGui::PopStyleColor();
-			for (int i = 0; i < 9; i++)
+			for (int i = 0; i < MAX_FACESHAPEPARAMTER; i++)
 			{
 				if (UIBridge::faceType != 0 && i > 1)
 				{
@@ -440,7 +500,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 				}
 				if (UIBridge::mFaceShapeLevel[i] == 0)
 				{
-					std::string closeIconFile = faceShapeIconNameArr[i].substr(0, faceShapeIconNameArr[i].find_last_of('_')) + "_Close";
+					std::string closeIconFile = faceShapeIconNameArr[i].substr(0, faceShapeIconNameArr[i].find_last_of('_')) + "_close";
 					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(closeIconFile + ".png", false)->getTextureID(), faceShapeNameArr[i].c_str());
 				}
 				else
@@ -449,14 +509,14 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 				}
 				ImGui::SameLine();
 				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
-				if (i == 2 || i == 3 || i == 5)
+				if (g_faceShapeParamShowFlag[i] == FACE_SHAPE_SHOW_FLAG_MIDDLE)
 				{
 					if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), (std::string("##slider23") + std::to_string(i)).c_str(), &UIBridge::mFaceShapeLevel[i], -50, 50))
 					{
 						nama->UpdateBeauty();
 					}
 				}
-				else
+				else if (g_faceShapeParamShowFlag[i] == FACE_SHAPE_SHOW_FLAG_NORMAL)
 				{
 					if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), (std::string("##slider2") + std::to_string(i)).c_str(), &UIBridge::mFaceShapeLevel[i], 0, 100))
 					{
@@ -470,7 +530,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 			
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-			if (LayoutButton(ImVec2(145, 15), ImVec2(126, 40), u8"»Ö¸´Ä¬ÈÏ"))
+			if (LayoutButton(ImVec2(145, 15), ImVec2(126, 40), u8"æ¢å¤é»˜è®¤"))
 			{
 				resetShapeParam();
 				nama->UpdateBeauty();
@@ -541,13 +601,16 @@ void Gui::render(Nama::UniquePtr& nama)
 	nama->UpdateBeauty();
 	nama->SetCurrentShape(4);
 
+#ifdef _WIN32
 	if (!ipcBridge.open(IPC_FILE_NAME, IpcBridge::OpenMode::Write))
 	{
 		printf("open ipc file failed!");
 	}
+#endif
 
 	rapidjson::Document doc;
-	FILE* fp = fopen("../../res/config.json", "rb"); // ·Ç Windows Æ½Ì¨Ê¹ÓÃ "r"
+    std::string strFile = FuTool::GetFileFullPathFromeSearchPath("config.json");
+	FILE* fp = fopen(strFile.c_str(), "rb");
 	char readBuffer[65536];
 	rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
 	doc.ParseStream(is);
@@ -595,7 +658,7 @@ void Gui::render(Nama::UniquePtr& nama)
 			ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 76 * scaleRatioH), ImGuiCond_Always);
 			ImGui::Begin("Window1##2", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 			ImGui::Dummy(ImVec2(21 * scaleRatioW, 11 * scaleRatioH));
-			ImGui::Text(u8"Ñ¡ÔñÉãÏñÍ·:");
+			ImGui::Text(u8"é€‰æ‹©æ‘„åƒå¤´:");
 
 			ImGui::SameLine();
 			if (nama->CameraList().size())
@@ -626,22 +689,27 @@ void Gui::render(Nama::UniquePtr& nama)
 			else if (showUI)
 			{
 				ImGui::PushItemWidth(244 * scaleRatioW);				
-				if(ImGui::BeginCombo("##slect camera122", u8"Î´¼ì²âµ½ÉãÏñÍ·")) // The second parameter is the label previewed before opening the combo.				
+				if(ImGui::BeginCombo("##slect camera122", u8"æœªæ£€æµ‹åˆ°æ‘„åƒå¤´")) // The second parameter is the label previewed before opening the combo.				
 					ImGui::EndCombo();				
 				ImGui::PopItemWidth();
 			}
-
+#ifdef _WIN32
 			ImGui::SameLine();
-			ImGui::Checkbox(u8"ÐéÄâÉãÏñÍ·", &UIBridge::mNeedIpcWrite);
+			ImGui::Checkbox(u8"è™šæ‹Ÿæ‘„åƒå¤´", &UIBridge::mNeedIpcWrite);
 			ImGui::SameLine();
-			ShowHelpMarker(u8"¹´Ñ¡ºó»á¿ªÆôÐéÄâÉãÏñÍ·¹¦ÄÜ£¬ÏêÏ¸¿É²Î¼û°ïÖúÎÄµµÀïÄÚÈÝ");
+			ShowHelpMarker(u8"å‹¾é€‰åŽä¼šå¼€å¯è™šæ‹Ÿæ‘„åƒå¤´åŠŸèƒ½ï¼Œè¯¦ç»†å¯å‚è§å¸®åŠ©æ–‡æ¡£é‡Œå†…å®¹");
 			ImGui::SameLine(800 * scaleRatioW);
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
-			if (ImGui::Button(u8"´ò¿ª°ïÖúÎÄµµ"))
+
+			if (ImGui::Button(u8"æ‰“å¼€å¸®åŠ©æ–‡æ¡£"))
 			{
-				WinExec("notepad.exe ../../README.md", SW_SHOW);
+
+				WinExec("notepad.exe README.md", SW_SHOW);
+
 			}
+
 			ImGui::PopStyleColor();
+#endif
 			ImGui::End();
 		}
 		//frame window
@@ -659,12 +727,12 @@ void Gui::render(Nama::UniquePtr& nama)
 					std::string allCategory[]= { "list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_AR_nor", "list_icon_Changeface_nor",
 						"list_icon_Expressionrecognition_nor",	"list_icon_Musicfilter_nor","list_icon_Bgsegmentation_nor",
 						"list_icon_gesturerecognition_nor","list_icon_Hahamirror_nor","list_icon_Portraitdrive_nor",
-						"Animoji",u8"µÀ¾ßÌùÍ¼",u8"ARÃæ¾ß",u8"  »»Á³",
-						u8"±íÇéÊ¶±ð",u8"ÒôÀÖÂË¾µ",u8"±³¾°·Ö¸î",
-						u8"ÊÖÊÆÊ¶±ð",u8" ¹þ¹þ¾µ",u8"ÈËÏñÇý¶¯", };
+						"Animoji",u8"é“å…·è´´å›¾",u8"ARé¢å…·",u8"æ¢è„¸",
+						u8"è¡¨æƒ…è¯†åˆ«",u8"éŸ³ä¹æ»¤é•œ",u8"èƒŒæ™¯åˆ†å‰²",
+						u8"æ‰‹åŠ¿è¯†åˆ«",u8"å“ˆå“ˆé•œ",u8"äººåƒé©±åŠ¨"};
 					int amount = 10;
 					categoryNameArr = allCategory;
-					std::string makeupCategory[] = {"list_icon_propmap_collapse_nor",u8"ÃÀ×±"};
+					std::string makeupCategory[] = {"list_icon_propmap_collapse_nor",u8"ç¾Žå¦†"};
 					if (UIBridge::showMakeUpWindow)
 					{
 						categoryNameArr = makeupCategory;
@@ -689,7 +757,7 @@ void Gui::render(Nama::UniquePtr& nama)
 							std::string iconFileName = categoryNameArr[i].substr(0, categoryNameArr[i].find_last_of("_")) + (1 ? "_hover.png" : "_nor.png");
 							if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile(categoryNameArr[i] + ".png", false)->getTextureID(),
 								Texture::createTextureFromFile(iconFileName, false)->getTextureID(), categoryNameArr[amount + i].c_str()))
-							{//ÏÔÊ¾µÀ¾ßÑ¡Ôñ
+							{
 								UIBridge::bundleCategory = i;
 								if (UIBridge::showMakeUpWindow)
 								{
@@ -708,7 +776,7 @@ void Gui::render(Nama::UniquePtr& nama)
 				ImGui::PushStyleVar(ImGuiStyleVar_GrabRounding, 6.0f);
 				ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));				
 				//ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
-				if (ImGui::SliderString("##modeSlider", u8"AR¹¦ÄÜ", u8"ÃÀ×±", (int*)&UIBridge::showMakeUpWindow, 0, 1))
+				if (ImGui::SliderString("##modeSlider", (char*)u8"ARåŠŸèƒ½", (char *)u8"ç¾Žå¦†", (int*)&UIBridge::showMakeUpWindow, 0, 1))
 				{
 					if (UIBridge::showMakeUpWindow)
 					{
@@ -728,60 +796,68 @@ void Gui::render(Nama::UniquePtr& nama)
 				
 			}
 		
-			//NamaäÖÈ¾
-			ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(58.f / 255.f, 61.f / 255.f, 82.f / 255.f, 1.f));
-			ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 156 * scaleRatioH), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(888 * scaleRatioW, 500 * scaleRatioH), ImGuiCond_Always);
-			ImGui::Begin("frame##4", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs);			
-			float frameWidth = (float)888.f * scaleRatioW;
-			float frameHeight = (float)500.f * scaleRatioH;
-			ImVec2 frameUV_LB = ImVec2(1, 0);
-			ImVec2 frameUV_RT = ImVec2(0, 1);
-			//WaitForSingleObject(hMutex, INFINITE);
-			cv::Mat frameMat = nama->GetFrame();			
-			static cv::Mat processedFrame = frameMat.clone();
-			//ReleaseMutex(hMutex);
-			cv::cvtColor(frameMat, processedFrame, cv::COLOR_BGR2RGBA);
-			//float tempTime = GetTickCount();
-			if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
-			{
-				nama->RenderItems(processedFrame.data);
-				//nama->DrawLandmarks(processedFrame.data);
-			}			
-			//printf("RenderItems cost %f \n", GetTickCount()- tempTime);			
-			{
-				cv::Mat bgra[4];
-				cv::split(processedFrame, bgra);
-				bgra[3] = 255.0f;
-				cv::merge(bgra, 4, processedFrame);
-			}
-			if (UIBridge::mNeedIpcWrite)
-			{
-				cv::cvtColor(processedFrame, processedFrame, cv::COLOR_RGBA2BGRA);
-				size_t frameSize = ipcBridge.write(MEDIASUBTYPE_RGB32, processedFrame.cols, processedFrame.rows, processedFrame.data);
-				cv::cvtColor(processedFrame, processedFrame, cv::COLOR_BGRA2RGBA);
-			}
-			UIBridge::mFPS = get_fps();
-			//printf("UIBridge::mFPS: %d\n", UIBridge::mFPS);
-			UIBridge::mRenderTime = 1000.f / (float)UIBridge::mFPS;
-			UIBridge::mResolutionWidth = processedFrame.cols;
-			UIBridge::mResolutionHeight = processedFrame.rows;
-			glBindTexture(GL_TEXTURE_2D, textureID);
-			glPixelStorei(GL_UNPACK_ROW_LENGTH, processedFrame.step / processedFrame.elemSize());
-			glPixelStorei(GL_UNPACK_ALIGNMENT, (processedFrame.step & 3) ? 1 : 4);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, processedFrame.cols, processedFrame.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, processedFrame.data);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			float rotio = (float)UIBridge::mResolutionWidth / (float)UIBridge::mResolutionHeight;
-			if (rotio<1.7f)//È·±£¿í¸ß±È1.777ÏÔÊ¾
-			{
-				float UVSub = (1.0f - 1.0f / 1.776f) / 4.0f;
-				frameUV_LB = ImVec2(1.f, UVSub);
-				frameUV_RT = ImVec2(0.f, 1.f-UVSub);
-			}
-			ImGui::Image((void *)(intptr_t)textureID, ImVec2(frameWidth, frameHeight), frameUV_LB, frameUV_RT, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-			ImGui::End();
-			ImGui::PopStyleColor();
-			//FPSÐÅÏ¢ÏÔÊ¾
+			cv::Mat frameMat = nama->GetFrame();
+            if(frameMat.data)
+            {
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(58.f / 255.f, 61.f / 255.f, 82.f / 255.f, 1.f));
+                ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 156 * scaleRatioH), ImGuiCond_Always);
+                ImGui::SetNextWindowSize(ImVec2(888 * scaleRatioW, 500 * scaleRatioH), ImGuiCond_Always);
+                ImGui::Begin("frame##4", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs);
+                float frameWidth = (float)888.f * scaleRatioW;
+                float frameHeight = (float)500.f * scaleRatioH;
+                ImVec2 frameUV_LB = ImVec2(1, 0);
+                ImVec2 frameUV_RT = ImVec2(0, 1);
+                
+                static cv::Mat processedFrame = frameMat.clone();
+                //ReleaseMutex(hMutex);
+                cv::cvtColor(frameMat, processedFrame, cv::COLOR_BGR2RGBA);
+                //float tempTime = GetTickCount();
+                if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
+                {
+                    nama->RenderItems(processedFrame.data);
+                    //nama->DrawLandmarks(processedFrame.data);
+                }
+                //printf("RenderItems cost %f \n", GetTickCount()- tempTime);
+                {
+                    cv::Mat bgra[4];
+                    cv::split(processedFrame, bgra);
+                    bgra[3] = 255.0f;
+                    cv::merge(bgra, 4, processedFrame);
+                }
+                
+#ifdef _WIN32
+                if (UIBridge::mNeedIpcWrite)
+                {
+                    cv::cvtColor(processedFrame, processedFrame, cv::COLOR_RGBA2BGRA);
+                    size_t frameSize = ipcBridge.write(MEDIASUBTYPE_RGB32, processedFrame.cols, processedFrame.rows, processedFrame.data);
+                    cv::cvtColor(processedFrame, processedFrame, cv::COLOR_BGRA2RGBA);
+                }
+#endif
+                
+                UIBridge::mFPS = get_fps();
+                //printf("UIBridge::mFPS: %d\n", UIBridge::mFPS);
+                UIBridge::mRenderTime = 1000.f / (float)UIBridge::mFPS;
+                UIBridge::mResolutionWidth = processedFrame.cols;
+                UIBridge::mResolutionHeight = processedFrame.rows;
+                glBindTexture(GL_TEXTURE_2D, textureID);
+                glPixelStorei(GL_UNPACK_ROW_LENGTH, processedFrame.step / processedFrame.elemSize());
+                glPixelStorei(GL_UNPACK_ALIGNMENT, (processedFrame.step & 3) ? 1 : 4);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, processedFrame.cols, processedFrame.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, processedFrame.data);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                float rotio = (float)UIBridge::mResolutionWidth / (float)UIBridge::mResolutionHeight;
+                if (rotio<1.7f)
+                {
+                    float UVSub = (1.0f - 1.0f / 1.776f) / 4.0f;
+                    frameUV_LB = ImVec2(1.f, UVSub);
+                    frameUV_RT = ImVec2(0.f, 1.f-UVSub);
+                }
+                ImGui::Image((void *)(intptr_t)textureID, ImVec2(frameWidth, frameHeight), frameUV_LB, frameUV_RT, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+                ImGui::End();
+                ImGui::PopStyleColor();
+            }
+            
+			
+	
 			if (showUI)
 			{
 				if (UIBridge::showDegubInfoWindow)
@@ -795,7 +871,7 @@ void Gui::render(Nama::UniquePtr& nama)
 					ImGui::TextColored(ImColor(255, 255, 255, 255), "Resolution:%d*%d", UIBridge::mResolutionWidth, UIBridge::mResolutionHeight);
 					ImGui::TextColored(ImColor(255, 255, 255, 255), "RenderTime:%dms", UIBridge::mRenderTime);
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .0f));
-					if (LayoutButton(ImVec2(100, 0), ImVec2(37, 24), u8"¹Ø±Õ"))
+					if (LayoutButton(ImVec2(100, 0), ImVec2(37, 24), u8"å…³é—­"))
 					{
 						UIBridge::showDegubInfoWindow = false;
 					}
@@ -813,7 +889,7 @@ void Gui::render(Nama::UniquePtr& nama)
 					ImGui::SetNextWindowPos(ImVec2(26 * scaleRatioW, 172 * scaleRatioH), ImGuiCond_Always);
 					ImGui::SetNextWindowSize(ImVec2(120 * scaleRatioW, 40 * scaleRatioH), ImGuiCond_Always);
 					ImGui::Begin("debugInfo##23", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar /*| ImGuiWindowFlags_NoInputs*/);
-					if (LayoutButton(ImVec2(0, 0), ImVec2(100, 25), u8"ÏÔÊ¾ÐÔÄÜ²ÎÊý"))
+					if (LayoutButton(ImVec2(0, 0), ImVec2(100, 25), u8"æ˜¾ç¤ºæ€§èƒ½å‚æ•°"))
 					{
 						UIBridge::showDegubInfoWindow = true;
 					}
@@ -827,7 +903,7 @@ void Gui::render(Nama::UniquePtr& nama)
 		
 			if (showUI)
 			{
-				//Ðü¸¡Ñ¡ÔñµÀ¾ß
+				//æ‚¬æµ®é€‰æ‹©é“å…·
 				if (UIBridge::showItemSelectWindow)
 				{
 					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
@@ -853,7 +929,7 @@ void Gui::render(Nama::UniquePtr& nama)
 
 						std::string iconName = itemName.substr(0, itemName.find_last_of('.'));
 						Texture::SharedPtr tex = Texture::createTextureFromFile(iconName + ".png", false);
-						//ÕÒ²»µ½Í¼±ê
+						//æ‰¾ä¸åˆ°å›¾æ ‡
 						if (!tex)
 						{
 							tex = Texture::createTextureFromFile("icon_Movebutton_nor.png", false);
@@ -884,7 +960,7 @@ void Gui::render(Nama::UniquePtr& nama)
 				}
 			}
 		}
-		//µÀ¾ßÌáÊ¾
+		//é“å…·æç¤º
 		if (showUI)		
 		{
 			std::string tip;

@@ -1,9 +1,8 @@
-
 #pragma once
+
 #include <memory>
 #include "gl3w.h"
 #include "glfw3.h"
-#include "FreeImage/FreeImage.h"
 #include <stdio.h>
 #include <string>
 #include <map>
@@ -20,23 +19,6 @@ enum class Type
 	Texture3D,             
 	TextureCube,           
 	Texture2DMultisample,  
-};
-
-class Bitmap
-{
-	~Bitmap() 
-	{
-		if (mpData)
-		{
-			delete[] mpData;
-			mpData = nullptr;
-		}
-	}
-public:
-	Bitmap() = default;
-	uint8_t* mpData = nullptr;
-	uint32_t mWidth = 0;
-	uint32_t mHeight = 0;
 };
 
 class Texture

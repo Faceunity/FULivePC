@@ -15,15 +15,18 @@
 	"ssd_thread_six.bundle": "比个六",
 	"ssd_thread_cute.bundle": "双拳卖萌",
 
-	"demo_combination_charming.bundle": "妩媚妆",
-	"demo_combination_coral.bundle": "珊瑚妆",
-	"demo_combination_flower.bundle": "花花妆",
-	"demo_combination_lady.bundle": "仕女妆",
-	"demo_combination_moon.bundle": "星月妆",
-	"demo_combination_neighbor_girl.bundle": "邻家妆",
-	"demo_combination_occident.bundle": "欧美妆",
-	"demo_combination_sexy.bundle": "性感妆",
-	"demo_combination_sweet.bundle": "甜美妆",
-	"demo_combination_tough_guy.bundle": "硬汉妆"
+	"makeup_icon_combination_age.bundle": "减龄妆",
+	"makeup_icon_combination_bored_cat.bundle": "厌世猫妆",
+	"makeup_icon_combination_daisy.bundle": "雏菊妆",
+	"makeup_icon_combination_early_autumn.bundle": "初秋妆",
+	"makeup_icon_combination_girl.bundle": "少女妆",
+	"makeup_icon_combination_harbour_wind.bundle": "港风妆",
+	"makeup_icon_combination_mermaid.bundle": "人鱼妆",
+	"makeup_icon_combination_purple_rhyme.bundle": "紫韵妆",
+	"makeup_icon_combination_red_maple.bundle": "红枫妆",
+	"makeup_icon_combination_rose.bundle": "ROSE妆",
+	"makeup_icon_combination_supermodel.bundle": "超模妆",
+	"makeup_icon_combination_warm_winter.bundle": "暖冬妆",
+	"makeup_icon_combination_paper_cranes.bundle": "千纸鹤妆"
 }
 

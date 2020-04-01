@@ -1,6 +1,7 @@
 
 #include "Texture.h"
-#pragma  comment(lib,"FreeImage.lib")
+#include "fu_tool.h"
+
 std::map<std::string, Texture::SharedPtr> Texture::mTextureMap;
 std::vector<std::string> Texture::m_searchPath;
 
@@ -91,9 +92,15 @@ std::string Texture::GetFileFullPathFromeSearchPath(const char * name)
 			fullPath.append(name);
 
 #ifdef DEBUG
-			fprintf(stderr, "Trying to open %s\n", fullPath.c_str());
+			//fprintf(stderr, "Trying to open %s\n", fullPath.c_str());
 #endif
+            
+#ifdef _WIN32
 			if ((fopen_s(&fp, fullPath.c_str(), "rb") == 0) || (fp != NULL))
+#else
+            fp = fopen(fullPath.c_str(), "rb");
+            if(fp)
+#endif
 			{
 				fclose(fp);
 				return fullPath;
@@ -107,107 +114,40 @@ std::string Texture::GetFileFullPathFromeSearchPath(const char * name)
 	//return nullptr;
 	return "";
 }
-/* From FreeImage */
-template <class T> void INPLACESWAP(T& a, T& b) {
-	a ^= b; b ^= a; a ^= b;
-}
-BOOL SwapRedBlue32(FIBITMAP* dib) {
-	if (FreeImage_GetImageType(dib) != FIT_BITMAP) {
-		return FALSE;
-	}
 
-	const unsigned bytesperpixel = FreeImage_GetBPP(dib) / 8;
-	if (bytesperpixel > 4 || bytesperpixel < 3) {
-		return FALSE;
-	}
-
-	const unsigned height = FreeImage_GetHeight(dib);
-	const unsigned pitch = FreeImage_GetPitch(dib);
-	const unsigned lineSize = FreeImage_GetLine(dib);
-
-	BYTE* line = FreeImage_GetBits(dib);
-	for (unsigned y = 0; y < height; ++y, line += pitch) {
-		for (BYTE* pixel = line; pixel < line + lineSize; pixel += bytesperpixel) {
-			INPLACESWAP(pixel[0], pixel[2]);
-		}
-	}
-
-	return TRUE;
-}
 Texture::SharedPtr Texture::createTextureFromFile(const std::string filename, bool generateMips)
 {
 	SharedPtr pTexture = SharedPtr(new Texture);
-	FREE_IMAGE_FORMAT fifFormat = FIF_UNKNOWN;
-	if (filename.size() == 0)
-	{
-		return SharedPtr(genError("Image Name unknown", filename));
-	}
+    if (filename.size() == 0)
+    {
+        return SharedPtr(genError("Image Name unknown", filename));
+    }
+	
+    //这边默认所有素材名称都不相同,只是win32需要全路径
+#ifdef _WIN32
 	std::string fullpath = GetFileFullPathFromeSearchPath(filename.c_str());
-
+#else
+    std::string fullpath = filename;
+#endif
+    
 	if (mTextureMap.find(fullpath)!= mTextureMap.end())
 	{
 		return mTextureMap[fullpath];
 	}
-	fifFormat = FreeImage_GetFileType(fullpath.c_str(), 0);
-	if (fifFormat == FIF_UNKNOWN)
-	{
-		// Can't get the format from the file. Use file extension
-		fifFormat = FreeImage_GetFIFFromFilename(fullpath.c_str());
-
-		if (fifFormat == FIF_UNKNOWN)
-		{
-			return SharedPtr(genError("Image Type unknown", filename));
-		}
-	}
-
-	// Check the the library supports loading this image Type
-	if (FreeImage_FIFSupportsReading(fifFormat) == false)
-	{
-		return SharedPtr(genError("Library doesn't support the file format", filename));
-	}
-
-	// Read the DIB
-	FIBITMAP* pDib = FreeImage_Load(fifFormat, fullpath.c_str());
-	if (pDib == nullptr)
-	{
-		return SharedPtr(genError("Can't read image file", filename));
-	}
-
-	// create the bitmap
-	auto pBmp = new Bitmap();
-	pBmp->mHeight = FreeImage_GetHeight(pDib);
-	pBmp->mWidth = FreeImage_GetWidth(pDib);
-
-	if (pBmp->mHeight == 0 || pBmp->mWidth == 0 || FreeImage_GetBits(pDib) == nullptr)
-	{
-		return SharedPtr(genError("Invalid image", filename));
-	}
-
-	uint32_t bpp = FreeImage_GetBPP(pDib);
-
-	// Convert the image to RGBX image
-	if (bpp == 24)
-	{
-		logWarning("Converting 24-bit texture to 32-bit");
-		bpp = 32;
-		auto pNew = FreeImage_ConvertTo32Bits(pDib);
-		FreeImage_Unload(pDib);
-		pDib = pNew;
-	}
-
-	uint32_t bytesPerPixel = bpp / 8;
-
-	pBmp->mpData = new uint8_t[pBmp->mHeight * pBmp->mWidth * bytesPerPixel];
-	SwapRedBlue32(pDib);
-	FreeImage_ConvertToRawBits(pBmp->mpData, pDib, pBmp->mWidth * bytesPerPixel, bpp, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, true);
-	FreeImage_Unload(pDib);
-	
+    
+    auto pBmp = FuTool::getBitmapFromFile(fullpath);
+	if(!pBmp)
+    {
+        return SharedPtr(genError("Image Load Failed", filename));
+    }
+    
 	pTexture->create(pBmp->mWidth, pBmp->mHeight, pBmp->mpData);
+    delete pBmp;
+    
 	mTextureMap[fullpath] = pTexture;
 	return pTexture;
 }
 
 Texture::~Texture()
 {
-	
 }
