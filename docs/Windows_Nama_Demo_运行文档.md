@@ -130,4 +130,4 @@ vs2015
 ### 4. 常见问题 
 - 推荐的批处理脚本中配置visual studio版本可以有 Visual Studio 15 2017    以及 Visual Studio 14 2015。
 - 所使用的显卡的年代过于久远可能不支持Opengl 3.2 core profile ，会提示错误并推出
-- **因Github不支持上传100MB以上的文件，FULivePC\ThridParty\opencv400\opencv\build\x64\vc14\bin\opencv_world400d.rar是经过压缩的dll，使用时请自行解压！**
+- **因Github不支持上传100MB以上的文件，FULivePC\bin\win\x64\Debug\opencv_world400d.rar是经过压缩的dll，使用时请自行解压！**

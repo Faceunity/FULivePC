@@ -206,7 +206,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			std::cout << "Error: fail load tongue model" << g_tongue << std::endl;
 			return false;
 		}
-		// ��ͷʶ��
+
 		fuLoadTongueModel(reinterpret_cast<float*>(&tongue_model_data[0]), tongue_model_data.size());
 
 		std::vector<char> ai_model_data;
@@ -265,7 +265,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			mBeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
 		}
 
-		//��ȡ��ױ����
+		
 		if( CheckModuleCode(Makeup))
 		{
 			std::vector<char> propData;
@@ -277,7 +277,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			std::cout << "load face makeup data." << std::endl;
 
 			mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
-			fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1); //�л�ʱ���֮ǰ��ױ��
+			fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1);
 		}
 		//fuSetDefaultOrientation(0);
 		float fValue = 0.5f;
@@ -461,7 +461,7 @@ void Nama::UpdateBeauty()
 	
 	for (int i=0;i<MAX_BEAUTYFACEPARAMTER;i++)
 	{		
-		if (i==0)//ĥƤ
+		if (i==0)
 		{
 			fuItemSetParamd(mBeautyHandles, const_cast<char*>(g_faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i] *6.0/ 100.f);
 		} 
@@ -522,10 +522,10 @@ bool Nama::SelectBundle(std::string bundleName)
 	
 	if (0 == mBundlesMap[bundleName])
 	{
-		//֤��û��Ȩ�޶�ȡ�������ĵ���
+		
 		if ( !CheckModuleCode(UIBridge::bundleCategory) )
 		{
-			std::cout << "����ǰ��֤���޷����ش������." << std::endl;
+			std::cout << "no right to use." << std::endl;
 			return false;
 		}
 		std::vector<char> propData;
@@ -536,7 +536,7 @@ bool Nama::SelectBundle(std::string bundleName)
 			return false;
 		}
 		std::cout << "load prop data." << std::endl;
-		//Map��С���п���
+		
 		if (mBundlesMap.size() > MAX_NAMA_BUNDLE_NUM)
 		{
 			fuDestroyItem(mBundlesMap.begin()->second);
@@ -604,7 +604,7 @@ bool Nama::SelectBundle(std::string bundleName)
 		
 	if (UIBridge::m_curRenderItem == bundleID)
 	{		
-		//�������ױ����
+		
 		if (UIBridge::bundleCategory == BundleCategory::Makeup)
 		{
 			fuUnbindItems(mMakeUpHandle, &UIBridge::m_curRenderItem, 1);
@@ -688,7 +688,7 @@ void Nama::RenderItems(uchar* frame)
 		{
 			int handle[] = { mBeautyHandles, UIBridge::m_curRenderItem };
 			int handleSize = sizeof(handle) / sizeof(handle[0]);
-			//֧�ֵĸ�ʽ��FU_FORMAT_BGRA_BUFFER �� FU_FORMAT_NV21_BUFFER ��FU_FORMAT_I420_BUFFER ��FU_FORMAT_RGBA_BUFFER		
+			//֧FU_FORMAT_BGRA_BUFFER  FU_FORMAT_NV21_BUFFER FU_FORMAT_I420_BUFFER FU_FORMAT_RGBA_BUFFER		
 			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
 				mFrameWidth, mFrameHeight, mFrameID, handle, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
 		}
@@ -708,7 +708,7 @@ void Nama::RenderItems(uchar* frame)
     
 	return;
 }
-//ֻ����nama�������ģ��
+
 uchar* Nama::RenderEx(uchar* frame)
 {
 #ifdef _WIN32
@@ -739,7 +739,7 @@ uchar* Nama::RenderEx(uchar* frame)
 	return frame;
 }
 
-//��������������
+
 void Nama::DrawLandmarks(uchar* frame)
 {
 	if (false == mEnableNama) return;
