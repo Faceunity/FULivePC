@@ -1,7 +1,3 @@
-/**
-*
-* Created by liujia on 2018/1/3 mybbs2200@gmail.com.
-*/
 #include "Camera.h"
 #include "Nama.h"
 #include "Config.h"	
@@ -10,7 +6,7 @@
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/document.h"
 
-#include <funama.h>				//nama SDK
+#include <CNamaSDK.h>				//nama SDK
 #include <authpack.h>			//nama SDK
 
 
@@ -24,7 +20,6 @@ bool Nama::mEnableNama = false;
 #include "Sound/MP3.h"
 std::map<int,Mp3*> mp3Map;
 static HGLRC new_context;
-#pragma comment(lib, "nama.lib")//nama SDK
 
 #else
 
@@ -72,9 +67,9 @@ Nama::~Nama()
 {
 	if (true == mHasSetup)
 	{
-		fuDestroyAllItems();//Note: ÇÐ¼ÉÊ¹ÓÃÒ»¸öÒÑ¾­destroyµÄitem
-		fuOnDeviceLost();//Note: Õâ¸öµ÷ÓÃÏú»Ùnama´´½¨µÄOpenGL×ÊÔ´
-		fuDestroyLibData();//Note: Õâ¸öµ÷ÓÃÏú»Ùnama´´½¨µÄÏß³Ì×ÊÔ´
+		fuDestroyAllItems();
+		fuOnDeviceLost();
+		fuDestroyLibData();
 	}
 
 #ifdef _WIN32
@@ -106,7 +101,7 @@ bool Nama::ReOpenCamera(int camID)
 	{
 		mCapture->closeCamera();
 		mCapture->initCamera(mCapture->rs_width, mCapture->rs_height,camID);
-		fuOnCameraChange();//Note: ÖØÖÃÈËÁ³¼ì²âµÄÐÅÏ¢
+		fuOnCameraChange();
 	}
 	return true;
 }
@@ -146,8 +141,6 @@ void InitOpenGL()
 	int ret = SetPixelFormat(hgldc, spf, &pfd);
 	HGLRC hglrc = wglCreateContext(hgldc);
 	wglMakeCurrent(hgldc, hglrc);
-
-	//hglrc¾ÍÊÇ´´½¨³öµÄOpenGL context
 	printf("hw=%08x hgldc=%08x spf=%d ret=%d hglrc=%08x\n",
 		hw, hgldc, spf, ret, hglrc);
     
@@ -197,43 +190,56 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 	mFrameWidth = mCapture->m_dstFrameSize.width;
 	mFrameHeight = mCapture->m_dstFrameSize.height;
 	if (false == mHasSetup && true ==  mEnableNama)
-	{
-		std::vector<char> v3data;
-		if (false == FuTool::LoadBundle(g_v3Data, v3data))
-		{
-			std::cout << "Error:" << g_fuDataDir + g_v3Data << std::endl;
-			return false;
-		}
-		
+	{	
         CheckGLContext();
 		
-        fuSetup(reinterpret_cast<float*>(&v3data[0]), v3data.size(), NULL, g_auth_package, sizeof(g_auth_package));
+		fuSetLogLevel(FU_LOG_LEVEL_ERROR);
+        
+		fuSetup(nullptr, 0, nullptr, g_auth_package, sizeof(g_auth_package));
+		// setup without license, only render 1000 frames.
+		//fuSetup(nullptr, 0, nullptr, nullptr, 0);
 
 		printf("Nama version:%s \n", fuGetVersion());
 		std::vector<char> tongue_model_data;
 		if (false == FuTool::LoadBundle(g_tongue, tongue_model_data))
 		{
-			std::cout << "Error:È±ÉÙÊý¾ÝÎÄ¼þ¡£" << g_tongue << std::endl;
+			std::cout << "Error: fail load tongue model" << g_tongue << std::endl;
 			return false;
 		}
-		// ÉàÍ·Ê¶±ð
+		// ï¿½ï¿½Í·Ê¶ï¿½ï¿½
 		fuLoadTongueModel(reinterpret_cast<float*>(&tongue_model_data[0]), tongue_model_data.size());
 
 		std::vector<char> ai_model_data;
 		if (false == FuTool::LoadBundle(g_ai_faceprocessor, ai_model_data))
 		{
-			std::cout << "Error:È±ÉÙÊý¾ÝÎÄ¼þ¡£" << g_ai_faceprocessor << std::endl;
+			std::cout << "Error:fail load faceprocessor model" << g_ai_faceprocessor << std::endl;
 			return false;
 		}		
 		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_model_data[0]), ai_model_data.size(), FUAITYPE::FUAITYPE_FACEPROCESSOR);
 
-		std::vector<char> ai239_model_data;
-		if (false == FuTool::LoadBundle(g_ai_landmark239, ai239_model_data))
+		std::vector<char> ai_beseg_green_model_data;
+		if (false == FuTool::LoadBundle(g_ai_bgseg_green, ai_beseg_green_model_data))
 		{
-			std::cout << "Error:È±ÉÙÊý¾ÝÎÄ¼þ¡£" << g_ai_landmark239 << std::endl;
+			std::cout << "Error: fail load bgseg green model" << g_ai_bgseg_green << std::endl;
 			return false;
 		}
-		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai239_model_data[0]), ai239_model_data.size(), FUAITYPE::FUAITYPE_FACELANDMARKS239);
+		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_beseg_green_model_data[0]), ai_beseg_green_model_data.size(), FUAITYPE::FUAITYPE_BACKGROUNDSEGMENTATION_GREEN);
+
+		std::vector<char> ai_beseg_model_data;
+		if (false == FuTool::LoadBundle(g_ai_bgseg, ai_beseg_model_data))
+		{
+			std::cout << "Error: fail load bgseg model" << g_ai_bgseg << std::endl;
+			return false;
+		}
+		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_beseg_model_data[0]), ai_beseg_model_data.size(), FUAITYPE::FUAITYPE_BACKGROUNDSEGMENTATION);
+
+		std::vector<char> ai_hairseg_model_data;
+		if (false == FuTool::LoadBundle(g_ai_hairseg, ai_hairseg_model_data))
+		{
+			std::cout << "Error: fail load hair seg model" << g_ai_hairseg << std::endl;
+			return false;
+		}
+		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_hairseg_model_data[0]), ai_hairseg_model_data.size(), FUAITYPE::FUAITYPE_HAIRSEGMENTATION);
 
 		std::vector<char> fxaa_data;
 		if (false == FuTool::LoadBundle(g_fxaa, fxaa_data))
@@ -242,7 +248,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			return false;
 		}
 		mFxaaHandles = fuCreateItemFromPackage(fxaa_data.data(), fxaa_data.size());
-		fuSetExpressionCalibration(1);
+		//fuSetExpressionCalibration(1);
 
 		mModuleCode = fuGetModuleCode(0);
 		mModuleCode1 = fuGetModuleCode(1);
@@ -259,7 +265,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			mBeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
 		}
 
-		//¶ÁÈ¡ÃÀ×±µÀ¾ß
+		//ï¿½ï¿½È¡ï¿½ï¿½×±ï¿½ï¿½ï¿½ï¿½
 		if( CheckModuleCode(Makeup))
 		{
 			std::vector<char> propData;
@@ -271,11 +277,13 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			std::cout << "load face makeup data." << std::endl;
 
 			mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
-			fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1); //ÇÐ»»Ê±Çå¿ÕÖ®Ç°µÄ×±ÈÝ
+			fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1); //ï¿½Ð»ï¿½Ê±ï¿½ï¿½ï¿½Ö®Ç°ï¿½ï¿½×±ï¿½ï¿½
 		}
-		fuSetDefaultOrientation(0);
+		//fuSetDefaultOrientation(0);
 		float fValue = 0.5f;
 		fuSetFaceTrackParam("mouth_expression_more_flexible", &fValue);
+
+		fuSetMaxFaces(4);
 
 		mHasSetup = true;
 	}
@@ -514,10 +522,10 @@ bool Nama::SelectBundle(std::string bundleName)
 	
 	if (0 == mBundlesMap[bundleName])
 	{
-		//Ö¤ÊéÃ»ÓÐÈ¨ÏÞ¶ÁÈ¡Õâ¸öÖÖÀàµÄµÀ¾ß
+		//Ö¤ï¿½ï¿½Ã»ï¿½ï¿½È¨ï¿½Þ¶ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½ï¿½
 		if ( !CheckModuleCode(UIBridge::bundleCategory) )
 		{
-			std::cout << "Äúµ±Ç°µÄÖ¤ÊéÎÞ·¨¼ÓÔØ´ËÀàµÀ¾ß." << std::endl;
+			std::cout << "ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½Þ·ï¿½ï¿½ï¿½ï¿½Ø´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½." << std::endl;
 			return false;
 		}
 		std::vector<char> propData;
@@ -528,7 +536,7 @@ bool Nama::SelectBundle(std::string bundleName)
 			return false;
 		}
 		std::cout << "load prop data." << std::endl;
-		//Map´óÐ¡½øÐÐ¿ØÖÆ
+		//Mapï¿½ï¿½Ð¡ï¿½ï¿½ï¿½Ð¿ï¿½ï¿½ï¿½
 		if (mBundlesMap.size() > MAX_NAMA_BUNDLE_NUM)
 		{
 			fuDestroyItem(mBundlesMap.begin()->second);
@@ -596,7 +604,7 @@ bool Nama::SelectBundle(std::string bundleName)
 		
 	if (UIBridge::m_curRenderItem == bundleID)
 	{		
-		//½â³ý°ó¶¨ÃÀ×±µÀ¾ß
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×±ï¿½ï¿½ï¿½ï¿½
 		if (UIBridge::bundleCategory == BundleCategory::Makeup)
 		{
 			fuUnbindItems(mMakeUpHandle, &UIBridge::m_curRenderItem, 1);
@@ -630,7 +638,7 @@ bool Nama::SelectBundle(std::string bundleName)
 
 bool Nama::CheckModuleCode(int category)
 {	
-	return (mModuleCode & modules[category])  || (mModuleCode1 & modules1[category]);
+	return true;//(mModuleCode & modules[category])  || (mModuleCode1 & modules1[category]);
 }
 
 void Nama::RenderItems(uchar* frame)
@@ -646,7 +654,7 @@ void Nama::RenderItems(uchar* frame)
 	
 	if (true == mEnableNama )
 	{
-		fuSetMaxFaces(mMaxFace);
+		//fuSetMaxFaces(mMaxFace);
 
 #ifdef _WIN32
 		if (UIBridge::mNeedPlayMP3)
@@ -680,7 +688,7 @@ void Nama::RenderItems(uchar* frame)
 		{
 			int handle[] = { mBeautyHandles, UIBridge::m_curRenderItem };
 			int handleSize = sizeof(handle) / sizeof(handle[0]);
-			//Ö§³ÖµÄ¸ñÊ½ÓÐFU_FORMAT_BGRA_BUFFER ¡¢ FU_FORMAT_NV21_BUFFER ¡¢FU_FORMAT_I420_BUFFER ¡¢FU_FORMAT_RGBA_BUFFER		
+			//Ö§ï¿½ÖµÄ¸ï¿½Ê½ï¿½ï¿½FU_FORMAT_BGRA_BUFFER ï¿½ï¿½ FU_FORMAT_NV21_BUFFER ï¿½ï¿½FU_FORMAT_I420_BUFFER ï¿½ï¿½FU_FORMAT_RGBA_BUFFER		
 			fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
 				mFrameWidth, mFrameHeight, mFrameID, handle, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
 		}
@@ -700,7 +708,7 @@ void Nama::RenderItems(uchar* frame)
     
 	return;
 }
-//Ö»µ÷ÓÃnamaÀïµÄÃÀÑÕÄ£¿é
+//Ö»ï¿½ï¿½ï¿½ï¿½namaï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½
 uchar* Nama::RenderEx(uchar* frame)
 {
 #ifdef _WIN32
@@ -731,7 +739,7 @@ uchar* Nama::RenderEx(uchar* frame)
 	return frame;
 }
 
-//»æÖÆÈËÁ³ÌØÕ÷µã
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void Nama::DrawLandmarks(uchar* frame)
 {
 	if (false == mEnableNama) return;

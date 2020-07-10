@@ -79,7 +79,7 @@ namespace NamaExampleNameSpace
 #endif
 		static std::string mFilters[6];
 		std::unordered_map<std::string, int> mBundlesMap;
-		std::unordered_map<std::string, std::vector<MakeupParam>> mMakeupsMap;
+		std::unordered_map<std::string, std::vector<MakeupParam> > mMakeupsMap;
 	};
 }
 

@@ -13,13 +13,6 @@
 #include <vector>
 
 #pragma comment(lib,"Strmiids.lib")
-#ifdef _DEBUG
-#pragma comment(lib,"opencv_world400d.lib")
-#else
-#pragma comment(lib,"opencv_world400.lib")
-#endif // DEBUG
-
-
 
 #define BLUE    0x0001
 #define GREEN   0x0002

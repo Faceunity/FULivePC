@@ -6,8 +6,6 @@
 #include <control.h>
 #include <string>
 
-#pragma comment(lib, "strmiids.lib")
-
 class Mp3
 {
 public:

@@ -177,6 +177,12 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	/*GLFWwindow**/ window = glfwCreateWindow(width, height, "FU Live Demo PC", NULL, NULL);
+	if (!window)
+	{
+		std::cout << "Create Window Faild !!! Please Check GPU Card If Support OpenGL 3.2 CoreProfile";
+		return nullptr;
+	}
+
 	glfwMakeContextCurrent(window);
 #if __APPLE__
 	hWindow = glfwGetCocoaWindow(window);
@@ -726,11 +732,11 @@ void Gui::render(Nama::UniquePtr& nama)
 					std::string *categoryNameArr = nullptr;
 					std::string allCategory[]= { "list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_AR_nor", "list_icon_Changeface_nor",
 						"list_icon_Expressionrecognition_nor",	"list_icon_Musicfilter_nor","list_icon_Bgsegmentation_nor",
-						"list_icon_gesturerecognition_nor","list_icon_Hahamirror_nor","list_icon_Portraitdrive_nor",
+						"list_icon_gesturerecognition_nor","list_icon_Hahamirror_nor",
 						"Animoji",u8"道具贴图",u8"AR面具",u8"换脸",
 						u8"表情识别",u8"音乐滤镜",u8"背景分割",
-						u8"手势识别",u8"哈哈镜",u8"人像驱动"};
-					int amount = 10;
+						u8"手势识别",u8"哈哈镜"};
+					int amount = 9;
 					categoryNameArr = allCategory;
 					std::string makeupCategory[] = {"list_icon_propmap_collapse_nor",u8"美妆"};
 					if (UIBridge::showMakeUpWindow)

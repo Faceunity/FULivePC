@@ -15,14 +15,18 @@ std::vector<std::string> FuToolMac::getVideoDevices()
     return vecRet;
 }
 
+#define MyPicBUNDLE_NAME @ "ResPic.bundle"
+#define MyPicBUNDLE_PATH [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:MyPicBUNDLE_NAME]
+#define MyPicBUNDLE [NSBundle bundleWithPath: MyPicBUNDLE_PATH]
+
 Bitmap * FuToolMac::getBitmapFromAsset(std::string name)
 {
     Bitmap * pBmp = NULL;
     
     do {
         NSString * picPath = [NSString stringWithUTF8String:name.c_str()];
-        NSString * picName = [picPath stringByDeletingPathExtension];
-        NSImage * img = [NSImage imageNamed:picName]; //这个不能加后缀，否则打不开
+        NSString * picBundlePath =  [[MyPicBUNDLE resourcePath] stringByAppendingPathComponent: picPath];
+        NSImage * img = [[NSImage alloc] initWithContentsOfFile: picBundlePath];
         if (!img) {
             break;
         }

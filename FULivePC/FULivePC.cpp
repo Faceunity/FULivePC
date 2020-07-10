@@ -31,6 +31,10 @@ int main(int argc, char* argv[])
 	
 	using namespace NamaExampleNameSpace;
 	Gui::UniquePtr gui = Gui::create(1360, 830);
+	if (gui == nullptr)
+	{
+		return -1;
+	}
 
 	Nama::UniquePtr nama = Nama::create(1280, 720, enableNama);
 
