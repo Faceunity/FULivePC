@@ -1,36 +1,45 @@
 # Windows Nama SDK 集成指导文档  
-更新日期：2020-3-26
-级        别：Public 
+- 级别：Public
+  更新日期：2020-02-11
+  
+  ------
+  
+  **FaceUnity Nama SDK v7.0.0 (2020-06-30 )**
+  
+  更新内容 **版本整体说明:** 
+  1. 新增人体算法能力接口，包括人体检测、2D人体关键点（全身、半身）、人体3D骨骼（全身、半身）、手势识别、人像mask、头发mask、头部mask、动作识别等能力。
+  2. 新增接口，详见接口说明
+  - fuGetLogLevel,获取当前日志级别。
+  - fuSetLogLevel,设置当前日志级别。
+  - fuOpenFileLog,打开文件日志，默认使用console日志。
+  - fuFaceProcessorSetMinFaceRatio，设置人脸检测距离的接口。
+  - fuSetTrackFaceAIType，设置fuTrackFace算法运行类型接口。
+  - fuSetCropState，设置裁剪状态。
+  - fuSetCropFreePixel，设置自由裁剪参数。
+  - fuSetFaceProcessorFov，设置FaceProcessor人脸算法模块跟踪fov。
+  - fuGetFaceProcessorFov，获取FaceProcessor人脸算法模块跟踪fov。
+  - fuHumanProcessorReset，重置HumanProcessor人体算法模块状态。
+  - fuHumanProcessorSetMaxHumans，设置HumanProcessor人体算法模块跟踪人体数。
+  - fuHumanProcessorGetNumResults，获取HumanProcessor人体算法模块跟踪人体数。
+  - fuHumanProcessorGetResultTrackId，获取HumanProcessor人体算法模块跟踪Id。
+  - fuHumanProcessorGetResultRect，获取HumanProcessor人体算法模块跟踪人体框。
+  - fuHumanProcessorGetResultJoint2ds，获取HumanProcessor人体算法模块跟踪人体2D关键点。
+  - fuHumanProcessorGetResultJoint3ds，获取HumanProcessor人体算法模块跟踪人体3D骨骼信息。
+  - fuHumanProcessorGetResultHumanMask，获取HumanProcessor人体算法模块全身mask。
+  - fuHumanProcessorGetResultActionType，获取HumanProcessor人体算法模块跟踪人体动作类型。
+  - fuHumanProcessorGetResultActionScore，获取HumanProcessor人体算法模块跟踪人体动作置信度。
+  - fuFaceProcessorGetResultHairMask，获取HumanProcessor人体算法模块头发mask。
+  - fuFaceProcessorGetResultHeadMask，获取HumanProcessor人体算法模块头部mask。
+  - fuHandDetectorGetResultNumHands，获取HandGesture手势算法模块跟踪手势数量。
+  - fuHandDetectorGetResultHandRect，获取HandGesture手势算法模块跟踪手势框。
+  - fuHandDetectorGetResultGestureType，获取HandGesture手势算法模块跟踪手势类别。
+  - fuHandDetectorGetResultHandScore，获取HandGesture手势算法模块跟踪手势置信度。
+3. 废弃接口
+  - fuSetStrictTracking
+  - fuSetASYNCTrackFace
+  - fuSetFaceTrackParam  
 
-------
-
-### 最新更新内容：
-
-2020-3-26 v6.7.0
-
-0 UI
-
-- 新增美肤 去黑眼圈，法令纹
-- 新增美型 眼距，开眼角，眼睛角度，长鼻， 缩人中，微笑嘴角
-
-1.美颜效果
--新增去黑眼圈、去法令纹功能
--优化磨皮效果，新增只磨皮人脸区域功能
--优化原有美型效果
-
-2.优化表情跟踪效果，解决了6.6.0版表情系数表情灵活度问题——FaceProcessor模块优化
--解决Animoji表情灵活度问题，基本与原有SDK v6.4.0效果相近
--解决优化了表情动图的鼻子跟踪效果问题
-
-3.优化美妆效果，人脸点位优化，提高准确性
--优化口红点位与效果，解决张嘴、正脸、低抬头、左右转头、抿嘴动作的口红溢色
--优化美瞳点位效果，是美瞳效果稳定
--腮红效果优化，解决了仰头角度下腮红强拉扯问题
-
-4.新增接口支持图像裁剪，解决瘦脸边缘变形问题（边缘变形剪裁）
-5.新增接口判断初始化完成状态；
-6.Windows版本新增OpenGL版本检测
-
+ **注**  nama.lib 替换为 CNamaSDK.lib
 ------
 ## 目录：
 本文档内容目录：
@@ -60,9 +69,6 @@
     -Camera.h：相机类的头文件
     -Config.h：配置文件，记录道具文件的加载路径
     -FULivePC.cpp：程序入口
-	-FULivePC.vcxproj：visual studio工程配置文件
-	-FULivePC.vcxproj.filters：visual studio工程目录文件
-	-FULivePC.vcxproj.user：visual studio用户配置文件
 	-imgui.ini：GUI的初始化配置文件
 	-Nama.cpp：负责展示如何调用Nama SDK的接口
 	-Nama.h：展示如何调用Nama SDK的接口类的头文件
@@ -74,7 +80,8 @@
   +Win32   				//32位SDK目录
   +Win64   				//64位SDK目录
   -readme.md			//工程总文档
-  
+  run_cmake.bat   //CMAKE 生成VS工程的脚本，可自行修改VS版本（>=2015）,以及位数
+  run_cmake.sh    //CMAKE 生成XCODE版本的脚本
 ```
 
 ------
@@ -108,11 +115,12 @@ vs2015
 ### 3.4 初始化
 
 ```c
-#include <funama.h>					//nama SDK 的头文件
+#include <CNamaSDK.h>					//nama SDK 的头文件
 #include <authpack.h>				//nama SDK 的key文件
-#pragma comment(lib, "nama.lib")	//nama SDK 的lib文件
-//然后将nama.dll拷贝到程序运行的目录
 ```
+
+链接CNamaSDK.lib
+
 
 1.如未有初始化好的OpenGL环境，请查看demo代码中Nama.cpp中的InitOpenGL函数进行初始化，一个初始化好的OpenGL环境是正确使用FaceUnity SDK的必须条件，如果不知道自己是否成功初始化好了环境，可以参考Nama.cpp中的CheckGLContext函数进行检测。
 
@@ -567,5 +575,6 @@ fuItemSetParamd(mLightMakeUpHandle, const_cast<char*>(mMakeupParams[index][j].va
 ## 5. 常见问题 
 
 ### 5.1 编译相关
-
+- 推荐的批处理脚本中配置visual studio版本可以有 Visual Studio 15 2017    以及 Visual Studio 14 2015。
+- 所使用的显卡的年代过于久远可能不支持Opengl 3.2 core profile ，会提示错误并推出
 - visual studio 2015版本 安装时勾选c++部件。

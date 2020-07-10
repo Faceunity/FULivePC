@@ -2,13 +2,61 @@
 <!--每次更新文档，更新时间-->
 
 级别：Public   
-更新日期：2020-01-19   
-SDK版本: 6.6.0  
+更新日期：2020-06-30   
+SDK版本: 7.0.0  
 
 ------
 ### 最新更新内容：
 
 <!--这个小节写每次最新以及次新的更新记录，时间，更新内容。新增函数，函数接口定义更新-->
+2020-6-30 v7.0.0:
+1. 新增人体算法能力接口，包括人体检测、2D人体关键点（全身、半身）、人体3D骨骼（全身、半身）、手势识别、人像mask、头发mask、头部mask、动作识别等能力。
+2. 新增接口，详见接口说明
+  - fuGetLogLevel,获取当前日志级别。
+  - fuSetLogLevel,设置当前日志级别。
+  - fuOpenFileLog,打开文件日志，默认使用console日志。
+  - fuFaceProcessorSetMinFaceRatio，设置人脸检测距离的接口。
+  - fuSetTrackFaceAIType，设置fuTrackFace算法运行类型接口。
+  - fuSetCropState，设置裁剪状态。
+  - fuSetCropFreePixel，设置自由裁剪参数。
+  - fuSetFaceProcessorFov，设置FaceProcessor人脸算法模块跟踪fov。
+  - fuGetFaceProcessorFov，获取FaceProcessor人脸算法模块跟踪fov。
+  - fuHumanProcessorReset，重置HumanProcessor人体算法模块状态。
+  - fuHumanProcessorSetMaxHumans，设置HumanProcessor人体算法模块跟踪人体数。
+  - fuHumanProcessorGetNumResults，获取HumanProcessor人体算法模块跟踪人体数。
+  - fuHumanProcessorGetResultTrackId，获取HumanProcessor人体算法模块跟踪Id。
+  - fuHumanProcessorGetResultRect，获取HumanProcessor人体算法模块跟踪人体框。
+  - fuHumanProcessorGetResultJoint2ds，获取HumanProcessor人体算法模块跟踪人体2D关键点。
+  - fuHumanProcessorGetResultJoint3ds，获取HumanProcessor人体算法模块跟踪人体3D骨骼信息。
+  - fuHumanProcessorGetResultHumanMask，获取HumanProcessor人体算法模块全身mask。
+  - fuHumanProcessorGetResultActionType，获取HumanProcessor人体算法模块跟踪人体动作类型。
+  - fuHumanProcessorGetResultActionScore，获取HumanProcessor人体算法模块跟踪人体动作置信度。
+  - fuFaceProcessorGetResultHairMask，获取HumanProcessor人体算法模块头发mask。
+  - fuFaceProcessorGetResultHeadMask，获取HumanProcessor人体算法模块头部mask。
+  - fuHandDetectorGetResultNumHands，获取HandGesture手势算法模块跟踪手势数量。
+  - fuHandDetectorGetResultHandRect，获取HandGesture手势算法模块跟踪手势框。
+  - fuHandDetectorGetResultGestureType，获取HandGesture手势算法模块跟踪手势类别。
+  - fuHandDetectorGetResultHandScore，获取HandGesture手势算法模块跟踪手势置信度。
+3. 废弃接口
+  - fuSetStrictTracking
+  - fuSetASYNCTrackFace
+  - fuSetFaceTrackParam  
+
+
+2020-3-19 v6.7.0:
+1. 优化6.6.0版本表情系数的灵活度，Animoji表情跟踪更加灵活。  
+2. 新增接口 fuIsLibraryInit，检测SDK是否已初始化。  
+3. AI能力模型中人脸相关能力合并为一体。将FUAITYPE::FUAITYPE_FACELANDMARKS75,FUAITYPE_FACELANDMARKS209,FUAITYPE_FACELANDMARKS239,FUAITYPE_FACEPROCESSOR统一合并到FUAITYPE_FACEPROCESSOR。美颜美妆道具中"landmarks_type"参数关闭，由系统自动切换。  
+4. 优化美颜模块：  
+	- 新增去黑眼圈、去法令纹功能。  
+	- 优化美颜美型效果。  
+	- 美颜磨皮效果优化，新增支持仅磨人脸区域功能。  
+5. 新增接口支持图像裁剪，可用于瘦脸边缘变形裁剪。详见fuSetCropState，fuSetCropFreePixel接口。
+6. 优化美妆效果，人脸点位优化，提高准确性。 
+	- 优化口红点位与效果，解决张嘴、正脸、低抬头、左右转头、抿嘴动作的口红溢色。
+	- 优化美瞳点位效果，美瞳效果更准确。
+	- 腮红效果优化，解决了仰头角度下腮红强拉扯问题。
+
 2020-01-19 v6.6.0:
 注意: 更新SDK 6.6.0时，在fuSetup之后，需要马上调用 fuLoadAIModelFromPackage 加载ai_faceprocessor.bundle 到 FUAITYPE::FUAITYPE_FACEPROCESSOR!!!
 
@@ -81,9 +129,9 @@ int fuSetup(float* v3data, int sz_v3data, float* ardata, void* authdata, int sz_
 
 __参数:__
 
-*v3data [in]*： 内存指针，指向SDK提供的 v3.bundle 文件内容
+*v3data [in]*： 已废弃，传nullptr。内存指针，指向SDK提供的 v3.bundle 文件内容
 
-*sz_v3data [in]*: v3.bundle文件字节数
+*sz_v3data [in]*: 已废弃，传入0。v3.bundle文件字节数
 
 *ardata [in]*： 已废弃
 
@@ -112,9 +160,9 @@ int fuSetupLocal(float* v3data, int sz_v3data,float* ardata,void* authdata,int s
 
 __参数:__
 
-*v3data [in]*： 内存指针，指向SDK提供的 v3.bundle 文件内容
+*v3data [in]*： 已废弃，传nullptr。内存指针，指向SDK提供的 v3.bundle 文件内容
 
-*sz_v3data [in]*: v3.bundle文件字节数
+*sz_v3data [in]*: 已废弃，传入0。v3.bundle文件字节数
 
 *ardata [in]*： 已废弃
 
@@ -140,7 +188,34 @@ __备注:__
 
 需要在有GL Context的地方进行初始化。  
 
-第一次需要联网鉴权，鉴权成功后，保存新的证书，后面不要联网。
+第一次需要联网鉴权，鉴权成功后，保存新的证书，后面不要联网。  
+
+##### FUAITYPE 算法能力类型
+算法能力类型，可用于fuSetTrackFaceAItype等接口
+```c
+typedef enum FUAITYPE{
+	FUAITYPE_BACKGROUNDSEGMENTATION=1<<1,
+	FUAITYPE_HAIRSEGMENTATION=1<<2,
+	FUAITYPE_HANDGESTURE=1<<3,
+	FUAITYPE_TONGUETRACKING=1<<4,
+	FUAITYPE_FACELANDMARKS75=1<<5,		//废弃
+	FUAITYPE_FACELANDMARKS209=1<<6,		//废弃
+	FUAITYPE_FACELANDMARKS239=1<<7,		//废弃
+	FUAITYPE_HUMANPOSE2D=1<<8,
+	FUAITYPE_BACKGROUNDSEGMENTATION_GREEN=1<<9,
+	FUAITYPE_FACEPROCESSOR=1<<10，
+	FUAITYPE_FACEPROCESSOR_FACECAPTURE = 1 << 11,
+  	FUAITYPE_FACEPROCESSOR_HAIRSEGMENTATION = 1 << 12,
+  	FUAITYPE_FACEPROCESSOR_HEADSEGMENTATION = 1 << 13,
+  	FUAITYPE_HUMAN_PROCESSOR = 1 << 14,
+  	FUAITYPE_HUMAN_PROCESSOR_DETECT = 1 << 15,
+  	FUAITYPE_HUMAN_PROCESSOR_2D_SELFIE = 1 << 16,
+  	FUAITYPE_HUMAN_PROCESSOR_2D_DANCE = 1 << 17,
+  	FUAITYPE_HUMAN_PROCESSOR_3D_SELFIE = 1 << 18,
+  	FUAITYPE_HUMAN_PROCESSOR_3D_DANCE = 1 << 19,
+  	FUAITYPE_HUMAN_PROCESSOR_SEGMENTATION = 1 << 20
+}FUAITYPE;
+```
 
 ##### fuLoadAIModelFromPackage 函数
 SDK6.6.0 新增接口，在fuSetup后，可以预先加载未来可能需要使用到的AI能力。AI模型和SDK一起发布，在Assets目录下。
@@ -163,21 +238,8 @@ __参数:__
 
 *sz [in]*: data文件字节数
 
-*type [in]*：描述bundle对应的AI能力类型，如下：
-```
-typedef enum FUAITYPE{
-	FUAITYPE_BACKGROUNDSEGMENTATION=1<<1,
-	FUAITYPE_HAIRSEGMENTATION=1<<2,
-	FUAITYPE_HANDGESTURE=1<<3,
-	FUAITYPE_TONGUETRACKING=1<<4,
-	FUAITYPE_FACELANDMARKS75=1<<5,
-	FUAITYPE_FACELANDMARKS209=1<<6,
-	FUAITYPE_FACELANDMARKS239=1<<7,
-	FUAITYPE_HUMANPOSE2D=1<<8,
-	FUAITYPE_BACKGROUNDSEGMENTATION_GREEN=1<<9,
-	FUAITYPE_FACEPROCESSOR=1<<10
-}FUAITYPE;
-```
+*type [in]*：描述bundle对应的AI能力类型，详见FUAITYPE：
+
 
 __返回值:__
 
@@ -189,12 +251,13 @@ AI能力会随SDK一起发布，存放在assets/AI_Model目录中。
 - ai_bgseg.bundle 为背景分割AI能力模型。
 - ai_hairseg.bundle 为头发分割AI能力模型。
 - ai_gesture.bundle 为手势识别AI能力模型。
-- ai_facelandmarks75.bundle 为脸部特征点75点AI能力模型。
-- ai_facelandmarks209.bundle 为脸部特征点209点AI能力模型。
-- ai_facelandmarks239.bundle 为脸部特征点239点AI能力模型。
+- ai_facelandmarks75.bundle 为脸部特征点75点AI能力模型。	//废弃
+- ai_facelandmarks209.bundle 为脸部特征点209点AI能力模型。	//废弃
+- ai_facelandmarks239.bundle 为脸部特征点239点AI能力模型。	//废弃
 - ai_humanpose.bundle 为人体2D点位AI能力模型。
 - ai_bgseg_green.bundle 为绿幕背景分割AI能力模型。
-- ai_face_processor 为人脸面具以及人脸面罩AI能力模型，需要默认加载。
+- ai_face_processor.bundle 为人脸特征点、表情跟踪以及人脸面罩AI能力模型，需要默认加载。
+- ai_human_processor.bundle 为人体算法能力模型，包括人体检测、2D人体关键点（全身、半身）、人体3D骨骼（全身、半身）、手势识别、人像mask、头发mask、头部mask、动作识别等能力。
 
 ##### fuReleaseAIModel 函数
 当不需要是使用特定的AI能力时，可以释放其资源，节省内存空间。1为已释放，0为未释放。
@@ -210,21 +273,8 @@ FUNAMA_API int fuReleaseAIModel(FUAITYPE type);
 
 __参数:__
 
-*type [in]*：描述bundle对应的AI能力类型，如下：
-```
-typedef enum FUAITYPE{
-	FUAITYPE_BACKGROUNDSEGMENTATION=1<<1,
-	FUAITYPE_HAIRSEGMENTATION=1<<2,
-	FUAITYPE_HANDGESTURE=1<<3,
-	FUAITYPE_TONGUETRACKING=1<<4,
-	FUAITYPE_FACELANDMARKS75=1<<5,
-	FUAITYPE_FACELANDMARKS209=1<<6,
-	FUAITYPE_FACELANDMARKS239=1<<7,
-	FUAITYPE_HUMANPOSE2D=1<<8,
-	FUAITYPE_BACKGROUNDSEGMENTATION_GREEN=1<<9,
-	FUAITYPE_FACEPROCESSOR=1<<10
-}FUAITYPE;
-```
+*type [in]*：描述bundle对应的AI能力类型，详细见FUAITYPE：
+
 
 __返回值:__
 
@@ -249,21 +299,7 @@ FUNAMA_API int fuIsAIModelLoaded(FUAITYPE type);
 
 __参数:__
 
-*type [in]*：描述bundle对应的AI能力类型，如下：
-```
-typedef enum FUAITYPE{
-	FUAITYPE_BACKGROUNDSEGMENTATION=1<<1,
-	FUAITYPE_HAIRSEGMENTATION=1<<2,
-	FUAITYPE_HANDGESTURE=1<<3,
-	FUAITYPE_TONGUETRACKING=1<<4,
-	FUAITYPE_FACELANDMARKS75=1<<5,
-	FUAITYPE_FACELANDMARKS209=1<<6,
-	FUAITYPE_FACELANDMARKS239=1<<7,
-	FUAITYPE_HUMANPOSE2D=1<<8,
-	FUAITYPE_BACKGROUNDSEGMENTATION_GREEN=1<<9,
-	FUAITYPE_FACEPROCESSOR=1<<10
-}FUAITYPE;
-```
+*type [in]*：描述bundle对应的AI能力类型，详见FUAITYPE：
 
 __返回值:__
 
@@ -272,6 +308,81 @@ __返回值:__
 __备注:__  
 
 AI能力模型内存占用不高，建议长驻内存。
+
+------
+##### fuGetLogLevel 函数
+获取当前日志级别。
+
+```C
+/**
+ \brief Get current log level
+ \return ref to FULOGLEVEL
+*/
+FUNAMA_API FULOGLEVEL fuGetLogLevel();
+```
+
+__返回值:__
+
+FULOGLEVEL。
+```C
+typedef enum FULOGLEVEL {
+  FU_LOG_LEVEL_TRACE = 0,
+  FU_LOG_LEVEL_DEBUG = 1,
+  FU_LOG_LEVEL_INFO = 2,
+  FU_LOG_LEVEL_WARN = 3,
+  FU_LOG_LEVEL_ERROR = 4,
+  FU_LOG_LEVEL_CRITICAL = 5,
+  FU_LOG_LEVEL_OFF = 6
+} FULOGLEVEL;
+```
+
+__备注:__  
+
+------
+##### fuSetLogLevel 函数
+设置当前日志级别。
+
+```C
+/**
+ \brief Set log level
+ \param level - define in FULOGLEVEL enumeration.
+ \return zero for failed, one for success.
+*/
+FUNAMA_API int fuSetLogLevel(FULOGLEVEL level);
+```
+__参数:__
+
+*level [in]*：设置当前日志级别，详见FULOGLEVEL定义。
+__返回值:__
+
+1表示成功，0表示失败
+
+__备注:__  
+
+------
+##### fuOpenFileLog 函数
+打开文件日志，默认使用console日志。
+
+```C
+/**
+ \brief open file log
+ \param file_fullname - nullptr for default terminal, non-null for log into
+ file. \param max_file_size, max file size in byte. \param max_files, max file
+ num for rotating log. \return zero for failed, one for success.
+*/
+FUNAMA_API int fuOpenFileLog(const char* file_pullname, int max_file_size,
+                             int max_files);
+```
+__参数:__
+
+*file_pullname [in]*：日志文件名，如果为nullptr表示使用默认的console日志。
+*max_file_size [in]*：日志文件最大文件大小，超过将重置。
+*max_files [in]*：轮换日志文件数量，多个日志文件中进行轮转。
+__返回值:__
+
+1表示成功，0表示失败
+
+__备注:__  
 
 ------
 
@@ -690,6 +801,7 @@ __备注:__
 
 ------
 ##### fuSetFaceDetParam 函数
+__注意__: 6.7版本该接口已废弃  
 设置人脸检测器相关参数，__建议使用默认参数__。
 
 ```C
@@ -723,11 +835,13 @@ __返回值:__
 设置后状态，1 设置成功，0 设置失败。 
 
 __备注:__  
+__注意__: 6.7版本该接口已废弃  
 
 `name == "min_facesize_small"`，`name == "min_facesize_small"`参数必须在`fuSetup`前设置。
 
 ------
 ##### fuSetFaceTrackParam 函数
+__注意__: 7.0.0版本该接口已废弃  
 设置人脸表情跟踪相关参数，__建议使用默认参数__。
 
 ```C
@@ -764,7 +878,9 @@ __备注:__
 如果道具本身带舌头bs，则不需要主动开启。
 
 ------
-#####  fuSetASYNCTrackFace 函数
+#####  fuSetASYNCTrackFace 函数  
+
+__注意__: 7.0.0版本该接口已废弃   
 设置人脸跟踪异步接口。默认处于关闭状态。
 ```C
 int fuSetASYNCTrackFace(int enable);
@@ -870,7 +986,7 @@ __备注:__
 | -------------- | ---- | ------------------------------------------------------------ | -------- | -------- |
 | face_rect      | 4    | float |人脸矩形框，图像分辨率坐标，数据为 (x_min, y_min, x_max, y_max) | 默认     |
 | rotation_mode  | 1    | int |识别人脸相对于设备图像的旋转朝向，取值范围 0-3，分别代表旋转0度、90度、180度、270度 | 默认     |
-| failure_rate   | 1    | float |人脸跟踪的失败率，表示人脸跟踪的质量。取值范围为 0-2，取值越低代表人脸跟踪的质量越高 | 默认     |
+| failure_rate[已废弃] | 1    | float |人脸跟踪的失败率，表示人脸跟踪的质量。取值范围为 0-2，取值越低代表人脸跟踪的质量越高 | 默认     |
 | is_calibrating | 1    | int |表示是否SDK正在进行主动表情校准，取值为 0 或 1。             | 默认     |
 | focal_length   | 1    | float| SDK当前三维人脸跟踪所采用的焦距数值                          | 默认     |
 | landmarks      | 75x2 | float|人脸 75 个特征点，图像分辨率坐标                             | Landmark |
@@ -1111,9 +1227,58 @@ __备注:__
 
 如果系统加载过非正式版道具，会导致系统进入倒计时，并在倒计时结束时关闭。如果系统提示 “debug item used”，或系统在运行1分钟后停止，则需要利用该函数检查所有加载过的道具，如果有非正式道具需要进行正确的道具签名。
 
-道具签名流程请联系技术支持。
+道具签名流程请联系技术支持。  
 
 ------
+##### fuSetCropState 函数
+是否开启和关闭裁剪功能，参数设为0关闭，设为1开启。
+```C
+int fuSetCropState(int state);
+```
+__参数:__  
+
+*state [in]*：是否开启和关闭裁剪功能，参数设为0关闭，设为1开启。
+
+__返回值:__  
+
+返回状态0为关闭，1开启。
+
+__备注:__  
+
+------
+##### fuSetCropFreePixel 函数
+自由裁剪接口：x0,y0为裁剪后的起始坐标（裁剪前为（0,0）），x1,y1为裁剪后的终止坐标（裁剪前为（imageWidth,imageHeight））。
+```C
+int fuSetCropFreePixel(int x0, int y0, int x1, int y1);
+```
+__参数:__  
+
+*(x0,y0) [in]*：x0,y0为裁剪后的起始坐标（裁剪前为（0,0））
+*(x1,y1) [in]*：x1,y1为裁剪后的终止坐标（裁剪前为（imageWidth,imageHeight））
+
+__返回值:__  
+
+返回状态0为失败，1成功。
+
+__备注:__  
+
+------
+##### fuIsLibraryInit 函数
+检测接口是否已经初始化。
+```C
+int fuIsLibraryInit();
+```
+__参数:__  
+无。
+
+__返回值:__  
+
+返回状态0为未初始化，1已初始化。
+
+__备注:__  
+
+------
+
 #### 2.6 功能接口-效果
 ##### fuSetExpressionCalibration 函数
 设置人脸表情校准功能。该功能的目的是使表情识别模块可以更加适应不同人的人脸特征，以实现更加准确可控的表情跟踪效果。
@@ -1136,6 +1301,9 @@ __备注:__
 
 ------
 ##### fuSetStrictTracking 函数
+
+__注意__: 7.0.0版本该接口已废弃   
+
 启用更加严格的跟踪质量检测。
 
 该功能启用后，当面部重要五官出现被遮挡、出框等情况，以及跟踪质量较差时，会判断为跟踪失败，避免系统在跟踪质量较低时出现异常跟踪数据。
@@ -1169,7 +1337,416 @@ __备注:__
 系数小于等于0为无效输入。
 
 ------
-#### 2.6 废弃接口
+#### 2.7 功能接口-算法接口
+##### fuFaceProcessorSetMinFaceRatio  函数
+设置人脸检测距离的接口
+```C
+/**
+ \brief set ai model HumanProcessor's minium track face size.
+ \param ratio, ratio with min(w,h)，range (0.0,1.0].
+ */
+FUNAMA_API void fuFaceProcessorSetMinFaceRatio(float ratio);
+```
+__参数:__  
+
+*ratio [in]*：数值范围0.0至1.0，最小人脸的大小和输入图形宽高短边的比值。
+
+__备注:__  
+无
+
+------
+##### fuSetTrackFaceAIType  函数
+设置fuTrackFace算法运行类型接口
+```C
+/**
+ \brief Set AI type for fuTrackFace and fuTrackFaceWithTongue interface
+ \param ai_type, is a bit combination of FUAITYPE;
+ */
+FUNAMA_API void fuSetTrackFaceAIType(int ai_type);
+```
+__参数:__  
+
+*ai_type [in]*：aitype，详见FUAITYPE定义。
+
+__备注:__  
+无
+
+------
+##### fuSetFaceProcessorFov  函数
+设置FaceProcessor人脸算法模块跟踪fov
+```C
+/**
+ \brief Set tracking fov for ai model FaceProcessor.
+ */
+FUNAMA_API int fuSetFaceProcessorFov(float fov);
+```
+__参数:__  
+
+*fov [in]*：fov，要设置的FaceProcessor人脸算法模块跟踪fov。
+
+__返回值:__  1表示成功，0表示失败。
+
+__备注:__  
+无
+
+------
+##### fuGetFaceProcessorFov  函数
+获取FaceProcessor人脸算法模块跟踪fov
+```C
+/**
+ \brief Get tracking fov of ai model FaceProcessor.
+ */
+FUNAMA_API float fuGetFaceProcessorFov();
+```
+
+__返回值:__  fov，当前FaceProcessor人脸算法模块跟踪fov。
+
+__备注:__  
+无
+
+------
+##### fuHumanProcessorReset  函数
+重置HumanProcessor人体算法模块状态。
+```C
+/**
+ \brief Reset ai model HumanProcessor's tracking state.
+ */
+FUNAMA_API void fuHumanProcessorReset();
+```
+
+__备注:__  
+无
+
+------
+##### fuHumanProcessorSetMaxHumans  函数
+设置HumanProcessor人体算法模块跟踪人体数。
+```C
+/**
+ \brief set ai model HumanProcessor's maxinum tracking people.
+ */
+FUNAMA_API void fuHumanProcessorSetMaxHumans(int max_humans);
+```
+__参数:__  
+
+*max_humans [in]*：设置能够跟踪的最大人体数。
+
+__备注:__  
+无
+
+------
+##### fuHumanProcessorGetNumResults  函数
+获取HumanProcessor人体算法模块跟踪人体数。
+```C
+/**
+ \brief get ai model HumanProcessor's tracking result.
+ */
+FUNAMA_API int fuHumanProcessorGetNumResults();
+```
+__返回值:__  当前跟踪到人体数。
+
+__备注:__  
+无
+
+------
+##### fuHumanProcessorGetResultTrackId  函数
+获取HumanProcessor人体算法模块跟踪Id。
+```C
+/**
+ \brief get ai model HumanProcessor's tracking id.
+ \param index, index of fuHumanProcessorGetNumResults
+ */
+FUNAMA_API int fuHumanProcessorGetResultTrackId(int index);
+```
+__参数:__  
+
+*index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。
+__返回值:__  当前跟踪到人体id。
+
+__备注:__  
+无
+
+------
+##### fuHumanProcessorGetResultRect  函数
+获取HumanProcessor人体算法模块跟踪人体框。
+```C
+/**
+ \brief get ai model HumanProcessor's tracking rect with index.
+ \param index, index of fuHumanProcessorGetNumResults
+ */
+FUNAMA_API const float* fuHumanProcessorGetResultRect(int index);
+```
+__参数:__  
+
+*index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。
+__返回值:__  当前跟踪到人体的人体框，4个float大小。
+
+__备注:__  
+无
+
+------
+##### fuHumanProcessorGetResultJoint2ds  函数
+获取HumanProcessor人体算法模块跟踪人体2D关键点。
+```C
+/**
+ \brief get ai model HumanProcessor's tracking 2d joint with index.
+ \param index, index of fuHumanProcessorGetNumResults
+ */
+FUNAMA_API const float* fuHumanProcessorGetResultJoint2ds(int index, int* size);
+```
+__参数:__  
+
+*index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。
+*size [out]*：返回的数据长度。
+__返回值:__  当前跟踪到人体的人体2D关键点，长度由size决定。
+
+__备注:__  
+无
+
+------
+##### fuHumanProcessorGetResultJoint3ds  函数
+获取HumanProcessor人体算法模块跟踪人体3D骨骼信息。
+```C
+/**
+ \brief get ai model HumanProcessor's tracking 3d joint with index.
+ \param index, index of fuHumanProcessorGetNumResults
+ */
+FUNAMA_API const float* fuHumanProcessorGetResultJoint3ds(int index, int* size);
+```
+__参数:__  
+
+*index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。  
+*size [out]*：返回的数据长度。
+__返回值:__  当前跟踪到人体的人体3D骨骼信息，长度由size决定。
+
+__备注:__  
+无
+
+------
+##### fuHumanProcessorGetResultHumanMask  函数
+获取HumanProcessor人体算法模块全身mask。
+```C
+/**
+ \brief get ai model HumanProcessor's tracking full body mask with index.
+ \param index, index of fuHumanProcessorGetNumResults.
+ \param mask_width,  width of return.
+ \param mask_height,  height of return.
+ \return mask data.
+ */
+FUNAMA_API const float* fuHumanProcessorGetResultHumanMask(int index,
+                                                           int* mask_width,
+                                                           int* mask_height);
+```
+__参数:__  
+
+*index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。  
+*mask_width [out]*：返回的数据宽度。  
+*mask_height [out]*：返回的数据高度。  
+__返回值:__  当前HumanProcessor人体算法模块全身mask，长度由mask_width X mask_height决定。
+
+__备注:__  
+无
+
+------
+##### fuFaceProcessorGetResultHairMask  函数
+获取HumanProcessor人体算法模块头发mask。
+```C
+/**
+ \brief get ai model HumanProcessor's tracking hair mask with index.
+ \param index, index of fuHumanProcessorGetNumResults.
+ \param mask_width,  width of return.
+ \param mask_height,  height of return.
+ \return mask data.
+ */
+FUNAMA_API const float* fuFaceProcessorGetResultHairMask(int index,
+                                                         int* mask_width,
+                                                         int* mask_height);
+```
+__参数:__  
+
+*index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。  
+*mask_width [out]*：返回的数据宽度。  
+*mask_height [out]*：返回的数据高度。  
+__返回值:__  当前HumanProcessor人体算法模块头发mask，长度由mask_width X mask_height决定。
+
+__备注:__  
+无
+
+------
+##### fuFaceProcessorGetResultHeadMask  函数
+获取HumanProcessor人体算法模块头部mask。
+```C
+/**
+ \brief get ai model HumanProcessor's tracking head mask with index.
+ \param index, index of fuHumanProcessorGetNumResults.
+ \param mask_width,  width of return.
+ \param mask_height,  height of return.
+ \return mask data.
+ */
+FUNAMA_API const float* fuFaceProcessorGetResultHeadMask(int index,
+                                                         int* mask_width,
+                                                         int* mask_height);
+```
+__参数:__  
+
+*index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。  
+*mask_width [out]*：返回的数据宽度。  
+*mask_height [out]*：返回的数据高度。  
+__返回值:__  当前HumanProcessor人体算法模块头部mask，长度由mask_width X mask_height决定。
+
+__备注:__  
+无
+
+------
+##### fuHumanProcessorGetResultActionType  函数
+获取HumanProcessor人体算法模块跟踪人体动作类型。
+```C
+/**
+ \brief get ai model HumanProcessor's action type with index.
+ \param index, index of fuHumanProcessorGetNumResults
+ */
+FUNAMA_API int fuHumanProcessorGetResultActionType(int index);
+```
+__参数:__  
+
+*index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。  
+__返回值:__  获取HumanProcessor人体算法模块跟踪人体动作类型。
+
+__备注:__  
+无
+
+------
+##### fuHumanProcessorGetResultActionScore  函数
+获取HumanProcessor人体算法模块跟踪人体动作置信度
+```C
+/**
+ \brief get ai model HumanProcessor's action score with index.
+ \param index, index of fuHumanProcessorGetNumResults
+ */
+FUNAMA_API float fuHumanProcessorGetResultActionScore(int index);
+```
+__参数:__  
+
+*index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。  
+__返回值:__  获取HumanProcessor人体算法模块跟踪人体动作置信度。
+
+__备注:__  
+无
+
+------
+##### fuHumanProcessorGetResultActionScore  函数
+获取HumanProcessor人体算法模块跟踪人体动作置信度
+```C
+/**
+ \brief get ai model HumanProcessor's action score with index.
+ \param index, index of fuHumanProcessorGetNumResults
+ */
+FUNAMA_API float fuHumanProcessorGetResultActionScore(int index);
+```
+__参数:__  
+
+*index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。  
+__返回值:__  获取HumanProcessor人体算法模块跟踪人体动作置信度。
+
+__备注:__  
+无
+
+------
+##### fuHandDetectorGetResultNumHands  函数
+获取HandGesture手势算法模块跟踪手势数量。需加载ai_gesture.bundle
+```C
+/**
+ \brief get hand detector's tracking results.
+ \return num of hand tracked.
+*/
+FUNAMA_API int fuHandDetectorGetResultNumHands();
+```
+__参数:__  
+
+__返回值:__  获取HandGesture手势算法模块跟踪手势数量。
+
+__备注:__  
+无
+
+------
+##### fuHandDetectorGetResultHandRect  函数
+获取HandGesture手势算法模块跟踪手势框。
+```C
+/**
+ \brief get hand detector's tracking rect with index.
+ \param index ,index of fuHandDetectorGetResultNumHands.
+ \return rect data, float array with size 4.
+*/
+FUNAMA_API const float* fuHandDetectorGetResultHandRect(int index);
+```
+__参数:__  
+*index [in]*：第index个手势，从0开始，不超过fuHandDetectorGetResultNumHands结果。  
+__返回值:__ 获取HandGesture手势算法模块跟踪手势框，长度为4。
+
+__备注:__  
+无
+
+------
+##### fuHandDetectorGetResultGestureType  函数
+获取HandGesture手势算法模块跟踪手势类别。
+```C
+/**
+ \brief get hand detector's tracking hand gesture type with index.
+ \param index ,index of fuHandDetectorGetResultNumHands.
+ \return gesture type, ref to FUAIGESTURETYPE.
+*/
+FUNAMA_API FUAIGESTURETYPE fuHandDetectorGetResultGestureType(int index);
+```
+__参数:__  
+*index [in]*：第index个手势，从0开始，不超过fuHandDetectorGetResultNumHands结果。  
+__返回值:__ 获取HandGesture手势算法模块跟踪手势类别, 。
+```C
+typedef enum FUAIGESTURETYPE {
+  FUAIGESTURE_NO_HAND = -1,
+  FUAIGESTURE_UNKNOWN = 0,
+  FUAIGESTURE_THUMB = 1,
+  FUAIGESTURE_KORHEART = 2,
+  FUAIGESTURE_SIX = 3,
+  FUAIGESTURE_FIST = 4,
+  FUAIGESTURE_PALM = 5,
+  FUAIGESTURE_ONE = 6,
+  FUAIGESTURE_TWO = 7,
+  FUAIGESTURE_OK = 8,
+  FUAIGESTURE_ROCK = 9,
+  FUAIGESTURE_CROSS = 10,
+  FUAIGESTURE_HOLD = 11,
+  FUAIGESTURE_GREET = 12,
+  FUAIGESTURE_PHOTO = 13,
+  FUAIGESTURE_HEART = 14,
+  FUAIGESTURE_MERGE = 15,
+  FUAIGESTURE_EIGHT = 16,
+  FUAIGESTURE_HALFFIST = 17,
+  FUAIGESTURE_GUN = 18,
+} FUAIGESTURETYPE;
+```
+
+__备注:__  
+无
+
+------
+##### fuHandDetectorGetResultHandScore  函数
+获取HandGesture手势算法模块跟踪手势置信度。
+```C
+/**
+ \brief get hand detector's tracking hand gesture score with index.
+ \param index ,index of fuHandDetectorGetResultNumHands.
+ \return gesture score, range [0,1]
+*/
+FUNAMA_API float fuHandDetectorGetResultHandScore(int index);
+```
+__参数:__  
+*index [in]*：第index个手势，从0开始，不超过fuHandDetectorGetResultNumHands结果。  
+__返回值:__ 获取HandGesture手势算法模块跟踪手势置信度。
+
+__备注:__  
+无
+
+------
+#### 2.8 废弃接口
 ##### fuSetQualityTradeoff  函数
 
 ```C
