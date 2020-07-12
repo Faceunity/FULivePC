@@ -195,17 +195,26 @@ if(WIN32)
 	
 	STRING(FIND $ENV{CMAKE_GENERATOR} "Win64" IsFinded)
     if(${IsFinded} EQUAL -1)
-		set(SrcNamaDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/FaceUnity-SDK-PC/lib/win32)
+        set(SrcNamaDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/FaceUnity-SDK-PC/lib/win32)
+        set(SrcFreeImageDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/FreeImage/lib/win32)
+        set(SrcOpenCVDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/opencv400/lib/win32)
 	else()
-		set(SrcNamaDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/FaceUnity-SDK-PC/lib/win64)
+        set(SrcNamaDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/FaceUnity-SDK-PC/lib/win64)
+        set(SrcFreeImageDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/FreeImage/lib/win64)
+        set(SrcOpenCVDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/opencv400/lib/win64)
 	endif()
 	
 	add_custom_command(TARGET ${target}
                 POST_BUILD
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/fuai.dll     $ENV{CMAKE_DEBUG_OUTPUT}
-				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/CNamaSDK.dll     $ENV{CMAKE_DEBUG_OUTPUT}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/CNamaSDK.dll     $ENV{CMAKE_DEBUG_OUTPUT}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFreeImageDLLFolder}/FreeImage.dll     $ENV{CMAKE_DEBUG_OUTPUT}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFolder}/opencv_world400.dll     $ENV{CMAKE_DEBUG_OUTPUT}
+                
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/fuai.dll 	$ENV{CMAKE_RUNTIME_OUTPUT}
-				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/CNamaSDK.dll		$ENV{CMAKE_RUNTIME_OUTPUT}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/CNamaSDK.dll		$ENV{CMAKE_RUNTIME_OUTPUT}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFreeImageDLLFolder}/FreeImage.dll     $ENV{CMAKE_RUNTIME_OUTPUT}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFolder}/opencv_world400.dll     $ENV{CMAKE_RUNTIME_OUTPUT}
 				COMMENT "copy nama")
 
 elseif(APPLE)
