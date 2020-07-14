@@ -7,6 +7,8 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <stdexcept>
+
 #define logError(x) printf("%s\n",x)
 #define logWarning(x) printf("%s\n",x)
 
