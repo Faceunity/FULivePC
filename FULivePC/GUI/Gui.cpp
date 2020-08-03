@@ -814,7 +814,7 @@ void Gui::render(Nama::UniquePtr& nama)
                 ImVec2 frameUV_LB = ImVec2(1, 0);
                 ImVec2 frameUV_RT = ImVec2(0, 1);
                 
-                static cv::Mat processedFrame = frameMat.clone();
+                cv::Mat processedFrame = frameMat.clone();
                 //ReleaseMutex(hMutex);
                 cv::cvtColor(frameMat, processedFrame, cv::COLOR_BGR2RGBA);
                 //float tempTime = GetTickCount();

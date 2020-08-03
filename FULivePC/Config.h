@@ -23,6 +23,8 @@ const std::string g_ai_bgseg = "AI_model/ai_bgseg.bundle";
 
 const std::string g_ai_hairseg = "AI_model/ai_hairseg.bundle";
 
+const std::string g_ai_human_process = "AI_model/ai_human_processor_pc.bundle";
+
 const std::string g_fuDataDir = "assets";
 
 const std::string g_v3Data = "v3.bundle";

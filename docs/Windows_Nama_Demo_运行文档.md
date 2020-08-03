@@ -1,11 +1,28 @@
 # Demo运行说明文档-Windows 
 - 级别：Public
-  更新日期：2020-06-30
+  更新日期：2020-07-29
   
   ------
   
-  **FaceUnity Nama SDK v7.0.0 (2020-06-30 )**
+  **FaceUnity Nama SDK v7.1.0 (2020-07-29)**
 
+2020-7-29 v7.1.0:
+1. 新增美颜锐化功能，见美颜参数文档。
+2. 优化美颜磨皮效果，保留更多的高频细节。
+3. 添加fuHumanProcessorGetFov接口。
+4. 添加fuHumanProcessorSetFov接口。
+
+2020-07-24 v7.0.1：
+1. 新增接口fuHumanProcessorSetBonemap
+2. 新增接口fuHumanProcessorGetResultTransformArray
+3. 新增接口fuHumanProcessorGetResultModelMatrix
+4. 修复fuGetSestemError问题。
+5. 修复fuSetMaxFaces，在释放AI模型后，设置失效问题。
+6. 修复Android非高通机型，OES输入问题。
+7. 修复美妆远距离嘴部黑框问题。
+8. 修复美体美颜共存不支持问题。
+
+2020-6-30 v7.0.0:
 1. 新增人体算法能力接口，包括人体检测、2D人体关键点（全身、半身）、人体3D骨骼（全身、半身）、手势识别、人像mask、头发mask、头部mask、动作识别等能力。
 2. 新增接口，详见接口说明
   - fuGetLogLevel,获取当前日志级别。
@@ -23,7 +40,11 @@
   - fuHumanProcessorGetResultTrackId，获取HumanProcessor人体算法模块跟踪Id。
   - fuHumanProcessorGetResultRect，获取HumanProcessor人体算法模块跟踪人体框。
   - fuHumanProcessorGetResultJoint2ds，获取HumanProcessor人体算法模块跟踪人体2D关键点。
-  - fuHumanProcessorGetResultJoint3ds，获取HumanProcessor人体算法模块跟踪人体3D骨骼信息。
+  - fuHumanProcessorGetResultJoint3ds，获取HumanProcessor人体算法模块跟踪人体3D关键点。
+  - fuHumanProcessorSetBonemap，设置HumanProcessor人体算法模块，3D骨骼拓扑结构信息。
+  - fuHumanProcessorGetResultTransformArray， 获取HumanProcessor人体算法模块跟踪人体3D骨骼信息。
+  - fuHumanProcessorGetResultModelMatrix， 获取HumanProcessor人体算法模块跟踪人体3D骨骼，根节点模型变化矩阵。
+
   - fuHumanProcessorGetResultHumanMask，获取HumanProcessor人体算法模块全身mask。
   - fuHumanProcessorGetResultActionType，获取HumanProcessor人体算法模块跟踪人体动作类型。
   - fuHumanProcessorGetResultActionScore，获取HumanProcessor人体算法模块跟踪人体动作置信度。
@@ -37,8 +58,8 @@
   - fuSetStrictTracking
   - fuSetASYNCTrackFace
   - fuSetFaceTrackParam  
-
-**注**  nama.lib 替换为 CNamaSDK.lib
+  - fuSetDeviceOrientation  
+  - fuSetDefaultOrientation
 
 文档：
 
@@ -129,5 +150,5 @@ vs2015
 ------
 ### 4. 常见问题 
 - 推荐的批处理脚本中配置visual studio版本可以有 Visual Studio 15 2017    以及 Visual Studio 14 2015。
-- 所使用的显卡的年代过于久远可能不支持Opengl 3.2 core profile ，会提示错误并推出
+- 所使用的显卡的年代过于久远可能不支持Opengl 3.2 core profile ，会提示错误并退出
 - **因Github不支持上传100MB以上的文件，FULivePC\bin\win\x64\Debug\opencv_world400d.rar是经过压缩的dll，使用时请自行解压！**

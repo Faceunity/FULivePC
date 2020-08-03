@@ -2,13 +2,19 @@
 <!--每次更新文档，更新时间-->
 
 级别：Public   
-更新日期：2020-07-24   
-SDK版本: 7.0.1  
+更新日期：2020-07-29   
+SDK版本: 7.1.0 
 
 ------
 ### 最新更新内容：
 
 <!--这个小节写每次最新以及次新的更新记录，时间，更新内容。新增函数，函数接口定义更新-->
+2020-7-29 v7.1.0:
+1. 新增美颜锐化功能，见美颜参数文档。
+2. 优化美颜磨皮效果，保留更多的高频细节。
+3. 添加fuHumanProcessorGetFov接口。
+4. 添加fuHumanProcessorSetFov接口。
+
 2020-7-24 v7.0.1:
 1. 新增接口fuHumanProcessorSetBonemap
 2. 新增接口fuHumanProcessorGetResultTransformArray
@@ -265,16 +271,16 @@ __返回值:__
 __备注:__  
 
 AI能力会随SDK一起发布，存放在assets/AI_Model目录中。
-- ai_bgseg.bundle 为背景分割AI能力模型，对应FUAITYPE_BACKGROUNDSEGMENTATION。
-- ai_hairseg.bundle 为头发分割AI能力模型，对应FUAITYPE_HAIRSEGMENTATION。
+- ai_bgseg.bundle 为背景分割AI能力模型，对应FUAITYPE_BACKGROUNDSEGMENTATION。7.0.0之后版本，可以统一使用ai_human_processor.bundle对应的全身mask模块。
+- ai_hairseg.bundle 为头发分割AI能力模型，对应FUAITYPE_HAIRSEGMENTATION。7.0.0之后版本，可以统一使用ai_face_processor.bundle对应的头发mask模块。
 - ai_gesture.bundle 为手势识别AI能力模型，对应FUAITYPE_HANDGESTURE。
 - ai_facelandmarks75.bundle 为脸部特征点75点AI能力模型。	//废弃
 - ai_facelandmarks209.bundle 为脸部特征点209点AI能力模型。	//废弃
 - ai_facelandmarks239.bundle 为脸部特征点239点AI能力模型。	//废弃
-- ai_humanpose.bundle 为人体2D点位AI能力模型，对应FUAITYPE_HUMANPOSE2D。
+- ai_humanpose.bundle 为人体2D点位AI能力模型，对应FUAITYPE_HUMANPOSE2D。7.0.0之后版本，可以统一使用ai_human_processor.bundle对应的人体点位模块。
 - ai_bgseg_green.bundle 为绿幕背景分割AI能力模型，对应FUAITYPE_BACKGROUNDSEGMENTATION_GREEN。
-- ai_face_processor.bundle 为人脸特征点、表情跟踪以及人脸面罩AI能力模型，需要默认加载，对应FUAITYPE_FACEPROCESSOR。
-- ai_human_processor.bundle 为人体算法能力模型，包括人体检测、2D人体关键点（全身、半身）、人体3D骨骼（全身、半身）、手势识别、人像mask、头发mask、头部mask、动作识别等能力，对应FUAITYPE_HUMAN_PROCESSOR。
+- ai_face_processor.bundle 为人脸特征点、表情跟踪以及头发mask、头部maskAI能力模型，需要默认加载，对应FUAITYPE_FACEPROCESSOR。
+- ai_human_processor.bundle 为人体算法能力模型，包括人体检测、2D人体关键点（全身、半身）、人体3D骨骼（全身、半身）、人像mask、动作识别等能力，对应FUAITYPE_HUMAN_PROCESSOR。
 
 ##### fuReleaseAIModel 函数
 当不需要是使用特定的AI能力时，可以释放其资源，节省内存空间。1为已释放，0为未释放。
@@ -1714,6 +1720,42 @@ __备注:__
 无
 
 ------
+##### fuHumanProcessorGetFov  函数
+获取HumanProcessor人体算法模块跟踪人体3D关键点时使用的fov。
+```C
+/**
+ \brief get ai model HumanProcessor's tracking fov, use to 3d joint projection.
+ */
+FUNAMA_API float fuHumanProcessorGetFov();
+```
+__参数:__  
+无。
+
+__返回值:__  
+HumanProcessor人体算法模块跟踪人体3D关键点时使用的fov  
+
+__备注:__  
+无。
+
+------
+##### fuHumanProcessorSetFov  函数
+设置HumanProcessor人体算法模块跟踪人体3D关键点时使用的fov，默认30度。
+```C
+/**
+ \brief set ai model HumanProcessor's tracking fov, use to 3d joint projection.
+ */
+FUNAMA_API void fuHumanProcessorSetFov(float fov);
+```  
+__参数:__  
+*fov [in]*：设置HumanProcessor人体算法模块跟踪人体3D关键点时使用的fov，角度制。  
+
+__返回值:__    
+无。
+
+__备注:__  
+无。
+
+------
 ##### fuHumanProcessorGetResultJoint3ds  函数
 获取HumanProcessor人体算法模块跟踪人体3D关键点。
 ```C
@@ -1731,12 +1773,12 @@ __返回值:__  当前跟踪到人体的人体3D骨骼信息，长度由size决�
 ![body3d](./imgs/body3d.png)  
 
 __备注:__  
-输出3D点是在相机坐标系下（右手坐标系）的结果，所以需要设置绘制这些3D点的渲染器的相机FOV和算法FOV相同（不考虑绘制对齐的话可以不用设置FOV），FUAI_HumanProcessorGetFov获取FOV。
+输出3D点是在相机坐标系下（右手坐标系）的结果，所以需要设置绘制这些3D点的渲染器的相机FOV和算法FOV相同（不考虑绘制对齐的话可以不用设置FOV），fuHumanProcessorGetFov获取FOV。
 ![body3d](./imgs/axis.png)  
 
 ------
 ##### fuHumanProcessorSetBonemap  函数
-在决定获取骨骼动画帧数据之前，需要在初始化阶段调用FUAI_HumanProcessorSetBonemap接口设置算法内部的bonemap。
+在决定获取骨骼动画帧数据之前，需要在初始化阶段调用fuHumanProcessorSetBonemap接口设置算法内部的bonemap。
 ```C
 /**
  \brief set ai model HumanProcessor's 3d skeleton hierarchy.
@@ -1751,11 +1793,11 @@ __参数:__
 *size [in]*：输入bonemap大小 
 
 __备注:__  
-在决定获取骨骼动画帧数据之前，需要在初始化阶段调用FUAI_HumanProcessorSetBonemap接口设置算法内部的bonemap，bonemap的示例：boneMap.json，详询我司技术支持。
+在决定获取骨骼动画帧数据之前，需要在初始化阶段调用fuHumanProcessorSetBonemap接口设置算法内部的bonemap，bonemap的示例：boneMap.json，详询我司技术支持。
 
 目前算法对于bonemap有严格要求，需要和示例bonemap完全一致（骨骼名称、骨骼长度、骨骼的初始pose，后续算法测会优化此处，降低要求）。
 
-然后需要调用FUAI_HumanProcessorSetFov或者FUAI_HumanProcessorGetFov设置算法内部FOV和渲染器FOV相同。
+然后需要调用fuHumanProcessorSetFov或者fuHumanProcessorGetFov设置算法内部FOV和渲染器FOV相同。
 
 ------
 ##### fuHumanProcessorGetResultTransformArray  函数
