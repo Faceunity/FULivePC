@@ -101,6 +101,8 @@ bool Nama::ReOpenCamera(int camID)
 	{
 		mCapture->closeCamera();
 		mCapture->initCamera(mCapture->rs_width, mCapture->rs_height,camID);
+		mFrameWidth = mCapture->m_dstFrameSize.width;
+		mFrameHeight = mCapture->m_dstFrameSize.height;
 		fuOnCameraChange();
 	}
 	return true;
@@ -225,13 +227,21 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 		}
 		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_beseg_green_model_data[0]), ai_beseg_green_model_data.size(), FUAITYPE::FUAITYPE_BACKGROUNDSEGMENTATION_GREEN);
 
-		std::vector<char> ai_beseg_model_data;
+		/*std::vector<char> ai_beseg_model_data;
 		if (false == FuTool::LoadBundle(g_ai_bgseg, ai_beseg_model_data))
 		{
 			std::cout << "Error: fail load bgseg model" << g_ai_bgseg << std::endl;
 			return false;
 		}
-		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_beseg_model_data[0]), ai_beseg_model_data.size(), FUAITYPE::FUAITYPE_BACKGROUNDSEGMENTATION);
+		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_beseg_model_data[0]), ai_beseg_model_data.size(), FUAITYPE::FUAITYPE_BACKGROUNDSEGMENTATION);*/
+
+		std::vector<char> ai_human_process_model_data;
+		if (false == FuTool::LoadBundle(g_ai_human_process, ai_human_process_model_data))
+		{
+			std::cout << "Error: fail load ai_human_process" << g_ai_human_process << std::endl;
+			return false;
+		}
+		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_process_model_data[0]), ai_human_process_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
 
 		std::vector<char> ai_hairseg_model_data;
 		if (false == FuTool::LoadBundle(g_ai_hairseg, ai_hairseg_model_data))

@@ -1,14 +1,33 @@
 # Windows Nama SDK 集成指导文档  
 - 级别：Public
-  更新日期：2020-02-11
+  更新日期： 2020-7-29
   
-  ------
+------
   
-  **FaceUnity Nama SDK v7.0.0 (2020-06-30 )**
+  **FaceUnity Nama SDK v7.1.0 (2020-07-29)**
   
   更新内容 **版本整体说明:** 
-  1. 新增人体算法能力接口，包括人体检测、2D人体关键点（全身、半身）、人体3D骨骼（全身、半身）、手势识别、人像mask、头发mask、头部mask、动作识别等能力。
-  2. 新增接口，详见接口说明
+
+2020-7-29 v7.1.0:
+1. 新增美颜锐化功能，见美颜参数文档。
+2. 优化美颜磨皮效果，保留更多的高频细节。
+3. 添加fuHumanProcessorGetFov接口。
+4. 添加fuHumanProcessorSetFov接口。
+
+2020-07-24 v7.0.1：
+1. 新增接口fuHumanProcessorSetBonemap
+2. 新增接口fuHumanProcessorGetResultTransformArray
+3. 新增接口fuHumanProcessorGetResultModelMatrix
+4. 修复fuGetSestemError问题。
+5. 修复fuSetMaxFaces，在释放AI模型后，设置失效问题。
+6. 修复Android非高通机型，OES输入问题。
+7. 修复美妆远距离嘴部黑框问题。
+8. 修复美体美颜共存不支持问题。
+
+
+2020-6-30 v7.0.0:
+1. 新增人体算法能力接口，包括人体检测、2D人体关键点（全身、半身）、人体3D骨骼（全身、半身）、手势识别、人像mask、头发mask、头部mask、动作识别等能力。
+2. 新增接口，详见接口说明
   - fuGetLogLevel,获取当前日志级别。
   - fuSetLogLevel,设置当前日志级别。
   - fuOpenFileLog,打开文件日志，默认使用console日志。
@@ -24,7 +43,11 @@
   - fuHumanProcessorGetResultTrackId，获取HumanProcessor人体算法模块跟踪Id。
   - fuHumanProcessorGetResultRect，获取HumanProcessor人体算法模块跟踪人体框。
   - fuHumanProcessorGetResultJoint2ds，获取HumanProcessor人体算法模块跟踪人体2D关键点。
-  - fuHumanProcessorGetResultJoint3ds，获取HumanProcessor人体算法模块跟踪人体3D骨骼信息。
+  - fuHumanProcessorGetResultJoint3ds，获取HumanProcessor人体算法模块跟踪人体3D关键点。
+  - fuHumanProcessorSetBonemap，设置HumanProcessor人体算法模块，3D骨骼拓扑结构信息。
+  - fuHumanProcessorGetResultTransformArray， 获取HumanProcessor人体算法模块跟踪人体3D骨骼信息。
+  - fuHumanProcessorGetResultModelMatrix， 获取HumanProcessor人体算法模块跟踪人体3D骨骼，根节点模型变化矩阵。
+
   - fuHumanProcessorGetResultHumanMask，获取HumanProcessor人体算法模块全身mask。
   - fuHumanProcessorGetResultActionType，获取HumanProcessor人体算法模块跟踪人体动作类型。
   - fuHumanProcessorGetResultActionScore，获取HumanProcessor人体算法模块跟踪人体动作置信度。
@@ -38,8 +61,9 @@
   - fuSetStrictTracking
   - fuSetASYNCTrackFace
   - fuSetFaceTrackParam  
+  - fuSetDeviceOrientation  
+  - fuSetDefaultOrientation
 
- **注**  nama.lib 替换为 CNamaSDK.lib
 ------
 ## 目录：
 本文档内容目录：
@@ -517,35 +541,14 @@ fuItemSetParamd(itemid, "loc_x_flip", 1.0);
  mItemsArray[0] = fuCreateItemFromPackage(data, size);
 ```
 
-音乐滤镜是使用播放音乐的时间戳进行驱动的，在每次处理图像前，将音乐的播放进度传入音乐滤镜道具即可，方式如下：通过随着音乐设置播放时间才能让滤镜“动”一起
+音乐滤镜是使用播放音乐的时间戳进行驱动的，在每次处理图像前，将音乐的播放进度传入音乐滤镜道具即可，方式如下：通过随着音乐设置播放时间才能让滤镜按音频每一帧的数据
+驱动
 
 ```c
 fuItemSetParamd(name, "music_time",  mp3Map[UIBridge::m_curRenderItem]->GetCurrentPosition() / 1e4);
 ```
 
-如果没有音乐则可以模拟音乐播放进度，demo中提供的道具对应的音乐时长为28s，换算成ms为28000ms，在没有音乐的情况下，可以从加载音乐滤镜开始计时，每次处理图像前获取一下当前时间与开始加载音乐滤镜的时间差，转换成ms传入音乐滤镜即可，当时间差超过28000ms时归0重新开始计时即可。效果详见FULiveDemoPC，道具可以通过FUEditor进行制作（v4.2.1及以上）。
-
-### 4.12 照片驱动功能
-
-针对照片进行精确的人脸重建，然后支持实时表情驱动，预置表情播放。可以用于实时应用，也可以用于生成表情包等。
-
-该功能的资源有两种方式生成方式：
-
-- 使用FUEditor v4.3.0以上版本离线制作道具
-- 利用相芯提供的云服务在线上传照片生成道具
-  在线云服务的方式请联系技术支持获取更多细节。
-
-__使用方法__：
-
-- 直接加载对应的道具
-
-- 需要带有照片驱动权限的证书
-
-  制作好道具后如下加载即可显示。
-
-```c#
- mItemsArray[0] = fuCreateItemFromPackage(data, size);
-```
+如果没有音乐则可以模拟音乐播放进度，demo中提供的道具对应的音乐时长为28s，换算成ms为28000ms，在没有音乐的情况下，可以从加载音乐滤镜开始计时，每次处理图像前获取一下当前时间与开始加载音乐滤镜的时间差，转换成ms传入音乐滤镜即可，当时间差超过28000ms时归0重新开始计时即可。效果详见FULiveDemoPC，道具可以通过FUEditor v4.3.0及以上进行制作（FUCreator暂不支持）。
 
 ### 4.13 质感美颜
 
@@ -576,5 +579,5 @@ fuItemSetParamd(mLightMakeUpHandle, const_cast<char*>(mMakeupParams[index][j].va
 
 ### 5.1 编译相关
 - 推荐的批处理脚本中配置visual studio版本可以有 Visual Studio 15 2017    以及 Visual Studio 14 2015。
-- 所使用的显卡的年代过于久远可能不支持Opengl 3.2 core profile ，会提示错误并推出
+- 所使用的显卡的年代过于久远可能不支持Opengl 3.2 core profile ，会提示错误并退出
 - visual studio 2015版本 安装时勾选c++部件。
