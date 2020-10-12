@@ -12,19 +12,22 @@ set PWD=%cd%
 echo "Extract OpenCV DebugLib"
 7z.exe e ThirdParty\Windows\opencv400\lib\win64\opencv_world400d.zip -aoa -oThirdParty\Windows\opencv400\lib\win64\
 
+set PLATFORM=x64
 set BUILD_ARCH=%~1
 if "%BUILD_ARCH%"=="" set BUILD_ARCH=x64
-
+ 
 if "%BUILD_ARCH%"=="x64" (
 	set CMAKE_GENERATOR=Visual Studio 16 2019
 	set CMAKE_DEBUG_OUTPUT=%PWD%\bin\win\x64\Debug
 	set CMAKE_RUNTIME_OUTPUT=%PWD%\bin\win\x64\Release
+    set CMAKE_PLATFORM=x64
 )
 
 if "%BUILD_ARCH%"=="x86" (
 	set CMAKE_GENERATOR=Visual Studio 16 2019
 	set CMAKE_DEBUG_OUTPUT=%PWD%\bin\win\x86\Debug
 	set CMAKE_RUNTIME_OUTPUT=%PWD%\bin\win\x86\Release
+    set CMAKE_PLATFORM=Win32
 )
 
 set CMAKE_BUILD_DIR=%~2
@@ -43,6 +46,7 @@ cmake -G "%CMAKE_GENERATOR%" ^
     -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO="%CMAKE_RUNTIME_OUTPUT%" ^
     -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE="%CMAKE_RUNTIME_OUTPUT%" ^
     -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL="%CMAKE_RUNTIME_OUTPUT%" ^
+    -A"%CMAKE_PLATFORM%" ^
     "%SOURCE_DIR%" && ^
 popd
 

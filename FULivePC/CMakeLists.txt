@@ -4,6 +4,7 @@ project(FULivePC)
 set(target FULivePC)
 set(CMAKE_CXX_STANDARD 11)
 
+message(${CMAKE_SIZEOF_VOID_P})
 
 if(WIN32)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/cmakeScripts/Modules)
@@ -248,8 +249,6 @@ if(WIN32)
                 COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avformat-58.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avcodec-58.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/swresample-3.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/libwinpthread-1.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-
 
                 COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/fuai.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/CNamaSDK.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
@@ -262,10 +261,19 @@ if(WIN32)
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avformat-58.dll		${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avcodec-58.dll		${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/swresample-3.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
-				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/libwinpthread-1.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+				
 
 				COMMENT "copy dll"
                 )
+
+    if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+    add_custom_command(TARGET ${target}
+                POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/libwinpthread-1.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/libwinpthread-1.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+        COMMENT "copy x64 ffmpeg libs"
+                )
+    endif()
 
 elseif(APPLE)
 
