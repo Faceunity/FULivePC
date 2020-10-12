@@ -8,51 +8,50 @@
 #endif
 #include "glfw3native.h"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_tabs.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
+#include "GuiTool.h"
 #include "Texture.h"
 
 #include <stdio.h>
 #include <string>
 #include "Nama.h"
 #include "UIBridge.h"
+#include "MouseControl.h"
 
-//for virtual camera
-#ifdef _WIN32
-#include "ipc/filtercommons.h"
-#include "ipc/ipcbridge.h"
-#include <uuids.h>
-#include <dinput.h>
-#endif
-
+using namespace std;
 using namespace NamaExampleNameSpace;
 
 class Gui
 {
 public:
-    using UniquePtr = std::unique_ptr<Gui>;
+    using UniquePtr = unique_ptr<Gui>;
 	static UniquePtr create(uint32_t width, uint32_t height);
 
 	~Gui(); 
 
 	void render(Nama::UniquePtr& nama);
+
+	void UpdateFrame(Nama * nama);
+
+	void ShowMainWindow(Nama * nama);
 	
 	void onWindowResize(uint32_t width, uint32_t height);
 
+	void ProcessGSSampleClick(Nama * nama);
+	void ResetPreviewRect(Nama::UniquePtr& nama);
 #ifdef _WIN32
 	static HWND hWindow;
 #else
     static void * hWindow;
 #endif
     static GLFWwindow* window;
+
+	static bool mIsOpenMiniWindow;
+
 protected:
 private:
 	Gui() = default;
-	
-#ifdef _WIN32
-	IpcBridge ipcBridge;
-#endif
-	cv::Mat processedFrame;
+	MouseControl* mouseControl;
+	cv::Mat  m_processedFrame;
+	GLuint m_texIDNamaProcess = -1;
+	GLuint m_texIDOrignal = -1;
 };

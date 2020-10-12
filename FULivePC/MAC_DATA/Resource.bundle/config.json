@@ -14,6 +14,9 @@
 	"ssd_thread_thumb.bundle": "竖个拇指",
 	"ssd_thread_six.bundle": "比个六",
 	"ssd_thread_cute.bundle": "双拳卖萌",
+	"ctrl_rain.bundle": "推出手掌",
+	"ctrl_snow.bundle": "推出手掌",
+	"ctrl_flower.bundle": "推出手掌",
 
 	"makeup_icon_combination_age.bundle": "减龄妆",
 	"makeup_icon_combination_bored_cat.bundle": "厌世猫妆",
@@ -27,6 +30,7 @@
 	"makeup_icon_combination_rose.bundle": "ROSE妆",
 	"makeup_icon_combination_supermodel.bundle": "超模妆",
 	"makeup_icon_combination_warm_winter.bundle": "暖冬妆",
-	"makeup_icon_combination_paper_cranes.bundle": "千纸鹤妆"
+	"makeup_icon_combination_paper_cranes.bundle": "千纸鹤妆",
+	"big_head_smiling.bundle":"微笑触发"
 }
 

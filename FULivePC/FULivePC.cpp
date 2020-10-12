@@ -5,6 +5,8 @@
 #include "GUI/Gui.h"
 #include <string.h>
 
+
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -17,6 +19,7 @@ extern "C"
 {
 	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
+
 
 int main(int argc, char* argv[])
 {	
@@ -31,7 +34,7 @@ int main(int argc, char* argv[])
 	
 	using namespace NamaExampleNameSpace;
 	Gui::UniquePtr gui = Gui::create(1360, 830);
-	if (gui == nullptr)
+	if (nullptr == gui)
 	{
 		return -1;
 	}
@@ -40,6 +43,6 @@ int main(int argc, char* argv[])
 
 	gui->render(nama);
 
+	
     return 0;
 }
-

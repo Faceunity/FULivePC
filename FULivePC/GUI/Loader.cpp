@@ -94,20 +94,17 @@ void * Loader::OpenFileFromeSearchPath(const char * name)
 		while (looping) {
 			fullPath.assign(upPath);  // reset to current upPath.
 			if (src != m_searchPath.end()) {
-				//sprintf_s(fullPath, "%s%s/assets/%s", upPath, *src, filePath);
 				fullPath.append(*src);
 				fullPath.append("/assets/");
 				src++;
 			}
 			else {
-				//sprintf_s(fullPath, "%sassets/%s", upPath, filePath);
 				fullPath.append("assets/");
 				looping = false;
 			}
 			fullPath.append(name);
 
 #ifdef DEBUG
-			//fprintf(stderr, "Trying to open %s\n", fullPath.c_str());
 #endif
 #ifdef _WIN32
 			if ((fopen_s(&fp, fullPath.c_str(), "rb") == 0) || (fp != NULL))

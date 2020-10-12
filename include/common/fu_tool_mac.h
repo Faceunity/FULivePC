@@ -4,15 +4,25 @@
 #include <string>
 #include <vector>
 #include "fu_common_def.h"
-
+using namespace std;
+struct FUCGSize {
+    float width;
+    float height;
+};
 class FuToolMac
 {
 public:
-    static std::vector<std::string> getVideoDevices();
+    static vector<string> getVideoDevices();
+	static string GetFileFullPathFromResPicBundle(const char * path);
+    static Bitmap * getBitmapFromAsset(string name);
     
-    static Bitmap * getBitmapFromAsset(std::string name);
-    
-    static std::string GetFileFullPathFromBundle(const char * path);
+    static string GetFileFullPathFromResourceBundle(const char * path);
+	static string GetRelativePathDependResourceBundle(const char * fullpath);
+	static bool importFilesInObjectC(const char *dirPath,vector<const char *> types,vector<const char *> *seletedFilesPathsPtr,bool allowsMultipleSelection);
+    static float culculatorTextWidth(const char *string,float fontSize);
+private:
+	static FUCGSize culculatorTextSize(const char *string,float fontSize);
+	
 };
 
 #endif

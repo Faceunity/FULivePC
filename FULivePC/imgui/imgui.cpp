@@ -8278,7 +8278,8 @@ bool ImGui::ImageButton(ImTextureID user_texture_id, const ImVec2& size, const I
 // frame_padding = 0: no framing
 // frame_padding > 0: set framing size
 // The color used are the button colors.
-bool ImGui::ImageRoundButton(ImGuiID& gui_id, ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, int frame_padding, const ImVec4& bg_col, const ImVec4& tint_col)
+// forceSelect 强制选中
+bool ImGui::ImageRoundButton(ImGuiID& gui_id, ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, int frame_padding, const ImVec4& bg_col, const ImVec4& tint_col,ImGUI_Button_Operation_Type button_operation_type)
 {
 	ImGuiWindow* window = GetCurrentWindow();
 	if (window->SkipItems)
@@ -8321,10 +8322,15 @@ bool ImGui::ImageRoundButton(ImGuiID& gui_id, ImTextureID user_texture_id, const
 		{
 			window->DrawList->AddCircle(bb.GetCenter() + ImVec2(1, 1), bb.GetWidth() / 2.f, GetColorU32(ImGuiCol_BorderShadow), circleSeg, border_size);
 			window->DrawList->AddCircle(bb.GetCenter(), bb.GetWidth() / 2.f, GetColorU32(ImGuiCol_Border), circleSeg, border_size);
+		}else if (button_operation_type == ImGUI_Button_Operation_Type_Select){
+			window->DrawList->AddCircle(bb.GetCenter() + ImVec2(1, 1), bb.GetWidth() / 2.f, GetColorU32(ImGuiCol_BorderShadow), circleSeg, border_size);
+			window->DrawList->AddCircle(bb.GetCenter(), bb.GetWidth() / 2.f, GetColorU32(ImGuiCol_Border), circleSeg, border_size);
 		}
 	}
 	ImGui::PopStyleColor(2);
-	if (pressed)
+	if (button_operation_type == ImGUI_Button_Operation_Type_Reset) {
+		gui_id = -1;
+	}else if (pressed)
 	{
 		if (gui_id == id)
 		{

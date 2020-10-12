@@ -79,20 +79,17 @@ std::string Texture::GetFileFullPathFromeSearchPath(const char * name)
 		while (looping) {
 			fullPath.assign(upPath);  // reset to current upPath.
 			if (src != m_searchPath.end()) {
-				//sprintf_s(fullPath, "%s%s/assets/%s", upPath, *src, filePath);
 				fullPath.append(*src);
 				fullPath.append("/res/");
 				src++;
 			}
 			else {
-				//sprintf_s(fullPath, "%sassets/%s", upPath, filePath);
 				fullPath.append("res/");
 				looping = false;
 			}
 			fullPath.append(name);
 
 #ifdef DEBUG
-			//fprintf(stderr, "Trying to open %s\n", fullPath.c_str());
 #endif
             
 #ifdef _WIN32
@@ -104,7 +101,6 @@ std::string Texture::GetFileFullPathFromeSearchPath(const char * name)
 			{
 				fclose(fp);
 				return fullPath;
-				//return (void*)fp;
 			}
 				
 		}
@@ -145,6 +141,13 @@ Texture::SharedPtr Texture::createTextureFromFile(const std::string filename, bo
     delete pBmp;
     
 	mTextureMap[fullpath] = pTexture;
+	return pTexture;
+}
+
+Texture::SharedPtr Texture::createTextureFromData(uint32_t width, uint32_t height, unsigned char* pixels)
+{
+	SharedPtr pTexture = SharedPtr(new Texture);
+	pTexture->create(width, height, pixels);
 	return pTexture;
 }
 

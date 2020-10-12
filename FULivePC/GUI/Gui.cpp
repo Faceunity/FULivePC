@@ -7,6 +7,16 @@
 #include "rapidjson/filereadstream.h"
 #include "stdio.h"
 #include "fu_tool.h"
+#include "GuiGS.h"
+#include "GuiTabContent.h"
+#include <string>
+#include <stdlib.h>
+#include <stdio.h>
+#include "imgui/imgui_internal.h"
+#if __APPLE__
+#include "fu_tool_mac.h"
+#endif 
+using namespace gui_tool;
 
 int oriWindowWidth = 0;
 int oriWindowHeight = 0;
@@ -14,16 +24,16 @@ float scaleRatioW = 1.f;
 float scaleRatioH = 1.f;
 bool showUI = true;
 
-int UIBridge::bundleCategory = -1;
+int UIBridge::bundleCategory = BUNDLE_CATEGORY_NOMEAN;
 int UIBridge::renderBundleCategory = -1;
-std::vector<std::string> UIBridge::categoryBundles[BundleCategory::Count];
+vector<string> UIBridge::categoryBundles[BundleCategory::Count];
 int UIBridge::faceType = 0;
 
 bool UIBridge::showItemSelectWindow = false;
 bool UIBridge::showItemTipsWindow = false;
 bool UIBridge::showDegubInfoWindow = false;
 bool UIBridge::showFilterSlider = false;
-int UIBridge::showMakeUpWindow = false;
+int UIBridge::showGreenScreen = false;
  uint32_t UIBridge::mFPS = 60;
  uint32_t UIBridge::mResolutionWidth = 1280;
  uint32_t UIBridge::mResolutionHeight = 720;
@@ -32,8 +42,10 @@ int UIBridge::showMakeUpWindow = false;
 int UIBridge::m_curFilterIdx = 2;  //默认粉嫩
 int UIBridge::m_curRenderItem = -1; 
 int UIBridge::m_curBindedItem = -1;
+int UIBridge::m_curPlayingMusicItem = -1;
 ImGuiID UIBridge::m_curRenderItemUIID = -1;
-std::string UIBridge::mCurRenderItemName = "";
+ImGuiID UIBridge::m_curRenderItemUIIDSec = -2;
+string UIBridge::mCurRenderItemName = "";
 double UIBridge::mLastTime=0.0;
 int UIBridge::mEnableSkinDect = 1;
 int UIBridge::mEnableHeayBlur = 0;
@@ -44,51 +56,18 @@ float UIBridge::mFaceBeautyLevel[MAX_BEAUTYFACEPARAMTER] = {0.0f};
 float UIBridge::mFaceShapeLevel[MAX_FACESHAPEPARAMTER] = {0.0f};
 float UIBridge::mFilterLevel[10] = { 100,100,40,100,100, 100,100,100,100,100};
 float UIBridge::mMakeupLevel[10] = { 100,100,100,100,100, 100,100,100,100,100 };
+float UIBridge::mBodyShapeLevel[MAX_BODY_SHAPE_PARAM] = { 0.0f };
 
 bool UIBridge::mNeedIpcWrite =false;
 bool UIBridge::mNeedPlayMP3 = false;
 bool UIBridge::mNeedStopMP3 = false;
 
-
+bool Gui::mIsOpenMiniWindow = true;
 //{ "blur_level","color_level", "red_level", "eye_bright", "tooth_whiten" ,"remove_pouch_strength", "remove_nasolabial_folds_strength" };
 
+const char * g_szMainFrameWinName = "MainFrameWindow";
 
-void resetBeautyParam()
-{
-	UIBridge::mEnableSkinDect = 1;
-	UIBridge::mEnableHeayBlur = 0;
-	UIBridge::mEnableExBlur = 0;
-	UIBridge::mFaceBeautyLevel[0] = 70;
-	UIBridge::mFaceBeautyLevel[1] = 30;
-	UIBridge::mFaceBeautyLevel[2] = 30;
-	UIBridge::mFaceBeautyLevel[3] = 70;
-	UIBridge::mFaceBeautyLevel[4] = 0;
-	UIBridge::mFaceBeautyLevel[5] = 0;
-	UIBridge::mFaceBeautyLevel[6] = 0;
-}
-
-void resetShapeParam()
-{
-	UIBridge::faceType = 0;
-	UIBridge::mFaceShapeLevel[0] = 40;
-	UIBridge::mFaceShapeLevel[1] = 40;
-	UIBridge::mFaceShapeLevel[2] = -20;
-	UIBridge::mFaceShapeLevel[3] = -20;
-	UIBridge::mFaceShapeLevel[4] = 50;
-	UIBridge::mFaceShapeLevel[5] = -10;
-
-	UIBridge::mFaceShapeLevel[6] = 50;
-	UIBridge::mFaceShapeLevel[7] = 0;
-	UIBridge::mFaceShapeLevel[8] = 0;
-	UIBridge::mFaceShapeLevel[9] = 0;
-	UIBridge::mFaceShapeLevel[10] = 0;
-	UIBridge::mFaceShapeLevel[11] = 0;
-	UIBridge::mFaceShapeLevel[12] = 0;
-	UIBridge::mFaceShapeLevel[13] = 0;
-	UIBridge::mFaceShapeLevel[14] = 0;
-}
-
-bool doesFileExist(const std::string& filename)
+bool doesFileExist(const string& filename)
 {
 #ifdef _WIN32
 	DWORD attr = GetFileAttributesA(filename.c_str());
@@ -98,7 +77,7 @@ bool doesFileExist(const std::string& filename)
     return true;
 }
 
-bool isDirectoryExists(const std::string& filename)
+bool isDirectoryExists(const string& filename)
 {
 #ifdef _WIN32
 	DWORD attr = GetFileAttributesA(filename.c_str());
@@ -148,8 +127,7 @@ static void glfw_error_callback(int error, const char* description)
 
 static void window_size_callback(GLFWwindow* window, int width, int height)
 {
-	std::cout << width << "," << height << std::endl;
-	//ImGuiStyle::ScaleAllSizes(1.0f);
+	cout << width << "," << height << endl;
 	scaleRatioW =(float)width/(float)oriWindowWidth ;
 	scaleRatioH = (float)height / (float)oriWindowHeight;
 }
@@ -164,6 +142,7 @@ GLFWwindow* Gui::window;
 Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 {
 	UniquePtr pGui = UniquePtr(new Gui);
+	
 	// Setup window
 	glfwSetErrorCallback(glfw_error_callback);
 	if (!glfwInit())
@@ -179,7 +158,7 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 	/*GLFWwindow**/ window = glfwCreateWindow(width, height, "FU Live Demo PC", NULL, NULL);
 	if (!window)
 	{
-		std::cout << "Create Window Faild !!! Please Check GPU Card If Support OpenGL 3.2 CoreProfile";
+		cout << "Create Window Faild !!! Please Check GPU Card If Support OpenGL 3.2 CoreProfile";
 		return nullptr;
 	}
 
@@ -196,8 +175,6 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
@@ -216,7 +193,7 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 	colors[ImGuiCol_ScrollbarGrabHovered] = ImColor(112, 136, 237, 255);
 	colors[ImGuiCol_PopupBg] = ImColor(252, 253, 255, 255);
 
-	std::string fontFile = FuTool::GetFileFullPathFromeSearchPath("msyh.ttc");
+	string fontFile = FuTool::GetFileFullPathFromeSearchPath("msyh.ttc");
 
 	if (doesFileExist(fontFile))
 	{
@@ -224,12 +201,9 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 	}
 	oriWindowWidth = width;
 	oriWindowHeight = height;
-	//pGui->onWindowResize(width, height);
 	GLFWimage icons[1];
 	Texture::SharedPtr tex = Texture::createTextureFromFile("LOGO.png", false);
-	//icons[0].pixels = tex.getData();
-	//glfwSetWindowIcon(window, 1, icons);
-
+    pGui->mouseControl = new MouseControl(GUIGS::previewRect);
 	return pGui;
 }
 
@@ -244,98 +218,7 @@ Gui::~Gui()
 	glfwTerminate();
 }
 
-static void ShowHelpMarker(const char* desc)
-{
-	ImGui::TextDisabled("(?)");
-	if (ImGui::IsItemHovered())
-	{
-		ImGui::BeginTooltip();
-		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-		ImGui::TextUnformatted(desc);
-		ImGui::PopTextWrapPos();
-		ImGui::EndTooltip();
-	}
-}
-
-static bool ImageButtonWithLabel(const char* text)
-{
-	ImGui::BeginGroup();
-	ImGui::Text("%s",text);
-	ImGui::EndGroup();
-    return true;
-}
-
-static bool LayoutButton(const ImVec2& pos,const ImVec2& size, const char* label)
-{
-	ImGui::BeginGroup();
-	ImGui::Dummy(ImVec2(1,pos.y * scaleRatioH));
-	ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine();
-	bool ret = ImGui::Button(label, ImVec2(size.x * scaleRatioW ,size.y * scaleRatioH));
-	ImGui::EndGroup();
-	return ret;
-}
-
-static bool LayoutSelectable(const ImVec2& pos, const ImVec2& size, const char* label, bool selected)
-{
-	ImGui::BeginGroup();
-	ImGui::Dummy(ImVec2(1, pos.y * scaleRatioH));
-	ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine();
-	bool ret = ImGui::SelectableBorder(label,selected,0,ImVec2(size.x * scaleRatioW,size.y * scaleRatioH));
-	ImGui::EndGroup();
-	return ret;
-}
-
-static bool LayoutSlider(const ImVec2& pos, const ImVec2& size, const char* label,float* v,float v_min,float v_max)
-{
-	ImGui::BeginGroup();
-	ImGui::Dummy(ImVec2(1, pos.y * scaleRatioH));
-	ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine();
-	ImGui::PushItemWidth(size.x * scaleRatioW);
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 1.0f));
-	//bool ret = ImGui::SliderRoundScalar(label, ImGuiDataType_Float, v, &v_min, &v_max,"%.f");
-	bool ret = ImGui::SliderFloat(label, v, v_min, v_max, "%.f");
-	ImGui::PopStyleVar();
-	ImGui::PopItemWidth();
-	ImGui::EndGroup();
-	return ret;
-}
-
-static void LayoutImage(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, const char* label)
-{
-	ImGui::BeginGroup();
-	ImGui::Dummy(ImVec2(1, pos.y * scaleRatioH));
-	ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine();
-	ImGui::Image(user_texture_id,ImVec2(size.x * scaleRatioW,size.y * scaleRatioW));
-	ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine(); ImGui::Text(label);
-	ImGui::EndGroup();	
-}
-
-static bool LayoutImageButtonWithText(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, ImTextureID user_texture_id2, const char* label)
-{
-	ImGui::BeginGroup();
-	bool ret = ImGui::ImageRoundButton2(user_texture_id, user_texture_id2, ImVec2(size.x * scaleRatioW,size.y * scaleRatioH));/* ImGui::SameLine(0.f, 27.f);*/
-	ImGui::Spacing();
-	ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine(); ImGui::Text(label);
-	ImGui::EndGroup();
-	return ret;
-}
-
-struct MyDocument
-{
-	const char* Name;
-	bool        Open;
-	bool        PreviousOpen;
-	bool        Dirty;
-	bool        WantClose;
-
-	MyDocument() { Name = NULL; Open = true;  PreviousOpen = false; Dirty = false; WantClose = false; }
-	void DoOpen() { Open = true; }
-	void DoQueueClose() { WantClose = true; }
-	void DoForceClose() { Open = false; Dirty = false; }
-	void DoSave() { Dirty = false; }
-};
-
-static MyDocument GDocs[3];
+static MyDocument GDocs[4];
 
 static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 {
@@ -346,6 +229,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 		GDocs[0].Name = u8"美肤";
 		GDocs[1].Name = u8"美型";
 		GDocs[2].Name = u8"滤镜";
+		GDocs[3].Name = u8"美体";
 	}
 	ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 1.f));
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(120.f / 255.f, 136.f / 255.f, 234.f / 255.f, 1.f));
@@ -357,14 +241,8 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 	for (int doc_n = 0; doc_n < IM_ARRAYSIZE(GDocs); doc_n++)
 	{
 		MyDocument& doc = GDocs[doc_n];
-		//ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
-		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding,ImVec2(0.0f,5.0f));
-		//ImGui::PushItemWidth(52);
-		const bool selected = ImGui::TabItem(ImVec2(135 * scaleRatioW,30* scaleRatioH),doc.Name, &doc.Open, 0);
-		
-		//ImGui::PopItemWidth();
-		//ImGui::PopStyleVar();
-		//ImGui::PopStyleVar();
+
+		const bool selected = ImGui::TabItem(ImVec2(100 * scaleRatioW,30* scaleRatioH),doc.Name, &doc.Open, 0);
 
 		if (!selected)
 			continue;
@@ -373,214 +251,22 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 		{
 		case 0:
 		{
-			ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
-			if (UIBridge::mEnableSkinDect)
-			{
-				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_skinbeauty_open.png", false)->getTextureID(), u8"精准美肤");
-			}
-			else
-			{
-				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_skinbeauty_close.png", false)->getTextureID(), u8"精准美肤");
-			}
-			ImGui::SameLine();
-			ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
-			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"开启", UIBridge::mEnableSkinDect == 1))
-			{
-				UIBridge::mEnableSkinDect = 1;
-				nama->UpdateBeauty();
-			}
-			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"关闭", UIBridge::mEnableSkinDect == 0))
-			{
-				UIBridge::mEnableSkinDect = 0;
-				nama->UpdateBeauty();
-			}
-			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_BeautyMode_open.png", false)->getTextureID(), u8"美肤模式");
-			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(22, 11), ImVec2(78, 30), u8"精细磨皮##3", UIBridge::mEnableHeayBlur == 0))
-			{
-				UIBridge::mEnableHeayBlur = 0;
-				nama->UpdateBeauty();
-			}
-			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(5, 11), ImVec2(78, 30), u8"清晰磨皮##2", UIBridge::mEnableHeayBlur == 1))
-			{
-				UIBridge::mEnableHeayBlur = 1;
-				nama->UpdateBeauty();
-			}
-			ImGui::SameLine();
-			if (LayoutSelectable(ImVec2(5, 11), ImVec2(78, 30), u8"朦胧磨皮##2", UIBridge::mEnableHeayBlur == 2))
-			{
-				UIBridge::mEnableHeayBlur = 2;
-				nama->UpdateBeauty();
-			}
-			ImGui::PopStyleColor();
-			//ImGui::PopStyleColor();
-
-			std::string sliderIconNameArr[MAX_BEAUTYFACEPARAMTER] = { "list_icon_Grindingskin_open","list_icon_Skinwhitening_open", "list_icon_Ruddy_open",
-				"list_icon_Brighteye_open","list_iconBeautifulteeth_open",
-				"list_icon_dark_circles_open","list_icon_wrinkle_open" };
-
-			std::string sliderNameArr[MAX_BEAUTYFACEPARAMTER] = { u8"   磨皮", u8"   美白",u8"   红润", u8"   亮眼", u8"   美牙" ,u8"去黑眼圈", u8"去法令纹" };
-			
-			for (int i = 0; i < MAX_BEAUTYFACEPARAMTER; i++)
-			{
-				if (UIBridge::mFaceBeautyLevel[i] == 0)
-				{
-					std::string closeIconFile = sliderIconNameArr[i].substr(0, sliderIconNameArr[i].find_last_of('_')) + "_close";
-					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(closeIconFile + ".png", false)->getTextureID(), sliderNameArr[i].c_str());
-				}
-				else
-				{
-					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(sliderIconNameArr[i] + ".png", false)->getTextureID(), sliderNameArr[i].c_str());
-				}
-				ImGui::SameLine();
-				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
-
-				if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + std::to_string(i)).c_str(), &UIBridge::mFaceBeautyLevel[i], 0, 100))
-				{
-					nama->UpdateBeauty();
-				}
-				//ImGui:: SameLine(); ImGui::InputInt(("##input221" + std::to_string(i)).c_str(), (int*)&UIBridge::mFaceBeautyLevel[i]);
-				ImGui::PopStyleVar();
-			}
-			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-			//ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
-			if (LayoutButton(ImVec2(145, 38), ImVec2(126, 40), u8"恢复默认"))
-			{
-				resetBeautyParam();
-				nama->UpdateBeauty();
-			}
-			ImGui::PopStyleVar();
-			ImGui::PopStyleVar();
-			//ImGui::PopStyleColor();
-
-
-			ImGui::PopStyleColor();
+			gui_tab_content::ShowTabBeautySkin(nama.get());
 		}
 		break;
 		case 1:
 		{
-			ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));
-			//ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
-			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_Facetype_open.png", false)->getTextureID(), u8"   脸型");
-			ImGui::SameLine();
-			std::string faceTypeNameArr[5] = { u8"自定义" ,u8"默认" ,u8"女神",u8"网红" ,u8"自然" };
-			int shapeHandle[5] = { 4,3,0,1,2 };
-			for (int i = 0; i < 5; i++)
-			{
-				if (LayoutSelectable(ImVec2(4, 11), ImVec2(44, 30), faceTypeNameArr[i].c_str(), UIBridge::faceType == i))
-				{
-					UIBridge::faceType = i;
-					nama->SetCurrentShape(shapeHandle[i]);
-				}
-				ImGui::SameLine();
-			}
-			ImGui::Spacing();
-
-
-			std::string faceShapeIconNameArr[MAX_FACESHAPEPARAMTER] = { "list_icon_Thinface_open", "list_icon_Bigeye_open",
-				"list_icon_chin_open", "list_icon_forehead_open", "list_icon_Thinnose_open","list_icon_Mouthtype_open",
-				"list_icon_v_open","list_icon_narrow_face_open","list_icon_little_face_open",
-			"list_icon_open_eyes_open" ,"list_icon_eye_distance_open" ,"list_icon_eye_angle_open" ,
-			"list_icon_proboscis_open" ,"list_icon_shrinking_open" ,"list_icon_smile_mouth_open" };
-
-			//眼角、眼距、眼睛角度、长鼻、缩人中、微笑嘴角
-
-			std::string faceShapeNameArr[MAX_FACESHAPEPARAMTER] = { u8"   瘦脸" ,u8"   大眼" ,u8"   下巴",u8"   额头" ,
-				u8"   瘦鼻",u8"   嘴型",u8"   V脸",u8"   窄脸",u8"   小脸" ,
-			 u8"  开眼角", u8"   眼距", u8"眼睛角度", u8"   长鼻", u8"  缩人中", u8"微笑嘴角"};
-
-
-			ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 1.f));
-			ImGui::BeginChild("faceShape##2223",ImVec2(400*scaleRatioW,550*scaleRatioH) );
-			ImGui::PopStyleColor();
-			for (int i = 0; i < MAX_FACESHAPEPARAMTER; i++)
-			{
-				if (UIBridge::faceType != 0 && i > 1)
-				{
-					break;
-				}
-				if (UIBridge::mFaceShapeLevel[i] == 0)
-				{
-					std::string closeIconFile = faceShapeIconNameArr[i].substr(0, faceShapeIconNameArr[i].find_last_of('_')) + "_close";
-					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(closeIconFile + ".png", false)->getTextureID(), faceShapeNameArr[i].c_str());
-				}
-				else
-				{
-					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(faceShapeIconNameArr[i] + ".png", false)->getTextureID(), faceShapeNameArr[i].c_str());
-				}
-				ImGui::SameLine();
-				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
-				if (g_faceShapeParamShowFlag[i] == FACE_SHAPE_SHOW_FLAG_MIDDLE)
-				{
-					if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), (std::string("##slider23") + std::to_string(i)).c_str(), &UIBridge::mFaceShapeLevel[i], -50, 50))
-					{
-						nama->UpdateBeauty();
-					}
-				}
-				else if (g_faceShapeParamShowFlag[i] == FACE_SHAPE_SHOW_FLAG_NORMAL)
-				{
-					if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), (std::string("##slider2") + std::to_string(i)).c_str(), &UIBridge::mFaceShapeLevel[i], 0, 100))
-					{
-						nama->UpdateBeauty();
-					}
-				}
-				ImGui::PopStyleVar();
-			}
-			
-			ImGui::EndChild();
-			
-			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-			if (LayoutButton(ImVec2(145, 15), ImVec2(126, 40), u8"恢复默认"))
-			{
-				resetShapeParam();
-				nama->UpdateBeauty();
-				nama->SetCurrentShape(4);
-			}
-			ImGui::PopStyleVar();
-			ImGui::PopStyleVar();
-
-
-			ImGui::PopStyleColor();
+			gui_tab_content::ShowTabFaceBeauty(nama.get());
 		}
 		break;
 		case 2:
 		{
-			ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));			
-			std::string filterNameArr[6] = { "list_image_origin", "list_image_bailiang1", "list_image_fennen1", "list_image_xiaoqingxin1", "list_image_lengsediao1", "list_image_nuansediao1" };
-			for (int i = 0; i < 6; i++)
-			{
-				if (ImGui::ImageButton(Texture::createTextureFromFile(filterNameArr[i] + ".png", false)->getTextureID(), ImVec2(106 * scaleRatioW, 106 * scaleRatioH)))
-				{
-					nama->UpdateFilter(i);
-					
-					UIBridge::m_curFilterIdx = i;
-					nama->UpdateBeauty();
-					if (i != 0)
-					{
-						UIBridge::showFilterSlider = true;
-					}
-					else
-					{
-						UIBridge::showFilterSlider = false;
-					}
-				}
-				if (i != 2 && i != 5)
-				{
-					ImGui::SameLine(0.f, 27.f);
-				}
-			}
-			if (UIBridge::showFilterSlider) {
-				if (LayoutSlider(ImVec2(54, 280), ImVec2(252, 10), "##slider36", &UIBridge::mFilterLevel[UIBridge::m_curFilterIdx], 0, 100))
-				{
-					nama->UpdateBeauty();
-				}
-			}
+			gui_tab_content::ShowTabFilter(nama.get());
+		}
+		break;
+		case 3:
+		{
+			gui_tab_content::ShowTabBodyBeauty(nama.get());
 		}
 		break;
 		}
@@ -594,28 +280,785 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 	ImGui::End();
 }
 
+static void ShowAvatarTip()
+{
+	ImGui::Begin("avatarTip", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+
+	ImGui::Dummy(ImVec2(480 * scaleRatioW, 280 * scaleRatioH));
+
+	LayoutImageSameLine(ImVec2(0, 0), ImVec2(20, 20), Texture::createTextureFromFile("icon_tips.png", false)->getTextureID(), u8"全身Avatar开启后美颜模块无法使用 如需编辑请先取消");
+
+	ImGui::End();
+}
+
+static void ShowAvatarMenu(Nama * nama)
+{
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 584 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(300 * scaleRatioW, 80 * scaleRatioH), ImGuiCond_Always);
+	ImGui::Begin("avatarChange", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+
+	string strIconName = "";
+	auto avaType = nama->GetAvatarType();
+	switch (avaType)
+	{
+	case NamaExampleNameSpace::AVATAR_TYPE_FULLBODY:
+		strIconName = "switch_whole_body.png";
+		break;
+	case NamaExampleNameSpace::AVATAR_TYPE_HALF:
+		strIconName = "switch_half_body.png";
+		break;
+	default:
+		break;
+	}
+
+	Texture::SharedPtr tex = Texture::createTextureFromFile(strIconName, false);
+	//找不到图标
+	if (!tex)
+	{
+		tex = Texture::createTextureFromFile("icon_Movebutton_nor.png", false);
+	}
+
+	if (ImGui::ImageButton(tex->getTextureID(), ImVec2(88 * scaleRatioW, 28 * scaleRatioH)))
+	{
+		nama->SwitchAvatar();
+	}
+
+	ImGui::End();
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
+}
+
+
+
+static void ShowAvatarMiniCameraView(GLuint & texId, float rotio, ImVec2 frameSize)
+{
+
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+	ImGui::SetNextWindowPos(ImVec2(660 * scaleRatioW, 515 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(frameSize, ImGuiCond_Always);
+	ImGui::Begin("avatarMiniCamera", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+
+	funShowImg(texId, rotio, frameSize, true);
+
+	ImGui::End();
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
+}
+
+static void ShowDebugMenu()
+{
+	if (UIBridge::showDegubInfoWindow)
+	{
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .78f));
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, 0.f));
+		ImGui::SetNextWindowPos(ImVec2(26 * scaleRatioW, 172 * scaleRatioH), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(154 * scaleRatioW, 98 * scaleRatioH), ImGuiCond_Always);
+		ImGui::Begin("debugInfo##2223", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar /*| ImGuiWindowFlags_NoInputs*/);
+		ImGui::TextColored(ImColor(255, 255, 255, 255), "FPS:%d", UIBridge::mFPS);
+		ImGui::TextColored(ImColor(255, 255, 255, 255), "Resolution:%d*%d", UIBridge::mResolutionWidth, UIBridge::mResolutionHeight);
+		ImGui::TextColored(ImColor(255, 255, 255, 255), "RenderTime:%dms", UIBridge::mRenderTime);
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .0f));
+		if (LayoutButton(ImVec2(100, 0), ImVec2(37, 24), u8"关闭"))
+		{
+			UIBridge::showDegubInfoWindow = false;
+		}
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
+		ImGui::End();
+		ImGui::PopStyleColor();
+	}
+	else
+	{
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .78f));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .0f));
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, 0.f));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+		ImGui::SetNextWindowPos(ImVec2(26 * scaleRatioW, 172 * scaleRatioH), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(120 * scaleRatioW, 40 * scaleRatioH), ImGuiCond_Always);
+		ImGui::Begin("debugInfo##23", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar /*| ImGuiWindowFlags_NoInputs*/);
+		if (LayoutButton(ImVec2(0, 0), ImVec2(100, 25), u8"显示性能参数"))
+		{
+			if (!UIBridge::m_bSetGSInputSrc && UIBridge::showGreenScreen){  
+				UIBridge::showDegubInfoWindow = false;
+			}else{
+				UIBridge::showDegubInfoWindow = true;
+			}
+		}
+		ImGui::End();
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
+	}
+}
+
+static void ShowFloatMenuAR(Nama * nama)
+{
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .0f));
+	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 584 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(888 * scaleRatioW, 90 * scaleRatioH), ImGuiCond_Always);
+	ImGui::Begin("itemSelect##1563", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
+	for (int i = 0; i < BundleCategory::Count; i++)
+	{
+		if (UIBridge::categoryBundles[i].size() == 0)
+		{
+			if (i >= sizeof(gBundlePath) / sizeof(gBundlePath[0]))
+			{
+				break;
+			}
+			UIBridge::FindAllBundle(gBundlePath[i], UIBridge::categoryBundles[i]);
+		}
+	}
+
+	if (UIBridge::bundleCategory < BundleCategory::Count && UIBridge::bundleCategory >= BundleCategory::Animoji)
+	{
+		for (int i = 0; i < UIBridge::categoryBundles[UIBridge::bundleCategory].size(); i++)
+		{
+			string itemName = UIBridge::categoryBundles[UIBridge::bundleCategory][i];
+
+			string iconName = itemName.substr(0, itemName.find_last_of('.'));
+			Texture::SharedPtr tex = Texture::createTextureFromFile(iconName + ".png", false);
+			//找不到图标
+			if (!tex)
+			{
+				tex = Texture::createTextureFromFile("icon_Movebutton_nor.png", false);
+			}
+			bool buttonClick;
+			if (UIBridge::mCurRenderItemName == itemName)
+			{
+				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH),ImVec2(0, 0),ImVec2(1, 1),-1,ImVec4(0, 0, 0, 0),ImVec4(1, 1, 1, 1),ImGui::ImGUI_Button_Operation_Type_Select);
+			}else{
+				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH),ImVec2(0, 0),ImVec2(1, 1),-1,ImVec4(0, 0, 0, 0),ImVec4(1, 1, 1, 1),ImGui::ImGUI_Button_Operation_Type_Deselect);
+			}
+			if (buttonClick)
+			{
+				if (UIBridge::mCurRenderItemName != itemName)
+				{
+					UIBridge::mCurRenderItemName = itemName;
+					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+					UIBridge::showItemTipsWindow = false;
+				}
+				else
+				{
+					UIBridge::mCurRenderItemName = "NONE";
+					UIBridge::mLastTime = 0.0;
+					UIBridge::showItemTipsWindow = false;
+					UIBridge::mNeedStopMP3 = true;
+				}
+				nama->SelectBundle(gBundlePath[UIBridge::bundleCategory] + "/" + itemName);
+			}
+			ImGui::SameLine(0.f, 22.f * scaleRatioW);
+		}
+	}
+
+
+	ImGui::End();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
+}
+
+static void ShowFloatMenu(Nama * nama)
+{
+	if (!UIBridge::showGreenScreen)
+	{
+		ShowFloatMenuAR(nama);
+	}
+	else
+	{
+		GUIGS::ShowFloatMenuGS(nama);
+	}
+}
+
+static void ShowArMenu()
+{
+	string *categoryNameArr = nullptr;
+	string allCategory[] = { "list_icon_avatar_nor","list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_AR_nor",
+		"list_icon_Expressionrecognition_nor",	"list_icon_Musicfilter_nor","list_icon_Bgsegmentation_nor",
+		"list_icon_gesturerecognition_nor","list_icon_Hahamirror_nor","list_icon_makeup_nor","list_icon_hairdressing_nor","list_icon_photo_sticker_nor",
+		u8"Avatar","Animoji",u8"道具贴图",u8"AR面具",
+		u8"表情识别",u8"音乐滤镜",u8"人像分割",
+		u8"手势识别",u8"哈哈镜",u8"美妆",u8"美发", u8"搞笑大头" };
+	int amount = 12;
+	categoryNameArr = allCategory;
+
+	/* 这是个例外逻辑,把Avatar放在最前面，这样后面加起来正常的就没啥问题 */
+#define INDEX_AVATAR (0)
+
+	for (int i = 0; i < amount; i++)
+	{
+		/* bundleCategory对于于bundle载入路径的Array,前面多了个Avatar所以加1 */
+		if ((UIBridge::bundleCategory + 1) == i)
+		{
+			if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_propmap_collapse.png", false)->getTextureID(),
+				Texture::createTextureFromFile("list_icon_propmap_collapse.png", false)->getTextureID(), categoryNameArr[amount + i].c_str()))
+			{
+				auto funSetUnSelectd = [&](int index) {
+					UIBridge::bundleCategory = BUNDLE_CATEGORY_NOMEAN;
+					UIBridge::showItemSelectWindow = false;
+
+					if (INDEX_AVATAR == index)
+					{
+						Nama::mEnableAvatar = false;
+					}
+				};
+
+				funSetUnSelectd(i);
+			}
+		}
+		else
+		{
+			string iconFileName = categoryNameArr[i].substr(0, categoryNameArr[i].find_last_of("_")) + (1 ? "_hover.png" : "_nor.png");
+			if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile(categoryNameArr[i] + ".png", false)->getTextureID(),
+				Texture::createTextureFromFile(iconFileName, false)->getTextureID(), categoryNameArr[amount + i].c_str()))
+			{
+				auto funSetSelectd = [&](int index) {
+					if (INDEX_AVATAR == index)
+					{
+						/* -1现在意味着AVATAR */
+						UIBridge::bundleCategory = -1;
+						UIBridge::showItemSelectWindow = false;
+						Nama::mEnableAvatar = true;
+					}
+					else
+					{
+						/* bundleCategory对于于bundle载入路径的Array,前面多了个Avatar所以减1 */
+						UIBridge::bundleCategory = index - 1;
+						UIBridge::showItemSelectWindow = true;
+						Nama::mEnableAvatar = false;
+					}
+				};
+
+				funSetSelectd(i);
+			}
+		}
+		ImGui::SameLine(0.f, 27.f * scaleRatioW);
+	}
+}
+
+static void LayoutShowCamChoice(Nama * nama)
+{
+	if (nama->CameraList().size())
+	{
+		ImGui::PushItemWidth(244 * scaleRatioW);
+		static string item_current = nama->CameraList()[0];
+		if (ImGui::BeginCombo("##slect camera1", item_current.c_str())) // The second parameter is the label previewed before opening the combo.
+		{
+			for (int n = 0; n < nama->CameraList().size(); n++)
+			{
+				bool is_selected = (item_current == nama->CameraList()[n]);
+				if (ImGui::Selectable(nama->CameraList()[n].c_str(), is_selected))
+				{
+					item_current = nama->CameraList()[n];
+					if (UIBridge::mSelectedCamera != n)
+					{
+						UIBridge::mSelectedCamera = n;
+						nama->ReOpenCamera(n);
+					}
+				}
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::PopItemWidth();
+	}
+	else if (showUI)
+	{
+		ImGui::PushItemWidth(244 * scaleRatioW);
+		if (ImGui::BeginCombo("##slect camera122", u8"未检测到摄像头")) // The second parameter is the label previewed before opening the combo.				
+			ImGui::EndCombo();
+		ImGui::PopItemWidth();
+	}
+}
+
+/*
+维护AR情况下的各种状态
+*/
+static void ReCoverArState(Nama * nama)
+{
+	nama->OpenCamera(UIBridge::mSelectedCamera);
+}
+
+/* 
+第一次设置绿幕画面，给出一个默认位置
+*/
+static void ReSetGSInputSize(Nama * nama)
+{
+		FURect curRect = nama->getGSPreviewRect();
+		float newRectX = 0.5-curRect.origin.x;
+		nama->gsPreviewRect = {newRectX,curRect.origin.y,float(0.5)+newRectX,curRect.size.height};
+		nama->changeGSPreviewRect(nama->gsPreviewRect);
+}
+/* 
+维护绿幕状态下的状态
+*/
+static void ReCoverGSState(Nama * nama)
+{
+	/* 
+	用户切换的时候不能进来改配置
+	*/
+	if (UIBridge::m_bSetGSInputSrc && UIBridge::m_bNeedShowGSCamChoice != true)
+	{
+		switch (UIBridge::m_gsState.inputType)
+		{
+		case GS_INPUT_TYPE_CAMERA:
+		{
+			if (UIBridge::m_gsState.iCmaeraID > 0)
+			{
+				nama->OpenCamera(UIBridge::m_gsState.iCmaeraID);
+			}
+		}
+		break;
+		case GS_INPUT_TYPE_FILE:
+		{
+			if (UIBridge::m_gsState.strFilePath.length() > 0)
+			{
+				nama->OpenCamera(UIBridge::m_gsState.strFilePath);
+			}
+		}
+		break;
+		default:
+			break;
+		}
+
+	}
+}
+
+static void ShowMainMenu(Nama * nama)
+{
+	{
+		ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 156 * scaleRatioH), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 664 * scaleRatioH), ImGuiCond_Always);
+		ImGui::Begin("Window2##2", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus);
+		ImGui::Dummy(ImVec2(888 * scaleRatioW, 480 * scaleRatioH));
+		for (int i = 0; i < 7; i++)	ImGui::Spacing();
+		
+		if (UIBridge::showGreenScreen)
+		{
+			ReCoverGSState(nama);
+			GUIGS::ShowGreenScreenMenu(nama);
+		}
+		else
+		{
+			ReCoverArState(nama);
+			if (UIBridge::m_bShowingBodyBeauty) {
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.30f);
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ShowArMenu();
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}else{
+				ShowArMenu();
+			}
+		}
+		
+		
+		ImGui::Dummy(ImVec2(1, 1));
+		ImGui::Dummy(ImVec2(321 * scaleRatioW, 1)); ImGui::SameLine();
+		ImGui::PushItemWidth(272 * scaleRatioW);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_GrabRounding, 6.0f);
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
+
+		if (UIBridge::m_bSamplingColor) {
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.30f);
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+		}
+		if (ImGui::SliderString("##modeSlider", (char*)u8"AR功能", (char *)u8"绿幕抠像", (int*)&UIBridge::showGreenScreen, 0, 1))
+		{
+			
+			if (UIBridge::showGreenScreen)
+			{
+				if(UIBridge::m_bSetGSInputSrc == false)
+				{
+					// 关闭默认相机输入源
+					GUIGS::CloseCamera(nama);
+					UIBridge::m_bNeedReChooseInputSrc = true;
+				}
+				UIBridge::showItemSelectWindow = true;
+				Nama::mEnableAvatar = false;
+				
+				// 处理音乐滤镜,关闭音乐
+				if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3) {
+					nama->pauseCurrentMp3();
+				}
+			}
+			else
+			{
+				UIBridge::showItemSelectWindow = (UIBridge::bundleCategory != BUNDLE_CATEGORY_NOMEAN);
+				if (!nama->IsCameraPlaying() || nama->GetCameraCaptureType() == 2){
+					nama->setDefaultFrame();
+					nama->ReOpenCamera(UIBridge::mSelectedCamera);
+				}
+				
+				// 处理音乐滤镜，重新开启音乐
+				if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3 &&!UIBridge::m_bShowingBodyBeauty) {
+					nama->resumeCurrentMp3();
+				}
+			}
+			
+		}
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor(1);
+		ImGui::PopItemWidth();
+		if (UIBridge::m_bSamplingColor) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+		ImGui::End();
+		
+	}
+}
+
+static void ShowCameraChoice(Nama * nama)
+{
+	{
+		ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 70 * scaleRatioH), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 76 * scaleRatioH), ImGuiCond_Always);
+		ImGui::Begin("Window1##2", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+		ImGui::Dummy(ImVec2(21 * scaleRatioW, 11 * scaleRatioH));
+		ImGui::Text(u8"选择摄像头:");
+
+		ImGui::SameLine();
+		
+		if (UIBridge::showGreenScreen)
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.30f);
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			//navigation window
+			ImGui::PushItemWidth(244 * scaleRatioW);
+			if (ImGui::BeginCombo("##slect camera4", u8"请从下方选择绿幕输入")) // The second parameter is the label previewed before opening the combo.				
+				ImGui::EndCombo();
+			ImGui::PopItemWidth();
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+			
+		}
+		else
+		{
+			LayoutShowCamChoice(nama);
+		}
+
+#ifdef _WIN32
+		ImGui::SameLine();
+		ImGui::Checkbox(u8"虚拟摄像头", &UIBridge::mNeedIpcWrite);
+		ImGui::SameLine();
+		ShowHelpMarker(u8"勾选后会开启虚拟摄像头功能，详细可参见帮助文档里内容");
+		ImGui::SameLine(800 * scaleRatioW);
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
+
+		if (ImGui::Button(u8"打开帮助文档"))
+		{
+
+			WinExec("notepad.exe README.md", SW_SHOW);
+
+		}
+
+		ImGui::PopStyleColor();
+#endif
+		ImGui::End();
+	}
+}
+
+static void ShowTitle()
+{
+	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(1360 * scaleRatioW, 60 * scaleRatioH), ImGuiCond_Always);
+	ImGui::Begin("TitleWindow##21", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+	string filename = "title.png";
+	Texture::SharedPtr tex = Texture::createTextureFromFile(filename, false);
+	float my_tex_w = (float)ImGui::GetContentRegionAvailWidth();
+	float my_tex_h = (float)ImGui::GetContentRegionAvail().y;
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+	ImGui::Image(tex->getTextureID(), ImVec2(my_tex_w, my_tex_h), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+	ImGui::PopStyleVar();
+	ImGui::End();
+}
+
+void Gui::ShowMainWindow(Nama * nama)
+{
+	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(58.f / 255.f, 61.f / 255.f, 82.f / 255.f, 1.f));
+	float x = DEF_FRAME_SHOW_POS_X;
+	float y = DEF_FRAME_SHOW_POS_Y;
+	float w = DEF_FRAME_SHOW_WIDTH;
+	float h = DEF_FRAME_SHOW_HEIGHT;
+	ImGui::SetNextWindowPos(ImVec2(x, y), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(w,h), ImGuiCond_Always);
+	ImGui::Begin(g_szMainFrameWinName, NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs);
+	float frameWidth = (float)DEF_FRAME_SHOW_WIDTH;
+	float frameHeight = (float)DEF_FRAME_SHOW_HEIGHT;
+	
+	UIBridge::mFPS = get_fps();
+	//printf("UIBridge::mFPS: %d\n", UIBridge::mFPS);
+	UIBridge::mRenderTime = 1000.f / (float)UIBridge::mFPS;
+	UIBridge::mResolutionWidth = m_processedFrame.cols;
+	UIBridge::mResolutionHeight = m_processedFrame.rows;
+	
+	GLuint texidNeedShow = UIBridge::m_bSamplingColor ? m_texIDOrignal : m_texIDNamaProcess;
+	
+	auto srcType = nama->GetCameraCaptureType();
+	/* 相机输入需要镜像，文件不需要 */
+	bool bNeedFlip = false;
+	if(!UIBridge::showGreenScreen){
+		bNeedFlip = srcType != GS_INPUT_TYPE_FILE;
+	}
+	funShowImg(texidNeedShow, ((float)m_processedFrame.cols) / m_processedFrame.rows, ImVec2(frameWidth, frameHeight), bNeedFlip);
+	ImGui::End();
+	ImGui::PopStyleColor();
+	static FURect tmpRect;
+	if (UIBridge::showGreenScreen && !UIBridge::m_bNeedReChooseInputSrc && UIBridge::m_bSetGSInputSrc) {
+		ImVec2 dealt;
+		if(mouseControl->draging(&dealt)){
+			FURect namaGSPreviewRect = nama->gsPreviewRect;
+			float direction = bNeedFlip ? -1.0: 1.0;
+			float dealtXInNama = dealt.x / w;
+			float dealtYInNama = dealt.y / h;
+			float newNamaGSPreviewRectX = namaGSPreviewRect.origin.x + direction * dealtXInNama;
+			float newNamaGSPreviewRectY = namaGSPreviewRect.origin.y + dealtYInNama;
+			float newNamaGSPreviewRectW = namaGSPreviewRect.size.width + direction * dealtXInNama;
+			float newNamaGSPreviewRectH = namaGSPreviewRect.size.height + dealtYInNama;
+			
+			if (newNamaGSPreviewRectX < 0.0) {
+				newNamaGSPreviewRectX= 0.0;
+				newNamaGSPreviewRectW = namaGSPreviewRect.size.width - namaGSPreviewRect.origin.x;
+				
+			}else if (newNamaGSPreviewRectW > 1.0)
+			{
+				newNamaGSPreviewRectW = 1;
+				newNamaGSPreviewRectX = namaGSPreviewRect.origin.x + (1 - namaGSPreviewRect.size.width);
+				
+			}
+			if (newNamaGSPreviewRectY < 0.0) {
+				newNamaGSPreviewRectY= 0.0;
+				newNamaGSPreviewRectH = namaGSPreviewRect.size.height - namaGSPreviewRect.origin.y;
+				
+			}else if (newNamaGSPreviewRectH > 1.0)
+			{
+				newNamaGSPreviewRectH = 1;
+				newNamaGSPreviewRectY = namaGSPreviewRect.origin.y + (1 - namaGSPreviewRect.size.height);
+			}else{
+			}
+			
+			FURect newNamaGSPreviewRect = {newNamaGSPreviewRectX,newNamaGSPreviewRectY,
+				newNamaGSPreviewRectW,newNamaGSPreviewRectH
+			};
+			nama->changeGSPreviewRect(newNamaGSPreviewRect);
+			tmpRect = newNamaGSPreviewRect;
+			FURect viewRect = mouseControl->viewRect;
+			float newViewRectW = UIBridge::m_localVideoWidth;
+			float newViewRectH = UIBridge::m_localVideoHeight;
+			
+			float newViewRectX = bNeedFlip ? x+(0.5-newNamaGSPreviewRectX)*w : x+newNamaGSPreviewRectX*w;
+			float newViewRectY = y+newNamaGSPreviewRectY*h;
+			
+			FURect newViewRect = {newViewRectX,newViewRectY,newViewRectW,newViewRectH};
+			mouseControl->callback(newViewRect);
+			
+		}else if(mouseControl->dragComplete(&dealt))
+		{
+			nama->setGSPreviewRect(tmpRect);
+		}
+	}
+}
+
+
+void Gui::UpdateFrame(Nama * nama)
+{
+	cv::Mat frameMat = nama->GetFrame();
+	if (frameMat.data)
+	{
+		m_processedFrame.release();
+		m_processedFrame = frameMat.clone();
+		
+
+		cv::cvtColor(frameMat, m_processedFrame, cv::COLOR_BGR2RGBA);
+
+		bool bNeedOri = (Nama::mEnableAvatar && Gui::mIsOpenMiniWindow) || UIBridge::m_bSamplingColor;
+		
+		if (bNeedOri)
+		{
+			UpdateFrame2Tex(m_processedFrame, m_texIDOrignal);
+		}
+
+		float tempTime = GetTickCount();
+		if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
+		{
+			nama->RenderItems(m_processedFrame);
+		}
+
+		if (UIBridge::showGreenScreen && !UIBridge::m_bSetGSInputSrc)
+		{
+			m_processedFrame.setTo(150);
+		}else{
+			cv::Mat bgra[4];
+			cv::split(m_processedFrame, bgra);
+			bgra[3] = 255.0;
+			cv::merge(bgra, 4, m_processedFrame);
+		}
+
+		UpdateFrame2Tex(m_processedFrame, m_texIDNamaProcess);
+	}
+}
+static void ShowTipStr(string tipStr){
+	int tipStrWdith = 0;
+#if _WIN32
+	wstring tipWstr(tipStr.begin(),tipStr.end());
+	tipStrWdith = CalWstringWidth(tipWstr, 13,0,1000);
+#elif __APPLE__
+	tipStrWdith = FuToolMac::culculatorTextWidth(tipStr.c_str(),18);
+#endif
+
+	int marginX = 20;
+	int tipStrLength = tipStr.length();
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .0f));
+	ImGui::SetNextWindowPos(ImVec2(366 * scaleRatioW, 472 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(tipStrWdith + marginX * 2, 30 * scaleRatioH), ImGuiCond_Always);
+	ImGui::Begin("itemTips##1563", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+	ImGui::Dummy(ImVec2(marginX, 1)); ImGui::SameLine();
+	ImGui::TextColored(ImVec4(0.0, 0.0, 0.0, 1.0), tipStr.c_str());
+	
+	ImGui::End();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
+}
+static void ShowTip(rapidjson::Document & doc)
+{
+	string tip;
+	if (doc.HasParseError()) {
+		rapidjson::ParseErrorCode code = doc.GetParseError();
+		printf(" json parse error code: %d\n", code);
+	}
+	else
+	{
+		rapidjson::Value::ConstMemberIterator itr = doc.FindMember(UIBridge::mCurRenderItemName.c_str());
+		if (itr != doc.MemberEnd()) {
+			tip = itr->value.GetString();
+			UIBridge::showItemTipsWindow = true;
+		}
+	}
+	if (UIBridge::mLastTime > ImGui::GetTime())
+	{
+		if (UIBridge::showItemTipsWindow)
+		{
+			ShowTipStr(tip);
+		}
+	}
+	else
+	{
+		UIBridge::showItemTipsWindow = false;
+		UIBridge::mLastTime = 0.0;
+	}
+}
+
+static void ShowTipLabel(string tip)
+{
+	if (UIBridge::mLastTime > ImGui::GetTime())
+	{
+			ShowTipStr(tip);
+	}
+	else
+	{
+		UIBridge::showItemTipsWindow = false;
+		UIBridge::mLastTime = 0.0;
+	}
+}
+#include "imgui_internal.h"
+
+void Gui::ProcessGSSampleClick(Nama * nama)
+{
+	if (UIBridge::m_bSamplingColor)
+	{
+		ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+	}
+
+	if (UIBridge::m_bSamplingColor)
+	{
+		if (ImGui::IsMouseClicked(0))
+		{
+			ImVec2 pos = ImGui::GetMousePos();
+
+			ImGuiWindow* window = ImGui::FindWindowByName(g_szMainFrameWinName);
+
+			int CurW = DEF_FRAME_SHOW_WIDTH;
+			int CurH = DEF_FRAME_SHOW_HEIGHT;
+			
+			//Imgui的窗口是在左上角的 
+			bool bXIn = (pos.x > (window->Pos.x) && pos.x < (window->Pos.x + CurW));
+			bool bYIn = (pos.y > (window->Pos.y) && pos.y < (window->Pos.y + CurH));
+			if (bXIn && bYIn)
+			{
+				cv::Mat frameMat = nama->GetFrame();
+				if (frameMat.data)
+				{
+					cv::Point point;
+					point.x = (pos.x - window->Pos.x) / CurW * frameMat.cols;
+
+					auto srcType = nama->GetCameraCaptureType();
+					/* 相机输入需要镜像，文件不需要 */
+					bool bNeedFlip = srcType != GS_INPUT_TYPE_FILE;
+					if (bNeedFlip)
+					{
+						point.x = frameMat.cols - point.x;
+					}
+					
+					point.y = (pos.y - window->Pos.y) / CurH * frameMat.rows;
+
+					printf("keycolor pos find:(%d,%d) \r\n", point.x, point.y);
+
+					auto dataBGR = frameMat.at<cv::Vec3b>(point.y, point.x);
+
+					cv::Vec4b colorNeed = { dataBGR[2],dataBGR[1], dataBGR[0], 255 };
+					nama->SetGSKeyColor(colorNeed);
+					GUIGS::SetCurColorCircle(colorNeed);
+					UIBridge::m_bSamplingColor = false;
+				}
+			}
+		}
+	}
+}
+
+
 void Gui::render(Nama::UniquePtr& nama)
 {
-	GLuint textureID = -1;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	funGenTex(m_texIDNamaProcess);
+	funGenTex(m_texIDOrignal);
+	funGenTex(UIBridge::m_id4ChoiceCam);
 
+	GUIGS::InitColorVec();
+	GUIGS::ResetDefParam();
 	resetBeautyParam();
 	resetShapeParam();
+
+	nama->UpdateGreenScreen();
 	nama->UpdateBeauty();
 	nama->SetCurrentShape(4);
 
-#ifdef _WIN32
-	if (!ipcBridge.open(IPC_FILE_NAME, IpcBridge::OpenMode::Write))
-	{
-		printf("open ipc file failed!");
-	}
-#endif
-
 	rapidjson::Document doc;
-    std::string strFile = FuTool::GetFileFullPathFromeSearchPath("config.json");
+    string strFile = FuTool::GetFileFullPathFromeSearchPath("config.json");
 	FILE* fp = fopen(strFile.c_str(), "rb");
 	char readBuffer[65536];
 	rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
@@ -642,377 +1085,107 @@ void Gui::render(Nama::UniquePtr& nama)
 		{
 			showUI = !showUI;
 		}
+
+		ProcessGSSampleClick(nama.get());
+
+		if (UIBridge::m_bResetPreviewRect)
+		{
+			ResetPreviewRect(nama);
+			UIBridge::m_bResetPreviewRect = false;
+		}
 		//title window
 		if (showUI)
 		{
-			ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(1360 * scaleRatioW, 60 * scaleRatioH), ImGuiCond_Always);
-			ImGui::Begin("TitleWindow##21", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);			
-			std::string filename = "title.png";
-			Texture::SharedPtr tex = Texture::createTextureFromFile(filename, false);
-			float my_tex_w = (float)ImGui::GetContentRegionAvailWidth();
-			float my_tex_h = (float)ImGui::GetContentRegionAvail().y;
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-			ImGui::Image(tex->getTextureID(), ImVec2(my_tex_w, my_tex_h), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-			ImGui::PopStyleVar();
-			ImGui::End();
+			ShowTitle();
 		}
-		//navigation window
-		if (showUI)
-		{
-			ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 70 * scaleRatioH), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 76 * scaleRatioH), ImGuiCond_Always);
-			ImGui::Begin("Window1##2", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-			ImGui::Dummy(ImVec2(21 * scaleRatioW, 11 * scaleRatioH));
-			ImGui::Text(u8"选择摄像头:");
-
-			ImGui::SameLine();
-			if (nama->CameraList().size())
-			{
-				ImGui::PushItemWidth(244 * scaleRatioW);
-				static std::string item_current = nama->CameraList()[0];
-				if (ImGui::BeginCombo("##slect camera1", item_current.c_str())) // The second parameter is the label previewed before opening the combo.
-				{
-					for (int n = 0; n < nama->CameraList().size(); n++)
-					{
-						bool is_selected = (item_current == nama->CameraList()[n]);
-						if (ImGui::Selectable(nama->CameraList()[n].c_str(), is_selected))
-						{
-							item_current = nama->CameraList()[n];
-							if (UIBridge::mSelectedCamera != n)
-							{
-								UIBridge::mSelectedCamera = n;
-								nama->ReOpenCamera(n);
-							}							
-						}							
-						if (is_selected)
-							ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
-					}
-					ImGui::EndCombo();
-				}
-				ImGui::PopItemWidth();
-			}
-			else if (showUI)
-			{
-				ImGui::PushItemWidth(244 * scaleRatioW);				
-				if(ImGui::BeginCombo("##slect camera122", u8"未检测到摄像头")) // The second parameter is the label previewed before opening the combo.				
-					ImGui::EndCombo();				
-				ImGui::PopItemWidth();
-			}
-#ifdef _WIN32
-			ImGui::SameLine();
-			ImGui::Checkbox(u8"虚拟摄像头", &UIBridge::mNeedIpcWrite);
-			ImGui::SameLine();
-			ShowHelpMarker(u8"勾选后会开启虚拟摄像头功能，详细可参见帮助文档里内容");
-			ImGui::SameLine(800 * scaleRatioW);
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
-
-			if (ImGui::Button(u8"打开帮助文档"))
-			{
-
-				WinExec("notepad.exe README.md", SW_SHOW);
-
-			}
-
-			ImGui::PopStyleColor();
-#endif
-			ImGui::End();
-		}
-		//frame window
+		
 		{
 			if (showUI)
 			{
-				ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 156 * scaleRatioH), ImGuiCond_Always);
-				ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 664 * scaleRatioH), ImGuiCond_Always);
-				ImGui::Begin("Window2##2", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus);
-				ImGui::Dummy(ImVec2(888 * scaleRatioW, 500 * scaleRatioH));
-				for (int i = 0; i < 7; i++)	ImGui::Spacing();
-
-				{
-					std::string *categoryNameArr = nullptr;
-					std::string allCategory[]= { "list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_AR_nor", "list_icon_Changeface_nor",
-						"list_icon_Expressionrecognition_nor",	"list_icon_Musicfilter_nor","list_icon_Bgsegmentation_nor",
-						"list_icon_gesturerecognition_nor","list_icon_Hahamirror_nor",
-						"Animoji",u8"道具贴图",u8"AR面具",u8"换脸",
-						u8"表情识别",u8"音乐滤镜",u8"背景分割",
-						u8"手势识别",u8"哈哈镜"};
-					int amount = 9;
-					categoryNameArr = allCategory;
-					std::string makeupCategory[] = {"list_icon_propmap_collapse_nor",u8"美妆"};
-					if (UIBridge::showMakeUpWindow)
-					{
-						categoryNameArr = makeupCategory;
-						amount =1;
-						ImGui::Dummy(ImVec2(431 * scaleRatioW, 1)); ImGui::SameLine();
-					}
-					
-					for (int i = 0; i < amount; i++)
-					{
-						if (i == 3)continue;//sb product logic
-						if (UIBridge::bundleCategory == i || UIBridge::bundleCategory == BundleCategory::Makeup)
-						{
-							if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_propmap_collapse.png", false)->getTextureID(),
-								Texture::createTextureFromFile("list_icon_propmap_collapse.png", false)->getTextureID(), categoryNameArr[amount + i].c_str()))
-							{
-								UIBridge::bundleCategory = -1;
-								UIBridge::showItemSelectWindow = false;
-							}
-						}
-						else
-						{
-							std::string iconFileName = categoryNameArr[i].substr(0, categoryNameArr[i].find_last_of("_")) + (1 ? "_hover.png" : "_nor.png");
-							if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile(categoryNameArr[i] + ".png", false)->getTextureID(),
-								Texture::createTextureFromFile(iconFileName, false)->getTextureID(), categoryNameArr[amount + i].c_str()))
-							{
-								UIBridge::bundleCategory = i;
-								if (UIBridge::showMakeUpWindow)
-								{
-									UIBridge::bundleCategory = BundleCategory::Makeup;
-								}
-								UIBridge::showItemSelectWindow = true;
-							}
-						}
-						ImGui::SameLine(0.f, 27.f * scaleRatioW);
-					}
-				}
-				ImGui::Dummy(ImVec2(1,1));
-				ImGui::Dummy(ImVec2(321 * scaleRatioW, 1)); ImGui::SameLine();
-				ImGui::PushItemWidth(272 * scaleRatioW);
-				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
-				ImGui::PushStyleVar(ImGuiStyleVar_GrabRounding, 6.0f);
-				ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));				
-				//ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
-				if (ImGui::SliderString("##modeSlider", (char*)u8"AR功能", (char *)u8"美妆", (int*)&UIBridge::showMakeUpWindow, 0, 1))
-				{
-					if (UIBridge::showMakeUpWindow)
-					{
-						UIBridge::showItemSelectWindow = true;
-						UIBridge::bundleCategory = BundleCategory::Makeup;
-					}
-					else
-					{
-						UIBridge::showItemSelectWindow = false;
-						UIBridge::bundleCategory = -1;
-					}
-				}
-				ImGui::PopStyleVar(2);
-				ImGui::PopStyleColor(1);
-				ImGui::PopItemWidth();
-				ImGui::End();
 				
+				ShowCameraChoice(nama.get());
+				
+				//main menu
+				ShowMainMenu(nama.get());	
 			}
-		
-			cv::Mat frameMat = nama->GetFrame();
-            if(frameMat.data)
-            {
-                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(58.f / 255.f, 61.f / 255.f, 82.f / 255.f, 1.f));
-                ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 156 * scaleRatioH), ImGuiCond_Always);
-                ImGui::SetNextWindowSize(ImVec2(888 * scaleRatioW, 500 * scaleRatioH), ImGuiCond_Always);
-                ImGui::Begin("frame##4", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs);
-                float frameWidth = (float)888.f * scaleRatioW;
-                float frameHeight = (float)500.f * scaleRatioH;
-                ImVec2 frameUV_LB = ImVec2(1, 0);
-                ImVec2 frameUV_RT = ImVec2(0, 1);
-                
-                cv::Mat processedFrame = frameMat.clone();
-                //ReleaseMutex(hMutex);
-                cv::cvtColor(frameMat, processedFrame, cv::COLOR_BGR2RGBA);
-                //float tempTime = GetTickCount();
-                if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
-                {
-                    nama->RenderItems(processedFrame.data);
-                    //nama->DrawLandmarks(processedFrame.data);
-                }
-                //printf("RenderItems cost %f \n", GetTickCount()- tempTime);
-                {
-                    cv::Mat bgra[4];
-                    cv::split(processedFrame, bgra);
-                    bgra[3] = 255.0f;
-                    cv::merge(bgra, 4, processedFrame);
-                }
-                
-#ifdef _WIN32
-                if (UIBridge::mNeedIpcWrite)
-                {
-                    cv::cvtColor(processedFrame, processedFrame, cv::COLOR_RGBA2BGRA);
-                    size_t frameSize = ipcBridge.write(MEDIASUBTYPE_RGB32, processedFrame.cols, processedFrame.rows, processedFrame.data);
-                    cv::cvtColor(processedFrame, processedFrame, cv::COLOR_BGRA2RGBA);
-                }
-#endif
-                
-                UIBridge::mFPS = get_fps();
-                //printf("UIBridge::mFPS: %d\n", UIBridge::mFPS);
-                UIBridge::mRenderTime = 1000.f / (float)UIBridge::mFPS;
-                UIBridge::mResolutionWidth = processedFrame.cols;
-                UIBridge::mResolutionHeight = processedFrame.rows;
-                glBindTexture(GL_TEXTURE_2D, textureID);
-                glPixelStorei(GL_UNPACK_ROW_LENGTH, processedFrame.step / processedFrame.elemSize());
-                glPixelStorei(GL_UNPACK_ALIGNMENT, (processedFrame.step & 3) ? 1 : 4);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, processedFrame.cols, processedFrame.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, processedFrame.data);
-                glBindTexture(GL_TEXTURE_2D, 0);
-                float rotio = (float)UIBridge::mResolutionWidth / (float)UIBridge::mResolutionHeight;
-                if (rotio<1.7f)
-                {
-                    float UVSub = (1.0f - 1.0f / 1.776f) / 4.0f;
-                    frameUV_LB = ImVec2(1.f, UVSub);
-                    frameUV_RT = ImVec2(0.f, 1.f-UVSub);
-                }
-                ImGui::Image((void *)(intptr_t)textureID, ImVec2(frameWidth, frameHeight), frameUV_LB, frameUV_RT, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-                ImGui::End();
-                ImGui::PopStyleColor();
-            }
+			UpdateFrame(nama.get());
             
-			
-	
+			//main window
+			ShowMainWindow(nama.get());
+
 			if (showUI)
 			{
-				if (UIBridge::showDegubInfoWindow)
-				{
-					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .78f));
-					ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, 0.f));
-					ImGui::SetNextWindowPos(ImVec2(26 * scaleRatioW, 172 * scaleRatioH), ImGuiCond_Always);
-					ImGui::SetNextWindowSize(ImVec2(154 * scaleRatioW, 98 * scaleRatioH), ImGuiCond_Always);
-					ImGui::Begin("debugInfo##2223", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar /*| ImGuiWindowFlags_NoInputs*/);
-					ImGui::TextColored(ImColor(255, 255, 255, 255), "FPS:%d", UIBridge::mFPS);
-					ImGui::TextColored(ImColor(255, 255, 255, 255), "Resolution:%d*%d", UIBridge::mResolutionWidth, UIBridge::mResolutionHeight);
-					ImGui::TextColored(ImColor(255, 255, 255, 255), "RenderTime:%dms", UIBridge::mRenderTime);
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .0f));
-					if (LayoutButton(ImVec2(100, 0), ImVec2(37, 24), u8"关闭"))
-					{
-						UIBridge::showDegubInfoWindow = false;
-					}
-					ImGui::PopStyleColor();
-					ImGui::PopStyleColor();
-					ImGui::End();
-					ImGui::PopStyleColor();
-				}
-				else
-				{
-					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .78f));
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, .0f));
-					ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(82.f / 255.f, 88.f / 255.f, 112.f / 255.f, 0.f));
-					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-					ImGui::SetNextWindowPos(ImVec2(26 * scaleRatioW, 172 * scaleRatioH), ImGuiCond_Always);
-					ImGui::SetNextWindowSize(ImVec2(120 * scaleRatioW, 40 * scaleRatioH), ImGuiCond_Always);
-					ImGui::Begin("debugInfo##23", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar /*| ImGuiWindowFlags_NoInputs*/);
-					if (LayoutButton(ImVec2(0, 0), ImVec2(100, 25), u8"显示性能参数"))
-					{
-						UIBridge::showDegubInfoWindow = true;
-					}
-					ImGui::End();
-					ImGui::PopStyleVar();
-					ImGui::PopStyleColor();
-					ImGui::PopStyleColor();
-					ImGui::PopStyleColor();
-				}
-			}
-		
-			if (showUI)
-			{
-				//悬浮选择道具
-				if (UIBridge::showItemSelectWindow)
-				{
-					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .0f));
-					ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 584 * scaleRatioH), ImGuiCond_Always);
-					ImGui::SetNextWindowSize(ImVec2(888 * scaleRatioW, 90 * scaleRatioH), ImGuiCond_Always);
-					ImGui::Begin("itemSelect##1563", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
-					for (int i = 0; i < BundleCategory::Count; i++)
-					{
-						if (UIBridge::categoryBundles[i].size() == 0)
-						{
-							if (i>= sizeof(gBundlePath) / sizeof(gBundlePath[0]))
-							{
-								break;
-							}
-							UIBridge::FindAllBundle(gBundlePath[i], UIBridge::categoryBundles[i]);
-						}
-					}
-					
-					for (int i = 0; i < UIBridge::categoryBundles[UIBridge::bundleCategory].size(); i++)
-					{
-						std::string itemName = UIBridge::categoryBundles[UIBridge::bundleCategory][i];
+				ShowDebugMenu();
 
-						std::string iconName = itemName.substr(0, itemName.find_last_of('.'));
-						Texture::SharedPtr tex = Texture::createTextureFromFile(iconName + ".png", false);
-						//找不到图标
-						if (!tex)
-						{
-							tex = Texture::createTextureFromFile("icon_Movebutton_nor.png", false);
-						}
+				/* 绿幕重选输入按钮 */
+				if (UIBridge::showGreenScreen)
+				{
+					GUIGS::ShowReChooseInputSrc();
+				}
+				
 
-						if (ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH)))
-						{
-							if (UIBridge::mCurRenderItemName != itemName)
-							{
-								UIBridge::mCurRenderItemName = itemName;
-								UIBridge::mLastTime = ImGui::GetTime() + 2.0;
-								UIBridge::showItemTipsWindow = false;
-							}
-							else
-							{
-								UIBridge::mCurRenderItemName = "NONE";
-								UIBridge::mLastTime = 0.0;
-								UIBridge::showItemTipsWindow = false;
-								UIBridge::mNeedStopMP3 = true;
-							}
-							nama->SelectBundle(gBundlePath[UIBridge::bundleCategory] + "/" + itemName);
-						}
-						ImGui::SameLine(0.f, 22.f * scaleRatioW);
+				/* 悬浮选择道具 */
+				if (UIBridge::showItemSelectWindow && !UIBridge::m_bSamplingColor)
+				{
+					ShowFloatMenu(nama.get());
+				}
+
+				if (Nama::mEnableAvatar)
+				{
+					ShowAvatarMenu(nama.get());
+
+					/* 显示略影响性能 */
+					if (Gui::mIsOpenMiniWindow)
+					{
+						float frameWidth = (float)DEF_FRAME_SHOW_WIDTH / 4.0f;
+						float frameHeight = (float)DEF_FRAME_SHOW_HEIGHT / 4.0f;
+						ShowAvatarMiniCameraView(m_texIDOrignal, ((float)UIBridge::mResolutionWidth) / UIBridge::mResolutionHeight, ImVec2(frameWidth, frameHeight));
 					}
-					ImGui::End();
-					ImGui::PopStyleColor();
-					ImGui::PopStyleColor();
 				}
 			}
 		}
-		//道具提示
-		if (showUI)		
+		// 選擇了含有中文字符的 png 提示
+		if (UIBridge::m_bLoadWrongNamePNGFile) {
+			string tipStr = UIBridge::m_openLocalFileTip;
+			ShowTipLabel(tipStr);
+			if (UIBridge::mLastTime < ImGui::GetTime())
+			{
+				UIBridge::m_bLoadWrongNamePNGFile = false;
+			}
+		}
+		// AR与美体功能不能共用提示
+		else if(UIBridge::m_bShowingBodyBeauty && !UIBridge::showGreenScreen)
 		{
-			std::string tip;
-			if (doc.HasParseError()) {
-				rapidjson::ParseErrorCode code = doc.GetParseError();
-				printf(" json parse error code: %d\n", code);
-			}
-			else
+			string tipStr = u8"AR功能跟美体模块无法共用";
+			ShowTipLabel(tipStr);
+
+		}else if (showUI)//道具提示
 			{
-				rapidjson::Value::ConstMemberIterator itr = doc.FindMember(UIBridge::mCurRenderItemName.c_str());
-				if (itr != doc.MemberEnd()) {
-					tip = itr->value.GetString();
-					UIBridge::showItemTipsWindow = true;
-				}
+				ShowTip(doc);
 			}
-			if (UIBridge::mLastTime > ImGui::GetTime())
-			{
-				if (UIBridge::showItemTipsWindow)
-				{
-					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .0f));
-					ImGui::SetNextWindowPos(ImVec2(366 * scaleRatioW, 472 * scaleRatioH), ImGuiCond_Always);
-					ImGui::SetNextWindowSize(ImVec2(156 * scaleRatioW, 30 * scaleRatioH), ImGuiCond_Always);
-					ImGui::Begin("itemTips##1563", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
-					ImGui::Dummy(ImVec2(30, 1)); ImGui::SameLine();
-					ImGui::TextColored(ImVec4(0.0, 0.0, 0.0, 1.0), tip.c_str());
-					ImGui::End();
-					ImGui::PopStyleColor();
-					ImGui::PopStyleColor();
-				}
-			}
-			else
-			{
-				UIBridge::showItemTipsWindow = false;
-				UIBridge::mLastTime = 0.0;
-			}
-		}
 		
 		//right window
 		if (showUI)
 		{
 			ImGui::SetNextWindowPos(ImVec2(934 * scaleRatioW, 70 * scaleRatioH), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(416 * scaleRatioW, 750 * scaleRatioH), ImGuiCond_Always);
-			ShowTabs("rightTabs", 0, nama);
+
+			if (UIBridge::showGreenScreen)
+			{
+				GUIGS::ShowRightPanel(nama.get());
+			}
+			else
+			{
+				if (Nama::mEnableAvatar)
+				{
+					ShowAvatarTip();
+				}
+				else
+				{
+					ShowTabs("rightTabs", 0, nama);
+				}
+			}
 		}
-		//ImGui::ShowDemoWindow();
 		
 		// Rendering
 		ImGui::Render();
@@ -1028,13 +1201,30 @@ void Gui::render(Nama::UniquePtr& nama)
 		glfwMakeContextCurrent(window);
 		glfwSwapBuffers(window);
 	}
-}
 
+	auto lastColor = GUIGS::GetCurColorCircle();
+	if (lastColor != g_color1)
+	{
+		nama->AddRecentColor(lastColor);
+	}
+	
+
+	funDestroyTex(m_texIDNamaProcess);
+	funDestroyTex(m_texIDOrignal);
+	funDestroyTex(UIBridge::m_id4ChoiceCam);
+}
+void Gui::ResetPreviewRect(Nama::UniquePtr& nama){
+	GUIGS::previewRect = {DEF_FRAME_SHOW_WIDTH - UIBridge::m_localVideoWidth + DEF_FRAME_SHOW_POS_X,
+		DEF_FRAME_SHOW_POS_Y + DEF_FRAME_SHOW_HEIGHT - UIBridge::m_localVideoHeight,
+		UIBridge::m_localVideoWidth,UIBridge::m_localVideoHeight};
+	mouseControl->ReSet(GUIGS::previewRect);
+	nama->gsPreviewRect = {1-UIBridge::m_localVideoWidth/DEF_FRAME_SHOW_WIDTH,
+		1-UIBridge::m_localVideoHeight/DEF_FRAME_SHOW_HEIGHT,1,1};
+	nama->changeGSPreviewRect(nama->gsPreviewRect);
+}
 void Gui::onWindowResize(uint32_t width, uint32_t height)
 {
 	ImGuiIO& io = ImGui::GetIO();
 	io.DisplaySize.x = (float)width;
 	io.DisplaySize.y = (float)height;
-	//std::cout << width << "," << height << std::endl;
-	//
 }

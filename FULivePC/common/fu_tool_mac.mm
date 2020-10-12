@@ -2,10 +2,10 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <AppKit/AppKit.h>
-
-std::vector<std::string> FuToolMac::getVideoDevices()
+#include "fu_tool.h"
+vector<string> FuToolMac::getVideoDevices()
 {
-    std::vector<std::string> vecRet;
+    vector<string> vecRet;
     
     NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
     for (AVCaptureDevice * device in devices) {
@@ -19,7 +19,19 @@ std::vector<std::string> FuToolMac::getVideoDevices()
 #define MyPicBUNDLE_PATH [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:MyPicBUNDLE_NAME]
 #define MyPicBUNDLE [NSBundle bundleWithPath: MyPicBUNDLE_PATH]
 
-Bitmap * FuToolMac::getBitmapFromAsset(std::string name)
+/*
+  这里的filepath是ResPic.bundle下的相对路径
+ */
+string FuToolMac::GetFileFullPathFromResPicBundle(const char * path)
+{
+    string strFullPath = "";
+    
+    NSString * nstrFullPath = [[MyPicBUNDLE resourcePath] stringByAppendingPathComponent: [NSString stringWithUTF8String:path]];
+    strFullPath = [nstrFullPath UTF8String];
+    
+    return strFullPath;
+}
+Bitmap * FuToolMac::getBitmapFromAsset(string name)
 {
     Bitmap * pBmp = NULL;
     
@@ -87,15 +99,82 @@ Bitmap * FuToolMac::getBitmapFromAsset(std::string name)
 
 
 /*
-  这里的filepath是Resource下的相对路径
+  这里的filepath是Resource.bundle下的相对路径
  */
-std::string FuToolMac::GetFileFullPathFromBundle(const char * path)
+string FuToolMac::GetFileFullPathFromResourceBundle(const char * path)
 {
-    std::string strFullPath = "";
+    string strFullPath = "";
     
     NSString * nstrFullPath = [[MyLibBUNDLE resourcePath] stringByAppendingPathComponent: [NSString stringWithUTF8String:path]];
     strFullPath = [nstrFullPath UTF8String];
     
     return strFullPath;
 }
+
+/// 获取相对于 MyLibBUNDLE_PATH 的 相对路径
+/// @param path 绝对路径
+string FuToolMac::GetRelativePathDependResourceBundle(const char * fullpath)
+{
+	string dependpath = MyLibBUNDLE_PATH.UTF8String;
+	return FuTool::GetRelativePath(fullpath, dependpath);
+}
+
+
+
+//#import "FUObject-C-Interface.h"
+/// 使用OC方法，来选取需要的文件，相对于Qt方法更加稳定
+/// @param dirPath 将要选取文件的文件夹路径
+/// @param types 文件类型 “bundle”等的集合
+/// @param seletedFilesPathsPtr 已经选取的文件路径数组指针
+/// @param allowsMultipleSelection 是否允许多选
+/// @return true 表示选取文件成功，false 表示选取文件失败
+bool FuToolMac::importFilesInObjectC(const char *dirPath,vector<const char *> types,vector<const char *> *seletedFilesPathsPtr,bool allowsMultipleSelection) {
+	// Get the main window for the document.
+	
+	// Create and configure the panel.
+	NSOpenPanel* panel = [NSOpenPanel openPanel];
+	[panel setCanChooseDirectories:NO];
+	[panel setAllowsMultipleSelection:allowsMultipleSelection];
+	[panel setMessage:@"Import one or more files or directories."];
+	NSMutableArray *typeArr = [NSMutableArray array];
+	for(std::vector<const char *>::iterator it = types.begin(); it != types.end(); ++it) {
+		[typeArr addObject:[NSString stringWithUTF8String:*it]];
+	}
+	panel.allowedFileTypes = typeArr;
+	//   Display the panel attached to the document's window.
+	NSString * dirPath_Str = [NSString stringWithUTF8String:dirPath];
+	panel.directoryURL = [NSURL URLWithString: dirPath_Str];
+	if([panel runModal] == NSOKButton){
+		NSArray* urls = [panel URLs];
+		[urls enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+			NSURL * selectedURL = obj;
+			NSString * selectedFile_Str = selectedURL.path;
+			NSString * selectedFile_Str_deal = [selectedFile_Str stringByReplacingOccurrencesOfString:@"file://" withString:@""];  // stringByReplacingOccurrencesOfString:@"%20" withString:@" "];
+			//vector<const char *> seletedFilesPaths = *seletedFilesPathsPtr;
+			const char* selectedFile_Str_char = [selectedFile_Str_deal UTF8String];
+			(*seletedFilesPathsPtr).push_back(selectedFile_Str_char);
+		}];
+		return true;
+	}else{
+		return false;
+	}
+}
+
+
+/// 计算给定字符串的尺寸
+/// @param string 传入的字符数
+/// @param fontSize 字体大小
+FUCGSize FuToolMac::culculatorTextSize(const char *string,float fontSize) { 
+	NSString * ocString = [NSString stringWithUTF8String:string];
+	NSFont *font = [NSFont systemFontOfSize:fontSize];
+	CGSize ocSize = [ocString boundingRectWithSize:CGSizeMake(MAXFLOAT, MAXFLOAT) options:(NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading) attributes: @{NSFontAttributeName:font} context:nil].size;
+	FUCGSize fuCGSize = {ocSize.width,ocSize.height};
+	return fuCGSize;
+}
+float FuToolMac::culculatorTextWidth(const char *string,float fontSize) { 
+	return culculatorTextSize(string, fontSize).width;
+}
+
+
+
 

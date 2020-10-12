@@ -36,6 +36,8 @@ public:
 
 	static Texture::SharedPtr createTextureFromFile(const std::string filename, bool generateMips);
 
+	static Texture::SharedPtr createTextureFromData(uint32_t width, uint32_t height, unsigned char* pixels);
+
 	static bool AddSearchPath(const char *path);
 
 	bool RemoveSearchPath(const char *path);

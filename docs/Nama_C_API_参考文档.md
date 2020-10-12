@@ -2,14 +2,30 @@
 <!--每次更新文档，更新时间-->
 
 级别：Public   
-更新日期：2020-07-29   
-SDK版本: 7.1.0 
+更新日期：2020-09-25   
+SDK版本: 7.2.0 
 
 ------
 ### 最新更新内容：
 
 <!--这个小节写每次最新以及次新的更新记录，时间，更新内容。新增函数，函数接口定义更新-->
+2020-9-24 v7.2.0:
+1. 新增绿幕抠像功能，支持替换图片、视频背景等，详见绿幕抠像功能文档。
+2. 美颜模块新增瘦颧骨、瘦下颌骨功能。
+3. 优化美颜性能以及功耗，优化集成入第三方推流服务时易发热掉帧问题。
+4. 优化手势识别功能的效果以及性能，提升识别稳定性和手势跟随性效果，优化手势识别时cpu占有率。
+5. 优化PC版各个功能性能，帧率提升显著。美发、美体、背景分割帧率提升30%以上，美颜、Animoji、美妆、手势等功能也有10%以上的帧率提升。
+6. 优化包增量，SDK分为lite版，和全功能版本。lite版体积更小，包含人脸相关的功能(海报换脸除外)。
+7. 优化人脸跟踪稳定性，提升贴纸的稳定性。
+8. 提供独立核心算法SDK，接口文档详见算法SDK文档([FUAI_C_API_参考文档.md](./FUAI_C_API_参考文档.md))。
+9. fuGetFaceInfo接口新增三个参数，分别为：舌头方向(tongue_direction)，表情识别(expression_type)，头部旋转信息欧拉角参数(rotation_euler)。
+10. 新增fuOnDeviceLostSafe函数，详见接口文档。
+11. 新增fuSetFaceProcessorDetectMode函数，人脸识别跟踪区分图片模式和视频模式，详见接口文档。
+12. 新增人体动作识别动作定义文档([人体动作识别文档.md](../resource/docs/人体动作识别文档.md))。
+13. 新增ai_hand_processor.bundle，替代ai_gesture.bundle，提供手势识别跟踪能力。
+
 2020-7-29 v7.1.0:
+
 1. 新增美颜锐化功能，见美颜参数文档。
 2. 优化美颜磨皮效果，保留更多的高频细节。
 3. 添加fuHumanProcessorGetFov接口。
@@ -135,7 +151,7 @@ SDK版本: 7.1.0
 
 本文是相芯人脸跟踪及视频特效开发包（以下简称 Nama SDK）的底层接口文档。该文档中的 Nama API 为底层 native 接口，可以直接用于 iOS/Android NDK/Windows/Linux/Mac 上的开发。其中，iOS和Android平台上的开发可以利用SDK的应用层接口（Objective-C/Java），相比本文中的底层接口会更贴近平台相关的开发经验。
 
-SDK相关的所有调用要求在同一个线程中顺序执行，不支持多线程。少数接口可以异步调用（如道具加载），会在备注中特别注明。SDK所有主线程调用的接口需要保持 OpenGL context 一致，否则会引发纹理数据异常。如果需要用到SDK的绘制功能，则主线程的所有调用需要预先初始化OpenGL环境，没有初始化或初始化不正确会导致崩溃。我们对OpenGL的环境要求为 GLES 2.0 以上。具体调用方式，可以参考各平台 demo。
+SDK相关的所有调用要求在同一个线程中顺序执行，不支持多线程。少数接口可以异步调用（如道具加载），会在备注中特别注明。SDK所有主线程调用的接口需要保持 OpenGL context 一致，否则会引发纹理数据异常。如果需要用到SDK的绘制功能，则主线程的所有调用需要预先初始化OpenGL环境，没有初始化或初始化不正确会导致崩溃。我们对移动平台OpenGL的环境要求为 GLES 2.0 以上，PC、MAC端为Opengl 3.2 core profile及以上版本。具体调用方式，可以参考各平台 demo。
 
 底层接口根据作用逻辑归为六类：初始化、加载道具、主运行接口、销毁、功能接口、P2A相关接口。
 
@@ -217,26 +233,27 @@ __备注:__
 算法能力类型，可用于fuSetTrackFaceAItype等接口
 ```c
 typedef enum FUAITYPE{
-	FUAITYPE_BACKGROUNDSEGMENTATION=1<<1,//背景分割,7.0.0可使用FUAITYPE_HUMAN_PROCESSOR_SEGMENTATION
-	FUAITYPE_HAIRSEGMENTATION=1<<2,		//头发分割，7.0.0可使用FUAITYPE_FACEPROCESSOR_HAIRSEGMENTATION
+	FUAITYPE_BACKGROUNDSEGMENTATION=1<<1,//背景分割,7.0.0及以上版本可使用FUAITYPE_HUMAN_PROCESSOR_SEGMENTATION
+	FUAITYPE_HAIRSEGMENTATION=1<<2,		//头发分割，7.0.0及以上版本可使用FUAITYPE_FACEPROCESSOR_HAIRSEGMENTATION
 	FUAITYPE_HANDGESTURE=1<<3,			//手势识别
 	FUAITYPE_TONGUETRACKING=1<<4,		//暂未使用
 	FUAITYPE_FACELANDMARKS75=1<<5,		//废弃
 	FUAITYPE_FACELANDMARKS209=1<<6,		//废弃
-	FUAITYPE_FACELANDMARKS239=1<<7,		//废弃
+	FUAITYPE_FACELANDMARKS239=1<<7,		//高级人脸特征点，7.0.0之后实际为241点
 	FUAITYPE_HUMANPOSE2D=1<<8,			//2D身体点位，7.0.0可使用FUAITYPE_HUMAN_PROCESSOR_2D_DANCE
 	FUAITYPE_BACKGROUNDSEGMENTATION_GREEN=1<<9,//绿幕分割
 	FUAITYPE_FACEPROCESSOR=1<<10，				//人脸算法模块，默认带低质量高性能表情跟踪
 	FUAITYPE_FACEPROCESSOR_FACECAPTURE = 1 << 11,	//高质量表情跟踪
-  	FUAITYPE_FACEPROCESSOR_HAIRSEGMENTATION = 1 << 12,	//头发分割
-  	FUAITYPE_FACEPROCESSOR_HEADSEGMENTATION = 1 << 13,	//头部分割
-  	FUAITYPE_HUMAN_PROCESSOR = 1 << 14,			//人体算法模块
-  	FUAITYPE_HUMAN_PROCESSOR_DETECT = 1 << 15,	//人体检测
-  	FUAITYPE_HUMAN_PROCESSOR_2D_SELFIE = 1 << 16,//2D半身点位
-  	FUAITYPE_HUMAN_PROCESSOR_2D_DANCE = 1 << 17,//2D全身点位
-  	FUAITYPE_HUMAN_PROCESSOR_3D_SELFIE = 1 << 18,//3D半身点位
-  	FUAITYPE_HUMAN_PROCESSOR_3D_DANCE = 1 << 19,//3D全身点位
-  	FUAITYPE_HUMAN_PROCESSOR_SEGMENTATION = 1 << 20 //人体分割
+  	FUAITYPE_FACEPROCESSOR_FACECAPTURE_TONGUETRACKING = 1 << 12,	//高质量表情跟踪模式下额外进行舌头追踪
+  	FUAITYPE_FACEPROCESSOR_HAIRSEGMENTATION = 1 << 13,	//人脸算法模式下进行头发分割
+  	FUAITYPE_FACEPROCESSOR_HEADSEGMENTATION = 1 << 14,	//人脸算法模式下进行头部分割
+  	FUAITYPE_HUMAN_PROCESSOR = 1 << 15,			//人体算法模块
+  	FUAITYPE_HUMAN_PROCESSOR_DETECT = 1 << 16,	//人体算法模式下进行每帧都进行全图人体检测，性能相对较差
+  	FUAITYPE_HUMAN_PROCESSOR_2D_SELFIE = 1 << 17,//人体算法模式下进行2D半身点位
+  	FUAITYPE_HUMAN_PROCESSOR_2D_DANCE = 1 << 18,//人体算法模式下进行2D全身点位
+  	FUAITYPE_HUMAN_PROCESSOR_3D_SELFIE = 1 << 19,//人体算法模式下进行3D半身点位
+  	FUAITYPE_HUMAN_PROCESSOR_3D_DANCE = 1 << 20,//人体算法模式下进行3D全身点位
+  	FUAITYPE_HUMAN_PROCESSOR_SEGMENTATION = 1 << 21 //人体算法模式下进行人体分割
 }FUAITYPE;
 ```
 
@@ -266,21 +283,21 @@ __参数:__
 
 __返回值:__
 
-返回1值代表成功，返回0代表失败。可以通过fuReleaseAIModel释放模型，以及通过fuIsAIModelLoaded查询是否AI能力模型是否已经加载。
+返回1值代表成功，返回0代表失败。可以通过fuReleaseAIModel释放模型，以及通过fuIsAIModelLoaded查询AI能力模型是否已经加载。
 
 __备注:__  
 
 AI能力会随SDK一起发布，存放在assets/AI_Model目录中。
 - ai_bgseg.bundle 为背景分割AI能力模型，对应FUAITYPE_BACKGROUNDSEGMENTATION。7.0.0之后版本，可以统一使用ai_human_processor.bundle对应的全身mask模块。
 - ai_hairseg.bundle 为头发分割AI能力模型，对应FUAITYPE_HAIRSEGMENTATION。7.0.0之后版本，可以统一使用ai_face_processor.bundle对应的头发mask模块。
-- ai_gesture.bundle 为手势识别AI能力模型，对应FUAITYPE_HANDGESTURE。
+- ai_hand_processor.bundle ( ai_gesture.bundle 7.2.0 后废弃） 为手势识别AI能力模型，对应FUAITYPE_HANDGESTURE。 
 - ai_facelandmarks75.bundle 为脸部特征点75点AI能力模型。	//废弃
 - ai_facelandmarks209.bundle 为脸部特征点209点AI能力模型。	//废弃
-- ai_facelandmarks239.bundle 为脸部特征点239点AI能力模型。	//废弃
+- ai_facelandmarks239.bundle 为脸部特征点239点AI能力模型。	//高级人脸特征点，7.0.0之后实际为241点
 - ai_humanpose.bundle 为人体2D点位AI能力模型，对应FUAITYPE_HUMANPOSE2D。7.0.0之后版本，可以统一使用ai_human_processor.bundle对应的人体点位模块。
 - ai_bgseg_green.bundle 为绿幕背景分割AI能力模型，对应FUAITYPE_BACKGROUNDSEGMENTATION_GREEN。
-- ai_face_processor.bundle 为人脸特征点、表情跟踪以及头发mask、头部maskAI能力模型，需要默认加载，对应FUAITYPE_FACEPROCESSOR。
-- ai_human_processor.bundle 为人体算法能力模型，包括人体检测、2D人体关键点（全身、半身）、人体3D骨骼（全身、半身）、人像mask、动作识别等能力，对应FUAITYPE_HUMAN_PROCESSOR。
+- ai_face_processor.bundle 为人脸特征点、表情跟踪以及头发mask、头部maskAI能力模型，需要默认加载，对应FUAITYPE_FACEPROCESSOR。__注意:__ 桌面版(windows pc, mac)请使用ai_face_processor_pc.bundle, ai_face_processor.bundle 和 ai_face_processor_pc.bundle 功能相同，针对pc进行性能优化版本。。
+- ai_human_processor.bundle 为人体算法能力模型，包括人体检测、2D人体关键点（全身、半身）、人体3D骨骼（全身、半身）、人像mask、动作识别等能力，对应FUAITYPE_HUMAN_PROCESSOR。__注意:__ 桌面版(windows pc, mac)请使用ai_human_processor_pc.bundle, ai_human_processor_pc.bundle 和 ai_human_processor.bundle 功能相同，针对pc进行性能优化版本。
 
 ##### fuReleaseAIModel 函数
 当不需要是使用特定的AI能力时，可以释放其资源，节省内存空间。1为已释放，0为未释放。
@@ -463,10 +480,10 @@ __返回值:__
 
 __备注:__
 
-设定变量为字符串时，要求字符串以0结尾。
+设定变量为字符串时，要求字符串以‘\0’结尾。 以上接口均支持异步调用 
 
 ------
-##### fuItemGetParam 函数
+##### fuItemGetParamd 函数
 获取道具中变量的值。可以支持的道具包变量名、含义、及取值范围需要参考道具的文档。
 
 ```C
@@ -551,7 +568,7 @@ __备注:__
 
 即使在非纹理模式下，函数仍会返回输出图像的纹理ID。虽然该模式下输入输出都是内存数组，但是绘制工作仍然是通过GPU完成的，因此该输出图像的纹理ID同样存在。输出的OpenGL纹理为SDK运行时在当前OpenGL context中创建的纹理，其ID应与输入ID不同。输出后使用该纹理时需要确保OpenGL context保持一致。
 
-该绘制接口需要OpenGL环境，环境异常会导致崩溃。
+**该绘制接口需要OpenGL环境，环境异常会导致崩溃**。
 
 ------
 ##### fuRenderItemsEx 函数
@@ -594,7 +611,7 @@ __备注:__
 
 即使在非纹理模式下，函数仍会返回输出图像的纹理ID。虽然输出的图像可能是多种可选格式，但是绘制工作总是通过GPU完成，因此输出图像的纹理ID始终存在。输出的OpenGL纹理为SDK运行时在当前OpenGL context中创建的纹理，其ID应与输入ID不同。输出后使用该纹理时需要确保OpenGL context保持一致。  
 
-该绘制接口需要OpenGL环境，环境异常会导致崩溃。
+**该绘制接口需要OpenGL环境，环境异常会导致崩溃**。
 
 ------
 ##### fuRenderItemsEx2 函数
@@ -653,11 +670,11 @@ __备注:__
 
 即使在非纹理模式下，函数仍会返回输出图像的纹理ID。虽然输出的图像可能是多种可选格式，但是绘制工作总是通过GPU完成，因此输出图像的纹理ID始终存在。输出的OpenGL纹理为SDK运行时在当前OpenGL context中创建的纹理，其ID应与输入ID不同。输出后使用该纹理时需要确保OpenGL context保持一致。
 
-该绘制接口需要OpenGL环境，环境异常会导致崩溃。
+**该绘制接口需要OpenGL环境，环境异常会导致崩溃**。
 
 ------
 ##### fuBeautifyImage 函数
-将输入的图像数据，送入SDK流水线进行全图美化，并输出处理之后的图像数据。该接口仅执行图像层面的美化处理（包括滤镜、美肤），不执行人脸跟踪及所有人脸相关的操作（如美型）。由于功能集中，相比```fuRenderItemsEx``` 接口执行美颜道具，该接口所需计算更少，执行效率更高。
+将输入的图像数据，送入SDK流水线进行全图美化，并输出处理之后的图像数据。该接口只执行美颜相关功能。由于功能集中，相比```fuRenderItemsEx``` 接口执行美颜道具，该接口所需计算更少，执行效率更高。
 
 ```C
 int fuBeautifyImage(
@@ -694,7 +711,7 @@ __备注:__
 
 该接口正常生效需要传入的道具中必须包含美颜道具（随SDK分发，文件名通常为```face_beautification.bundle```）。传入道具中所有非美颜道具不会生效，也不会占用计算资源。
 
-该绘制接口需要OpenGL环境，环境异常会导致崩溃。
+**该绘制接口需要OpenGL环境，环境异常会导致崩溃**。
 
 ------
 ##### fuRenderBundles 函数
@@ -735,7 +752,7 @@ __备注:__
 
 即使在非纹理模式下，函数仍会返回输出图像的纹理ID。虽然输出的图像可能是多种可选格式，但是绘制工作总是通过GPU完成，因此输出图像的纹理ID始终存在。输出的OpenGL纹理为SDK运行时在当前OpenGL context中创建的纹理，其ID应与输入ID不同。输出后使用该纹理时需要确保OpenGL context保持一致。  
 
-该绘制接口需要OpenGL环境，环境异常会导致崩溃。
+**该绘制接口需要OpenGL环境，环境异常会导致崩溃**。
 
 ------
 ##### fuRenderBundlesEx 函数
@@ -794,7 +811,7 @@ __备注:__
 
 即使在非纹理模式下，函数仍会返回输出图像的纹理ID。虽然输出的图像可能是多种可选格式，但是绘制工作总是通过GPU完成，因此输出图像的纹理ID始终存在。输出的OpenGL纹理为SDK运行时在当前OpenGL context中创建的纹理，其ID应与输入ID不同。输出后使用该纹理时需要确保OpenGL context保持一致。
 
-该绘制接口需要OpenGL环境，环境异常会导致崩溃。
+**该绘制接口需要OpenGL环境，环境异常会导致崩溃**。
 
 ------
 ##### fuRenderBundlesSplitView 函数
@@ -856,7 +873,7 @@ __备注:__
 
 即使在非纹理模式下，函数仍会返回输出图像的纹理ID。虽然输出的图像可能是多种可选格式，但是绘制工作总是通过GPU完成，因此输出图像的纹理ID始终存在。输出的OpenGL纹理为SDK运行时在当前OpenGL context中创建的纹理，其ID应与输入ID不同。输出后使用该纹理时需要确保OpenGL context保持一致。
 
-该绘制接口需要OpenGL环境，环境异常会导致崩溃。
+**该绘制接口需要OpenGL环境，环境异常会导致崩溃**。
 
 ------
 ##### fuTrackFace 函数
@@ -882,9 +899,9 @@ __返回值:__
 
 __备注:__  
 
-该函数仅支持部分输入图像格式，包括 RGBA_BUFFER，BGRA_BUFFER，NV12 BUFFER，NV21 BUFFER。
+该函数仅支持部分输入图像格式，包括 RGBA_BUFFER，BGRA_BUFFER，NV12_BUFFER，NV21_BUFFER。
 
-该接口不需要绘制环境，但仍需要在SDK主线程中运行。
+该接口不需要绘制环境，可以任意线程调用
 
 ------
 ##### fuTrackFaceWithTongue 函数
@@ -948,11 +965,11 @@ void fuDestroyAllItems();
 
 __备注:__  
 
-该函数会即刻释放系统所占用的资源。但不会破坏 ```fuSetup``` 的系统初始化信息，应用临时挂起到后台时可以调用该函数释放资源，再次激活时无需重新初始化系统。
+该函数必须在有context的情况下调用,该函数会即刻释放系统所占用的资源。但不会破坏 ```fuSetup``` 的系统初始化信息，应用临时挂起到后台时可以调用该函数释放资源，再次激活时无需重新初始化系统。  
 
 ------
 ##### fuOnDeviceLost 函数
-特殊函数，当 OpenGL context 被外部释放/破坏时调用，用于重置系统的 GL 状态。
+特殊函数，当程序退出或OpenGL context准备销毁时，调用该函数，会进行资源清理和回收，所有系统占用的内存资源会被释放，包括GL的GPU资源以及内存。
 
 ```C
 void fuOnDeviceLost();
@@ -960,11 +977,26 @@ void fuOnDeviceLost();
 
 __备注:__  
 
-该函数仅在无法在原 OpenGL context 内正确清理资源的情况下调用。调用该函数时，会尝试进行资源清理和回收，所有系统占用的内存资源会被释放，但由于 context 发生变化，OpenGL 资源相关的内存可能会发生泄露。
+该函数必须在有context的情况下调用，且context必须和在fuRender开头的系列渲染函数的context保持一致，否则可能由于context 发生变化，OpenGL 资源相关的内存可能会发生泄露。
+
+------
+##### fuOnDeviceLostSafe 函数
+**特殊函数**，当客户端调用代码存在逻辑BUG时，可能会导致OpenGL Context状态异常，此时fuOnDeviceLost无法成功释放GPU资源进而导致应用崩溃，若无法有效定位客户端BUG，可以使用本函数替代。本函数只负责释放CPU资源，对GPU资源不进行销毁操作，借由外部context的销毁统一维护。
+
+```C
+void fuOnDeviceLostSafe();
+```
+
+__备注:__  
+
+1. 请优先使用fuOndeviceLost函数，仅当OpenGL环境异常时使用本函数；
+
+2. 不恰当的调用会造成OpenGL 资源相关的内存发生泄露，不恰当调用包括：
+   1. 在同一个OpenGL Context下，重复调用本函数；
 
 ------
 ##### fuDestroyLibData 函数
-特殊函数，当不再需要Nama SDK时，可以释放由 ```fuSetup```初始化所分配的人脸跟踪模块的内存，约30M左右。调用后，人脸跟踪以及道具绘制功能将失效， ```fuRenderItemEx ```，```fuTrackFace```等函数将失败。如需使用，需要重新调用 ```fuSetup```进行初始化。
+特殊函数，当不再需要Nama SDK时，可以释放由 ```fuSetup```初始化所分配的相关资源。调用后，人脸跟踪以及道具绘制功能将失效， ```fuRenderItemEx ```，```fuTrackFace```等函数将失败。如需使用，需要重新调用 ```fuSetup```进行初始化。
 
 ```C
 void fuDestroyLibData();
@@ -986,6 +1018,10 @@ __参数:__
 *p_items [in]*: 需要绑定的资源道具列表对应的标识符数组。标识符应为调用 ```fuCreateItemFromPackage``` 函数的返回值，并且道具没有被销毁。
 *n_items [in]*: 需要绑定的资源道具数量
 
+__返回值:__  
+
+成功完成绑定的道具数量。
+
 ------
 ##### fuUnbindItems 函数
 将资源道具从controller道具上解绑
@@ -998,6 +1034,10 @@ __参数:__
 *obj_handle [in]*：目标道具的标识符，目标道具将作为controller，管理和使用资源道具，目标道具需要有OnUnbind函数。该标识符应为调用 ```fuCreateItemFromPackage``` 函数的返回值，并且道具没有被销毁。
 *p_items [in]*: 需要解绑的资源道具列表对应的标识符数组。
 *n_items [in]*: 需要解绑的资源道具数量
+
+__返回值:__  
+
+成功完成解绑的道具数量。
 
 __备注:__  
 
@@ -1014,6 +1054,20 @@ void fuOnCameraChange();
 __备注:__  
 
 在其他人脸信息发生残留的情景下，也可以调用该函数来清除人脸信息残留。或相机切换时，触发重置人脸跟踪模块。
+
+------
+
+##### fuGetOpenGLSupported函数
+
+判定当前的GL环境是否支持，1为支持，0为不支持  
+
+```C
+int fuGetOpenGLSupported();
+```
+
+__备注:__  
+
+不支持时可能无法正常渲染。
 
 ------
 
@@ -1126,8 +1180,34 @@ __备注:__
 | armesh_uvs     | armesh_vertex_num * 2   |float| armesh三维网格顶点纹理数据       | armesh   |
 | armesh_faces     | armesh_face_num * 3   |int| armesh三维网格三角片数据       | armesh  |
 | armesh_trans_mat     | 4x4 |float| armesh 的transformation。 __注意:__ 1. 获取'armesh_trans_mat'前需要先获取对应脸的'armesh_vertices'。2. 该trans_mat,相比使用'position'和'rotation'重算的transform更加准确，配合armesh，更好贴合人脸。 | armesh  |
+| tongue_direction | 1 |int| 舌头方向，数值对应 FUAITONGUETYPE 定义，见下表。 | Avatar |
+| expression_type | 1 |int| 表情识别，数值对应 FUAIEXPRESSIONTYPE定义，见下表。 | Avatar |
+| rotation_euler | 3 |float| 返回头部旋转欧拉角，分别为roll、pitch、yaw | 默认 |
 *注：旋转四元数转换为欧拉角可以参考 [该网页](https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles)。
 
+```C
+typedef enum FUAITONGUETYPE {
+  FUAITONGUE_UNKNOWN = 0,
+  FUAITONGUE_UP = 1 << 1,
+  FUAITONGUE_DOWN = 1 << 2,
+  FUAITONGUE_LEFT = 1 << 3,
+  FUAITONGUE_RIGHT = 1 << 4,
+  FUAITONGUE_LEFT_UP = 1 << 5,
+  FUAITONGUE_LEFT_DOWN = 1 << 6,
+  FUAITONGUE_RIGHT_UP = 1 << 7,
+  FUAITONGUE_RIGHT_DOWN = 1 << 8,
+} FUAITONGUETYPE;
+```
+
+```C
+typedef enum FUAIEXPRESSIONTYPE {
+  FUAIEXPRESSION_UNKNOWN = 0,
+  FUAIEXPRESSION_SMILE = 1 << 1,
+  FUAIEXPRESSION_MOUTH_OPEN = 1 << 2,
+  FUAIEXPRESSION_EYE_BLINK = 1 << 3,
+  FUAIEXPRESSION_POUT = 1 << 4,
+} FUAIEXPRESSIONTYPE;
+```
 获取三维网格代码参考
 ```C
 	int vercnt = 0;
@@ -1507,50 +1587,45 @@ __参数:__
 *out_ptr2 [out]*：翻转后的图像的内存数组。
 
 ------
-
-#### 2.6 功能接口-效果
-
-##### fuSetExpressionCalibration 函数
-设置人脸表情校准功能。该功能的目的是使表情识别模块可以更加适应不同人的人脸特征，以实现更加准确可控的表情跟踪效果。
-
-该功能分为两种模式，主动校准 和 被动校准。
-- 主动校准：该种模式下系统会进行快速集中的表情校准，一般为初次识别到人脸之后的2-3秒钟。在该段时间内，需要用户尽量保持无表情状态，该过程结束后再开始使用。该过程的开始和结束可以通过 ```fuGetFaceInfo``` 接口获取参数 ```is_calibrating```。
-- 被动校准：该种模式下会在整个用户使用过程中逐渐进行表情校准，用户对该过程没有明显感觉。该种校准的强度比主动校准较弱。
-
-默认状态为开启被动校准。
+##### fuGetModuleCode 函数
+fuGetModuleCode 获取证书的module code。module code用于识别识别证书是否具有某些特定的功能。该接口一般情况下不需要使用，需要使用时请联系技术支持。  
 ```C
-void fuSetExpressionCalibration(int mode);
+/**
+ \brief Get certificate permission code for modules
+ \param i - get i-th code, currently available for 0 and 1
+ \return The permission code
+*/
+FUNAMA_API int fuGetModuleCode(int i);
 ```
 __参数:__  
+*i [in]*：第i个module code。 
 
-*mode [in]*：表情校准模式，0为关闭表情校准，1为主动校准，2为被动校准。
+__返回值:__  
+module code，为各个功能的bitmask，详询技术支持。
 
-__备注:__  
+------
+##### fuSetFaceProcessorDetectMode 函数
+fuSetFaceProcessorDetectMode 设置人脸识别模式，SDK人脸识别模式分为图片模式和视频模式。图片模式更为及时，视频模式性能更优。  
+```C
+/**
+ \brief set faceprocessor's face detect mode. when use 1 for video mode, face 
+ detect strategy is opimized for no face scenario. In image process scenario,
+ you should set detect mode into 0 image mode.
+ \param mode, 0 for image, 1 for video, 1 by default
+ */
+FUNAMA_API int fuSetFaceProcessorDetectMode(int mode);
+```
+__参数:__  
+*mode [in]*：0为图像模式，1为视频模式。 
 
-当利用主处理接口处理静态图片时，由于需要针对同一数据重复调用，需要将表情校准功能关闭。
+__返回值:__  
+1为成功，0为失败。
 
 ------
 
-##### fuSetFocalLengthScale 函数
-修改系统焦距（效果等价于focal length, 或FOV），影响三维跟踪、AR效果的透视效果。
-参数为一个比例系数，焦距变大会带来更小的透视畸变。
-```C
-/**
-\brief Scale the rendering perspectivity (focal length, or FOV)
-	Larger scale means less projection distortion
-	This scale should better be tuned offline, and set it only once in runtime
-\param scale - default is 1.f, keep perspectivity invariant
-	<= 0.f would be treated as illegal input and discard	
-*/
-void fuSetFocalLengthScale(float scale);
-```
-__参数:__  
+#### 2.6 功能接口-效果
 
-*scale [in]*：焦距调整的比例系数，1.0为默认值。建议取值范围为 0.1 ~ 2.0。
 
-__备注:__  
-
-系数小于等于0为无效输入。
 
 ------
 #### 2.7 功能接口-算法接口
@@ -1694,7 +1769,7 @@ FUNAMA_API const float* fuHumanProcessorGetResultRect(int index);
 __参数:__  
 
 *index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。
-__返回值:__  当前跟踪到人体的人体框，4个float大小。
+__返回值:__  当前跟踪到人体的人体框，4个float大小：[xmin, ymin, xmax, ymax]。
 
 __备注:__  
 无
@@ -1745,7 +1820,7 @@ __备注:__
  \brief set ai model HumanProcessor's tracking fov, use to 3d joint projection.
  */
 FUNAMA_API void fuHumanProcessorSetFov(float fov);
-```  
+```
 __参数:__  
 *fov [in]*：设置HumanProcessor人体算法模块跟踪人体3D关键点时使用的fov，角度制。  
 
@@ -1863,10 +1938,10 @@ __参数:__
 *index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。  
 *mask_width [out]*：返回的数据宽度。  
 *mask_height [out]*：返回的数据高度。  
-__返回值:__  当前HumanProcessor人体算法模块全身mask，长度由mask_width X mask_height决定。
+__返回值:__  当前HumanProcessor人体算法模块全身mask，长度由mask_width X mask_height决定；每个像素都是0到1的一个概率值，表示该像素属于人体的概率。
 
 __备注:__  
-无
+底层算法返回的mask_width,height与原图未必一致，为了性能，有可能经过缩放。外部使用时，需要使将图像resize到和原图一致。
 
 ------
 ##### fuFaceProcessorGetResultHairMask  函数
@@ -1888,10 +1963,10 @@ __参数:__
 *index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。  
 *mask_width [out]*：返回的数据宽度。  
 *mask_height [out]*：返回的数据高度。  
-__返回值:__  当前HumanProcessor人体算法模块头发mask，长度由mask_width X mask_height决定。
+__返回值:__  当前HumanProcessor人体算法模块头发mask，长度由mask_width X mask_height决定；每个像素都是0到1的一个概率值，表示该像素属于头发的概率。
 
 __备注:__  
-无
+底层算法返回的mask_width,height与原图未必一致，为了性能，有可能经过缩放。外部使用时，需要使将图像resize到和原图一致。
 
 ------
 ##### fuFaceProcessorGetResultHeadMask  函数
@@ -1913,10 +1988,10 @@ __参数:__
 *index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。  
 *mask_width [out]*：返回的数据宽度。  
 *mask_height [out]*：返回的数据高度。  
-__返回值:__  当前HumanProcessor人体算法模块头部mask，长度由mask_width X mask_height决定。
+__返回值:__  当前HumanProcessor人体算法模块头部mask，长度由mask_width X mask_height决定；每个像素都是0到1的一个概率值，表示该像素属于人头的概率。
 
 __备注:__  
-无
+底层算法返回的mask_width,height与原图未必一致，为了性能，有可能经过缩放。外部使用时，需要使将图像resize到和原图一致。
 
 ------
 ##### fuHumanProcessorGetResultActionType  函数
@@ -1956,7 +2031,7 @@ __备注:__
 
 ------
 ##### fuHandDetectorGetResultNumHands  函数
-获取HandGesture手势算法模块跟踪手势数量。需加载ai_gesture.bundle
+获取HandGesture手势算法模块跟踪手势数量。需加载ai_hand_processor.bundle
 ```C
 /**
  \brief get hand detector's tracking results.
@@ -1984,7 +2059,7 @@ FUNAMA_API const float* fuHandDetectorGetResultHandRect(int index);
 ```
 __参数:__  
 *index [in]*：第index个手势，从0开始，不超过fuHandDetectorGetResultNumHands结果。  
-__返回值:__ 获取HandGesture手势算法模块跟踪手势框，长度为4。
+__返回值:__ 获取HandGesture手势算法模块跟踪手势框，长度为4：[xmin,ymin,xmax,ymax]。
 
 __备注:__  
 无
@@ -2252,6 +2327,61 @@ __备注:__
 一般来说，iOS的原生相机数据是竖屏的，不需要进行该设置。Android 平台的原生相机数据为横屏，需要进行该设置加速首次识别。根据经验，Android 前置摄像头一般设置参数 1，后置摄像头一般设置参数 3。部分手机存在例外，自动计算的代码可以参考 fuLiveDemo。
 
 ------
+##### fuSetExpressionCalibration 函数
+
+__注意__: 7.0.0版本该接口已废弃。
+
+设置人脸表情校准功能。该功能的目的是使表情识别模块可以更加适应不同人的人脸特征，以实现更加准确可控的表情跟踪效果。
+
+该功能分为两种模式，主动校准 和 被动校准。
+
+- 主动校准：该种模式下系统会进行快速集中的表情校准，一般为初次识别到人脸之后的2-3秒钟。在该段时间内，需要用户尽量保持无表情状态，该过程结束后再开始使用。该过程的开始和结束可以通过 ```fuGetFaceInfo``` 接口获取参数 ```is_calibrating```。
+- 被动校准：该种模式下会在整个用户使用过程中逐渐进行表情校准，用户对该过程没有明显感觉。该种校准的强度比主动校准较弱。
+
+默认状态为开启被动校准。
+
+```C
+void fuSetExpressionCalibration(int mode);
+```
+
+__参数:__  
+
+*mode [in]*：表情校准模式，0为关闭表情校准，1为主动校准，2为被动校准。
+
+__备注:__  
+
+当利用主处理接口处理静态图片时，由于需要针对同一数据重复调用，需要将表情校准功能关闭。
+
+------
+
+##### fuSetFocalLengthScale 函数
+
+__注意__: 7.0.0版本该接口已废弃。
+
+修改系统焦距（效果等价于focal length, 或FOV），影响三维跟踪、AR效果的透视效果。
+参数为一个比例系数，焦距变大会带来更小的透视畸变。
+```C
+/**
+\brief Scale the rendering perspectivity (focal length, or FOV)
+	Larger scale means less projection distortion
+	This scale should better be tuned offline, and set it only once in runtime
+\param scale - default is 1.f, keep perspectivity invariant
+	<= 0.f would be treated as illegal input and discard	
+*/
+void fuSetFocalLengthScale(float scale);
+```
+__参数:__  
+
+*scale [in]*：焦距调整的比例系数，1.0为默认值。建议取值范围为 0.1 ~ 2.0。
+
+__备注:__  
+
+系数小于等于0为无效输入。
+
+------
+
+##### 
+
 ### 3. 输入输出格式列表
 
 ##### RGBA 数组
@@ -2341,7 +2471,7 @@ FU_FORMAT_NV21_BUFFER
 
 __数据内容:__
 
-连续内存，前一段是 Y 数据，长度为 ```w*h```，后一段是 UV 数据，长度为 ```2*((w+1)>>1)```（分辨率是Y的一半，但包含UV两个通道）。两段数据在内存中连续存放。
+连续内存，前一段是 Y 数据，长度为 ```w*h```，后一段是 UV 数据，长度为```（w*h + 3）>>1 ``` ，stride为```2*((w+1)>>1)```（分辨率是Y的一半，但包含UV两个通道）。两段数据在内存中连续存放。
 
 __输入输出支持:__
 
@@ -2399,7 +2529,7 @@ FU_FORMAT_I420_BUFFER
 
 __数据内容:__
 
-连续内存，第一段是 Y 数据，长度为 ```w*h```，第二段是 U 数据，长度为 ```((w+1)>>1)```，第三段是 V 数据，长度为 ```((w+1)>>1)```（后两个通道分辨率是Y的一半）。三段数据在内存中连续存放。
+连续内存，第一段是 Y 数据，长度为 ```w*h```，stride为 `w `，第二段是 U 数据，长度为  ```（w*h + 3）>>2 ```，stride为 ```((w+1)>>1)```，第三段是 V 数据，长度为 ```（w*h + 3）>>2 ```，stride为 ```((w+1)>>1)```（后两个通道分辨率是Y的一半）。三段数据在内存中连续存放。
 
 __输入输出支持:__
 

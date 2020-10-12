@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _CAMERA_H_
+#define _CAMERA_H_
 
 #include <stack>
 #include <opencv2/core.hpp>
@@ -27,11 +28,24 @@
 #define loge    printf
 #define logi    printf
 #endif
+
+using namespace std;
 enum CAPTURE_TYPE
 {
+	CAPTURE_NONE,
 	CAPTURE_CAMERA,
 	CAPTURE_FILE
 };
+
+typedef enum {
+	STATUS_UN_INIT,
+	STATUS_NAMA_UN_INIT,
+	STATUS_INIT,
+	STATUS_PLAYING,
+	STATUS_STOP,
+	STATUS_NO_CAMERA,
+	STATUS_ERROR
+}PlayStatus;
 
 class CCameraDS
 {
@@ -42,18 +56,36 @@ public:
 
 	void play();
 	void stop();
-
+#if 0
+	void savePngFilesToLocalDir(string dirPath,cv::Mat frame);
+#endif
+	void InitCameraFile(int, int, std::string, bool bLoop = true);
 	void initCamera(int,int,int);
 	void closeCamera();
+	void clearLastFrame();
+	void setDefaultFrame();
 	void connectCamera();
-	bool openFileDlg();
 	bool isPlaying();
 	void restartCamera();
+
+	void calculateRect();
+
 	bool isInit() { return m_isCameraInited; }
 	int getStatus() { return status; }
-	void setFilePath(std::string path);
-	void setCaptureType(int _type);
+	bool IsLoop()
+	{
+		return m_bloop;
+	}
+
+
+	std::string getFilePath()
+	{
+		return m_filepath;
+	}
+
+	int getCaptureType();
 	void setCaptureCameraID(int _id);
+	int getCaptureCameraID();
 	cv::Mat getFrame();
     
 #ifdef _WIN32
@@ -68,27 +100,21 @@ public:
 
 	std::vector<std::string> deviceList;
 	cv::Size getCameraResolution();
-	void QueryFrame();
+
 private:
 	float w, h;
-	typedef enum {
-		STATUS_UN_INIT,
-		STATUS_NAMA_UN_INIT,
-		STATUS_INIT,
-		STATUS_PLAYING,
-		STATUS_STOP,
-		STATUS_NO_CAMERA,
-		STATUS_ERROR
-	}PlayStatus;
 	
 	std::string m_filepath;
 	PlayStatus status;
 	bool m_isCameraInited = false;
-	int m_capture_type;
-	int m_capture_camera_id;
-	int frame_id;
-	int frameCount;
+	int m_capture_type = CAPTURE_NONE;
+	int m_capture_camera_id = -1;
+	bool m_bloop = false;
+
 public:
+	int localPNGNum = 0;
+	int frameCount;
+	int frame_id = 0;
 	int rs_width;
 	int rs_height;
 	bool useDefaultFrame;
@@ -103,4 +129,6 @@ public:
     pthread_t m_pid;
 #endif
 };
+
+#endif
 

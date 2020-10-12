@@ -1,10 +1,25 @@
 # Demo运行说明文档-Windows 
 - 级别：Public
-  更新日期：2020-07-29
+  更新日期：2020-09-24
   
   ------
   
-  **FaceUnity Nama SDK v7.1.0 (2020-07-29)**
+  **FaceUnity Nama SDK v7.2.0 (2020-09-24)**
+
+2020-9-24 v7.2.0:
+1. 新增绿幕抠像功能，支持替换图片、视频背景等，详见绿幕抠像功能文档。
+2. 美颜模块新增瘦颧骨、瘦下颌骨功能。
+3. 优化美颜性能以及功耗，优化集成入第三方推流服务时易发热掉帧问题。
+4. 优化手势识别功能的效果以及性能，提升识别稳定性和手势跟随性效果，优化手势识别时cpu占有率。
+5. 优化PC版各个功能性能，帧率提升显著。美发、美体、背景分割帧率提升30%以上，美颜、Animoji、美妆、手势等功能也有10%以上的帧率提升。
+6. 优化包增量，SDK分为lite版，和全功能版本。lite版体积更小，包含人脸相关的功能(海报换脸除外)。
+7. 优化人脸跟踪稳定性，提升贴纸的稳定性。
+8. 提供独立核心算法SDK，接口文档详见算法SDK文档([FUAI_C_API_参考文档.md](./FUAI_C_API_参考文档.md))。
+9. fuGetFaceInfo接口新增三个参数，分别为：舌头方向(tongue_direction)，表情识别(expression_type)，头部旋转信息欧拉角参数(rotation_euler)。
+10. 新增fuOnDeviceLostSafe函数，详见接口文档。
+11. 新增fuSetFaceProcessorDetectMode函数，人脸识别跟踪区分图片模式和视频模式，详见接口文档。
+12. 新增人体动作识别动作定义文档([人体动作识别文档.md](../resource/docs/人体动作识别文档.md))。
+13. 新增ai_hand_processor.bundle，替代ai_gesture.bundle，提供手势识别跟踪能力。
 
 2020-7-29 v7.1.0:
 1. 新增美颜锐化功能，见美颜参数文档。
@@ -97,26 +112,22 @@
   +assets 			  	//资源目录
   +FULivePC				//示例代码目录
     +GUI				//GUI文件目录
-    +ipc				//ipc文件目录
     +rapidjson			 //json库文件目录
     +Sound				 //声音库文件目录
-    -Camera.cpp：相机类，负责从摄像头内读取图像帧
-    -Camera.h：相机类的头文件
-    -Config.h：配置文件，记录道具文件的加载路径
-    -FULivePC.cpp：程序入口
-	-imgui.ini：GUI的初始化配置文件
-	-Nama.cpp：负责展示如何调用Nama SDK的接口
-	-Nama.h：展示如何调用Nama SDK的接口类的头文件
-	-UIBridge.h：负责展示虚拟摄像头的接入与使用
-	-ReadMe.txt：简单的接入说明
+    -Camera.cpp：       	相机类，负责从摄像头内读取图像帧
+    -Camera.h：			相机类的头文件
+    -Config.h：			配置文件，记录道具文件的加载路径
+    -FULivePC.cpp：		程序入口
+	-Nama.cpp：			负责展示如何调用Nama SDK的接口
+	-Nama.h：			展示如何调用Nama SDK的接口类的头文件
+	-UIBridge.h：		负责展示虚拟摄像头的接入与使用
+	-ReadMe.txt：		简单的接入说明
   +docs					//文档目录
-  +ThridParty			//第三方库目录
+  +ThirdParty			//第三方库目录
   +include				//SDK包含目录
-  +Win32   				//32位SDK目录
-  +Win64   				//64位SDK目录
   -readme.md			//工程总文档
-  run_cmake.bat   //CMAKE 生成VS工程的脚本，可自行修改VS版本（>=2015）,以及位数
-  run_cmake.sh    //CMAKE 生成XCODE版本的脚本
+  run_cmake.bat   		//CMAKE 生成VS工程的脚本，可自行修改VS版本（>=2015）,以及位数
+  run_cmake.sh    		//CMAKE 生成XCODE版本的脚本
 ```
 
 ------
@@ -129,11 +140,12 @@ Windows7及以上
 ```
 ##### 3.1.2 开发环境
 ```
-vs2015
+vs2015/vs2017/vs2019
 ```
 
 #### 3.2 准备工作 
-- [下载demo代码](<https://github.com/Faceunity/FULivePC> )
+- [下载demo代码 github](<https://github.com/Faceunity/FULivePC> )
+- [下载demo代码 码云](<https://gitee.com/hangzhou_xiangxin_1/FULivePC> )
 - 获取证书:
   1. 拨打电话 **0571-88069272** 
   2. 发送邮件至 **marketing@faceunity.com** 进行咨询。  
@@ -143,12 +155,15 @@ vs2015
 
 #### 3.4 编译运行
 
-- 安装最新的CMAKE,点击生成脚本，在build目录中打开工程，编译
+- 安装CMake 3.10及以上版本, 点击run_cmake.bat 生成脚本，在build目录中打开工程，编译。选择FULivePC为启动项目
+- 修改VS版本 set CMAKE_GENERATOR=Visual Studio [1] [2]。 [1],[2]的组合根据VS版本可以是 16 2019、
+15 2017、14 2015
+- 当时x64的时候 在后面加上 Win64，例如 set CMAKE_GENERATOR=Visual Studio 16 2019 Win64
 
   ![](./imgs/img1.png)
 
 ------
 ### 4. 常见问题 
-- 推荐的批处理脚本中配置visual studio版本可以有 Visual Studio 15 2017    以及 Visual Studio 14 2015。
-- 所使用的显卡的年代过于久远可能不支持Opengl 3.2 core profile ，会提示错误并退出
-- **因Github不支持上传100MB以上的文件，FULivePC\bin\win\x64\Debug\opencv_world400d.rar是经过压缩的dll，使用时请自行解压！**
+- 所使用的显卡的年代过于久远可能不支持Opengl 3.2 core profile及以上版本 ，会提示错误并退出
+- **因Github不支持上传100MB以上的文件，FULivePC\bin\win\x64\Debug\opencv_world400d.rar是经过压缩的dll，run_cmake.bat会自动解压，用户也可手动自行解压！**
+

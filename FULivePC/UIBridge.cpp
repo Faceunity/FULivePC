@@ -4,7 +4,7 @@
 #include <windows.h>
 #include "limits.h"
 #endif // _WIN32
-
+#include "Config.h"
 
 static void Wchar_tToString(std::string& szDst, wchar_t *wchar)
 {
@@ -17,7 +17,7 @@ static void Wchar_tToString(std::string& szDst, wchar_t *wchar)
     delete[]psText;// psTextµÄÇå³ý
 }
 
-static void IteratorFolder(const char* lpPath, std::vector<std::string> &fileList) {
+static void IteratorFolder(const char* lpPath, std::vector<std::string> &fileList,std::string suffix) {
     char szFind[MAX_PATH];
     WIN32_FIND_DATA FindFileData;
     strcpy(szFind, lpPath);
@@ -27,6 +27,9 @@ static void IteratorFolder(const char* lpPath, std::vector<std::string> &fileLis
     memset(wszUtf8, 0, len * 2 + 2);
     MultiByteToWideChar(CP_ACP, 0, (LPCSTR)szFind, -1, (LPWSTR)wszUtf8, len);
     HANDLE hFind = ::FindFirstFileW(wszUtf8, &FindFileData);
+
+	delete [] wszUtf8;
+
     if (INVALID_HANDLE_VALUE == hFind)    return;
     while (true) {
         if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
@@ -43,7 +46,7 @@ static void IteratorFolder(const char* lpPath, std::vector<std::string> &fileLis
             //std::cout << FindFileData.cFileName << std::endl;
             std::string str;
             Wchar_tToString(str, FindFileData.cFileName);
-            if (str.find(".bundle")!= std::string::npos)
+            if (str.find(suffix)!= std::string::npos)
             {
                 fileList.push_back(str);
             }
@@ -55,7 +58,20 @@ static void IteratorFolder(const char* lpPath, std::vector<std::string> &fileLis
 
 void UIBridge::FindAllBundle(std::string folder,std::vector<std::string> &files)
 {
-    IteratorFolder(folder.c_str(),files);
+    IteratorFolder(folder.c_str(),files, ".bundle");
+}
+
+void UIBridge::FindAllCommonPIC(std::string folder, std::vector<std::string> &files)
+{
+	IteratorFolder(folder.c_str(), files, ".jpg");
+
+	IteratorFolder(folder.c_str(), files, ".JPG");
+
+	IteratorFolder(folder.c_str(), files, ".png");
+
+	IteratorFolder(folder.c_str(), files, ".mp4");
+
+	IteratorFolder(folder.c_str(), files, ".mov");
 }
 
 

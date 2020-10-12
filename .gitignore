@@ -2,12 +2,18 @@
 # Created by https://www.gitignore.io/api/oc,macos
 # Edit at https://www.gitignore.io/?templates=oc,macos
 
+build/
+bin/
+x64/
+
 ### macOS ###
 # General
 .DS_Store
 .AppleDouble
 .LSOverride
 
+#imgui.ini
+imgui.ini
 # Icon must end with two \r
 Icon
 

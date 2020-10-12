@@ -7,22 +7,22 @@ rem Usage: run_cmake.bat <build_dir> <debug_runtime_output_dir> <runtime_output_
 rem
 setlocal
 
-set PWD=%cd%.
+set PWD=%cd%
 
 echo "Extract OpenCV DebugLib"
-7z.exe e ThridParty\Windows\opencv400\lib\win64\opencv_world400d.zip -aoa -oThridParty\Windows\opencv400\lib\win64\
+7z.exe e ThirdParty\Windows\opencv400\lib\win64\opencv_world400d.zip -aoa -oThirdParty\Windows\opencv400\lib\win64\
 
 set BUILD_ARCH=%~1
 if "%BUILD_ARCH%"=="" set BUILD_ARCH=x64
 
 if "%BUILD_ARCH%"=="x64" (
-	set CMAKE_GENERATOR=Visual Studio 15 2017 Win64
+	set CMAKE_GENERATOR=Visual Studio 16 2019
 	set CMAKE_DEBUG_OUTPUT=%PWD%\bin\win\x64\Debug
 	set CMAKE_RUNTIME_OUTPUT=%PWD%\bin\win\x64\Release
 )
 
 if "%BUILD_ARCH%"=="x86" (
-	set CMAKE_GENERATOR=Visual Studio 15 2017
+	set CMAKE_GENERATOR=Visual Studio 16 2019
 	set CMAKE_DEBUG_OUTPUT=%PWD%\bin\win\x86\Debug
 	set CMAKE_RUNTIME_OUTPUT=%PWD%\bin\win\x86\Release
 )

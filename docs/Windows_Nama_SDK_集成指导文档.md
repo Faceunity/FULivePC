@@ -1,14 +1,27 @@
 # Windows Nama SDK 集成指导文档  
-- 级别：Public
-  更新日期： 2020-7-29
-  
+- 级别：Public   
+  更新日期：2020-09-27   
+  SDK版本: 7.2.0 
 ------
-  
-  **FaceUnity Nama SDK v7.1.0 (2020-07-29)**
-  
-  更新内容 **版本整体说明:** 
+
+### 最新更新内容：
+
+**2020-9-27 v7.2.0:**
+
+- 新增绿幕抠像功能，支持替换图片、视频背景等。
+- 美颜模块新增瘦颧骨、瘦下颌骨功能。
+- 优化美颜性能以及功耗，优化集成入第三方推流服务时易发热掉帧问题。
+- 优化手势识别功能的效果以及性能，提升识别稳定性和手势跟随性效果，优化手势识别时cpu占有率。
+- 优化PC版各个功能性能，帧率提升显著。美发、美体、背景分割帧率提升30%以上，美颜、Animoji、美妆、手势等功能也有10%以上的帧率提升。
+- 优化包增量，SDK分为lite版，和全功能版本。lite版体积更小，包含人脸相关的功能(海报换脸除外)。
+- 优化人脸跟踪稳定性，提升贴纸的稳定性。
+- 提供独立核心算法SDK，接口文档详见算法SDK文档(FUAI_C_API_参考文档.md)。
+- fuGetFaceInfo接口新增三个参数，分别为：舌头方向(tongue_direction)，表情识别(expression_type)，头部旋转信息欧拉角参数(rotation_euler)。
+- 新增人体动作识别动作定义文档(人体动作识别文档.md)。
+- 
 
 2020-7-29 v7.1.0:
+
 1. 新增美颜锐化功能，见美颜参数文档。
 2. 优化美颜磨皮效果，保留更多的高频细节。
 3. 添加fuHumanProcessorGetFov接口。
@@ -83,17 +96,15 @@
 
 ```
 +FULivePC
-  +assets 			  	//资源目录
-  +FULivePC				//示例代码目录
-    +GUI				//GUI文件目录
-    +ipc				//ipc文件目录
+  +assets 			  	 //资源目录
+  +FULivePC				 //示例代码目录
+    +GUI				 //GUI文件目录
     +rapidjson			 //json库文件目录
     +Sound				 //声音库文件目录
-    -Camera.cpp：相机类，负责从摄像头内读取图像帧
-    -Camera.h：相机类的头文件
-    -Config.h：配置文件，记录道具文件的加载路径
+    -Camera.cpp：		//辅助相机类，负责从摄像头内读取图像帧
+    -Camera.h：			//辅助相机类的头文件
+    -Config.h：			// 配置文件，记录道具文件的加载路径
     -FULivePC.cpp：程序入口
-	-imgui.ini：GUI的初始化配置文件
 	-Nama.cpp：负责展示如何调用Nama SDK的接口
 	-Nama.h：展示如何调用Nama SDK的接口类的头文件
 	-UIBridge.h：负责展示虚拟摄像头的接入与使用
@@ -101,8 +112,6 @@
   +docs					//文档目录
   +ThridParty			//第三方库目录
   +include				//SDK包含目录
-  +Win32   				//32位SDK目录
-  +Win64   				//64位SDK目录
   -readme.md			//工程总文档
   run_cmake.bat   //CMAKE 生成VS工程的脚本，可自行修改VS版本（>=2015）,以及位数
   run_cmake.sh    //CMAKE 生成XCODE版本的脚本
@@ -119,7 +128,7 @@ Windows7及以上
 ```
 #### 3.1.2 开发环境
 ```
-vs2015
+vs2015/vs2017/vs2019
 ```
 
 ### 3.2 准备工作 
@@ -132,25 +141,139 @@ vs2015
 - 将证书文件authpack.h放置到include文件夹内（authpack.h由3.2步骤申请到）。
 
 - 如需要将本SDK集成到你的工程中去：
-  1. 请将demo中的assets、include、Win32\Win64文件夹的所有文件及文件夹复制到你的工程中去。
+  1. 请将demo中的assets文件、ThirdParty\Windows\FaceUnity-SDK-PC\下素有库文件复制到你的工程中去。
   2. 同时配置OpenGL渲染环境，配置方法参考demo。
   3. 参考Nama.cpp代码流程进行集成。
 
 ### 3.4 初始化
 
+#### 3.4.1 初始化SDK
+
 ```c
-#include <CNamaSDK.h>					//nama SDK 的头文件
+#include <CNamaSDK.h>				//nama SDK 的头文件
 #include <authpack.h>				//nama SDK 的key文件
 ```
 
-链接CNamaSDK.lib
+首先初始化好窗口以及OpenGL环境，初始化好的OpenGL环境是正确使用FaceUnity SDK的必须条件。
 
+OpenGL环境可以有多种初始化方式
 
-1.如未有初始化好的OpenGL环境，请查看demo代码中Nama.cpp中的InitOpenGL函数进行初始化，一个初始化好的OpenGL环境是正确使用FaceUnity SDK的必须条件，如果不知道自己是否成功初始化好了环境，可以参考Nama.cpp中的CheckGLContext函数进行检测。
+1. 使用QT开发环境，可以直接调用QT OpenGL Widget创建窗口。QT会自动初始化好OpenGL环境。
 
-2.fuSetup函数就是整个SDK的初始化开始，这个调用意味着人脸识别和道具渲染等其他功能开始就绪。一个应用程序只需要调用一次此函数，然后在函数初始化的同一线程里所有SDK函数均可正常运行。目前不支持跨线程的SDK初始化与调用。
+2. 参考demo代码中Nama.cpp中的InitOpenGL函数手工进行初始化。Demo提供了检查OpenGL环境是否成功的样例代码Nama.cpp中的CheckGLContext函数
 
-### 3.5 输入图像数据
+3. 直接使用glfw窗口库，https://github.com/glfw/glfw ，参考glfw example实现
+
+   ```c++
+   glfwSetErrorCallback(error_callback);
+   
+   if (!glfwInit())
+       exit(EXIT_FAILURE);
+   
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+   
+   GLFWwindow* window = glfwCreateWindow(640, 480, "OpenGL Triangle", NULL, NULL);
+   if (!window)
+   {
+       glfwTerminate();
+       exit(EXIT_FAILURE);
+   }
+   
+   glfwSetKeyCallback(window, key_callback);
+   glfwMakeContextCurrent(window);
+   gladLoadGL(glfwGetProcAddress);
+   glfwSwapInterval(1);
+   ```
+
+   调用fuSetup初始化SDK，SDK的初始化整个应用周期只需调用一次。fuSetup不依赖OpenGL环境，在函数初始化的同一线程里，其他函数可以正常调用。所有道具创建，销毁，图片渲染的API调用都需要保证有OpenGL context初始化好的环境。目前不支持跨线程的SDK初始化与调用。 初始化示例代码如下，g_auth_package为步骤3.2获取的证书权限码。
+
+```
+  fuSetup(nullptr, 0, nullptr, g_auth_package, sizeof(g_auth_package)); 
+```
+
+​	fuSetup具体API参数详见 [Nama_C_API_参考文档.md](Nama_C_API_参考文档.md)
+
+#### 3.4.2 加载AI能力
+
+根据需要的AI能力加载对应的AI bundle，如加载人脸驱动能力ai_face_processor_pc.bundle.
+
+1. 首先加载二进制bundle到内存
+2. 通过fuLoadAIModelFromPackage初始化具体AI能力并设置AI能力type为FUAITYPE::FUAITYPE_FACEPROCESSOR 人脸模块
+
+```c++
+vector<char> ai_model_data;
+if (false == FuTool::LoadBundle(g_ai_faceprocessor, ai_model_data))
+{
+    cout << "Error:fail load faceprocessor model" << g_ai_faceprocessor << endl;
+    return false;
+}
+fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_model_data[0]), ai_model_data.size(), FUAITYPE::FUAITYPE_FACEPROCESSOR);
+```
+
+fuLoadAIModelFromPackage具体API参数详见 [Nama_C_API_参考文档.md](Nama_C_API_参考文档.md)
+
+### 3.5 渲染道具创建、销毁、切换
+
+####  3.5.1道具创建
+
+每一个效果道具都是一个独立的Bundle文件，可以通过fuCreateItemFromPackage函数创建的道具并返回道具 handle 。其中 data 为指向道具文件内容的指针，size 为该文件的字节大小。
+
+之后每帧的绘制时需要输入 handle 作为道具的标识。
+
+```c
+static int mItemsArray[2] = {0, 0};
+...
+if (!mItemsArray[0]){
+  mItemsArray[0] = fuCreateItemFromPackage(data, size);
+}
+```
+
+#### 3.5.2道具销毁
+
+##### 销毁单个道具
+
+```c
+void fuDestroyItem(int item);
+```
+
+参数说明：
+
+`item ` 要销毁的道具句柄
+
+该接口将释放传入的句柄所对应的资源。示例如下：
+
+```c
+if (mItemsArray[0] > 0)
+    fuDestroyItem(mItemsArray[0]);
+```
+
+##### 销毁全部道具
+
+```c
+void fuDestroyAllItems();
+```
+
+该接口可以销毁全部道具句柄所对应的资源,同样在执行完该接口后请将所有句柄都置为0。示例如下：
+
+```java
+fuDestroyAllItems();
+```
+
+#### 3.5.3道具切换
+
+如果需要切换句柄数组中某一位的句柄时，需要先创建一个新的道具句柄，销毁原道具句柄，并将该新句柄替换到句柄数组中需要被替换的位置上。下面以替换句柄数组的第ITEM_ARRAYS_EFFECT位为例进行说明：
+
+```c
+int newEffectItem = loadItem(path);
+if (mItemsArray[0] > 0) {
+    fuDestroyItem(mItemsArray[0]);
+}
+mItemsArray[0] = newEffectItem;
+```
+
+### 3.6 输入图像数据
 
 本demo使用Camera.cpp中的代码来获取摄像头的图像帧数据。**如果你想输入自己的图像数据，可直接替换图像内容而不使用Camera类。**
 
@@ -170,7 +293,7 @@ int fuRenderItemsEx2(
 int handle[] = { mBeautyHandles,mLightMakeUpHandle, UIBridge::m_curRenderItem };
 int handleSize = sizeof(handle) / sizeof(handle[0]);
 //支持的格式有FU_FORMAT_BGRA_BUFFER 、 FU_FORMAT_NV21_BUFFER 、FU_FORMAT_I420_BUFFER 、FU_FORMAT_RGBA_BUFFER		
-fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),mFrameWidth, mFrameHeight, mFrameID, handle, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
+fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),mFrameWidth, mFrameHeight, mFrameID, handle_list, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
 ```
 
 以上我们示例将一个图像的RGBA排列格式的buffer作为本SDK输入图像数据。
@@ -182,6 +305,45 @@ fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT
 `FU_FORMAT_RGBA_BUFFER` RGBA格式的buffer数组，通用性最强
 
 `FU_FORMAT_I420_BUFFER` I420格式的buffer数组
+
+主要参数说明：
+
+out_format ： 输出的格式，支持RGBA的buffer， YUV I420输出，或者输出OpenGL纹理
+
+out_ptr:           输出数据地址
+
+in_format:		输入图形数据格式，支持RGBA, NV21, I420等不同格式
+
+p_items:		   需要处理效果的道具bundle 列表
+
+n_items：         输入道具bundle个数
+
+frame_id：        绘制的帧数
+
+具体fuRenderItemsEx2 API详见 [Nama_C_API_参考文档.md](Nama_C_API_参考文档.md)
+
+
+
+几种常见的调用方式：
+
+RGBA相机输入，RGBA CPU Buffer输出，适合本地图片处理：
+
+```
+
+fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, output_data, FU_FORMAT_RGBA_BUFFER, camera_data, camera_img_width, camera_img_height, mFrameID, handle_list, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
+```
+
+RGBA相机输入，OpenGL 贴图输出，本地窗口绘制：
+
+```
+fuRenderItemsEx2(FU_FORMAT_RGBA_Texture, output_data, FU_FORMAT_RGBA_BUFFER, camera_data, camera_img_width, camera_img_height, mFrameID, handle_list, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
+```
+
+RGBA相机输入，I420格式Buffer输出，适合推拉流或者视频处理：
+
+```
+fuRenderItemsEx2(`FU_FORMAT_I420_BUFFER` , output_data, FU_FORMAT_RGBA_BUFFER, camera_data, camera_img_width, camera_img_height, mFrameID, handle_list, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
+```
 
 ### 3.6 输出跟踪数据
 
@@ -203,64 +365,6 @@ ret = fuGetFaceInfo(0, "landmarks", landmarks, sizeof(landmarks) / sizeof(landma
 
 2.在代码中加载带舌头功能的道具，比如青蛙，即可展现出舌头跟踪效果。
 
-### 3.7 输出图像数据（道具创建、销毁、切换）
-
-####  3.7.1道具创建
-
-之后进行道具加载，函数返回的道具 handle 要保存在当前程序中，之后绘制道具时需要提供该 handle 作为道具的标识。其中 data 为指向道具文件内容的指针，size 为该文件的字节大小。
-
-```c
-static int mItemsArray[2] = {0, 0};
-...
-if (!mItemsArray[0]){
-  mItemsArray[0] = fuCreateItemFromPackage(data, size);
-}
-```
-
-#### 3.7.2道具销毁
-
-##### 3.7.2.1销毁单个道具
-
-```c
-void fuDestroyItem(int item);
-```
-
-参数说明：
-
-`item ` 要销毁的道具句柄
-
-该接口将释放传入的句柄所对应的资源。示例如下：
-
-```c
-if (mItemsArray[0] > 0)
-    fuDestroyItem(mItemsArray[0]);
-```
-
-##### 3.7.2.2销毁全部道具
-
-```c
-void fuDestroyAllItems();
-```
-
-该接口可以销毁全部道具句柄所对应的资源,同样在执行完该接口后请将所有句柄都置为0。示例如下：
-
-```java
-fuDestroyAllItems();
-```
-
-#### 3.7.3道具切换
-
-如果需要切换句柄数组中某一位的句柄时，需要先创建一个新的道具句柄，并将该句柄替换到句柄数组中需要被替换的位置上，最后再把被替换的句柄销毁掉。下面以替换句柄数组的第ITEM_ARRAYS_EFFECT位为例进行说明：
-
-```c
-int newEffectItem = loadItem(path);
-if (mItemsArray[0] > 0) {
-    fuDestroyItem(mItemsArray[0]);
-}
-mItemsArray[0] = newEffectItem;
-```
-
-------
 ## 4. 功能模块
 ### 4.1 视频美颜
 
@@ -280,48 +384,59 @@ fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT
 
 #### 参数设置
 
-美颜道具主要包含七个模块的内容：滤镜、美白、红润、磨皮、亮眼、美牙、美型。
+美颜道具主要包含：滤镜、美白、红润、磨皮、亮眼、美牙、美型，锐化等模块。
 
 美颜道具的所有功能都通过设置参数来进行设置，以下为设置参数的代码示例：
 
 ```c
-#define MAX_FACESHAPEPARAMTER 6
-std::string faceBeautyParamName[] = { "blur_level","color_level", "red_level", "eye_bright", "tooth_whiten" };
-std::string faceShapeParamName[] = { "cheek_thinning","eye_enlarging", "intensity_chin", "intensity_forehead", "intensity_nose","intensity_mouth" };
-for (int i=0;i<MAX_BEAUTYFACEPARAMTER;i++)
-{		
-    if (i==0)//磨皮
-    {
-        fuItemSetParamd(mBeautyHandles, const_cast<char*>(faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i] *6.0/ 100.f);
-    } 
-    else
-    {
-        fuItemSetParamd(mBeautyHandles, const_cast<char*>(faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i] / 100.f);
-    }		
-}
+#define MAX_BEAUTYFACEPARAMTER 8
+#define MAX_FACESHAPEPARAMTER 17
+const string g_faceBeautyParamName[MAX_BEAUTYFACEPARAMTER] = { "blur_level","color_level", "red_level","sharpen","eye_bright", "tooth_whiten" ,"remove_pouch_strength", "remove_nasolabial_folds_strength" };
 
-for (int i=0;i<MAX_FACESHAPEPARAMTER;i++)
-{
-    fuItemSetParamd(mBeautyHandles, const_cast<char*>(faceShapeParamName[i].c_str()), UIBridge::mFaceShapeLevel[i]/100.0f);		
-}
-fuItemSetParamd(mBeautyHandles, "skin_detect", UIBridge::mEnableSkinDect);	
-fuItemSetParamd(mBeautyHandles, "heavy_blur", UIBridge::mEnableHeayBlur);
-fuItemSetParamd(mBeautyHandles, "face_shape_level", 1);
-fuItemSetParamd(mBeautyHandles, "filter_level", UIBridge::mFilterLevel[UIBridge::m_curFilterIdx]/100.0f);
+const string g_faceShapeParamName[MAX_FACESHAPEPARAMTER] = { "cheek_thinning","eye_enlarging", "intensity_chin", "intensity_forehead", "intensity_nose","intensity_mouth","cheek_v","cheek_narrow","cheek_small","intensity_cheekbones","intensity_lower_jaw","intensity_canthus", "intensity_eye_space", "intensity_eye_rotate", "intensity_long_nose","intensity_philtrum", "intensity_smile" };
+
+
+	for (int i = 0; i < MAX_BEAUTYFACEPARAMTER; i++)
+	{
+		if (i == 0)
+		{
+			fuItemSetParamd(mBeautyHandles, const_cast<char*>(g_faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i] * 6.0 / 100.f);
+		}
+		else
+		{
+			fuItemSetParamd(mBeautyHandles, const_cast<char*>(g_faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i] / 100.f);
+		}
+	}
+
+	for (int i = 0; i < MAX_FACESHAPEPARAMTER; i++)
+	{
+		if (g_faceShapeParamShowFlag[i] == FACE_SHAPE_SHOW_FLAG_MIDDLE)
+		{
+			UIBridge::mFaceShapeLevel[i] += 50;
+		}
+		fuItemSetParamd(mBeautyHandles, const_cast<char*>(g_faceShapeParamName[i].c_str()), UIBridge::mFaceShapeLevel[i] / 100.0f);
+
+		if (g_faceShapeParamShowFlag[i] == FACE_SHAPE_SHOW_FLAG_MIDDLE)
+		{
+			UIBridge::mFaceShapeLevel[i] -= 50;
+		}
+	}
+	fuItemSetParamd(mBeautyHandles, "skin_detect", UIBridge::mEnableSkinDect);
+	map<int, int> blurType = { {0,2},{1,0},{2,1} };
+	fuItemSetParamd(mBeautyHandles, "blur_type", blurType[UIBridge::mEnableHeayBlur]);
+	fuItemSetParamd(mBeautyHandles, "face_shape_level", 1);
+	fuItemSetParamd(mBeautyHandles, "filter_level", UIBridge::mFilterLevel[UIBridge::m_curFilterIdx] / 100.0f);
 ```
 
 每个模块都有默认效果，它们可以调节的参数如下。
 
 #### 一、滤镜
 
-滤镜功能主要通过参数filter_level 和 filter_name来控制
+滤镜功能主要通过参数 `filter_level` 和 `filter_name` 来控制。
 
-```
-filter_level 取值范围 0.0-1.0,0.0为无效果，1.0为最大效果，默认值1.0
-filter_name 取值为一个字符串，默认值为 “origin” ，origin即为使用原图效果
-```
+`filter_name` 参数的取值和相关介绍详见：[美颜道具功能文档](美颜道具功能文档.md) ，在**滤镜对应key值**部分有详细介绍，对于老版本（6.0之前）的用户，可以参考**新老滤镜对应关系**部分。
 
-filter_name参数的取值和相关介绍详见：[美颜道具功能文档](./美颜道具功能文档.md) ，在 **滤镜对应key值** 部分有详细介绍，对于老版本（6.0之前）的用户，可以参考 **新老滤镜对应关系** 部分。
+`filter_level` 取值范围 0.0-1.0，0.0为无效果，1.0为最大效果，默认值1.0。
 
 #### 二、美白和红润
 
@@ -330,7 +445,7 @@ filter_name参数的取值和相关介绍详见：[美颜道具功能文档](./�
 美白功能主要通过参数color_level来控制
 
 ```
-color_level 取值范围 0.0-1.0,0.0为无效果，1.0为最大效果，默认值0.2
+color_level 取值范围 0.0-2.0,0.0为无效果，2.0为最大效果，默认值0.2
 ```
 
 ##### 红润
@@ -338,18 +453,18 @@ color_level 取值范围 0.0-1.0,0.0为无效果，1.0为最大效果，默认�
 红润功能主要通过参数red_level 来控制
 
 ```
-red_level 取值范围 0.0-1.0,0.0为无效果，1.0为最大效果，默认值0.5
+red_level 取值范围 0.0-2.0,0.0为无效果，2.0为最大效果，默认值0.5
 ```
 
 #### 三、磨皮
 
-控制磨皮的参数有四个：blur_level，skin_detect，nonshin_blur_scale，heavy_blur
+控制磨皮的参数有四个：blur_level，skin_detect，nonshin_blur_scale，blur_type
 
 ```
 blur_level: 磨皮程度，取值范围0.0-6.0，默认6.0
 skin_detect:肤色检测开关，0为关，1为开
 nonskin_blur_scale:肤色检测之后非肤色区域的融合程度，取值范围0.0-1.0，默认0.45
-heavy_blur: 重度磨皮开关，0为清晰磨皮，1为重度磨皮
+blur_type: 重度磨皮开关，0为清晰磨皮，1为重度磨皮
 ```
 
 注意：重度磨皮为高级美颜功能，需要相应证书权限才能使用 
@@ -382,12 +497,6 @@ tooth_whiten   取值范围 0.0-1.0,0.0为无效果，1.0为最大效果，默�
 face_shape_level   取值范围 0.0-1.0,0.0为无效果，1.0为最大效果，默认值1.0
 ```
 
-美型的渐变由change_frames参数控制
-
-```
-change_frames       0为关闭 ，大于0开启渐变，值为渐变所需要的帧数
-```
-
 美型的种类主要由face_shape 参数控制
 
 ```
@@ -415,6 +524,8 @@ intensity_forehead: 默认0.5,   //额头调整程度范围0.0-1.0
 intensity_mouth:默认0.5,       //嘴巴调整程度范围0.0-1.0
 intensity_chin: 默认0.5,       //下巴调整程度范围0.0-1.0
 ```
+
+具体可参考[美颜道具功能文档.md](美颜道具功能文档.md)
 
 注意：变形为高级美颜功能，需要相应证书权限才能使用 
 
@@ -482,15 +593,7 @@ ar面具可以很贴合的在人脸上戴上一层面具，加载方式如下
  mItemsArray[0] = fuCreateItemFromPackage(data, size);
 ```
 
-### 4.6 换脸
-
-可以将识别到的人脸替换为制作道具时的目标图片的人脸。
-
-```c
- mItemsArray[0] = fuCreateItemFromPackage(data, size);
-```
-
-### 4.7 表情识别
+### 4.6 表情识别
 
 表情识别道具是在普通的道具里加入额外的识别表情然后触发特定动作的功能，加载方式如下
 
@@ -498,7 +601,7 @@ ar面具可以很贴合的在人脸上戴上一层面具，加载方式如下
  mItemsArray[0] = fuCreateItemFromPackage(data, size);
 ```
 
-### 4.8 手势识别
+### 4.7 手势识别
 
 目前我们的手势识别功能也是以道具的形式进行加载的。一个手势识别的道具中包含了要识别的手势、识别到该手势时触发的动效、及控制脚本。加载该道具的过程和加载普通道具、美颜道具的方法一致。
 
@@ -519,7 +622,7 @@ fuItemSetParamd(itemid, "rotMode", 2);
 fuItemSetParamd(itemid, "loc_x_flip", 1.0);
 ```
 
-### 4.9 贴纸
+### 4.8 贴纸
 
 贴纸为基础的道具称呼。加载方式如下
 
@@ -527,7 +630,7 @@ fuItemSetParamd(itemid, "loc_x_flip", 1.0);
  mItemsArray[0] = fuCreateItemFromPackage(data, size);
 ```
 
-### 4.10 人脸夸张变形功能
+### 4.9 人脸夸张变形功能
 
 人脸夸张变形道具可以将人脸进行比较夸张的变形。加载方式如下
 
@@ -535,7 +638,7 @@ fuItemSetParamd(itemid, "loc_x_flip", 1.0);
  mItemsArray[0] = fuCreateItemFromPackage(data, size);
 ```
 
-### 4.11 音乐滤镜
+### 4.10 音乐滤镜
 
 ```c
  mItemsArray[0] = fuCreateItemFromPackage(data, size);
@@ -550,34 +653,55 @@ fuItemSetParamd(name, "music_time",  mp3Map[UIBridge::m_curRenderItem]->GetCurre
 
 如果没有音乐则可以模拟音乐播放进度，demo中提供的道具对应的音乐时长为28s，换算成ms为28000ms，在没有音乐的情况下，可以从加载音乐滤镜开始计时，每次处理图像前获取一下当前时间与开始加载音乐滤镜的时间差，转换成ms传入音乐滤镜即可，当时间差超过28000ms时归0重新开始计时即可。效果详见FULiveDemoPC，道具可以通过FUEditor v4.3.0及以上进行制作（FUCreator暂不支持）。
 
-### 4.13 质感美颜
+### 4.11 人脸美妆
 
-加载方式如下
+[美妆bundle参数说明](美妆道具功能文档.md)
 
-```c#
- mItemsArray[0] = fuCreateItemFromPackage(data, size);
+### 4.12 美发功能
+
+[美发参数说明](美发道具功能文档.md)
+
+加载美发道具 `itemName`，并保存到句柄数组items
+
+```objective-c
+NSString *path = [[NSBundle mainBundle] pathForResource:[itemName stringByAppendingString:@".bundle"] ofType:nil];
+int itemHandle = [FURenderer itemWithContentsOfFile:path];
 ```
 
-这个道具的调用方法相对比较复杂：
+发色种类设置，`colorIndex` (0~n）
 
-```c
-fuItemSetParamd((int)mLightMakeUpHandle, "is_makeup_on", 1);
-fuItemSetParamd((int)mLightMakeUpHandle, "makeup_intensity", makeupitem.intensity);
-                
-fuItemSetParamdv((int)mLightMakeUpHandle, "makeup_lip_color", makeupitem.Lipstick_color);
-fuItemSetParamd((int)mLightMakeUpHandle, "makeup_intensity_lip", makeupitem.Lipstick_intensity);
-fuItemSetParamd((int)mLightMakeUpHandle, "makeup_lip_mask", 1.0);
-...
-Texture::SharedPtr pTexture = Texture::createTextureFromFile(mMakeupParams[index][j].textureName + ".png", false);
-fuCreateTexForItem(mLightMakeUpHandle, const_cast<char*>(mMakeupParams[index][j].typeName.c_str()), pTexture->getData(), pTexture->m_width, pTexture->m_height);	
-fuItemSetParamd(mLightMakeUpHandle, const_cast<char*>(mMakeupParams[index][j].valueName.c_str()), (float)mMakeupParams[index][j].value / 100.);
-...
+```objective-c
+[FURenderer itemSetParam:items[FUNamaHandleTypeItem] withName:@"Index" value:@(colorIndex)]; 
 ```
 
-------
+发色程度值,`Strength` 值为(0 ~ 1.0)
+
+```objective-c
+ [FURenderer itemSetParam:items[FUNamaHandleTypeItem] withName:@"Strength" value: @(strength)]; 
+```
+
+### 4.13 轻美妆功能
+
+Nama SDK 从 6.0.0 开始支持质感美颜功能。
+
+轻美妆方案是一套更为精致高效的美颜解决方案，包含磨皮、美型、滤镜、美妆4大模块，提供60+套丰富素材库，支持客户任意切换风格与效果变化。
+
+首先加载 light_makeup.bundle，然后设置腮红、眼影、眼线、口红等参数，使用方法请参考[轻美妆道具说明](轻美妆功能文档.md)，同时参考 FULiveDemo 中的示例代码。
+
+### 4.14 美体功能
+
+Nama SDK 从 6.4.0 开始支持美体功能，仅支持单人。
+
+使用方法请参考[美体功能文档](美体道具功能文档.md)
+
+### 4.15 全身Avatar功能
+
+Nama SDK 从 7.0.0 开始支持全身Avatar功能。
+
+使用方法请参考[全身Avatar功能文档](controller功能文档.md)
+
 ## 5. 常见问题 
 
 ### 5.1 编译相关
-- 推荐的批处理脚本中配置visual studio版本可以有 Visual Studio 15 2017    以及 Visual Studio 14 2015。
 - 所使用的显卡的年代过于久远可能不支持Opengl 3.2 core profile ，会提示错误并退出
-- visual studio 2015版本 安装时勾选c++部件。
+- visual studio 2015/2017/2019版本 安装时需勾选c++组件以及windows sdk。

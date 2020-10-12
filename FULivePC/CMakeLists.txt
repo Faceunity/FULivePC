@@ -6,11 +6,11 @@ set(CMAKE_CXX_STANDARD 11)
 
 
 if(WIN32)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/cmakeScripts/Modules)
-    include(${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/cmakeScripts/import_custom_library.cmake)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/cmakeScripts/Modules)
+    include(${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/cmakeScripts/import_custom_library.cmake)
 elseif(APPLE)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Mac/cmakeScripts/Modules)
-    include(${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Mac/cmakeScripts/import_custom_library.cmake)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/cmakeScripts/Modules)
+    include(${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/cmakeScripts/import_custom_library.cmake)
 elseif(UNIX)
 endif()
 
@@ -36,7 +36,18 @@ if(APPLE)
     find_library(OPENGL_LIB OpenGL)
     find_library(APPKIT_LIB AppKit)
     find_library(COCOA_LIB Cocoa)
+    find_library(SECURITY_LIB Security)
+    find_library(GLKIT_LIB GLKit)
+    find_library(COREAUDIO_LIB CoreAudio)
+    find_library(AUDIOTOOLBOX_LIB AudioToolbox)
+    find_library(VIDEOTOOLBOX_LIB VideoToolbox)
+    find_library(LIBBZ2_1_0_TBD libbz2.1.0.tbd)
+    find_library(LIBICONV_2_4_0_TBD libiconv.2.4.0.tbd)
+    find_library(LIBLZMA_TBD liblzma.tbd)
+    find_library(LIBZ_1_2_5_TBD libz.1.2.5.tbd)
+    find_library(LIBCURL_TBD libcurl.4.tbd)
 endif()
+
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -fms-extensions")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fms-extensions")
@@ -51,7 +62,6 @@ include_directories(../include/rapidjson)
 include_directories(./)
 
 if(WIN32)
-include_directories(ipc)
 include_directories(Sound)
 endif()
 if(APPLE)
@@ -64,10 +74,13 @@ endif()
 if(WIN32)
 set(${target}_COMMON
     common/fu_tool.cpp
+	../include/common/fu_tool.h
 )
 else()
 set(${target}_COMMON
     common/fu_tool.cpp
+    ../include/common/fu_tool.h
+    ../include/common/fu_tool_mac.h
     common/fu_tool_mac.mm
 )
 endif()
@@ -80,10 +93,18 @@ set(${target}_GLCONTEXT
 set(${target}_GUI
     GUI/Gui.cpp
     GUI/Gui.h
+	GUI/GuiGS.cpp
+    GUI/GuiGS.h
+	GUI/GuiTool.cpp
+    GUI/GuiTool.h
+	GUI/GuiTabContent.cpp
+    GUI/GuiTabContent.h
     GUI/Loader.cpp
     GUI/Loader.h
     GUI/Texture.cpp
     GUI/Texture.h
+    GUI/MouseControl.cpp
+    GUI/MouseControl.h
 )
 
 set(${target}_IMGUI
@@ -105,30 +126,33 @@ set(${target}_IMGUI
     imgui/stb_truetype.h
 )
 
-
-set(${target}_IPC
-    ipc/filtercommons.h
-    ipc/ipcbridge.cpp
-    ipc/ipcbridge.h
-    ipc/mutex.cpp
-    ipc/mutex.h
-    ipc/waitcondition.cpp
-    ipc/waitcondition.h
-)
-
 set(${target}_Sound
     Sound/MP3.cpp
     Sound/MP3.h
 )
+set(${target}_Sound_mac
+    Sound/MP3_mac.mm
+    Sound/MP3_mac.h
+)
 
 set(${target}_SOURCES
+    authpack.h
+    Config.h
     Camera.cpp
     Camera.h
     FULivePC.cpp
     Nama.cpp
     Nama.h
     UIBridge.h
+	FuController.cpp
+	FuController.h
 )
+
+file(GLOB_RECURSE TINFILES tinfiledlg/*.*)
+set(${target}_TINFILEDLG
+	${TINFILES}
+)
+
 
 if(WIN32)
 list(APPEND ${target}_SOURCES
@@ -142,19 +166,21 @@ endif()
 
 
 if(WIN32)
+set(CMAKE_EXE_LINKER_FLAGS "/SAFESEH:NO" )	 
 add_executable(${target}
     ${${target}_SOURCES}
     ${${target}_IMGUI}
     ${${target}_COMMON}
     ${${target}_GUI}
-    ${${target}_IPC}
     ${${target}_Sound}
+	${${target}_TINFILEDLG}
 )
 elseif(APPLE)
 
 set(APP_UI_RES
         ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
         ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
+        ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/AppIcon.icns
 )
 
 add_executable(${target}
@@ -163,6 +189,7 @@ add_executable(${target}
     ${${target}_COMMON}
     ${${target}_GUI}
     ${${target}_GLCONTEXT}
+    ${${target}_Sound_mac}
     ${APP_UI_RES}
 )
 
@@ -176,8 +203,8 @@ source_group("Source Files\\common" FILES ${${target}_COMMON})
 source_group("Source Files\\gui" FILES ${${target}_GUI})
 
 if(WIN32)
-source_group("Source Files\\ipc" FILES ${${target}_IPC})
 source_group("Source Files\\sound" FILES ${${target}_Sound})
+source_group("Source Files\\tinfiledlg" FILES ${${target}_TINFILEDLG})
 elseif(APPLE)
 source_group("Source Files\\glcontext" FILES ${${target}_GLCONTEXT})
 source_group("Resources" FILES ${APP_UI_RES})
@@ -186,49 +213,62 @@ endif()
 
 import_custom_library(${target} Nama)
 import_custom_library(${target} Opencv)
+
 import_custom_library(${target} FreeImage)
 import_custom_library(${target} Glfw)
+import_custom_library(${target} ffmpeg)
 
 if(WIN32)
-    set_target_properties(${target} PROPERTIES COMPILE_FLAGS "/MP" )
+    # set_target_properties(${target} PROPERTIES COMPILE_FLAGS "/MP" )
 	set_target_properties(${target} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../")
 	
-	STRING(FIND $ENV{CMAKE_GENERATOR} "Win64" IsFinded)
-    if(${IsFinded} EQUAL -1)
-        set(SrcNamaDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/FaceUnity-SDK-PC/lib/win32)
-        set(SrcFreeImageDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/FreeImage/lib/win32)
-        set(SrcOpenCVDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/opencv400/lib/win32)
-		set(SrcOpenCVDLLFileFFmpeg  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/opencv400/lib/win32/opencv_ffmpeg400.dll)
+	if(${CMAKE_SIZEOF_VOID_P} EQUAL 4)
+        set(SrcNamaDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/FaceUnity-SDK-PC/lib/win32)
+        set(SrcFreeImageDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/FreeImage/lib/win32)
+        set(SrcOpenCVDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/opencv400/lib/win32)
+		set(SrcOpenCVDLLFileFFmpeg  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/opencv400/lib/win32/opencv_ffmpeg400.dll)
+		set(SrcFfmpegDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/ffmpeg/lib/win32)
 	else()
-        set(SrcNamaDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/FaceUnity-SDK-PC/lib/win64)
-        set(SrcFreeImageDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/FreeImage/lib/win64)
-        set(SrcOpenCVDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/opencv400/lib/win64)
-		set(SrcOpenCVDLLFileFFmpeg  ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Windows/opencv400/lib/win64/opencv_ffmpeg400_64.dll)
+        set(SrcNamaDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/FaceUnity-SDK-PC/lib/win64)
+        set(SrcFreeImageDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/FreeImage/lib/win64)
+        set(SrcOpenCVDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/opencv400/lib/win64)
+		set(SrcOpenCVDLLFileFFmpeg  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/opencv400/lib/win64/opencv_ffmpeg400_64.dll)
+		set(SrcFfmpegDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/ffmpeg/lib/win64)
 	endif()
 	
 	add_custom_command(TARGET ${target}
                 POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/fuai.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/CNamaSDK.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFreeImageDLLFolder}/FreeImage.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFileFFmpeg}     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFolder}/opencv_world400.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 
-				COMMAND ${CMAKE_COMMAND} -E make_directory $ENV{CMAKE_DEBUG_OUTPUT}
-				COMMAND ${CMAKE_COMMAND} -E make_directory $ENV{CMAKE_RUNTIME_OUTPUT}
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avutil-56.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avformat-58.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avcodec-58.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/swresample-3.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/libwinpthread-1.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 
-				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/fuai.dll     $ENV{CMAKE_DEBUG_OUTPUT}
-				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/CNamaSDK.dll     $ENV{CMAKE_DEBUG_OUTPUT}
-				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/fuai.dll 	$ENV{CMAKE_RUNTIME_OUTPUT}
-				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/CNamaSDK.dll		$ENV{CMAKE_RUNTIME_OUTPUT}
 
-                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFreeImageDLLFolder}/FreeImage.dll     $ENV{CMAKE_DEBUG_OUTPUT}
-                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFileFFmpeg}     $ENV{CMAKE_DEBUG_OUTPUT}
-                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFolder}/opencv_world400d.dll     $ENV{CMAKE_DEBUG_OUTPUT}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/fuai.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/CNamaSDK.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+                
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFreeImageDLLFolder}/FreeImage.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFileFFmpeg}     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFolder}/opencv_world400d.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
 
-				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFreeImageDLLFolder}/FreeImage.dll     $ENV{CMAKE_RUNTIME_OUTPUT}
-                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFileFFmpeg}     $ENV{CMAKE_RUNTIME_OUTPUT}
-                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFolder}/opencv_world400.dll     $ENV{CMAKE_RUNTIME_OUTPUT}
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avutil-56.dll 	${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avformat-58.dll		${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avcodec-58.dll		${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/swresample-3.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/libwinpthread-1.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
 
 				COMMENT "copy dll"
                 )
 
 elseif(APPLE)
+
     target_link_libraries(${target}
         ${AVFOUNDATION_LIB}
         ${COREMEDIA_LIB}
@@ -238,27 +278,60 @@ elseif(APPLE)
         ${OPENGL_LIB}
         ${APPKIT_LIB}
         ${COCOA_LIB}
+        ${SECURITY_LIB}
+        ${GLKIT_LIB}
+        ${COREAUDIO_LIB}
+        ${AUDIOTOOLBOX_LIB}
+		${VIDEOTOOLBOX_LIB}
+        ${LIBBZ2_1_0_TBD}
+        ${LIBICONV_2_4_0_TBD}
+        ${LIBLZMA_TBD}
+        ${LIBZ_1_2_5_TBD}
+        ${LIBCURL_TBD}
     )
-
+    set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
     set_target_properties(${target} PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Info.plist
-        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Developer ID Application: Faceunity Technology Co., Ltd. (35A6KD62ZJ)"
+        XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--deep"
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.faceunity.FULiveMac"
+        XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "35A6KD62ZJ"
     )
+    
+    set( MacOS_APP_Content "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/FULivePC.app/Contents")
+    
+# 如果不存在则创建，用于工程第一次运行的时候
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle")
+else()
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/../assets DESTINATION ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle)
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/../res/config.json DESTINATION ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle)
+endif()
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle")
+else()
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/../res DESTINATION ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle)
+endif()
+
+  add_custom_command(TARGET ${target} PRE_BUILD
+      #需要先rm Resource.bundle 和 ResPic.bundle，否则删除时，无法刷新
+      COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
+      COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
+      COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_LIST_DIR}/../assets  ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../res/config.json    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/../res    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
+      COMMAND ${CMAKE_COMMAND} -E make_directory  ${MacOS_APP_Content}/Frameworks
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/glfw/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/FaceUnity-SDK-Mac/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/Framework/*.dylib  ${MacOS_APP_Content}/Frameworks
+  )
+
 
     set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/AppIcon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
-    set( MacOS_APP_Content "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/FULivePC.app/Contents")
-    add_custom_command(TARGET ${target} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_LIST_DIR}/../assets  ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../res/config.json    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/../res    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
-        COMMAND ${CMAKE_COMMAND} -E make_directory  ${MacOS_APP_Content}/Frameworks
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Mac/glfw/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Mac/FaceUnity-SDK-Mac/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThridParty/Mac/Framework/*.dylib  ${MacOS_APP_Content}/Frameworks
-    )
+    
+
 
 elseif(UNIX)
 endif()
