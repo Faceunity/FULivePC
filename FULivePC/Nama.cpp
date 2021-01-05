@@ -315,7 +315,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 	{
 		CheckGLContext();
 
-		fuSetLogLevel(FU_LOG_LEVEL_OFF);
+		fuSetLogLevel(FU_LOG_LEVEL_INFO);
 
 		fuSetup(nullptr, 0, nullptr, g_auth_package, sizeof(g_auth_package));
 		// setup without license, only render 1000 frames.
@@ -400,7 +400,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			cout << "load face makeup data." << endl;
 
 			mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
-			fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1);
+			//fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1);
 		}
 
 		{
@@ -754,9 +754,9 @@ void Nama::SaveRencentColorToFile()
 
 		writer.StartArray();
 
-		writer.Int(data.colorRGBA[0]);
-		writer.Int(data.colorRGBA[1]);
-		writer.Int(data.colorRGBA[2]);
+		writer.Int(data.vecColorRGBA[0][0]);
+		writer.Int(data.vecColorRGBA[0][1]);
+		writer.Int(data.vecColorRGBA[0][2]);
 
 		writer.EndArray();
 
@@ -889,6 +889,131 @@ void Nama::pauseCurrentMp3(){
 void Nama::resumeCurrentMp3(){
 	mp3Map[UIBridge::m_curPlayingMusicItem]->Play();
 }
+
+void Nama::SetCMDoubles(const std::string& key, double* values, uint32_t count)
+{
+	if (mMakeUpHandle > 0)
+	{
+		fuItemSetParamdv(mMakeUpHandle, key.data(), values, count);
+	}
+}
+
+void Nama::SetCMDouble(const std::string& key, double v)
+{
+	if (mMakeUpHandle > 0)
+	{
+		fuItemSetParamd(mMakeUpHandle, key.data(), v);
+	}
+}
+
+void Nama::ClearAllCM()
+{
+	if (mMakeUpHandle > 0)
+	{
+		for (auto & v : m_CMakeupTypeMap)
+		{
+			fuUnbindItems(mMakeUpHandle, &v.second, 1);
+		}
+	}
+}
+
+int Nama::SelectCostumMakeupBundle(string bundleName, string strType)
+{
+	if (false == mEnableNama)
+	{
+		return false;
+	}
+
+	ChangeCleanFlag(false);
+
+	int bundleID = -1;
+
+	if (0 == m_CMakeupMap[bundleName])
+	{
+		if (!CheckModuleCode(UIBridge::bundleCategory))
+		{
+			cout << "no right to use." << endl;
+			return false;
+		}
+		vector<char> propData;
+		if (false == FuTool::LoadBundle(bundleName, propData))
+		{
+			cout << "load prop data failed." << endl;
+			UIBridge::m_curRenderItem = -1;
+			return false;
+		}
+		cout << "load prop data." << endl;
+
+		if (m_CMakeupMap.size() > MAX_NAMA_CM_BUNDLE_NUM)
+		{
+			int arrayBind[] = { m_CMakeupMap.begin()->second };
+			fuUnbindItems(mMakeUpHandle, arrayBind, 1);
+			fuDestroyItem(m_CMakeupMap.begin()->second);
+			m_CMakeupMap.erase(m_CMakeupMap.begin());
+			printf("cur map size : %d \n", m_CMakeupMap.size());
+		}
+
+		bundleID = fuCreateItemFromPackage(&propData[0], propData.size());
+		m_CMakeupMap[bundleName] = bundleID;
+	}
+
+	if (UIBridge::bundleCategory == BundleCategory::Makeup && m_CMakeupMap[bundleName] > 0)
+	{
+		auto itor = m_CMakeupTypeMap.find(strType);
+		int ret = -1;
+		if (itor != m_CMakeupTypeMap.end())
+		{
+			ret = fuUnbindItems(mMakeUpHandle, &itor->second, 1);
+		}
+
+		fuBindItems(mMakeUpHandle, &m_CMakeupMap[bundleName], 1);
+		m_CMakeupTypeMap[strType] = m_CMakeupMap[bundleName];
+
+		UIBridge::renderBundleCategory = BundleCategory::Makeup;
+	}
+
+	return m_CMakeupMap[bundleName];
+}
+
+void Nama::DestroyAll()
+{
+	ClearAllCM();
+
+	if (UIBridge::bundleCategory == BundleCategory::Makeup && UIBridge::m_curBindedItem != -1)
+	{
+		fuUnbindItems(mMakeUpHandle, &UIBridge::m_curBindedItem, 1);
+	}
+
+	for (auto & data: mBundlesMap)
+	{
+		fuDestroyItem(data.second);
+	}
+
+	UIBridge::m_curBindedItem = -1;
+	mBundlesMap.clear();
+}
+
+void Nama::UnbindCurFixedMakeup()
+{
+	if (UIBridge::bundleCategory == BundleCategory::Makeup)
+	{
+		if (UIBridge::m_curBindedItem != -1)
+		{
+			fuUnbindItems(mMakeUpHandle, &UIBridge::m_curBindedItem, 1);
+			UIBridge::m_curBindedItem = -1;
+		}
+	}
+}
+
+void Nama::ChangeCleanFlag(bool bOpen)
+{
+	if (mMakeUpHandle)
+	{
+		double v = bOpen ? 1.0 : 0.0;
+		SetCMDouble("is_clear_makeup", v);
+	}
+}
+
 bool Nama::SelectBundle(string bundleName)
 {
 	if (false == mEnableNama)
@@ -896,6 +1021,8 @@ bool Nama::SelectBundle(string bundleName)
 		return false;
 	}
 	
+	ChangeCleanFlag(true);
+
 	int bundleID = -1;
 	
 	map<int, Mp3*>::iterator it;
@@ -925,27 +1052,27 @@ bool Nama::SelectBundle(string bundleName)
 		}
 		cout << "load prop data." << endl;
 		
-		if (mBundlesMap.size() > MAX_NAMA_BUNDLE_NUM)
+		/*if (mBundlesMap.size() > MAX_NAMA_BUNDLE_NUM)
 		{
 			fuDestroyItem(mBundlesMap.begin()->second);
 			mBundlesMap.erase(mBundlesMap.begin());
 			printf("cur map size : %d \n", mBundlesMap.size());
-		}
+		}*/
+		DestroyAll();
+
 		
 		bundleID = fuCreateItemFromPackage(&propData[0], propData.size());
 		mBundlesMap[bundleName] = bundleID;
+
 		if (UIBridge::bundleCategory == BundleCategory::GestureRecognition) {
 			fuItemSetParamd(bundleID, "rotMode", 0);
 			if (bundleName.find("ctrl_flower") != std::string::npos) {
 				fuItemSetParamd(bundleID, "particleDirMode", 0);
 			}
 		}
+
 		if (UIBridge::bundleCategory == BundleCategory::Makeup)
 		{
-			if (UIBridge::m_curBindedItem != -1)
-			{
-				fuUnbindItems(mMakeUpHandle, &UIBridge::m_curBindedItem, 1);
-			}
 			fuBindItems(mMakeUpHandle, &bundleID, 1);
 			UIBridge::m_curBindedItem = bundleID;
 		}
@@ -993,9 +1120,7 @@ bool Nama::SelectBundle(string bundleName)
 			fuBindItems(mMakeUpHandle, &bundleID, 1);
 			UIBridge::m_curBindedItem = bundleID;
 		}
-		else
-		{
-		}
+		
 		if (UIBridge::bundleCategory == BundleCategory::MusicFilter)
 		{
 			mp3Map[bundleID]->Play();
@@ -1025,6 +1150,9 @@ bool Nama::SelectBundle(string bundleName)
 		UIBridge::m_curRenderItem = bundleID;
 		UIBridge::renderBundleCategory = UIBridge::bundleCategory;
 	}
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
 	if (UIBridge::bundleCategory == Animoji)
 	{
 		mMaxFace = 1;
@@ -1108,6 +1236,7 @@ void Nama::RenderDefNama(uchar * frame)
 			
 			if (UIBridge::renderBundleCategory == BundleCategory::Makeup)
 			{
+				renderList.push_back(UIBridge::m_curRenderItem);
 				renderList.push_back(mMakeUpHandle);
 			}
 			else

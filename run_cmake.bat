@@ -12,6 +12,7 @@ set PWD=%cd%
 echo "Extract OpenCV DebugLib"
 7z.exe e ThirdParty\Windows\opencv400\lib\win64\opencv_world400d.zip -aoa -oThirdParty\Windows\opencv400\lib\win64\
 
+
 set PLATFORM=x64
 set BUILD_ARCH=%~1
 if "%BUILD_ARCH%"=="" set BUILD_ARCH=x64

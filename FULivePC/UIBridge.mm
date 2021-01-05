@@ -4,6 +4,16 @@
 #include <vector>
 #include "fu_tool_mac.h"
 #include "Config.h"
+
+
+static bool isNotInSubs(NSString *filename)
+{
+    NSString * sub = @"subs";
+    NSRange range =  [filename rangeOfString: sub];
+    
+    return range.length == 0;
+}
+
 /*
  将外部传递的相对路径组合成Resource.bundle的绝对路径，再找到下面所有的文件
  */
@@ -19,8 +29,10 @@ void UIBridge::FindAllBundle(string folder,vector<string> &files)
     while (filename = [direnum nextObject]) {
         if ([[filename pathExtension] isEqualTo:@"bundle"]) {
             //NSString *path = [NSString stringWithFormat:@"%@%@%@",home,@"/",filename];
-           
-            files.push_back([filename UTF8String]);
+            if(isNotInSubs(filename)){
+                files.push_back([filename UTF8String]);
+            }
+            
         }
     }
 	sort(files.begin(), files.end());

@@ -32,6 +32,7 @@ public:
 	static string GetRelativePath(string fullpath,string dependpath);
 	static int getLocalVideoRotation(string& videoFilePath);
 	static bool getLocalVideoResolution(string& videoPath,float* videoWidth,float* videoHeight);
+    static string convert2utf8(const char * strIn);
 public:
     static vector<string> m_searchPath;
 private:	

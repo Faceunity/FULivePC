@@ -13,6 +13,7 @@ FULivePC 是 Windows 平台上，集成相芯人脸跟踪及视频特效开发�
 1. [Nama_Demo_运行文档.md](./docs/Windows_Nama_Demo_运行文档.md)，介绍如何运行demo
 2. [Nama_SDK_集成指导文档.md](./docs/Windows_Nama_SDK_集成指导文档.md)，介绍如何在宿主程序中集成Nama SDK。   
 3. [Nama_C_API_参考文档.md](./docs/Nama_C_API_参考文档.md)，Nama SDK C接口定义。  
+4. 由于git限制大小，MAC用户请手动解压ThirdParty\Mac\ffmpeg\lib\libavcodec.zip
 
 ## English
 
