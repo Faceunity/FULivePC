@@ -38,7 +38,7 @@ static void IteratorFolder(const char* lpPath, std::vector<std::string> &fileLis
             {
                 std::string folderName;
                 Wchar_tToString(folderName, FindFileData.cFileName);
-                fileList.push_back(folderName);
+                //fileList.push_back(folderName);
             }
         }
         else

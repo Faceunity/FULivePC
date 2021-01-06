@@ -1,4 +1,15 @@
 #include "fu_tool.h"
+
+#if _WIN32
+#include "windows.h"
+#include <io.h>
+#pragma  comment(lib,"FreeImage.lib")
+#elif __APPLE__
+#include "fu_tool_mac.h"
+#include <dirent.h>
+#include <limits.h>       //For PATH_MAX
+#endif
+
 #include <vector>
 #include "freeImage.h"
 #include <sstream>
@@ -7,14 +18,7 @@
 extern "C" {
 #include "libavformat/avformat.h"
 }
-#if _WIN32
-#include <io.h>
-#pragma  comment(lib,"FreeImage.lib")
-#elif __APPLE__
-#include "fu_tool_mac.h"
-#include <dirent.h>
-#include <limits.h>       //For PATH_MAX
-#endif
+
 
 
 
@@ -244,6 +248,48 @@ Bitmap * FuTool::getBitmapFromFile(string file)
     return getBitmapFromFileWithFreeImage(file);
 #else
     return FuToolMac::getBitmapFromAsset(file);
+#endif
+}
+
+#ifdef _WIN32
+
+// std::string 转换为 UTF-8 编码
+static std::string string_To_UTF8(const std::string & str)
+{
+	int nwLen = ::MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, 0);
+
+	wchar_t * pwBuf = new wchar_t[nwLen + 1];//一定要加1，不然会出现尾巴 
+	ZeroMemory(pwBuf, nwLen * 2 + 2);
+
+	::MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.length(), pwBuf, nwLen);
+
+	int nLen = ::WideCharToMultiByte(CP_UTF8, 0, pwBuf, -1, NULL, NULL, NULL, NULL);
+
+	char * pBuf = new char[nLen + 1];
+	ZeroMemory(pBuf, nLen + 1);
+
+	::WideCharToMultiByte(CP_UTF8, 0, pwBuf, nwLen, pBuf, nLen, NULL, NULL);
+
+	std::string retStr(pBuf);
+
+	delete[]pwBuf;
+	delete[]pBuf;
+
+	pwBuf = NULL;
+	pBuf = NULL;
+
+	return retStr;
+}
+
+#endif
+
+string FuTool::convert2utf8(const char * strIn)
+{
+#ifdef _WIN32
+	string str = strIn;
+	return string_To_UTF8(str);
+#else
+	return FuToolMac::Convert2utf8(strIn);
 #endif
 }
 

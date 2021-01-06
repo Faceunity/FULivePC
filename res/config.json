@@ -1,12 +1,11 @@
 {
-	"jet_mask.bundle": "鼓腮帮子",
+	"jet_mask.bundle": "眨眼",
 	"future_warrior.bundle": "张嘴试试",
 	"luhantongkuan_ztt_fu.bundle": "眨一眨眼",
 	"xiaobianzi_zh_fu.bundle": "微笑触发",
 	"xiaoxueshen_ztt_fu.bundle": "吹气触发",
 	"sdx2.bundle": "皱眉触发",
 	"qingqing_ztt_fu.bundle": "嘟嘴试试",
-
 	"fu_lm_koreaheart.bundle": "单手手指比心",
 	"fu_zh_baoquan.bundle": "双手抱拳",
 	"fu_zh_hezxiong.bundle": "双手合十",
@@ -17,7 +16,6 @@
 	"ctrl_rain.bundle": "推出手掌",
 	"ctrl_snow.bundle": "推出手掌",
 	"ctrl_flower.bundle": "推出手掌",
-
 	"makeup_icon_combination_age.bundle": "减龄妆",
 	"makeup_icon_combination_bored_cat.bundle": "厌世猫妆",
 	"makeup_icon_combination_daisy.bundle": "雏菊妆",
@@ -31,6 +29,5 @@
 	"makeup_icon_combination_supermodel.bundle": "超模妆",
 	"makeup_icon_combination_warm_winter.bundle": "暖冬妆",
 	"makeup_icon_combination_paper_cranes.bundle": "千纸鹤妆",
-	"big_head_smiling.bundle":"微笑触发"
+	"big_head_smiling.bundle": "微笑触发"
 }
-

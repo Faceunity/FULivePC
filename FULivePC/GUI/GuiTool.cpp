@@ -7,6 +7,8 @@
 extern float scaleRatioW;
 extern float scaleRatioH;
 
+using namespace cv;
+
 namespace gui_tool
 {
 
@@ -111,6 +113,16 @@ namespace gui_tool
 		return ret;
 	}
 
+	bool LayoutRectImageButtonWithText(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, const char* label)
+	{
+		ImGui::BeginGroup();
+		bool ret = ImGui::ImageButton(user_texture_id, ImVec2(size.x * scaleRatioW, size.y * scaleRatioH));/* ImGui::SameLine(0.f, 27.f);*/
+		ImGui::Spacing();
+		ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine(); ImGui::Text(label);
+		ImGui::EndGroup();
+		return ret;
+	}
+
 
 	void UpdateFrame2Tex(cv::Mat & frameData, GLuint texID)
 	{
@@ -171,12 +183,76 @@ namespace gui_tool
 		cv::circle(dataOut, { DEF_COLOR_W / 2,DEF_COLOR_W / 2 }, DEF_COLOR_W / 2, color, -1, cv::LINE_AA);
 	}
 
-	Texture::SharedPtr createColorTex(cv::Vec4b colorRGBA)
+	static void CutCircleInMiddle(cv::Mat & dataIn, cv::Mat & dataOut) {
+		Mat & srcImg = dataIn;
+		Mat maskImg;
+
+		maskImg = Mat(srcImg.rows, srcImg.cols, CV_8UC1, Scalar(0));
+
+		dataOut = srcImg.clone();
+		maskImg = Mat::zeros(srcImg.rows, srcImg.cols, CV_8UC1);
+
+		int X = srcImg.rows / 2;
+		int Y = srcImg.cols / 2;
+        cv::Point pt_o = cv::Point(X, Y);
+		int r = MIN(srcImg.rows, srcImg.cols) / 2;
+
+        cv::circle(maskImg, pt_o, r, Scalar(255), -1);
+
+		//imshow("testMask", maskImg);
+
+		cv::Mat bgra[4];
+		cv::split(dataOut, bgra);
+		bgra[3] = maskImg;
+		cv::merge(bgra, 4, dataOut);
+
+		//imshow("testOut", dataOut);
+	}
+
+	void generateTwoColorMat(cv::Vec4b colorRGBA0, cv::Vec4b colorRGBA1, cv::Mat & dataOut)
+	{
+		cv::Mat img(cv::Size(DEF_COLOR_W*2, DEF_COLOR_H*2), CV_8UC3);
+
+		rectangle(img, cv::Rect(0, 0, DEF_COLOR_W*2, DEF_COLOR_H), colorRGBA0, -1);
+		rectangle(img, cv::Rect(0, DEF_COLOR_H, DEF_COLOR_W*2, DEF_COLOR_H), colorRGBA1, -1);
+		
+		//imshow("img1", img);
+
+		CutCircleInMiddle(img, dataOut);
+	}
+
+	void generateThreeColorMat(cv::Vec4b colorRGBA0, cv::Vec4b colorRGBA1, cv::Vec4b colorRGBA2, cv::Mat & dataOut)
+	{
+
+		cv::Mat img;
+		img.create(DEF_COLOR_W * 3, DEF_COLOR_H*3, CV_8UC4);
+
+		rectangle(img, cv::Rect(0, 0, DEF_COLOR_W * 3, DEF_COLOR_H), colorRGBA0, -1);
+		rectangle(img, cv::Rect(0, DEF_COLOR_H, DEF_COLOR_W*3, DEF_COLOR_H), colorRGBA1, -1);
+		rectangle(img, cv::Rect(0, DEF_COLOR_H*2, DEF_COLOR_W * 3, DEF_COLOR_H), colorRGBA2, -1);
+		
+		CutCircleInMiddle(img, dataOut);
+
+	}
+
+	Texture::SharedPtr createColorTex(std::vector<cv::Vec4b> vecColorRGBA)
 	{
 		Texture::SharedPtr texRet = nullptr;
 
 		cv::Mat colordata;
-		generatePureColorMat(colorRGBA, colordata);
+		int nCnt = vecColorRGBA.size();
+		if (nCnt == 1)
+		{
+			generatePureColorMat(vecColorRGBA[0], colordata);
+		}else if (nCnt == 2)
+		{
+			generateTwoColorMat(vecColorRGBA[0], vecColorRGBA[1], colordata);
+		}
+		else if ( nCnt == 3)
+		{
+			generateThreeColorMat(vecColorRGBA[0], vecColorRGBA[1], vecColorRGBA[2], colordata);
+		}
+		
 
 		if (colordata.data)
 		{
@@ -252,13 +328,13 @@ namespace gui_tool
 		UIBridge::faceType = 0;
 		UIBridge::mFaceShapeLevel[0] = 40;
 		UIBridge::mFaceShapeLevel[1] = 40;
-		UIBridge::mFaceShapeLevel[2] = -20;
+		UIBridge::mFaceShapeLevel[2] = 0;
 		UIBridge::mFaceShapeLevel[3] = -20;
-		UIBridge::mFaceShapeLevel[4] = 50;
-		UIBridge::mFaceShapeLevel[5] = -10;
+		UIBridge::mFaceShapeLevel[4] = -20;
+		UIBridge::mFaceShapeLevel[5] = 50;
+		UIBridge::mFaceShapeLevel[6] = -10;
 
-		UIBridge::mFaceShapeLevel[6] = 50;
-		UIBridge::mFaceShapeLevel[7] = 0;
+		UIBridge::mFaceShapeLevel[7] = 50;
 		UIBridge::mFaceShapeLevel[8] = 0;
 		UIBridge::mFaceShapeLevel[9] = 0;
 		UIBridge::mFaceShapeLevel[10] = 0;
@@ -266,6 +342,7 @@ namespace gui_tool
 		UIBridge::mFaceShapeLevel[12] = 0;
 		UIBridge::mFaceShapeLevel[13] = 0;
 		UIBridge::mFaceShapeLevel[14] = 0;
+		UIBridge::mFaceShapeLevel[15] = 0;
 	}
 
 	void resetBodyShapeParam()

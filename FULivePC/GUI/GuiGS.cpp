@@ -728,8 +728,8 @@ void GUIGS::ShowColorChoiceWin(NamaExampleNameSpace::Nama * nama)
 
 				if (ImGui::ImageRoundButton(guiID, colorBag.pTex->getTextureID(), ImVec2(20, 20)))
 				{
-					nama->SetGSKeyColor(colorBag.colorRGBA);
-					m_curColor.setColor(colorBag.colorRGBA);
+					nama->SetGSKeyColor(colorBag.vecColorRGBA[0]);
+					m_curColor.setColor(colorBag.vecColorRGBA[0]);
 				}
 
 				ImGui::PopID();
@@ -855,7 +855,7 @@ void GUIGS::SetCurColorCircle(cv::Vec4b color)
 
 cv::Vec4b GUIGS::GetCurColorCircle()
 {
-	return m_curColor.colorRGBA;
+	return m_curColor.vecColorRGBA[0];
 }
 
 static MyDocument GDocs[3];
@@ -950,8 +950,8 @@ void GUIGS::ShowGSParamRight(NamaExampleNameSpace::Nama * nama)
 		UIBridge::m_bShowColorChoice = false;
 		// 恢复为默认绿色
 		auto & colorBag = m_vecColorTex[0];
-		nama->SetGSKeyColor(colorBag.colorRGBA);
-		m_curColor.setColor(colorBag.colorRGBA);
+		nama->SetGSKeyColor(colorBag.vecColorRGBA[0]);
+		m_curColor.setColor(colorBag.vecColorRGBA[0]);
 		// 取消选中
 		UIBridge::m_curRenderItemUIIDSec = 0;
 		ResetDefParam();

@@ -70,6 +70,14 @@ namespace NamaExampleNameSpace
 		bool Init(uint32_t& width, uint32_t& height);
 		bool InitAvatarController();
 		bool IsInited() { return mHasSetup; }
+
+		void SetCMDoubles(const std::string& key, double* values, uint32_t count);
+		void SetCMDouble(const std::string& key, double v);
+		int SelectCostumMakeupBundle(std::string bundleName, std::string strType);
+		void ClearAllCM();
+		void UnbindCurFixedMakeup();
+		void ChangeCleanFlag(bool bOpen);
+
 		bool SelectBundle(std::string bundleName);
 		bool CheckModuleCode(int category);
 		int  IsTracking();
@@ -104,6 +112,8 @@ namespace NamaExampleNameSpace
         void changeGSPreviewRect(FURect rect);
 		void setGSPreviewRect(FURect rect);
 		FURect getGSPreviewRect();
+
+		void DestroyAll();
 	private:
 		
 		void RenderGS(cv::Mat & picInput);
@@ -124,7 +134,8 @@ namespace NamaExampleNameSpace
 		uint32_t mFrameWidth, mFrameHeight;
 		static bool mHasSetup;
 		std::queue<gui_tool::ColorBag> m_queueRencetColor;
-		
+		std::map<std::string, int> m_CMakeupTypeMap;
+		std::unordered_map<std::string, int> m_CMakeupMap;
 
        
 	public:	
@@ -143,7 +154,7 @@ namespace NamaExampleNameSpace
         std::shared_ptr<CCameraDS> mCapture;
 #endif
 		static std::string mFilters[6];
-		std::unordered_map<std::string, int> mBundlesMap;
+		std::map<std::string, int> mBundlesMap;
 		std::unordered_map<std::string, std::vector<MakeupParam> > mMakeupsMap;
 		FuController * m_pCtrl;
 		AvatarType m_avaType = AVATAR_TYPE_FULLBODY;

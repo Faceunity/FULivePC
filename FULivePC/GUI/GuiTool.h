@@ -61,6 +61,8 @@ namespace gui_tool
 
 	bool LayoutImageButtonWithText(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, ImTextureID user_texture_id2, const char* label);
 
+	bool LayoutRectImageButtonWithText(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, const char* label);
+
 	void UpdateFrame2Tex(cv::Mat & frameData, GLuint texID);
 
 	void funGenTex(GLuint & texId);
@@ -71,9 +73,13 @@ namespace gui_tool
 
 	void generatePureColorMat(cv::Vec4b colorRGBA, cv::Mat & dataOut);
 
+	void generateTwoColorMat(cv::Vec4b colorRGBA0, cv::Vec4b colorRGBA1, cv::Mat & dataOut);
+
+	void generateThreeColorMat(cv::Vec4b colorRGBA0, cv::Vec4b colorRGBA1, cv::Vec4b colorRGBA2, cv::Mat & dataOut);
+
 	void generateHSVMat(int iW, int iH, cv::Mat & outData);
 
-	Texture::SharedPtr createColorTex(cv::Vec4b colorRGBA);
+	Texture::SharedPtr createColorTex(std::vector<cv::Vec4b> vecColorRGBA);
 
 	Texture::SharedPtr createColorHSV(int iW, int iH, cv::Mat & outRGB);
 
@@ -88,11 +94,10 @@ namespace gui_tool
 	typedef struct tagColorBag
 	{
 		Texture::SharedPtr pTex;
-		cv::Vec4b colorRGBA;
+		std::vector<cv::Vec4b> vecColorRGBA;
 
 		tagColorBag()
 		{
-			colorRGBA = { 0,0,0,0 };
 			pTex = nullptr;
 		}
 
@@ -102,17 +107,46 @@ namespace gui_tool
 			setColor(vec);
 		}
 
+		/* 后续支持下双色和三色的显示 */
+		tagColorBag(cv::Vec4b vec0, cv::Vec4b vec1)
+		{
+			setColor(vec0, vec1);
+		}
+
+		tagColorBag(cv::Vec4b vec0, cv::Vec4b vec1, cv::Vec4b vec2)
+		{
+			setColor(vec0, vec1, vec2);
+		}
+
 		tagColorBag(cv::Vec4b vec, void * )
 		{
-			colorRGBA = vec;
+			vecColorRGBA.push_back(vec);
 			pTex = nullptr;
 		}
 
 		void setColor(cv::Vec4b vec)
 		{
-			colorRGBA = vec;
+			vecColorRGBA.clear();
+			vecColorRGBA.push_back(vec);
 			pTex.reset();
-			pTex = gui_tool::createColorTex(colorRGBA);
+			pTex = gui_tool::createColorTex(vecColorRGBA);
+		}
+
+		void setColor(cv::Vec4b vec0, cv::Vec4b vec1)
+		{
+			vecColorRGBA.push_back(vec0);
+			vecColorRGBA.push_back(vec1);
+			pTex.reset();
+			pTex = gui_tool::createColorTex(vecColorRGBA);
+		}
+
+		void setColor(cv::Vec4b vec0, cv::Vec4b vec1, cv::Vec4b vec2)
+		{
+			vecColorRGBA.push_back(vec0);
+			vecColorRGBA.push_back(vec1);
+			vecColorRGBA.push_back(vec2);
+			pTex.reset();
+			pTex = gui_tool::createColorTex(vecColorRGBA);
 		}
 
 	}ColorBag;

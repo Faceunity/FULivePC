@@ -19,6 +19,14 @@ vector<string> FuToolMac::getVideoDevices()
 #define MyPicBUNDLE_PATH [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:MyPicBUNDLE_NAME]
 #define MyPicBUNDLE [NSBundle bundleWithPath: MyPicBUNDLE_PATH]
 
+
+string FuToolMac::Convert2utf8(const char * path)
+{
+   NSString * nstr =  [NSString stringWithUTF8String:path];
+   string str = [nstr UTF8String];
+   return str;
+}
+
 /*
   这里的filepath是ResPic.bundle下的相对路径
  */

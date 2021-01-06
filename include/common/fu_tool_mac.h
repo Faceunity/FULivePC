@@ -20,6 +20,7 @@ public:
 	static string GetRelativePathDependResourceBundle(const char * fullpath);
 	static bool importFilesInObjectC(const char *dirPath,vector<const char *> types,vector<const char *> *seletedFilesPathsPtr,bool allowsMultipleSelection);
     static float culculatorTextWidth(const char *string,float fontSize);
+    static string Convert2utf8(const char * path);
 private:
 	static FUCGSize culculatorTextSize(const char *string,float fontSize);
 	

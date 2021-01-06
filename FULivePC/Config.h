@@ -4,8 +4,9 @@
 #include <string>
 using namespace std;
 #define  MAX_NAMA_BUNDLE_NUM 1
+#define  MAX_NAMA_CM_BUNDLE_NUM 35
 
-const string g_faceBeautification = "graphics/face_beautification_v2.bundle";
+const string g_faceBeautification = "graphics/face_beautification.bundle";
 
 const string g_Makeup = "graphics/face_makeup.bundle";
 

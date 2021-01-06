@@ -13,8 +13,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "imgui/imgui_internal.h"
+#include "GuiCustomMakeup.h"
 #if __APPLE__
 #include "fu_tool_mac.h"
+#else
+#include "VirtualCamera.h"
 #endif 
 using namespace gui_tool;
 
@@ -34,6 +37,9 @@ bool UIBridge::showItemTipsWindow = false;
 bool UIBridge::showDegubInfoWindow = false;
 bool UIBridge::showFilterSlider = false;
 int UIBridge::showGreenScreen = false;
+bool UIBridge::showCustomMakeup = false;
+
+
  uint32_t UIBridge::mFPS = 60;
  uint32_t UIBridge::mResolutionWidth = 1280;
  uint32_t UIBridge::mResolutionHeight = 720;
@@ -292,6 +298,13 @@ static void ShowAvatarTip()
 	ImGui::End();
 }
 
+static void ShowCustomMakeupTip(Nama * nama)
+{
+	
+	GUICustomMakeup::Draw(nama);
+
+}
+
 static void ShowAvatarMenu(Nama * nama)
 {
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, 0.0f));
@@ -414,6 +427,8 @@ static void ShowDebugMenu()
 	}
 }
 
+#define MAKEUP_CUSTOM_NAME ("demo_icon_customize.bundle")
+
 static void ShowFloatMenuAR(Nama * nama)
 {
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
@@ -468,7 +483,25 @@ static void ShowFloatMenuAR(Nama * nama)
 					UIBridge::showItemTipsWindow = false;
 					UIBridge::mNeedStopMP3 = true;
 				}
-				nama->SelectBundle(gBundlePath[UIBridge::bundleCategory] + "/" + itemName);
+
+				if (itemName == MAKEUP_CUSTOM_NAME)
+				{
+					UIBridge::showCustomMakeup = true;
+					nama->UnbindCurFixedMakeup();
+				}
+				else
+				{
+					if (UIBridge::showCustomMakeup)
+					{
+						GUICustomMakeup::Reset(nama);
+						nama->DestroyAll();
+					}
+					
+					UIBridge::showCustomMakeup = false;
+					nama->SelectBundle(gBundlePath[UIBridge::bundleCategory] + "/" + itemName);
+				}
+
+				
 			}
 			ImGui::SameLine(0.f, 22.f * scaleRatioW);
 		}
@@ -893,7 +926,7 @@ void Gui::UpdateFrame(Nama * nama)
 		m_processedFrame.release();
 		m_processedFrame = frameMat.clone();
 		
-
+			
 		cv::cvtColor(frameMat, m_processedFrame, cv::COLOR_BGR2RGBA);
 
 		bool bNeedOri = (Nama::mEnableAvatar && Gui::mIsOpenMiniWindow) || UIBridge::m_bSamplingColor;
@@ -913,13 +946,29 @@ void Gui::UpdateFrame(Nama * nama)
 		{
 			m_processedFrame.setTo(150);
 		}else{
-			cv::Mat bgra[4];
+			cv::Mat bgra[4]; 
 			cv::split(m_processedFrame, bgra);
 			bgra[3] = 255.0;
 			cv::merge(bgra, 4, m_processedFrame);
 		}
 
 		UpdateFrame2Tex(m_processedFrame, m_texIDNamaProcess);
+        
+#if _WIN32
+        
+		if (UIBridge::mNeedIpcWrite)
+		{
+			static bool is_create_vc = false;
+			if (!is_create_vc)
+			{
+				createVirturalCamera(0);
+				is_create_vc = true;
+			}
+			pushDataToVirturalCamera(m_processedFrame.data, m_processedFrame.cols, m_processedFrame.rows);
+		}
+        
+#endif
+        
 	}
 }
 static void ShowTipStr(string tipStr){
@@ -1015,16 +1064,7 @@ void Gui::ProcessGSSampleClick(Nama * nama)
 				if (frameMat.data)
 				{
 					cv::Point point;
-					point.x = (pos.x - window->Pos.x) / CurW * frameMat.cols;
-
-					auto srcType = nama->GetCameraCaptureType();
-					/* 相机输入需要镜像，文件不需要 */
-					bool bNeedFlip = srcType != GS_INPUT_TYPE_FILE;
-					if (bNeedFlip)
-					{
-						point.x = frameMat.cols - point.x;
-					}
-					
+					point.x = (pos.x - window->Pos.x) / CurW * frameMat.cols;	
 					point.y = (pos.y - window->Pos.y) / CurH * frameMat.rows;
 
 					printf("keycolor pos find:(%d,%d) \r\n", point.x, point.y);
@@ -1180,7 +1220,10 @@ void Gui::render(Nama::UniquePtr& nama)
 				{
 					ShowAvatarTip();
 				}
-				else
+				else if (UIBridge::showCustomMakeup)
+				{
+					ShowCustomMakeupTip(nama.get());
+				}else
 				{
 					ShowTabs("rightTabs", 0, nama);
 				}

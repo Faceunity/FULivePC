@@ -2,9 +2,17 @@
 # Created by https://www.gitignore.io/api/oc,macos
 # Edit at https://www.gitignore.io/?templates=oc,macos
 
+*.xcuserstate
+*.DS_Store
+
 build/
 bin/
 x64/
+
+FULivePC/MAC_DATA/Info.plist
+FULivePC/MAC_DATA/ResPic.bundle
+FULivePC/MAC_DATA/Resource.bundle
+
 
 ### macOS ###
 # General
