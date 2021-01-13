@@ -151,7 +151,7 @@ vs2015/vs2017/vs2019
   2. 发送邮件至 **marketing@faceunity.com** 进行咨询。  
 #### 3.3 相关配置
 
-- 将证书文件authpack.h放置到include文件夹内（authpack.h由3.2步骤申请到）。
+- 将证书文件authpack.h放置到FULivePC文件夹内（authpack.h由3.2步骤申请到）。
 
 #### 3.4 编译运行
 
