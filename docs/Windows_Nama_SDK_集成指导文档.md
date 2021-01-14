@@ -1,24 +1,42 @@
 # Windows Nama SDK 集成指导文档  
 - 级别：Public   
-  更新日期：2020-09-27   
-  SDK版本: 7.2.0 
+  更新日期：2020-12-29   
+  SDK版本: 7.3.0 
 ------
 
 ### 最新更新内容：
 
+**2020-12-29 v7.3.0:**
+
+1. 优化美妆性能，和V7.2比，标准美妆Android端帧率提升29%，iOS端帧率提升17%；标准美颜+标准美妆，集成入第三方推流1小时后，在低端机上帧率高于15fps，可流畅运行。
+2. 优化美体性能，和V7.2比，性能显著提升，Android端帧率提升26%，CPU降低32%；iOS端帧率提升11%，CPU降低46%，内存降低45%。
+3. 优化人像分割性能，和V7.2比，性能显著提升，Android端帧率提升64%，CPU降低25%；iOS端帧率提升41%，CPU降低47%，内存降低44%。
+4. 优化美体功能效果，优化大幅度运动时，头部和肩部位置附近物体变形幅度大的问题；人体在画面中出现消失时过渡更自然；遮挡情况美体效果更加稳定，不会有高频持续抖动情况。
+5. 优化表情识别功能，提高识别准确性，共能识别17种表情动作。
+6. 优化绿幕抠像效果，提高边缘准确度。
+7. 优化人脸表情跟踪驱动效果，优化首帧检测模型显示较慢问题，加强细微表情跟踪，优化人脸转动时模型明显变小问题。
+8. 优化全身Avatar跟踪驱动效果，针对做连续高频大幅度运动的情况，如跳舞等场景，整体模型稳定性，尤其手臂稳定性提升，抖动情况显著改善。
+9. 优化美颜亮眼下眼睑溢色问题。
+10. 新增人脸拖拽变形功能，可使用FUCreator 2.1.0进行变形效果编辑。
+11. 新增美颜美型模块瘦圆眼功能，效果为使眼睛整体放大，尤其是纵向放大明显。
+12. 新增支持手势回调接口fuSetHandGestureCallBack，详见接口文档。
+13. 新增AI能力，表情识别，AITYPE为FUAITYPE_FACEPROCESSOR_EXPRESSION_RECOGNIZER
+14. windows sdk支持虚拟摄像头，用户可在直播平台上通过虚拟摄像头方式接入
+15. 控花、控雨、控雪道具重新制作，优化跟踪效果不连贯的问题
+
 **2020-9-27 v7.2.0:**
 
-- 新增绿幕抠像功能，支持替换图片、视频背景等。
-- 美颜模块新增瘦颧骨、瘦下颌骨功能。
-- 优化美颜性能以及功耗，优化集成入第三方推流服务时易发热掉帧问题。
-- 优化手势识别功能的效果以及性能，提升识别稳定性和手势跟随性效果，优化手势识别时cpu占有率。
-- 优化PC版各个功能性能，帧率提升显著。美发、美体、背景分割帧率提升30%以上，美颜、Animoji、美妆、手势等功能也有10%以上的帧率提升。
-- 优化包增量，SDK分为lite版，和全功能版本。lite版体积更小，包含人脸相关的功能(海报换脸除外)。
-- 优化人脸跟踪稳定性，提升贴纸的稳定性。
-- 提供独立核心算法SDK，接口文档详见算法SDK文档(FUAI_C_API_参考文档.md)。
-- fuGetFaceInfo接口新增三个参数，分别为：舌头方向(tongue_direction)，表情识别(expression_type)，头部旋转信息欧拉角参数(rotation_euler)。
-- 新增人体动作识别动作定义文档(人体动作识别文档.md)。
-- 
+1. 新增绿幕抠像功能，支持替换图片、视频背景等。
+2. 美颜模块新增瘦颧骨、瘦下颌骨功能。
+3. 优化美颜性能以及功耗，优化集成入第三方推流服务时易发热掉帧问题。
+4. 优化手势识别功能的效果以及性能，提升识别稳定性和手势跟随性效果，优化手势识别时cpu占有率。
+5. 优化PC版各个功能性能，帧率提升显著。美发、美体、人像分割帧率提升30%以上，美颜、Animoji、美妆、手势等功能也有10%以上的帧率提升。
+6. 优化包增量，SDK分为lite版，和全功能版本。lite版体积更小，包含人脸相关的功能(海报换脸除外)。
+7. 优化人脸跟踪稳定性，提升贴纸的稳定性。
+8. 提供独立核心算法SDK，接口文档详见算法SDK文档(FUAI_C_API_参考文档.md)。
+9. fuGetFaceInfo接口新增三个参数，分别为：舌头方向(tongue_direction)，表情识别(expression_type)，头部旋转信息欧拉角参数(rotation_euler)。
+10. 新增人体动作识别动作定义文档(人体动作识别文档.md)。
+ 
 
 2020-7-29 v7.1.0:
 
@@ -138,10 +156,10 @@ vs2015/vs2017/vs2019
   2. 发送邮件至 **marketing@faceunity.com** 进行咨询。
 
 ### 3.3 相关配置
-- 将证书文件authpack.h放置到include文件夹内（authpack.h由3.2步骤申请到）。
+- 将证书文件authpack.h放置到FULivePC文件夹内（authpack.h由3.2步骤申请到）。
 
 - 如需要将本SDK集成到你的工程中去：
-  1. 请将demo中的assets文件、ThirdParty\Windows\FaceUnity-SDK-PC\下素有库文件复制到你的工程中去。
+  1. 请将demo中的assets文件、ThirdParty\Windows\FaceUnity-SDK-PC\下所有库文件复制到你的工程中去。
   2. 同时配置OpenGL渲染环境，配置方法参考demo。
   3. 参考Nama.cpp代码流程进行集成。
 
@@ -342,10 +360,10 @@ fuRenderItemsEx2(FU_FORMAT_RGBA_Texture, output_data, FU_FORMAT_RGBA_BUFFER, cam
 RGBA相机输入，I420格式Buffer输出，适合推拉流或者视频处理：
 
 ```
-fuRenderItemsEx2(`FU_FORMAT_I420_BUFFER` , output_data, FU_FORMAT_RGBA_BUFFER, camera_data, camera_img_width, camera_img_height, mFrameID, handle_list, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
+fuRenderItemsEx2(FU_FORMAT_I420_BUFFER , output_data, FU_FORMAT_RGBA_BUFFER, camera_data, camera_img_width, camera_img_height, mFrameID, handle_list, handleSize, NAMA_RENDER_FEATURE_FULL, NULL);
 ```
 
-### 3.6 输出跟踪数据
+### 3.7 输出跟踪数据
 
 fuGetFaceInfo可以来获取每帧的人脸跟踪数据。
 
@@ -458,16 +476,14 @@ red_level 取值范围 0.0-2.0,0.0为无效果，2.0为最大效果，默认值0
 
 #### 三、磨皮
 
-控制磨皮的参数有四个：blur_level，skin_detect，nonshin_blur_scale，blur_type
+控制磨皮的参数有以下几个：
 
 ```
 blur_level: 磨皮程度，取值范围0.0-6.0，默认6.0
-skin_detect:肤色检测开关，0为关，1为开
-nonskin_blur_scale:肤色检测之后非肤色区域的融合程度，取值范围0.0-1.0，默认0.45
-blur_type: 重度磨皮开关，0为清晰磨皮，1为重度磨皮
+heavy_blur: 朦胧磨皮开关，0为清晰磨皮，1为朦胧磨皮
+blur_type：此参数优先级比heavy_blur低，在使用时要将heavy_blur设为0，0 清晰磨皮  1 朦胧磨皮  2精细磨皮
+blur_use_mask: 默认为0，1为开启基于人脸的磨皮mask，0为不使用mask正常磨皮。只在blur_type为2时生效。开启此功能需要高级美颜权限。
 ```
-
-注意：重度磨皮为高级美颜功能，需要相应证书权限才能使用 
 
 #### 四、亮眼
 
@@ -585,9 +601,9 @@ ar面具可以很贴合的在人脸上戴上一层面具，加载方式如下
  mItemsArray[0] = fuCreateItemFromPackage(data, size);
 ```
 
-### 4.5 背景分割
+### 4.5 人像分割
 
-背景分割道具可以识别到图像中人的区域，并将其与背景区别开来，然后在背景处绘制图案进行分割显示。加载方式如下：
+人像分割道具可以识别到图像中人的区域，并将其与背景区别开来，然后在背景处绘制图案进行分割显示。加载方式如下：
 
 ```c
  mItemsArray[0] = fuCreateItemFromPackage(data, size);
