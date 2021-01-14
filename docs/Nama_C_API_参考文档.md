@@ -2,13 +2,29 @@
 <!--每次更新文档，更新时间-->
 
 级别：Public   
-更新日期：2020-09-25   
-SDK版本: 7.2.0 
+更新日期：2020-12-29   
+SDK版本: 7.3.0 
 
 ------
 ### 最新更新内容：
 
 <!--这个小节写每次最新以及次新的更新记录，时间，更新内容。新增函数，函数接口定义更新-->
+2020-12-29 v7.3.0:
+1. 优化美妆性能，和V7.2比，标准美妆Android端帧率提升29%，iOS端帧率提升17%；标准美颜+标准美妆，集成入第三方推流1小时后，在低端机上帧率高于15fps，可流畅运行。
+2. 优化美体性能，和V7.2比，性能显著提升，Android端帧率提升26%，CPU降低32%；iOS端帧率提升11%，CPU降低46%，内存降低45%。
+3. 优化背景分割性能，和V7.2比，性能显著提升，Android端帧率提升64%，CPU降低25%；iOS端帧率提升41%，CPU降低47%，内存降低44%。
+4. 优化美体功能效果，优化大幅度运动时，头部和肩部位置附近物体变形幅度大的问题；人体在画面中出现消失时过渡更自然；遮挡情况美体效果更加稳定，不会有高频持续抖动情况。
+5. 优化表情识别功能，提高识别准确性，共能识别17种表情动作。
+6. 优化绿幕抠像效果，提高边缘准确度。
+7. 优化人脸表情跟踪驱动效果，优化首帧检测模型显示较慢问题，加强细微表情跟踪，优化人脸转动时模型明显变小问题。
+8. 优化全身Avatar跟踪驱动效果，针对做连续高频大幅度运动的情况，如跳舞等场景，整体模型稳定性，尤其手臂稳定性提升，抖动情况显著改善。
+9. 优化美颜亮眼下眼睑溢色问题。
+10. 新增人脸拖拽变形功能，可使用FUCreator 2.1.0进行变形效果编辑。
+11. 新增美颜美型模块瘦圆眼功能，效果为使眼睛整体放大，尤其是纵向放大明显。
+12. 新增支持手势回调接口fuSetHandGestureCallBack，详见接口文档。
+13. 新增AI能力，表情识别，AITYPE为FUAITYPE_FACEPROCESSOR_EXPRESSION_RECOGNIZER
+
+
 2020-9-24 v7.2.0:
 1. 新增绿幕抠像功能，支持替换图片、视频背景等，详见绿幕抠像功能文档。
 2. 美颜模块新增瘦颧骨、瘦下颌骨功能。
@@ -240,20 +256,22 @@ typedef enum FUAITYPE{
 	FUAITYPE_FACELANDMARKS75=1<<5,		//废弃
 	FUAITYPE_FACELANDMARKS209=1<<6,		//废弃
 	FUAITYPE_FACELANDMARKS239=1<<7,		//高级人脸特征点，7.0.0之后实际为241点
-	FUAITYPE_HUMANPOSE2D=1<<8,			//2D身体点位，7.0.0可使用FUAITYPE_HUMAN_PROCESSOR_2D_DANCE
+	FUAITYPE_HUMANPOSE2D=1<<8,			//2D身体点位，7.0.0及以上版本可使用FUAITYPE_HUMAN_PROCESSOR_2D_DANCE
 	FUAITYPE_BACKGROUNDSEGMENTATION_GREEN=1<<9,//绿幕分割
 	FUAITYPE_FACEPROCESSOR=1<<10，				//人脸算法模块，默认带低质量高性能表情跟踪
 	FUAITYPE_FACEPROCESSOR_FACECAPTURE = 1 << 11,	//高质量表情跟踪
   	FUAITYPE_FACEPROCESSOR_FACECAPTURE_TONGUETRACKING = 1 << 12,	//高质量表情跟踪模式下额外进行舌头追踪
   	FUAITYPE_FACEPROCESSOR_HAIRSEGMENTATION = 1 << 13,	//人脸算法模式下进行头发分割
   	FUAITYPE_FACEPROCESSOR_HEADSEGMENTATION = 1 << 14,	//人脸算法模式下进行头部分割
-  	FUAITYPE_HUMAN_PROCESSOR = 1 << 15,			//人体算法模块
-  	FUAITYPE_HUMAN_PROCESSOR_DETECT = 1 << 16,	//人体算法模式下进行每帧都进行全图人体检测，性能相对较差
-  	FUAITYPE_HUMAN_PROCESSOR_2D_SELFIE = 1 << 17,//人体算法模式下进行2D半身点位
-  	FUAITYPE_HUMAN_PROCESSOR_2D_DANCE = 1 << 18,//人体算法模式下进行2D全身点位
-  	FUAITYPE_HUMAN_PROCESSOR_3D_SELFIE = 1 << 19,//人体算法模式下进行3D半身点位
-  	FUAITYPE_HUMAN_PROCESSOR_3D_DANCE = 1 << 20,//人体算法模式下进行3D全身点位
-  	FUAITYPE_HUMAN_PROCESSOR_SEGMENTATION = 1 << 21 //人体算法模式下进行人体分割
+  	FUAITYPE_FACEPROCESSOR_EXPRESSION_RECOGNIZER = 1 << 15, //表情识别
+  	FUAITYPE_HUMAN_PROCESSOR = 1 << 16,			//人体算法模块
+  	FUAITYPE_HUMAN_PROCESSOR_DETECT = 1 << 17,	//人体算法模式下进行每帧都进行全图人体检测，性能相对较差
+  	FUAITYPE_HUMAN_PROCESSOR_2D_SELFIE = 1 << 18,//人体算法模式下进行2D半身点位
+  	FUAITYPE_HUMAN_PROCESSOR_2D_DANCE = 1 << 19,//人体算法模式下进行2D全身点位
+  	FUAITYPE_HUMAN_PROCESSOR_2D_SLIM = 1 << 20,//人体算法模式下进行2D全身点位，针对美体场景优化全身关键点检测模式，拥有更快的性能
+  	FUAITYPE_HUMAN_PROCESSOR_3D_SELFIE = 1 << 21,//人体算法模式下进行3D半身点位
+  	FUAITYPE_HUMAN_PROCESSOR_3D_DANCE = 1 << 22,//人体算法模式下进行3D全身点位
+  	FUAITYPE_HUMAN_PROCESSOR_SEGMENTATION = 1 << 23 //人体算法模式下进行人体分割
 }FUAITYPE;
 ```
 
@@ -296,8 +314,8 @@ AI能力会随SDK一起发布，存放在assets/AI_Model目录中。
 - ai_facelandmarks239.bundle 为脸部特征点239点AI能力模型。	//高级人脸特征点，7.0.0之后实际为241点
 - ai_humanpose.bundle 为人体2D点位AI能力模型，对应FUAITYPE_HUMANPOSE2D。7.0.0之后版本，可以统一使用ai_human_processor.bundle对应的人体点位模块。
 - ai_bgseg_green.bundle 为绿幕背景分割AI能力模型，对应FUAITYPE_BACKGROUNDSEGMENTATION_GREEN。
-- ai_face_processor.bundle 为人脸特征点、表情跟踪以及头发mask、头部maskAI能力模型，需要默认加载，对应FUAITYPE_FACEPROCESSOR。__注意:__ 桌面版(windows pc, mac)请使用ai_face_processor_pc.bundle, ai_face_processor.bundle 和 ai_face_processor_pc.bundle 功能相同，针对pc进行性能优化版本。。
-- ai_human_processor.bundle 为人体算法能力模型，包括人体检测、2D人体关键点（全身、半身）、人体3D骨骼（全身、半身）、人像mask、动作识别等能力，对应FUAITYPE_HUMAN_PROCESSOR。__注意:__ 桌面版(windows pc, mac)请使用ai_human_processor_pc.bundle, ai_human_processor_pc.bundle 和 ai_human_processor.bundle 功能相同，针对pc进行性能优化版本。
+- ai_face_processor.bundle 为人脸特征点、表情跟踪以及头发mask、头部mask、表情识别等AI能力模型，需要默认加载，对应FUAITYPE_FACEPROCESSOR。__注意:__ 桌面版(windows pc, mac)请使用ai_face_processor_pc.bundle, ai_face_processor.bundle 和 ai_face_processor_pc.bundle 功能相同，针对pc进行性能优化版本。。
+- ai_human_processor.bundle 为人体算法能力模型，包括人体检测、2D人体关键点（全身、半身）、人体3D骨骼（全身、半身）、人像mask、动作识别等能力，对应FUAITYPE_HUMAN_PROCESSOR。__注意:__ 桌面版(windows pc, mac)请使用ai_human_processor_pc.bundle, ai_human_processor_pc.bundle 和 ai_human_processor.bundle 功能相同，针对pc进行性能优化版本。ai_human_processor_mb_fast.bundle为手机背景分割高性能版本。
 
 ##### fuReleaseAIModel 函数
 当不需要是使用特定的AI能力时，可以释放其资源，节省内存空间。1为已释放，0为未释放。
@@ -674,7 +692,7 @@ __备注:__
 
 ------
 ##### fuBeautifyImage 函数
-将输入的图像数据，送入SDK流水线进行全图美化，并输出处理之后的图像数据。该接口只执行美颜相关功能。由于功能集中，相比```fuRenderItemsEx``` 接口执行美颜道具，该接口所需计算更少，执行效率更高。
+将输入的图像数据，送入SDK流水线进行全图美化，并输出处理之后的图像数据。该接口只执行图像层面的美化处理（包括滤镜、美肤），不执行人脸跟踪以及所有人脸相关的操作（如美型）。由于功能集中，相比```fuRenderItemsEx``` 接口执行美颜道具，该接口所需计算更少，执行效率更高。
 
 ```C
 int fuBeautifyImage(
@@ -1040,7 +1058,6 @@ __返回值:__
 成功完成解绑的道具数量。
 
 __备注:__  
-__注意__: 6.7版本该接口已废弃  
 
 销毁资源道具前，需要将资源道具从Controller道具上解绑。
 
@@ -1138,6 +1155,42 @@ __返回值:__
 设置之前的系统最大人脸数。
 
 ------
+##### fuSetHandGestureCallBack 函数
+设置手势识别回调函数，当开启手势功能，通过fuRenderXXX接口进行渲染时，识别到人手时调用回调函数。
+```C
+/**
+ * \brief HandGestureCallBack,callback with first handgesture type.
+ * \param type, ref to FUAIGESTURETYPE
+ */
+typedef void (*HandGestureCallBack)(int type);
+
+/**
+ * \brief set callback for handgesture detection.
+ * \param onHandGestureListener,
+ * callback. will override the older one, null for reset callback.
+ * \note this callback will be called with the first hand's type, you should
+ * use fuHandDetectorGetResultNumHands and fuHandDetectorGetResultGestureType
+ * for all info.
+ * \note this callback will be called when calling Render* interface. when use
+ * fuTrackFace*, you should use fuHandDetectorGetResultNumHands and
+ * fuHandDetectorGetResultGestureType for all info.
+ */
+FUNAMA_API void fuSetHandGestureCallBack(HandGestureCallBack cb);
+```
+__参数:__  
+
+*cb [in]*：回调函数。设置NULL/nullptr清除回调函数。
+
+__返回值:__  
+
+无
+
+__备注:__  
+
+当触发时，回调函数会被调用，且带有一个参数表示，识别到的第一个手势，参见FUAIGESTURETYPE。多个手势同时识别到时可以在回调中再通过fuHandDetectorGetResultNumHands 和fuHandDetectorGetResultGestureType获取详细手势信息。  
+此回调只有在fuRenderXXX接口时会回调，使用fuTrackFaceXXXX接口时，请通过fuHandDetectorGetResultNumHands 和fuHandDetectorGetResultGestureType获取详细手势信息。
+
+------
 ##### fuGetFaceInfo 函数
 在主接口执行过人脸跟踪操作后，通过该接口获取人脸跟踪的结果信息。获取信息需要证书提供相关权限，目前人脸信息权限包括以下级别：默认、Landmark、Avatar。
 ```C
@@ -1166,9 +1219,10 @@ __备注:__
 | face_rect      | 4    | float |人脸矩形框，图像分辨率坐标，数据为 (x_min, y_min, x_max, y_max) | 默认     |
 | rotation_mode  | 1    | int |识别人脸相对于设备图像的旋转朝向，取值范围 0-3，分别代表旋转0度、90度、180度、270度 | 默认     |
 | failure_rate[已废弃] | 1    | float |人脸跟踪的失败率，表示人脸跟踪的质量。取值范围为 0-2，取值越低代表人脸跟踪的质量越高 | 默认     |
-| is_calibrating | 1    | int |表示是否SDK正在进行主动表情校准，取值为 0 或 1。             | 默认     |
+| is_calibrating[已废弃] | 1    | int |表示是否SDK正在进行主动表情校准，取值为 0 或 1。             | 默认     |
 | focal_length   | 1    | float| SDK当前三维人脸跟踪所采用的焦距数值                          | 默认     |
 | landmarks      | 75x2 | float|人脸 75 个特征点，图像分辨率坐标                             | Landmark |
+| landmarks_ar      | 75x3 | float|人脸 75 个特征点，3D空间坐标，需使用投影矩阵计算，见下文示例代码                             | Avatar |
 | rotation       | 4    | float|人脸三维旋转，数据为旋转四元数\*                              | Landmark |
 | translation    | 3    | float|人脸三维平移，数据为 (x, y, z)                               | Landmark |
 | eye_rotation   | 4    | float| 眼球旋转，数据为旋转四元数\*，上下22度，左右30度。                                  | Landmark |
@@ -1203,10 +1257,23 @@ typedef enum FUAITONGUETYPE {
 ```C
 typedef enum FUAIEXPRESSIONTYPE {
   FUAIEXPRESSION_UNKNOWN = 0,
-  FUAIEXPRESSION_SMILE = 1 << 1,
-  FUAIEXPRESSION_MOUTH_OPEN = 1 << 2,
-  FUAIEXPRESSION_EYE_BLINK = 1 << 3,
-  FUAIEXPRESSION_POUT = 1 << 4,
+  FUAIEXPRESSION_BROW_UP = 1 << 1, //抬眉毛
+  FUAIEXPRESSION_BROW_FROWN = 1 << 2,//皱眉
+  FUAIEXPRESSION_LEFT_EYE_CLOSE = 1 << 3,//闭左眼
+  FUAIEXPRESSION_RIGHT_EYE_CLOSE = 1 << 4,//闭右眼
+  FUAIEXPRESSION_EYE_WIDE = 1 << 5,//睁大眼睛
+  FUAIEXPRESSION_MOUTH_SMILE_LEFT = 1 << 6,//抬左边嘴角
+  FUAIEXPRESSION_MOUTH_SMILE_RIGHT = 1 << 7,//抬右边嘴角
+  FUAIEXPRESSION_MOUTH_FUNNEL = 1 << 8,//嘴型O
+  FUAIEXPRESSION_MOUTH_OPEN = 1 << 9,//嘴型'啊'
+  FUAIEXPRESSION_MOUTH_PUCKER = 1 << 10,//嘟嘴
+  FUAIEXPRESSION_MOUTH_ROLL = 1 << 11,//抿嘴
+  FUAIEXPRESSION_MOUTH_PUFF = 1 << 12,//鼓脸
+  FUAIEXPRESSION_MOUTH_SMILE = 1 << 13,//微笑
+  FUAIEXPRESSION_MOUTH_FROWN = 1 << 14,//撇嘴
+  FUAIEXPRESSION_HEAD_LEFT = 1 << 15,//左转头
+  FUAIEXPRESSION_HEAD_RIGHT = 1 << 16,//右转头
+  FUAIEXPRESSION_HEAD_NOD = 1 << 17,//点头
 } FUAIEXPRESSIONTYPE;
 ```
 获取三维网格代码参考
@@ -1308,8 +1375,8 @@ for (int i = 0; i < 75; i++){
 	pos = project_mat.trans() * trans_mat * pos;
 	pos /= pos[3];
 	Float3 store;
-	store[0] = (pos[0] + 1) * screen_w - screen_w/2;
-	store[1] = (pos[1] + 1) * screen_h - screen_h / 2;
+	store[0] = (pos[0] + 1) * 0.5 * screen_w;
+	store[1] = (pos[1] + 1) * 0.5 * screen_h;
 	store[0] = (int)floor(store[0]);
 	store[1] = (int)floor(store[1]);
 	//draw
