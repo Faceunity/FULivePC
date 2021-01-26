@@ -1,1 +1,1 @@
-#define SDK_GIT_VERSION 9c5d3f05 
+#define SDK_GIT_VERSION de688a8b 

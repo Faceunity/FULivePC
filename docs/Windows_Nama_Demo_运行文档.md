@@ -1,10 +1,23 @@
 # Demo运行说明文档-Windows 
 - 级别：Public
-  更新日期：2020-12-29
+  更新日期：2021-01-25   
   
   ------
   
-  **FaceUnity Nama SDK v7.3.0 (2020-12-29)**
+  **FaceUnity Nama SDK v7.3.2 (2021-01-25)**
+2021-01-25 v7.3.2:
+
+1. 优化人脸表情跟踪驱动性能。
+
+2. fuSetup 函数改为线程安全。
+
+3. fuSetUp 、fuCreateItemFromPackage、fuLoadAIModel函数增加异常处理，增强鲁棒性。
+
+4. 修复自定义哈哈镜功能效果问题。
+
+5. 修复SDK在Mac 10.11上crash问题。
+
+6. 修复SDK在贴纸和Animoji混用时crash问题。  
 
 2020-12-29 v7.3.0:
 
