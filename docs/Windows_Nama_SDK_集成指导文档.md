@@ -1,12 +1,23 @@
 # Windows Nama SDK 集成指导文档  
-- 级别：Public   
-  更新日期：2021-1-25   
-  SDK版本: 7.3.2
-------
+
+级别：Public   
+更新日期：2021-04-16   
+SDK版本: 7.4.0
 
 ### 最新更新内容：
 
-**2021-01-25 v7.3.2:**
+**2021-01-25 v7.4.0:**
+
+1. 优化2D人体点位和美体性能。  
+2. 优化人像分割效果和性能。优化手臂和手识别不稳定问题，优化背景误识别问题。修复人像分割偏移问题。  
+3. 优化美妆效果。优化美瞳贴合效果和溢色问题；优化唇妆遮挡效果，遮挡时口红不再显现。  
+4. 优化Animoji面部驱动效果。优化小幅度动作，如小幅度张嘴和眨眼时，驱动效果更加灵敏。  
+5. 优化情绪识别，支持8种基本情绪识。  
+6. 新增接口fuSetUseAsyncAIInference，支持异步模式，开启异步模式，帧率提升，可改善客户在一些低端设备上帧率不足问题。  
+7. 新增fuRender接口，为所有业务统一渲染接口，详见接口定义。  
+8. 新增接口 fuSetInputCameraBufferMatrix，fuSetInputCameraBufferMatrixState，fuSetInputCameraTextureMatrix，fuSetInputCameraTextureMatrixState，fuSetOutputMatrix，fuSetOutputMatrixState，用于设置图像转换矩阵，用于调整输出图像方向，详见接口定义。  
+
+2021-01-25 v7.3.2:
 
 1. 优化人脸表情跟踪驱动性能。
 

@@ -1,5 +1,6 @@
 #include "FuController.h"
 #include "CNamaSDK.h"
+#include "CNamaSDKScene.h"
 #include "opencv2/core/core_c.h"
 #include "fu_tool.h"
 
@@ -13,14 +14,12 @@ FuController::FuController()
 
 FuController::~FuController()
 {
-	if (m_pFaceCaptureModel)
-	{
-		fuFaceCaptureDestory(m_pFaceCaptureModel);
-	}
+
 }
 
 void FuController::InitController(std::string strControllerPath, std::string strConfigPath)
 {
+
 	std::vector<char> vecCtrlBundle, vecCfgBundle;
 	bool flag = FuTool::LoadBundle(strControllerPath, vecCtrlBundle);
 	bool flagCfg = FuTool::LoadBundle(strConfigPath, vecCfgBundle);
@@ -28,18 +27,18 @@ void FuController::InitController(std::string strControllerPath, std::string str
 	{
 		m_nCtrlHandle = fuCreateItemFromPackage(&vecCtrlBundle[0], vecCtrlBundle.size());
 		m_nCtrlCfgHandle = fuCreateItemFromPackage(&vecCfgBundle[0], vecCfgBundle.size());
-		fuBindItems(m_nCtrlHandle, &m_nCtrlCfgHandle, 1);
+		//fuBindItems(m_nCtrlHandle, &m_nCtrlCfgHandle, 1);
 		m_vecRender.push_back(m_nCtrlHandle);
 
-		
-		/* 采用新的识别库,必须设定 */
-		fuItemSetParamd(m_nCtrlHandle, "enable_human_processor", 1.0);
+		mScreenHandle = fuCreateScene();
+		mInstanceHandle = fuCreateInstance(mScreenHandle);
 
+		fuEnableHumanProcessor(mScreenHandle, 1.0);
 
-		double pdArray[] = { 0.0, 50.0, -900 };
-		fuItemSetParamdv(m_nCtrlHandle, "target_position", pdArray, 3);
+		fuBindItemsToInstance(mInstanceHandle, &m_nCtrlCfgHandle, 1);
+		fuSetInstanceTargetPosition(mInstanceHandle, 0.0, 50.0, -900);
 
-		fuItemSetParamd(m_nCtrlHandle, "reset_all", 1.0);
+		//fuItemSetParamd(m_nCtrlHandle, "reset_all", 1.0);
 	}
 }
 
@@ -69,8 +68,8 @@ int FuController::BindBundleToController(std::string strBundlePath)
 	{
 		int nHandle = fuCreateItemFromPackage(&vecBundle[0], vecBundle.size());
 
-		fuBindItems(m_nCtrlHandle, &nHandle, 1);
-
+		//fuBindItems(m_nCtrlHandle, &nHandle, 1);
+		fuBindItemsToInstance(mInstanceHandle, &nHandle, 1);
 		m_vecBundles.emplace_back(nHandle);
 
 		return nHandle;
@@ -80,7 +79,13 @@ int FuController::BindBundleToController(std::string strBundlePath)
 
 void FuController::UnBindBundle(int nHandle)
 {
-	fuUnbindItems(m_nCtrlHandle, &nHandle, 1);
+	//fuUnbindItems(m_nCtrlHandle, &nHandle, 1);
+	fuUnbindItemsFromInstance(mInstanceHandle, &nHandle, 1);
+}
+
+void FuController::SetPos(float x, float y, float z)
+{
+	fuSetInstanceTargetPosition(mInstanceHandle, x, y, z);
 }
 
 int FuController::GetParam(std::string strKey)
@@ -115,31 +120,17 @@ unsigned int FuController::RenderBundlesBuffer(uint8_t* out_buffer, cv::Mat& bgr
 
 void FuController::OpenBodyTracking(bool bOpen)
 {
-	fuItemSetParamd(m_nCtrlHandle, "human_3d_track_is_follow", bOpen ? 1.0 : 0.0);
+	fuEnableHumanFollowMode(mScreenHandle, bOpen ? 1:0);
 }
 
 void FuController::CheckHalfBody(bool bHalfBody)
 {
-	fuItemSetParamd(m_nCtrlHandle, "human_3d_track_set_scene", bHalfBody ? 0 : 1);
+	fuHumanProcessorSet3DScene(mScreenHandle, bHalfBody ? 0:1);
 }
 
 int FuController::GetHumanStatus()
 {
 	return fuItemGetParamd(m_nCtrlHandle, "human_status");
-}
-
-void FuController::CreateFaceCapture(std::string strPath)
-{
-	std::vector<char> bundlebyte;
-	bool flag = FuTool::LoadBundle(strPath, bundlebyte);
-	if (flag)
-	{
-		m_pFaceCaptureModel = fuFaceCaptureCreate(bundlebyte.data(), (int)bundlebyte.size());
-
-		fuItemSetParamu64(m_nCtrlHandle, "register_face_capture_manager", (long long)m_pFaceCaptureModel);
-		fuItemSetParamd(m_nCtrlHandle, "register_face_capture_face_id", 0.0);
-		fuSetMaxFaces(1);
-	}
 }
 
 void FuController::OpenFaceCapture(bool bOpen)
@@ -159,18 +150,6 @@ void FuController::OpenBlinkTrack(bool bOpen)
 	fuItemSetParamdv(1, "blend_expression", blend_expression, 57);
 }
 
-void FuController::RunFaceCapture(cv::Mat& bgraFrame)
-{
-	if (m_pFaceCaptureModel)
-	{
-		fuFaceCaptureProcessFrame(m_pFaceCaptureModel, (void*)(bgraFrame.data), bgraFrame.cols, bgraFrame.rows, FU_FORMAT_BGRA_BUFFER, 0);
-	}
-}
-
-int FuController::GetFaceCaptureNum()
-{
-	return fuFaceCaptureGetResultFaceNum(m_pFaceCaptureModel);
-}
 
 void FuController::CreateTexForItemchar(const char* path)
 {

@@ -42,6 +42,7 @@ public:
 
 	static void ChangeGreenScreenBg(std::string strFilePath);
 
+	static void CloseGreenScreenBg();
 
 	static void UpdateGreenScreenBg(NamaExampleNameSpace::Nama * nama);
 

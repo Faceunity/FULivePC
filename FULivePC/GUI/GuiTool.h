@@ -83,6 +83,8 @@ namespace gui_tool
 
 	Texture::SharedPtr createColorHSV(int iW, int iH, cv::Mat & outRGB);
 
+	void CutCircleInMiddle(cv::Mat & dataIn, cv::Mat & dataOut);
+
 	void resetBeautyParam();
 
 	void resetShapeParam();

@@ -103,7 +103,8 @@ __attribute__((visibility("default"))) @interface FURenderer : NSObject
  @param package 密钥数组，必须配置好密钥，SDK 才能正常工作
  @param size 密钥数组大小
  @param shouldCreate  如果设置为 YES，我们会在内部创建并持有一个
- EAGLContext，OpenGL相关操作建议所用OC层接口 (注：OC接口会切换到内部创建的EAGLContext上执行，防止多EAGLContext异常问题)
+ EAGLContext，OpenGL相关操作建议所用OC层接口
+ (注：OC接口会切换到内部创建的EAGLContext上执行，防止多EAGLContext异常问题)
  @return 初始化结果，为0则初始化失败，大于0则初始化成功
  */
 - (int)setupWithData:(void*)data
@@ -123,7 +124,8 @@ __attribute__((visibility("default"))) @interface FURenderer : NSObject
  @param package 密钥数组，必须配置好密钥，SDK 才能正常工作
  @param size 密钥数组大小
  @param shouldCreate  如果设置为 YES，我们会在内部创建并持有一个
- EAGLContext，OpenGL相关操作建议所用OC层接口 (注：OC接口会切换到内部创建的EAGLContext上执行，防止多EAGLContext异常问题)
+ EAGLContext，OpenGL相关操作建议所用OC层接口
+ (注：OC接口会切换到内部创建的EAGLContext上执行，防止多EAGLContext异常问题)
  @return 初始化结果，为0则初始化失败，大于0则初始化成功
  */
 - (int)setupWithDataPath:(NSString*)v3path
@@ -141,7 +143,8 @@ __attribute__((visibility("default"))) @interface FURenderer : NSObject
  @param package 密钥数组，必须配置好密钥，SDK 才能正常工作
  @param size 密钥数组大小
  @param shouldCreate  如果设置为 YES，我们会在内部创建并持有一个
- EAGLContext，OpenGL相关操作建议所用OC层接口 (注：OC接口会切换到内部创建的EAGLContext上执行，防止多EAGLContext异常问题)
+ EAGLContext，OpenGL相关操作建议所用OC层接口
+ (注：OC接口会切换到内部创建的EAGLContext上执行，防止多EAGLContext异常问题)
  @return 第一次鉴权成功后的文件
  */
 
@@ -512,6 +515,12 @@ __attribute__((visibility("default"))) @interface FURenderer : NSObject
 + (void)onCameraChange;
 
 /**
+ 销毁所有gl资源时需调用的接口：
+ - 销毁所有gl资源时需要调用该接口
+ */
++ (void)ReleaseGLResources;
+
+/**
  销毁所有道具时需调用的接口：
  - 销毁所有道具时需要调用该接口，我们会在内部销毁每个指令中的OpenGL资源
  */
@@ -761,6 +770,11 @@ __attribute__((visibility("default"))) @interface FURenderer : NSObject
               pret:(float*)pret
             number:(int)number;
 
++ (int)getFaceInfoRotated:(int)faceId
+                     name:(NSString*)name
+                     pret:(float*)pret
+                   number:(int)number;
+
 /**
  获取正在跟踪人脸的标识符，用于在SDK外部对多人情况下的不同人脸进行区别。
  @param faceId，人脸编号，表示识别到的第 x
@@ -870,103 +884,33 @@ __attribute__((visibility("default"))) @interface FURenderer : NSObject
 **/
 + (int)authCountWithAPIName:(NSString*)name;
 
-+ (void*)create3DBodyTracker:(void*)model size:(int)size;
-
-+ (void)destroy3DBodyTracker:(void*)modelPtr;
-
-+ (int)run3DBodyTracker:(void*)modelPtr
-            humanHandle:(int)humanHandle
-                  inPtr:(void*)inPtr
-               inFormat:(FUFormat)inFormat
-                      w:(int)w
-                      h:(int)h
-           rotationMode:(int)rotationMode;
-
-/**
-new tracker
-**/
-+ (void*)faceCaptureCreate:(void*)data size:(int)size;
-
-+ (void)faceCaptureDestory:(void*)model;
-
-+ (int)faceCaptureReset:(void*)model;
-
-/**
- Run face capturing
-
- @param manager_ptr_addr the pointer of the capture manager
- @param img input image pointer, data type must be byte
- @param w input image width
- @param h input image height
- @param fu_image_format FU_FORMAT_*_BUFFER
- @param rotation_mode w.r.t to rotation the the camera view, 0=0^deg, 1=90^deg,
- 2=180^deg, 3=270^deg
- @return whether the current frame is valid for tracking
-*/
-+ (int)faceCaptureProcessFrame:(void*)model
-                         inPtr:(void*)inPtr
-                      inFormat:(FUFormat)inFormat
-                             w:(int)w
-                             h:(int)h
-                  rotationMode:(int)rotationMode;
-
-/*
- @return 返回 1 代表获取成功，返回 0 代表获取失败
-*/
-+ (int)faceCaptureGetResultLandmarks:(void*)model
-                               faceN:(int)faceN
-                              buffer:(float*)buffer
-                              length:(int)length;
-
-+ (int)faceCaptureGetResultIdentity:(void*)model
-                              faceN:(int)faceN
-                             buffer:(float*)buffer
-                             length:(int)length;
-
-+ (int)faceCaptureGetResultExpression:(void*)model
-                                faceN:(int)faceN
-                               buffer:(float*)buffer
-                               length:(int)length;
-
-+ (int)faceCaptureGetResultRotation:(void*)model
-                              faceN:(int)faceN
-                             buffer:(float*)buffer
-                             length:(int)length;
-
-+ (int)faceCaptureGetResultFaceBbox:(void*)model
-                              faceN:(int)faceN
-                             buffer:(float*)buffer
-                             length:(int)length;
-
-+ (int)faceCaptureGetResultTranslation:(void*)model
-                                 faceN:(int)faceN
-                                buffer:(float*)buffer
-                                length:(int)length;
-
-+ (int)faceCapturGetResultTongueExp:(void*)model
-                              faceN:(int)faceN
-                             buffer:(float*)buffer
-                             length:(int)length;
-
-/*
-
-*/
-+ (int)faceCaptureGetResultIsFace:(void*)model faceN:(int)faceN;
-
-+ (int)faceCaptureGetResultFaceID:(void*)model faceN:(int)faceN;
-
-+ (float)faceCaptureGetResultTongueScore:(void*)model faceN:(int)faceN;
-
-+ (int)faceCaptureGetResultTongueClass:(void*)model faceN:(int)faceN;
-
-+ (float)faceCaptureGetResultFocalLength:(void*)model;
-
-+ (int)faceCaptureGetResultFaceNum:(void*)model;
-
 /**
  释放nama资源
  */
 + (void)namaLibDestroy;
 
 + (void)humanProcessorReset;
+
+/**
+ prepare GL resource for a list of items in advance
+    This function needs a GLES 2.0+ context.
+ @param items the list of items
+ @param itemCount the number of items
+*/
+- (void)prepareGLResource:items:(int*)items itemCount:(int)itemCount;
+
+/**
+ check prepare gl resource is ready.
+    1 for ready prepared, 0 false.
+ @param items the list of items
+ @param itemCount the number of items
+*/
+- (int)isGLPrepared:items:(int*)items itemCount:(int)itemCount;
+
+/**
+ check gl error
+ @return OpenGL error information, 0 for no error
+*/
++ (int)checkGLError;
+
 @end

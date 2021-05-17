@@ -17,6 +17,7 @@ enum BundleCategory
 {
 	Animoji,
 	ItemSticker,
+	ItemJingpin,
 	ARMask,
 	ExpressionRecognition,
 	MusicFilter,
@@ -74,7 +75,7 @@ public:
 	static bool mNeedPlayMP3;
 	static bool mNeedStopMP3;
 
-	static uint32_t mFPS;
+	static volatile uint32_t mFPS;
 	static uint32_t mResolutionWidth;
 	static uint32_t mResolutionHeight;
 	static uint32_t mRenderTime;
@@ -178,6 +179,7 @@ extern const string g_assetDir;
 const string gBundlePath[] = {
 	g_assetDir + "items/" + "Animoji",
 	g_assetDir + "items/" + "ItemSticker",
+	g_assetDir + "items/" + "JINPINHOLDER",
 	g_assetDir + "items/" + "ARMask",
 	g_assetDir + "items/" + "ExpressionRecognition",
 	g_assetDir + "items/" + "MusicFilter",

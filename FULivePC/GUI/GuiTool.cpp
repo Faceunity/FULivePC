@@ -183,7 +183,7 @@ namespace gui_tool
 		cv::circle(dataOut, { DEF_COLOR_W / 2,DEF_COLOR_W / 2 }, DEF_COLOR_W / 2, color, -1, cv::LINE_AA);
 	}
 
-	static void CutCircleInMiddle(cv::Mat & dataIn, cv::Mat & dataOut) {
+	void CutCircleInMiddle(cv::Mat & dataIn, cv::Mat & dataOut) {
 		Mat & srcImg = dataIn;
 		Mat maskImg;
 
@@ -198,6 +198,26 @@ namespace gui_tool
 		int r = MIN(srcImg.rows, srcImg.cols) / 2;
 
         cv::circle(maskImg, pt_o, r, Scalar(255), -1);
+
+		//带阿尔法通道的原始图
+		if (srcImg.channels() == 4)
+		{
+			int height = srcImg.rows;
+			int width = srcImg.cols;
+			int sum = 0;
+			for (int row = 0; row < height; row++) {
+				for (int col = 0; col < width; col++) {
+					int srcAlpha = srcImg.at<cv::Vec4b>(row, col)[3];
+					int maskAlpha = maskImg.at<cv::uint8_t>(row, col);
+					if (maskAlpha == 255)
+					{
+						//圆圈区域赋值成阿尔法原始值
+						maskImg.at<cv::uint8_t>(row, col) = srcAlpha;
+					}
+				}
+			}
+		}
+		
 
 		//imshow("testMask", maskImg);
 
@@ -326,7 +346,7 @@ namespace gui_tool
 	void resetShapeParam()
 	{
 		UIBridge::faceType = 0;
-		UIBridge::mFaceShapeLevel[0] = 40;
+		UIBridge::mFaceShapeLevel[0] = 0;
 		UIBridge::mFaceShapeLevel[1] = 40;
 		UIBridge::mFaceShapeLevel[2] = 0;
 		UIBridge::mFaceShapeLevel[3] = -20;
@@ -343,6 +363,8 @@ namespace gui_tool
 		UIBridge::mFaceShapeLevel[13] = 0;
 		UIBridge::mFaceShapeLevel[14] = 0;
 		UIBridge::mFaceShapeLevel[15] = 0;
+		UIBridge::mFaceShapeLevel[16] = 0;
+		UIBridge::mFaceShapeLevel[17] = 50;
 	}
 
 	void resetBodyShapeParam()

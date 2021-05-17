@@ -1,8 +1,8 @@
 #ifndef _FL_SINGLETON_H_
 #define _FL_SINGLETON_H_
 
-#include "fl_uncopyable.h"
-#include "fl_lock_mutex.h"
+#include "fu_uncopyable.h"
+#include "fu_lock_mutex.h"
 
 template <class T>
 class SingleTon:public Uncopyable

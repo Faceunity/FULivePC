@@ -59,7 +59,7 @@ namespace NamaExampleNameSpace
 		void CloseCurCamera();
 		void OpenCamera(int);
 		void OpenCamera(std::string strVideoPath);
-		cv::Size getCameraResolution();
+		cv::Size getCameraDstResolution();
 		bool IsCameraPlaying();
 		bool IsCameraInit();
 		int GetCameraCaptureType();
@@ -71,6 +71,7 @@ namespace NamaExampleNameSpace
 		bool InitAvatarController();
 		bool IsInited() { return mHasSetup; }
 
+		void SetCurDouble(const std::string& key, double v);
 		void SetCMDoubles(const std::string& key, double* values, uint32_t count);
 		void SetCMDouble(const std::string& key, double v);
 		int SelectCostumMakeupBundle(std::string bundleName, std::string strType);
@@ -78,7 +79,7 @@ namespace NamaExampleNameSpace
 		void UnbindCurFixedMakeup();
 		void ChangeCleanFlag(bool bOpen);
 
-		bool SelectBundle(std::string bundleName);
+		bool SelectBundle(std::string bundleName, int maxFace = 4);
 		bool CheckModuleCode(int category);
 		int  IsTracking();
 		void SetCurrentShape(int index);
@@ -93,6 +94,9 @@ namespace NamaExampleNameSpace
 		void SetGSKeyColor(cv::Vec4b data);
 
 		std::vector<gui_tool::ColorBag> GetRencentColor();
+
+
+		void UpdateSegBg(cv::Mat & dataRGBA);
 
 		bool IsBodyShapeOpen();
 		void UpdateBodyShape();
@@ -116,9 +120,9 @@ namespace NamaExampleNameSpace
 		void DestroyAll();
 	private:
 		
-		void RenderGS(cv::Mat & picInput);
-		void RenderDefNama(uchar * frame);
-		void RenderP2A(cv::Mat & picBg);
+		void RenderGS(cv::Mat & picInput, int rotType);
+		void RenderDefNama(cv::Mat & picInput, int rotType);
+		void RenderP2A(cv::Mat & picBg, int rotType);
 
 		void LoadRencentColorFromFile();
 		void SaveRencentColorToFile();
@@ -143,7 +147,6 @@ namespace NamaExampleNameSpace
 		static bool mEnableAvatar;
 		int mIsBeautyOn;	
 		int mIsDrawPoints;
-		int mMaxFace;
 		int mFrameID;		
 		int mModuleCode, mModuleCode1;
 		FURect gsPreviewRect;

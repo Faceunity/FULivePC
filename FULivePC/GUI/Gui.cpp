@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include "imgui/imgui_internal.h"
 #include "GuiCustomMakeup.h"
+#include "GuiSticker.h"
+
 #if __APPLE__
 #include "fu_tool_mac.h"
 #else
@@ -40,7 +42,7 @@ int UIBridge::showGreenScreen = false;
 bool UIBridge::showCustomMakeup = false;
 
 
- uint32_t UIBridge::mFPS = 60;
+volatile uint32_t UIBridge::mFPS = 60;
  uint32_t UIBridge::mResolutionWidth = 1280;
  uint32_t UIBridge::mResolutionHeight = 720;
  uint32_t UIBridge::mRenderTime = 33;
@@ -60,7 +62,7 @@ int UIBridge::mSelectedCamera = 0;
 float UIBridge::mFaceBeautyLevel[MAX_BEAUTYFACEPARAMTER] = {0.0f};
 
 float UIBridge::mFaceShapeLevel[MAX_FACESHAPEPARAMTER] = {0.0f};
-float UIBridge::mFilterLevel[10] = { 100,100,40,100,100, 100,100,100,100,100};
+float UIBridge::mFilterLevel[10] = { 40,40,40,40,40, 40,40,40,40,40};
 float UIBridge::mMakeupLevel[10] = { 100,100,100,100,100, 100,100,100,100,100 };
 float UIBridge::mBodyShapeLevel[MAX_BODY_SHAPE_PARAM] = { 0.0f };
 
@@ -72,6 +74,12 @@ bool Gui::mIsOpenMiniWindow = true;
 //{ "blur_level","color_level", "red_level", "eye_bright", "tooth_whiten" ,"remove_pouch_strength", "remove_nasolabial_folds_strength" };
 
 const char * g_szMainFrameWinName = "MainFrameWindow";
+const FURect g_showViewRect = { 
+	DEF_FRAME_SHOW_POS_X,
+	DEF_FRAME_SHOW_POS_Y,
+	DEF_FRAME_SHOW_WIDTH,
+	DEF_FRAME_SHOW_HEIGHT
+};
 
 bool doesFileExist(const string& filename)
 {
@@ -95,7 +103,7 @@ bool isDirectoryExists(const string& filename)
 
 #ifndef _WIN32
 
-static uint64_t GetTickCount()
+uint64_t GetTickCount()
 {
     struct timespec tTemp = {0, 0};
     clock_gettime(CLOCK_MONOTONIC, &tTemp);
@@ -106,7 +114,7 @@ static uint64_t GetTickCount()
 
 #endif
 
-int get_fps()
+int get_fps(bool bADDFrame)
 {
 	static int fps = 0;
     
@@ -136,21 +144,42 @@ static void window_size_callback(GLFWwindow* window, int width, int height)
 	cout << width << "," << height << endl;
 	scaleRatioW =(float)width/(float)oriWindowWidth ;
 	scaleRatioH = (float)height / (float)oriWindowHeight;
+	
+	glfwSetWindowSize(Gui::offscreen_window, width, height);
+}
+
+static void window_iconify_callback(GLFWwindow* window, int isIcon)
+{
+	//HWND wnd = (HWND)Gui::hWindow;
+	//HDC hdc = ::GetDC(wnd);
+	//cout << "window iconify " << isIcon << " dc " << hdc << std::endl;
 }
 
 #ifdef _WIN32
 HWND Gui::hWindow;
+HWND Gui::hOffscreenWindow;
 #else
 void * Gui::hWindow = NULL;
+void * Gui::hOffscreenWindow = NULL;
 #endif
 
+void MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, GLvoid *userParam)
+{
+	fprintf(stderr, "GL CALLBACK: %s source=0x%x, type = 0x%x, id = %d, severity = 0x%x, message = %s\n",
+		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+		source, type, id, severity, message);
+}
+
 GLFWwindow* Gui::window;
+GLFWwindow* Gui::offscreen_window;
 Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 {
+	GUISticker::LoadResource();
 	UniquePtr pGui = UniquePtr(new Gui);
 	
 	// Setup window
 	glfwSetErrorCallback(glfw_error_callback);
+
 	if (!glfwInit())
 		return Gui::UniquePtr();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -168,15 +197,31 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 		return nullptr;
 	}
 
-	glfwMakeContextCurrent(window);
+	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+	offscreen_window = glfwCreateWindow(width, height, "", NULL, window);
+    glfwMakeContextCurrent(offscreen_window);
+    glfwSwapInterval(1); // Enable vsync
+    
+	glfwMakeContextCurrent(window); 
 #if __APPLE__
 	hWindow = glfwGetCocoaWindow(window);
+	hOffscreenWindow = glfwGetCocoaWindow(offscreen_window);
 #else
     hWindow = glfwGetWin32Window(window);
+	hOffscreenWindow = glfwGetWin32Window(offscreen_window);
 #endif
 	glfwSwapInterval(1); // Enable vsync
 	gl3wInit();
 	glfwSetWindowSizeCallback(window, window_size_callback);
+
+#if 0
+	glfwSetWindowIconifyCallback(window, window_iconify_callback);
+
+	// During init, enable debug output
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(MessageCallback, 0);
+#endif
+
 	// Setup Dear ImGui binding
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -209,7 +254,8 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 	oriWindowHeight = height;
 	GLFWimage icons[1];
 	Texture::SharedPtr tex = Texture::createTextureFromFile("LOGO.png", false);
-    pGui->mouseControl = new MouseControl(GUIGS::previewRect);
+    pGui->m_mouseControl = new MouseControl(GUIGS::previewRect);
+	pGui->m_mouseControlSec = new MouseControl(g_showViewRect);
 	return pGui;
 }
 
@@ -220,6 +266,7 @@ Gui::~Gui()
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
+	glfwDestroyWindow(offscreen_window);
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }
@@ -248,10 +295,16 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 	{
 		MyDocument& doc = GDocs[doc_n];
 
+		ImGui::PushID(&doc);
+
 		const bool selected = ImGui::TabItem(ImVec2(100 * scaleRatioW,30* scaleRatioH),doc.Name, &doc.Open, 0);
 
 		if (!selected)
+		{
+			ImGui::PopID();
 			continue;
+		}
+			
 		
 		switch (doc_n)
 		{
@@ -276,6 +329,8 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 		}
 		break;
 		}
+
+		ImGui::PopID();
 	}
 	ImGui::EndTabBar();
 	ImGui::PopStyleColor();
@@ -448,11 +503,15 @@ static void ShowFloatMenuAR(Nama * nama)
 		}
 	}
 
-	if (UIBridge::bundleCategory < BundleCategory::Count && UIBridge::bundleCategory >= BundleCategory::Animoji)
+	auto bundleCategory = UIBridge::bundleCategory;
+
+	if (bundleCategory < BundleCategory::Count && bundleCategory >= BundleCategory::Animoji)
 	{
-		for (int i = 0; i < UIBridge::categoryBundles[UIBridge::bundleCategory].size(); i++)
+		for (int i = 0; i < UIBridge::categoryBundles[bundleCategory].size(); i++)
 		{
-			string itemName = UIBridge::categoryBundles[UIBridge::bundleCategory][i];
+			ImGui::PushID(i);
+
+			string itemName = UIBridge::categoryBundles[bundleCategory][i];
 
 			string iconName = itemName.substr(0, itemName.find_last_of('.'));
 			Texture::SharedPtr tex = Texture::createTextureFromFile(iconName + ".png", false);
@@ -464,9 +523,10 @@ static void ShowFloatMenuAR(Nama * nama)
 			bool buttonClick;
 			if (UIBridge::mCurRenderItemName == itemName)
 			{
-				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH),ImVec2(0, 0),ImVec2(1, 1),-1,ImVec4(0, 0, 0, 0),ImVec4(1, 1, 1, 1),ImGui::ImGUI_Button_Operation_Type_Select);
-			}else{
-				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH),ImVec2(0, 0),ImVec2(1, 1),-1,ImVec4(0, 0, 0, 0),ImVec4(1, 1, 1, 1),ImGui::ImGUI_Button_Operation_Type_Deselect);
+				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Select);
+			}
+			else {
+				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Deselect);
 			}
 			if (buttonClick)
 			{
@@ -496,14 +556,14 @@ static void ShowFloatMenuAR(Nama * nama)
 						GUICustomMakeup::Reset(nama);
 						nama->DestroyAll();
 					}
-					
-					UIBridge::showCustomMakeup = false;
-					nama->SelectBundle(gBundlePath[UIBridge::bundleCategory] + "/" + itemName);
-				}
 
-				
+					UIBridge::showCustomMakeup = false;
+					nama->SelectBundle(gBundlePath[bundleCategory] + "/" + itemName);
+				}
 			}
 			ImGui::SameLine(0.f, 22.f * scaleRatioW);
+
+			ImGui::PopID();
 		}
 	}
 
@@ -517,7 +577,14 @@ static void ShowFloatMenu(Nama * nama)
 {
 	if (!UIBridge::showGreenScreen)
 	{
-		ShowFloatMenuAR(nama);
+		if (UIBridge::bundleCategory == BundleCategory::ItemJingpin)
+		{
+			GUISticker::ShowStickerPannel(nama);
+		}
+		else
+		{
+			ShowFloatMenuAR(nama);
+		}
 	}
 	else
 	{
@@ -528,13 +595,13 @@ static void ShowFloatMenu(Nama * nama)
 static void ShowArMenu()
 {
 	string *categoryNameArr = nullptr;
-	string allCategory[] = { "list_icon_avatar_nor","list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_AR_nor",
+	string allCategory[] = { "list_icon_avatar_nor","list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_Jinpin_nor","list_icon_AR_nor",
 		"list_icon_Expressionrecognition_nor",	"list_icon_Musicfilter_nor","list_icon_Bgsegmentation_nor",
 		"list_icon_gesturerecognition_nor","list_icon_Hahamirror_nor","list_icon_makeup_nor","list_icon_hairdressing_nor","list_icon_photo_sticker_nor",
-		u8"Avatar","Animoji",u8"道具贴图",u8"AR面具",
+		u8"Avatar","Animoji",u8"道具贴纸",u8"精品贴纸",u8"AR面具",
 		u8"表情识别",u8"音乐滤镜",u8"人像分割",
 		u8"手势识别",u8"哈哈镜",u8"美妆",u8"美发", u8"搞笑大头" };
-	int amount = 12;
+	int amount = 13;
 	categoryNameArr = allCategory;
 
 	/* 这是个例外逻辑,把Avatar放在最前面，这样后面加起来正常的就没啥问题 */
@@ -582,6 +649,7 @@ static void ShowArMenu()
 						UIBridge::showItemSelectWindow = true;
 						Nama::mEnableAvatar = false;
 					}
+
 				};
 
 				funSetSelectd(i);
@@ -741,11 +809,12 @@ static void ShowMainMenu(Nama * nama)
 			}
 			else
 			{
+				GUIGS::CloseGreenScreenBg();
 				UIBridge::showItemSelectWindow = (UIBridge::bundleCategory != BUNDLE_CATEGORY_NOMEAN);
-				if (!nama->IsCameraPlaying() || nama->GetCameraCaptureType() == 2){
+				/*if (!nama->IsCameraPlaying() || nama->GetCameraCaptureType() == 2){
 					nama->setDefaultFrame();
 					nama->ReOpenCamera(UIBridge::mSelectedCamera);
-				}
+				}*/
 				
 				// 处理音乐滤镜，重新开启音乐
 				if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3 &&!UIBridge::m_bShowingBodyBeauty) {
@@ -844,7 +913,7 @@ void Gui::ShowMainWindow(Nama * nama)
 	float frameWidth = (float)DEF_FRAME_SHOW_WIDTH;
 	float frameHeight = (float)DEF_FRAME_SHOW_HEIGHT;
 	
-	UIBridge::mFPS = get_fps();
+	UIBridge::mFPS = get_fps(true);
 	//printf("UIBridge::mFPS: %d\n", UIBridge::mFPS);
 	UIBridge::mRenderTime = 1000.f / (float)UIBridge::mFPS;
 	UIBridge::mResolutionWidth = m_processedFrame.cols;
@@ -855,16 +924,17 @@ void Gui::ShowMainWindow(Nama * nama)
 	auto srcType = nama->GetCameraCaptureType();
 	/* 相机输入需要镜像，文件不需要 */
 	bool bNeedFlip = false;
-	if(!UIBridge::showGreenScreen){
+	if(UIBridge::showGreenScreen){
 		bNeedFlip = srcType != GS_INPUT_TYPE_FILE;
 	}
+
 	funShowImg(texidNeedShow, ((float)m_processedFrame.cols) / m_processedFrame.rows, ImVec2(frameWidth, frameHeight), bNeedFlip);
 	ImGui::End();
 	ImGui::PopStyleColor();
 	static FURect tmpRect;
 	if (UIBridge::showGreenScreen && !UIBridge::m_bNeedReChooseInputSrc && UIBridge::m_bSetGSInputSrc) {
 		ImVec2 dealt;
-		if(mouseControl->draging(&dealt)){
+		if(m_mouseControl->draging(&dealt)){
 			FURect namaGSPreviewRect = nama->gsPreviewRect;
 			float direction = bNeedFlip ? -1.0: 1.0;
 			float dealtXInNama = dealt.x / w;
@@ -900,7 +970,7 @@ void Gui::ShowMainWindow(Nama * nama)
 			};
 			nama->changeGSPreviewRect(newNamaGSPreviewRect);
 			tmpRect = newNamaGSPreviewRect;
-			FURect viewRect = mouseControl->viewRect;
+			FURect viewRect = m_mouseControl->viewRect;
 			float newViewRectW = UIBridge::m_localVideoWidth;
 			float newViewRectH = UIBridge::m_localVideoHeight;
 			
@@ -908,24 +978,33 @@ void Gui::ShowMainWindow(Nama * nama)
 			float newViewRectY = y+newNamaGSPreviewRectY*h;
 			
 			FURect newViewRect = {newViewRectX,newViewRectY,newViewRectW,newViewRectH};
-			mouseControl->callback(newViewRect);
+			m_mouseControl->callback(newViewRect);
 			
-		}else if(mouseControl->dragComplete(&dealt))
+		}else if(m_mouseControl->dragComplete(&dealt))
 		{
 			nama->setGSPreviewRect(tmpRect);
 		}
+	}
+
+	ImVec2 pos;
+	if (m_mouseControlSec->isSelected(&pos))
+	{
+		nama->SetCurDouble("is_click", 1.0);
 	}
 }
 
 
 void Gui::UpdateFrame(Nama * nama)
 {
+
+
 	cv::Mat frameMat = nama->GetFrame();
 	if (frameMat.data)
 	{
 		m_processedFrame.release();
 		m_processedFrame = frameMat.clone();
 		
+		//imshow("test1", m_processedFrame);
 			
 		cv::cvtColor(frameMat, m_processedFrame, cv::COLOR_BGR2RGBA);
 
@@ -937,11 +1016,11 @@ void Gui::UpdateFrame(Nama * nama)
 		}
 
 		float tempTime = GetTickCount();
-		if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
+		//if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
 		{
 			nama->RenderItems(m_processedFrame);
 		}
-
+		
 		if (UIBridge::showGreenScreen && !UIBridge::m_bSetGSInputSrc)
 		{
 			m_processedFrame.setTo(150);
@@ -953,9 +1032,14 @@ void Gui::UpdateFrame(Nama * nama)
 		}
 
 		UpdateFrame2Tex(m_processedFrame, m_texIDNamaProcess);
-        
-#if _WIN32
-        
+
+#ifndef PERFORMANCE_OPEN
+		//更新Texture操作需要同步，否则某些机器会出现撕裂
+		glFinish();
+
+#endif
+
+#if _WIN32        
 		if (UIBridge::mNeedIpcWrite)
 		{
 			static bool is_create_vc = false;
@@ -965,30 +1049,31 @@ void Gui::UpdateFrame(Nama * nama)
 				is_create_vc = true;
 			}
 			pushDataToVirturalCamera(m_processedFrame.data, m_processedFrame.cols, m_processedFrame.rows);
-		}
-        
+		}        
 #endif
         
 	}
 }
 static void ShowTipStr(string tipStr){
-	int tipStrWdith = 0;
-#if _WIN32
-	wstring tipWstr(tipStr.begin(),tipStr.end());
-	tipStrWdith = CalWstringWidth(tipWstr, 13,0,1000);
-#elif __APPLE__
-	tipStrWdith = FuToolMac::culculatorTextWidth(tipStr.c_str(),18);
-#endif
 
-	int marginX = 20;
+//#if _WIN32
+//	wstring tipWstr(tipStr.begin(),tipStr.end());
+//	tipStrWdith = CalWstringWidth(tipWstr, 13,0,1000);
+//#elif __APPLE__
+//	tipStrWdith = FuToolMac::culculatorTextWidth(tipStr.c_str(),18);
+//#endif
+	//一般就一行
+	const ImVec2 line_size = ImGui::CalcTextSize(tipStr.data(), tipStr.data() + tipStr.length() - 1, false);
+
+	int marginX = 50;
 	int tipStrLength = tipStr.length();
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .0f));
 	ImGui::SetNextWindowPos(ImVec2(366 * scaleRatioW, 472 * scaleRatioH), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(tipStrWdith + marginX * 2, 30 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(line_size.x + 25, 30 * scaleRatioH), ImGuiCond_Always);
 	ImGui::Begin("itemTips##1563", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
-	ImGui::Dummy(ImVec2(marginX, 1)); ImGui::SameLine();
-	ImGui::TextColored(ImVec4(0.0, 0.0, 0.0, 1.0), tipStr.c_str());
+
+	ImGui::TextUnformatted(tipStr.data());
 	
 	ImGui::End();
 	ImGui::PopStyleColor();
@@ -1106,8 +1191,11 @@ void Gui::render(Nama::UniquePtr& nama)
 	fclose(fp);
 
 	// Main loop
+	int frameId = 0;
 	while (!glfwWindowShouldClose(window))
 	{
+		glfwMakeContextCurrent(window);
+
 		// Poll and handle events (inputs, window resize, etc.)
 		// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
 		// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -1148,11 +1236,13 @@ void Gui::render(Nama::UniquePtr& nama)
 				//main menu
 				ShowMainMenu(nama.get());	
 			}
+
+			glfwMakeContextCurrent(offscreen_window);
 			UpdateFrame(nama.get());
+			glfwMakeContextCurrent(window);
             
 			//main window
 			ShowMainWindow(nama.get());
-
 			if (showUI)
 			{
 				ShowDebugMenu();
@@ -1243,14 +1333,17 @@ void Gui::render(Nama::UniquePtr& nama)
 
 		glfwMakeContextCurrent(window);
 		glfwSwapBuffers(window);
+
+		frameId++;
 	}
+
+	printf("frame total %d\n", frameId);
 
 	auto lastColor = GUIGS::GetCurColorCircle();
 	if (lastColor != g_color1)
 	{
 		nama->AddRecentColor(lastColor);
-	}
-	
+	}	
 
 	funDestroyTex(m_texIDNamaProcess);
 	funDestroyTex(m_texIDOrignal);
@@ -1260,7 +1353,7 @@ void Gui::ResetPreviewRect(Nama::UniquePtr& nama){
 	GUIGS::previewRect = {DEF_FRAME_SHOW_WIDTH - UIBridge::m_localVideoWidth + DEF_FRAME_SHOW_POS_X,
 		DEF_FRAME_SHOW_POS_Y + DEF_FRAME_SHOW_HEIGHT - UIBridge::m_localVideoHeight,
 		UIBridge::m_localVideoWidth,UIBridge::m_localVideoHeight};
-	mouseControl->ReSet(GUIGS::previewRect);
+	m_mouseControl->ReSet(GUIGS::previewRect);
 	nama->gsPreviewRect = {1-UIBridge::m_localVideoWidth/DEF_FRAME_SHOW_WIDTH,
 		1-UIBridge::m_localVideoHeight/DEF_FRAME_SHOW_HEIGHT,1,1};
 	nama->changeGSPreviewRect(nama->gsPreviewRect);

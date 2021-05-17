@@ -40,17 +40,21 @@ public:
 	void ResetPreviewRect(Nama::UniquePtr& nama);
 #ifdef _WIN32
 	static HWND hWindow;
+	static HWND hOffscreenWindow;
 #else
     static void * hWindow;
+	static void* hOffscreenWindow;
 #endif
     static GLFWwindow* window;
+	static GLFWwindow* offscreen_window;
 
 	static bool mIsOpenMiniWindow;
 
 protected:
 private:
 	Gui() = default;
-	MouseControl* mouseControl;
+	MouseControl* m_mouseControl;
+	MouseControl* m_mouseControlSec;
 	cv::Mat  m_processedFrame;
 	GLuint m_texIDNamaProcess = -1;
 	GLuint m_texIDOrignal = -1;

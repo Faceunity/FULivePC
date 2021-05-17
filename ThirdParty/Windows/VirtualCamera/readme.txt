@@ -1,0 +1,5 @@
+#虚拟摄像头使用方法
+1、用管理员身份运行virturalcamera\regsvrVirtualCamera.bat脚本注册虚拟摄像头
+2、注册成功后可在设备列表中查询到FU Virtual Camera,用管理员身份运行unregsvrVirtualCamera.bat脚本可注销虚拟摄像头
+3、注册成功后运行FULive.exe,勾选虚拟摄像头,即会自动将数据传输到虚拟摄像头中
+4、运行其他相关软件,选择设备FU Virtual Camera即可看到传输画面

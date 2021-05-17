@@ -1194,9 +1194,13 @@ void CMEyePupil::ShowUI()
 
 		Nama * pNama = pThis->GetNama();
 		auto strType = pThis->GetDescName();
-		std::vector<double> colors0 = GetDoubles(choicebag->vecColorRGBA[0]);
 
-		pNama->SetCMDoubles("makeup_pupil_color", colors0.data(), colors0.size());
+		if (choicebag->vecColorRGBA.size() > 0)
+		{
+			std::vector<double> colors0 = GetDoubles(choicebag->vecColorRGBA[0]);
+
+			pNama->SetCMDoubles("makeup_pupil_color", colors0.data(), colors0.size());
+		}
 
 		return true;
 	};
@@ -1291,6 +1295,7 @@ void GUICustomMakeup::Reset(Nama * pNama)
 
 	if (pNama)
 	{
+		pNama->SetCMDouble("is_two_color", 0); //清除咬唇的设定
 		pNama->ClearAllCM();
 	}
 	
