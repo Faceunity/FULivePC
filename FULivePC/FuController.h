@@ -14,6 +14,8 @@ public:
 	int BindBundleToController(std::string strBundlePath);
 	void UnBindBundle(int nHandle);
 
+	void SetPos(float x, float y, float z);
+
 	int GetParam(std::string strKey);
 
 	void SetParam(std::string strKey, double value);
@@ -30,11 +32,9 @@ public:
 	int GetHumanStatus();
 
 	//face capture
-	void CreateFaceCapture(std::string strPath);
 	void OpenFaceCapture(bool bOpen);
 	void OpenBlinkTrack(bool bOpen);
 	void RunFaceCapture(cv::Mat& bgraFrame);
-	int GetFaceCaptureNum();
 	
 	void CreateTexForItemchar(const char* path);
 
@@ -55,7 +55,9 @@ private:
 	int m_fxaaBundle = -1;
 	std::vector<int> m_vecBundles;
 	void* m_pMocapTrackModel = nullptr;
-	void* m_pFaceCaptureModel = nullptr;
+
+	int mScreenHandle = -1;
+	int mInstanceHandle = -1;
 
 	std::vector<int> m_vecRender;
 

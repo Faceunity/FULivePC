@@ -281,6 +281,23 @@ static std::string string_To_UTF8(const std::string & str)
 	return retStr;
 }
 
+static std::string string_To_Local8Bit(const std::string & strUTF8)
+{
+	int len = MultiByteToWideChar(CP_UTF8, 0, strUTF8.c_str(), -1, NULL, 0);
+	wchar_t* wszGBK = new wchar_t[len + 1];
+	memset(wszGBK, 0, len * 2 + 2);
+	MultiByteToWideChar(CP_UTF8, 0, strUTF8.c_str(), -1, wszGBK, len);
+	len = WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, NULL, 0, NULL, NULL);
+	char* szGBK = new char[len + 1];
+	memset(szGBK, 0, len + 1);
+	WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, szGBK, len, NULL, NULL);
+	std::string strTemp(szGBK);
+
+	if (wszGBK) delete[] wszGBK;
+	if (szGBK) delete[] szGBK;
+
+	return strTemp;
+}
 #endif
 
 string FuTool::convert2utf8(const char * strIn)
@@ -288,6 +305,16 @@ string FuTool::convert2utf8(const char * strIn)
 #ifdef _WIN32
 	string str = strIn;
 	return string_To_UTF8(str);
+#else
+	return FuToolMac::Convert2utf8(strIn);
+#endif
+}
+
+string FuTool::convert2local8bit(const char * strIn)
+{
+#ifdef _WIN32
+	string str = strIn;
+	return string_To_Local8Bit(str);
 #else
 	return FuToolMac::Convert2utf8(strIn);
 #endif
@@ -329,6 +356,27 @@ static bool LoadBundleInner(const string& filepath, vector<char>& data)
 
     fin.close();
     return true;
+}
+
+bool FuTool::LoadBundleByFullPath(const string& filepath, vector<char>& data)
+{
+	ifstream fin(filepath, ios::binary);
+	if (false == fin.good())
+	{
+		fin.close();
+		return false;
+	}
+	size_t size = FileSize(fin);
+	if (0 == size)
+	{
+		fin.close();
+		return false;
+	}
+	data.resize(size);
+	fin.read(reinterpret_cast<char*>(&data[0]), size);
+
+	fin.close();
+	return true;
 }
 
 /// 加载bundle

@@ -19,6 +19,22 @@ vector<string> FuToolMac::getVideoDevices()
 #define MyPicBUNDLE_PATH [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:MyPicBUNDLE_NAME]
 #define MyPicBUNDLE [NSBundle bundleWithPath: MyPicBUNDLE_PATH]
 
+string FuToolMac::GetCurrentAppPath()
+{
+    NSString* path = @"";
+    NSString* str_app_full_file_name = [[NSBundle mainBundle] bundlePath];
+
+    NSRange range = [str_app_full_file_name rangeOfString:@"/" options:NSBackwardsSearch];
+
+    if (range.location != NSNotFound)
+    {
+        path = [str_app_full_file_name substringToIndex:range.location];
+        path = [path stringByAppendingFormat:@"%@",@"/"];
+
+    }
+
+    return [path UTF8String];
+}
 
 string FuToolMac::Convert2utf8(const char * path)
 {

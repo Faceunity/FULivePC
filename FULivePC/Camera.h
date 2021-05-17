@@ -12,6 +12,7 @@
 
 #include <locale>
 #include <vector>
+#include "fu_lock_mutex.h"
 
 #pragma comment(lib,"Strmiids.lib")
 
@@ -60,6 +61,11 @@ public:
 	void savePngFilesToLocalDir(string dirPath,cv::Mat frame);
 #endif
 	void InitCameraFile(int, int, std::string, bool bLoop = true);
+
+	void InitCameraVideo(int, int, std::string, bool bLoop = true);
+
+	void InitCameraSinglePic(int, int, std::string, bool bLoop = false);
+
 	void initCamera(int,int,int);
 	void closeCamera();
 	void clearLastFrame();
@@ -68,7 +74,10 @@ public:
 	bool isPlaying();
 	void restartCamera();
 
+	void LoadDefIFNone();
+
 	void calculateRect();
+	bool checkFps();
 
 	bool isInit() { return m_isCameraInited; }
 	int getStatus() { return status; }
@@ -99,6 +108,15 @@ public:
 	void init();
 
 	std::vector<std::string> deviceList;
+
+	cv::Size getCameraDstResolution();
+
+	bool IsVideoFile() const {
+		return m_IsVideo;
+	}
+
+private:
+
 	cv::Size getCameraResolution();
 
 private:
@@ -110,23 +128,31 @@ private:
 	int m_capture_type = CAPTURE_NONE;
 	int m_capture_camera_id = -1;
 	bool m_bloop = false;
+	double m_FPS = 30.0;
+	bool m_IsVideo = true;
+
+    int64 m_iStartTick = 0;
 
 public:
-	int localPNGNum = 0;
 	int frameCount;
 	int frame_id = 0;
 	int rs_width;
 	int rs_height;
 	bool useDefaultFrame;
 	cv::VideoCapture mCapture;
+	cv::Mat tmpframe;
 	cv::Mat frame;
 	cv::Mat resize_frame;
 	cv::Size m_dstFrameSize;
+
+	//本来应该弄事件，但是阔平台有点烦
+	volatile bool m_bThreadEnd = false;
+	L_Mutex m_mtxFrame;
     
 #ifdef _WIN32
-	HANDLE hThread;
+	HANDLE m_hThread = nullptr;
 #else
-    pthread_t m_pid;
+    pthread_t m_pid = 0;
 #endif
 };
 

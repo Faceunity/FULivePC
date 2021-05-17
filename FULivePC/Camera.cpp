@@ -1,6 +1,7 @@
-﻿#include "Camera.h"
+#include "Camera.h"
 #include "stdio.h"
 #include "fu_tool.h"
+#include "UIBridge.h"
 
 #if _WIN32
 #include "tinfiledlg/tinyfiledialogs.h"
@@ -17,7 +18,13 @@
 #include "fu_tool_mac.h"
 #endif
 
-extern int get_fps();
+#include <regex>
+
+#ifndef _WIN32
+extern uint64_t GetTickCount();
+#endif
+
+extern int get_fps(bool);
 CCameraDS::CCameraDS()
 {
 	init();
@@ -26,11 +33,7 @@ CCameraDS::CCameraDS()
 CCameraDS::~CCameraDS()
 {
 	status = STATUS_NO_CAMERA;
-
-	if (mCapture.isOpened())
-	{
-		mCapture.release();
-	}
+	closeCamera();
 }
 
 void CCameraDS::init() {
@@ -84,19 +87,36 @@ void CCameraDS::savePngFilesToLocalDir(string dirPath,cv::Mat frame)
 #endif
 static void ProcessFrame(CCameraDS* cc)
 {
-	while (cc->mCapture.grab() || 
-	// 解决 部分视频文件无法重复循环的问题
-	LoopVideoApproximate(cc))
+	while (!cc->m_bThreadEnd)
 	{
+		if (!cc->checkFps())
+		{
+			continue;
+		}
+
+		if (!cc->mCapture.grab() && !LoopVideoApproximate(cc))
+		{
+			break;
+		}
+
 		if (cc->mCapture.isOpened())
 		{
-            cv::Mat orgMat;
-		    cc->mCapture.retrieve(cc->frame);
-			
-			
-			cc->frame_id++;
-			//单帧图片啥的就不刷了
-			if (cc->getCaptureType() == CAPTURE_FILE && cc->frameCount == 1)
+			cc->mCapture.retrieve(cc->tmpframe);
+
+			{
+#ifndef PERFORMANCE_OPEN
+				Locker locker(&cc->m_mtxFrame);
+				cc->frame = cc->tmpframe.clone();
+#else
+				cc->frame = cc->tmpframe;
+#endif
+				
+			}
+
+			bool justBreak = (cc->getCaptureType() == CAPTURE_FILE && cc->frameCount == 1) ||
+				(cc->getCaptureType() == CAPTURE_FILE && !cc->IsVideoFile());
+		   
+			if(justBreak)
 			{
 				break;
 			}
@@ -111,6 +131,11 @@ static void ProcessFrame(CCameraDS* cc)
 		{
 			break;
 		}
+	}
+
+	if (cc->mCapture.isOpened())
+	{
+		cc->mCapture.release();
 	}
 	
 }
@@ -138,15 +163,20 @@ static void * TL_FRAME(void * lpParamter)
 }
 #endif
 
+cv::Size CCameraDS::getCameraDstResolution()
+{
+	return cv::Size(m_dstFrameSize.width, m_dstFrameSize.height);
+}
 
-
+//Tip 数据帧读完之后，mCapture就会被关闭，这边就会读出0数据
 cv::Size CCameraDS::getCameraResolution()
 {
-	mCapture.set(cv::CAP_PROP_FRAME_WIDTH, 10000);
-	mCapture.set(cv::CAP_PROP_FRAME_HEIGHT, 10000);
+	mCapture.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
+	mCapture.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
 	int w = (int)mCapture.get(cv::CAP_PROP_FRAME_WIDTH);
 	int h = (int)mCapture.get(cv::CAP_PROP_FRAME_HEIGHT);
 	return cv::Size(w, h);
+
 }
 
 
@@ -169,12 +199,24 @@ int CCameraDS::getCaptureCameraID()
 
 void CCameraDS::InitCameraFile(int width, int height, std::string path, bool bLoop)
 {
+	if (regex_match(path, regex("(.*)\\.(mp4|MP4|mov|MOV)"))) {
+		m_IsVideo = true;
+		InitCameraVideo(width, height, path, bLoop);
+	}
+	else {
+		m_IsVideo = false;
+		InitCameraSinglePic(width, height, path, bLoop);
+	}
+}
+
+void CCameraDS::InitCameraVideo(int width, int height, std::string path, bool bLoop)
+{
 	try {
 
 		if (!mCapture.isOpened())
 		{
-			localPNGNum = 0;
 			m_filepath = path;
+			mCapture.release();
 			mCapture.open(path);
 
 			if (!mCapture.isOpened())
@@ -183,9 +225,10 @@ void CCameraDS::InitCameraFile(int width, int height, std::string path, bool bLo
 			rs_width = width;
 			rs_height = height;
 
+			m_capture_type = CAPTURE_FILE;
+
 			calculateRect();
 
-			m_capture_type = CAPTURE_FILE;
 			m_bloop = bLoop;
 		}
 
@@ -193,6 +236,77 @@ void CCameraDS::InitCameraFile(int width, int height, std::string path, bool bLo
 	}
 	catch (...) {
 		loge("camera file init error\n");
+	}
+}
+
+void CCameraDS::InitCameraSinglePic(int width, int height, std::string path, bool bLoop)
+{
+	try {
+		
+		closeCamera();
+		frame = cv::imread(path.c_str(), cv::IMREAD_UNCHANGED);
+
+		if (frame.data)
+		{
+			//最高720的宽，防止图片过大造成卡顿
+			rs_height = MIN(720, frame.rows);
+			rs_width = (float)frame.cols / frame.rows * rs_height;
+
+			cv::resize(frame, frame, cv::Size(rs_width, rs_height));
+
+			m_filepath = path;
+
+			rs_width = frame.cols;
+			rs_height = frame.rows;
+			m_dstFrameSize.height = rs_height;
+			m_dstFrameSize.width = rs_width;
+
+		}
+		else
+		{
+			m_filepath = "";
+			rs_width = 0;
+			rs_height = 0;
+			m_dstFrameSize.height = 0;
+			m_dstFrameSize.width = 0;
+		}
+		
+		m_capture_type = CAPTURE_FILE;
+	}
+	catch (...) {
+		loge("camera file init error\n");
+	}
+}
+
+bool CCameraDS::checkFps()
+{
+	if (getCaptureType() != CAPTURE_FILE)
+	{
+		return true;
+	}
+
+	if (frame_id == 0)
+	{
+		m_iStartTick = GetTickCount();
+		//printf("loop once \r\n");
+	}
+
+    int64 curTick = GetTickCount();
+	float tickDelta = curTick - m_iStartTick;
+	float curFrameTime = frame_id * (1000.0 / m_FPS);
+
+	bool bNeedAdd2GetOriFps = (tickDelta > curFrameTime) || (frame_id == 0);
+	float curRealFps = tickDelta > 0 ? frame_id * 1000.0f / tickDelta:0;
+	bool bQuicker = curRealFps > UIBridge::mFPS;
+
+	if (bNeedAdd2GetOriFps)
+	{
+		frame_id++;
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
@@ -214,8 +328,14 @@ void CCameraDS::calculateRect()
 		m_dstFrameSize.width = MIN(MIN(maxRes.width, maxRes.height*aN), neededRes.width);  //取符合比例的值，同时小于needWidth
 		m_dstFrameSize.height = m_dstFrameSize.width / aN;
 	}
+
+
 	mCapture.set(cv::CAP_PROP_FRAME_WIDTH, m_dstFrameSize.width);
 	mCapture.set(cv::CAP_PROP_FRAME_HEIGHT, m_dstFrameSize.height);
+
+	//不一定能设置进去，所以还得读一遍
+	m_dstFrameSize.width = (int)mCapture.get(cv::CAP_PROP_FRAME_WIDTH);
+	m_dstFrameSize.height = (int)mCapture.get(cv::CAP_PROP_FRAME_HEIGHT);
 }
 
 void CCameraDS::initCamera(int width, int height, int camID) {
@@ -229,20 +349,19 @@ void CCameraDS::initCamera(int width, int height, int camID) {
 #else
 			bool bOK = mCapture.open(cv::CAP_AVFOUNDATION + camID);
 #endif
-			localPNGNum = 0;
-			//mCapture.open(camID);
 			rs_width = width;
 			rs_height = height;
 
 			if (!mCapture.isOpened())
 				throw std::runtime_error("Unable to open video source");
 
-			calculateRect();
-
 			mCapture.set(cv::CAP_PROP_AUTOFOCUS, 0);
 
 			m_capture_camera_id = camID;
 			m_capture_type = CAPTURE_CAMERA;
+
+			calculateRect();
+
 		}
 
 		connectCamera();
@@ -252,39 +371,47 @@ void CCameraDS::initCamera(int width, int height, int camID) {
 	}
 }
 void CCameraDS::clearLastFrame(){
+
+#ifndef PERFORMANCE_OPEN
+	Locker locker(&m_mtxFrame);
+#endif
+
 	cv::Mat blackMat(frame.rows, frame.cols, CV_8UC3, cv::Scalar(0, 0, 0));
 	frame = blackMat;
+
 }
 /// 设置默认的待机画面
 void CCameraDS::setDefaultFrame(){
-#if _WIN32
-	string defaultPicPath = "../../res/frame.png";
-#elif __APPLE__
-	string defaultPicPath = FuToolMac::GetFileFullPathFromResPicBundle("frame.png");
-#endif
-	static cv::Mat defaulfFrame = cv::imread(defaultPicPath, cv::IMREAD_COLOR);
-	if (!defaulfFrame.empty())
-	{
-		cv::resize(defaulfFrame, defaulfFrame, cv::Size(rs_width, rs_height));
-		frame = defaulfFrame;
-	}
+
+	LoadDefIFNone();
+
 }
 void CCameraDS::closeCamera() {
 
 	status = STATUS_NO_CAMERA;
 	m_filepath = "";
 
+	m_bThreadEnd = true;
+
 #ifdef _WIN32
-	Sleep(1000);
+
+	if (m_hThread)
+	{
+		WaitForSingleObject(m_hThread, INFINITE);
+		CloseHandle(m_hThread);
+		m_hThread = nullptr;
+	}
+	
 #else
-	pthread_join(m_pid, NULL);
-	sleep(1);
+
+	if (m_pid)
+	{
+		pthread_join(m_pid, NULL);
+		m_pid = 0;
+	}
+	
 #endif
 
-	if (mCapture.isOpened())
-	{
-		mCapture.release();
-	}
 }
 
 void CCameraDS::connectCamera()
@@ -295,20 +422,19 @@ void CCameraDS::connectCamera()
 	}
 	if (mCapture.isOpened())
 	{
-		double fps = 60;   //读取视频的帧?
+		m_FPS = 60;  
 		if (m_capture_type == CAPTURE_FILE)
 		{
 
-			fps = mCapture.get(cv::CAP_PROP_FPS);   //读取视频的帧?
+			m_FPS = mCapture.get(cv::CAP_PROP_FPS); 
 			frameCount = mCapture.get(cv::CAP_PROP_FRAME_COUNT);;
-			int vfps = 1000 / fps;                                        //计算每帧播放的时间
 		}
 		
+		m_bThreadEnd = false;
 
 		{
 #ifdef _WIN32
-			hThread = CreateThread(NULL, 0, TL_FRAME, this, 0, NULL);
-			CloseHandle(hThread);
+			m_hThread = CreateThread(NULL, 0, TL_FRAME, this, 0, NULL);
 #else
 			pthread_create(&m_pid, NULL, TL_FRAME, (void *)this);
 #endif
@@ -351,7 +477,13 @@ void CCameraDS::stop() {
 	}
 }
 
-cv::Mat CCameraDS::getFrame() {
+void CCameraDS::LoadDefIFNone()
+{
+	//性能测试，不加锁切换视频容易崩
+#ifndef PERFORMANCE_OPEN
+	Locker locker(&m_mtxFrame);
+#endif
+
 	if (frame.rows == 0 && frame.cols == 0)
 	{
 #if _WIN32
@@ -366,7 +498,25 @@ cv::Mat CCameraDS::getFrame() {
 			frame = defaulfFrame;
 		}
 	}
-	return frame;
+}
+
+cv::Mat CCameraDS::getFrame() {
+	
+	LoadDefIFNone();
+
+	//性能测试，不加锁切换视频容易崩
+#ifdef PERFORMANCE_OPEN
+
+	cv::Mat frameCopy = frame;
+
+#else
+	//cv::Mat分深浅拷贝，clone是深，直接赋值是浅，这里主要多线程没办法
+	Locker locker(&m_mtxFrame);
+	cv::Mat frameCopy = frame.clone();
+
+#endif
+
+	return frameCopy;
 }
 
 #pragma region enum_camera
@@ -455,14 +605,13 @@ HRESULT CCameraDS::CamCaps(IBaseFilter *pBaseFilter)
 				// Get frame size
 				s.cy = pVIH->bmiHeader.biHeight;
 				s.cx = pVIH->bmiHeader.biWidth;
-				// Битрейт
+
 				unsigned int bitrate = pVIH->dwBitRate;
 				modes.push_back(s);
 				// Bits per pixel
 				unsigned int bitcount = pVIH->bmiHeader.biBitCount;
 				REFERENCE_TIME t = pVIH->AvgTimePerFrame; // blocks (100ns) per frame
 				int FPS = floor(10000000.0 / static_cast<double>(t));
-				//printf("Size: x=%d\ty=%d\tFPS: %d\t bitrate: %ld\tbit/pixel:%ld\n", s.cx, s.cy, FPS, bitrate, bitcount);
 			}
 			_FreeMediaType(*pmt);
 		}

@@ -18,14 +18,14 @@ set BUILD_ARCH=%~1
 if "%BUILD_ARCH%"=="" set BUILD_ARCH=x64
  
 if "%BUILD_ARCH%"=="x64" (
-	set CMAKE_GENERATOR=Visual Studio 16 2019
+	set CMAKE_GENERATOR=Visual Studio 15 2017
 	set CMAKE_DEBUG_OUTPUT=%PWD%\bin\win\x64\Debug
 	set CMAKE_RUNTIME_OUTPUT=%PWD%\bin\win\x64\Release
     set CMAKE_PLATFORM=x64
 )
 
 if "%BUILD_ARCH%"=="x86" (
-	set CMAKE_GENERATOR=Visual Studio 16 2019
+	set CMAKE_GENERATOR=Visual Studio 15 2017
 	set CMAKE_DEBUG_OUTPUT=%PWD%\bin\win\x86\Debug
 	set CMAKE_RUNTIME_OUTPUT=%PWD%\bin\win\x86\Release
     set CMAKE_PLATFORM=Win32

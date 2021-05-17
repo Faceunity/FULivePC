@@ -34,7 +34,7 @@ const string g_ai_hand_processor = "model/ai_hand_processor_pc.bundle";
 
 const string g_fuDataDir = "assets";
 
-const string g_control = "graphics/controller.bundle";
+const string g_control = "graphics/controller_cpp.bundle";
 
 const string g_control_cfg = "graphics/controller_config.bundle";
 
@@ -43,6 +43,8 @@ const string g_fakeman = "others/fakeman.bundle";
 const string g_human3d = "model/human3d.bundle";
 
 const string g_fxaa_flipx = "graphics/fxaa_flipX.bundle";
+
+const string g_fxaa_flipy = "graphics/fxaa_flipY.bundle";
 #ifdef __APPLE__
 const string g_assetDir = "";
 #else

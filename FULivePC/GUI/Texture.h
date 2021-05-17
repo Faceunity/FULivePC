@@ -34,9 +34,15 @@ public:
 
 	static Texture::SharedPtr genError(const std::string & errMsg, const std::string & filename);
 
+	static Texture::SharedPtr createTextureFromFullPath(const std::string& filename, bool bCircle = false);
+
 	static Texture::SharedPtr createTextureFromFile(const std::string filename, bool generateMips);
 
 	static Texture::SharedPtr createTextureFromData(uint32_t width, uint32_t height, unsigned char* pixels);
+
+	static Texture::SharedPtr createUnLoadTextureFromFullPath(const std::string& fullpath, bool bCircle = false);
+
+	static Texture::SharedPtr createLoadingTextureFromFullPath(const std::string& fullpath, bool bCircle = false);
 
 	static bool AddSearchPath(const char *path);
 
@@ -44,6 +50,7 @@ public:
 
 	static std::string GetFileFullPathFromeSearchPath(const char* name);
 
+	
 	~Texture();
 
 	void* getData() { if (!this) throw std::runtime_error("Unable to open texture source"); return pixels; };
@@ -57,5 +64,7 @@ private:
 	GLuint mTextureID;
 	unsigned char* pixels;
 	static std::map<std::string, SharedPtr> mTextureMap;
+	static std::map<std::string, SharedPtr> mUnLoadTextureMap;
+	static std::map<std::string, SharedPtr> mLoadingTextureMap;
 	static std::vector<std::string> m_searchPath;
 };

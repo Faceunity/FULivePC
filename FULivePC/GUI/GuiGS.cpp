@@ -361,7 +361,7 @@ void GUIGS::ShowGSInputChoice(Nama * nama,bool canCancel)
 					{
 						UIBridge::m_localVideoRotation = 0;
 						float imgWidth,imgHeight, dstW, dstH;
-						cv::Size imgSize = nama->getCameraResolution();
+						cv::Size imgSize = nama->getCameraDstResolution();
 						imgWidth = imgSize.width;
 						imgHeight = imgSize.height;
 						calculatePreViewForHalfScreen(imgWidth, imgHeight, &dstW, &dstH);
@@ -539,6 +539,11 @@ void GUIGS::CloseCamera(Nama * nama)
 	{
 		nama->CloseCurCamera();
 	}
+}
+
+void GUIGS::CloseGreenScreenBg()
+{
+	m_pCamBG->closeCamera();
 }
 
 void GUIGS::ChangeGreenScreenBg(string strFilePath)

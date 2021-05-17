@@ -1,9 +1,15 @@
 
 #include "Texture.h"
 #include "fu_tool.h"
+#include "fu_tool_mac.h"
+#include <opencv2/opencv.hpp>
+#include "GuiTool.h"
 
 std::map<std::string, Texture::SharedPtr> Texture::mTextureMap;
 std::vector<std::string> Texture::m_searchPath;
+
+std::map<std::string, Texture::SharedPtr> Texture::mUnLoadTextureMap;
+std::map<std::string, Texture::SharedPtr> Texture::mLoadingTextureMap;
 
 void Texture::create(uint32_t width, uint32_t height, unsigned char* pixels)
 {
@@ -109,6 +115,200 @@ std::string Texture::GetFileFullPathFromeSearchPath(const char * name)
 	}
 	//return nullptr;
 	return "";
+}
+
+Texture::SharedPtr Texture::createUnLoadTextureFromFullPath(const std::string& fullpath, bool bCircle)
+{
+	if (fullpath.size() == 0)
+	{
+		return SharedPtr(genError("Image Name unknown", fullpath));
+	}
+	if (mUnLoadTextureMap.find(fullpath) != mUnLoadTextureMap.end())
+	{
+		return mUnLoadTextureMap[fullpath];
+	}
+#ifdef __APPLE__
+	std::string filePath = FuToolMac::GetCurrentAppPath() + "//" + fullpath;
+#else
+	std::string filePath = fullpath;
+#endif
+	
+	cv::Mat icon = cv::imread(filePath.c_str(), cv::IMREAD_UNCHANGED);
+	if (icon.empty())
+	{
+		cv::VideoCapture capture;
+		cv::Mat imggif;
+		imggif = capture.open(filePath.c_str());
+		if (!capture.isOpened())
+		{
+			return SharedPtr(genError("Image Name unknown", fullpath));
+		}
+		while (capture.read(imggif))
+		{
+			icon = imggif.clone();
+		}
+		capture.release();
+		
+		if ((icon.empty()))
+		{
+			return SharedPtr(genError("Image Name unknown", fullpath));
+		}
+	}
+	cv::cvtColor(icon, icon, cv::COLOR_BGRA2RGBA);
+
+	cv::Mat outData;
+	if (bCircle)
+	{
+		gui_tool::CutCircleInMiddle(icon, outData);
+}
+	else
+	{
+		outData = icon;
+	}
+
+#ifdef _WIN32
+	std::string unLoadfullpath = GetFileFullPathFromeSearchPath("boutique_stickers_icon_download.png");
+#else
+	std::string unLoadfullpath = GetFileFullPathFromeSearchPath("boutique_stickers_icon_download.png");
+#endif
+
+	cv::Mat downIcon = cv::imread(unLoadfullpath.c_str(), cv::IMREAD_UNCHANGED);
+	cv::cvtColor(downIcon, downIcon, cv::COLOR_BGR2RGBA);
+	downIcon.copyTo(outData(cv::Rect(outData.cols - downIcon.cols, outData.rows - downIcon.rows, downIcon.cols, downIcon.rows)));
+	//cv::cvtColor(icon, icon, cv::COLOR_BGR2RGBA);
+	//cv::imshow("image", icon);
+	//cv::waitKey();
+
+	auto texture = createTextureFromData(outData.cols, outData.rows, outData.data);
+	mUnLoadTextureMap[fullpath] = texture;
+
+	return texture;
+}
+
+Texture::SharedPtr Texture::createLoadingTextureFromFullPath(const std::string& fullpath, bool bCircle)
+{
+	if (fullpath.size() == 0)
+	{
+		return SharedPtr(genError("Image Name unknown", fullpath));
+	}
+	if (mLoadingTextureMap.find(fullpath) != mLoadingTextureMap.end())
+	{
+		return mLoadingTextureMap[fullpath];
+	}
+#ifdef __APPLE__
+	std::string filePath = FuToolMac::GetCurrentAppPath() + "//" + fullpath;
+#else
+	std::string filePath = fullpath;
+#endif
+
+	cv::Mat icon = cv::imread(filePath.c_str(), cv::IMREAD_UNCHANGED);
+	if (icon.empty())
+	{
+		cv::VideoCapture capture;
+		cv::Mat imggif;
+		imggif = capture.open(filePath.c_str());
+		if (!capture.isOpened())
+		{
+			return SharedPtr(genError("Image Name unknown", fullpath));
+		}
+		while (capture.read(imggif))
+		{
+			icon = imggif.clone();
+		}
+		capture.release();
+
+		if ((icon.empty()))
+		{
+			return SharedPtr(genError("Image Name unknown", fullpath));
+		}
+	}
+	cv::cvtColor(icon, icon, cv::COLOR_BGRA2RGBA);
+
+	cv::Mat outData;
+	if (bCircle)
+	{
+		gui_tool::CutCircleInMiddle(icon, outData);
+	}
+	else
+	{
+		outData = icon;
+	}
+
+#ifdef _WIN32
+	std::string unLoadfullpath = GetFileFullPathFromeSearchPath("btnLoad.png");
+#else
+	std::string unLoadfullpath = GetFileFullPathFromeSearchPath("btnLoad.png");
+#endif
+
+	cv::Mat downIcon = cv::imread(unLoadfullpath.c_str(), cv::IMREAD_UNCHANGED);
+	cv::cvtColor(downIcon, downIcon, cv::COLOR_BGR2RGBA);
+	downIcon.copyTo(outData(cv::Rect(outData.cols - downIcon.cols, outData.rows - downIcon.rows, downIcon.cols, downIcon.rows)));
+	//cv::cvtColor(icon, icon, cv::COLOR_BGR2RGBA);
+	//cv::imshow("image", icon);
+	//cv::waitKey();
+
+	auto texture = createTextureFromData(outData.cols, outData.rows, outData.data);
+	mUnLoadTextureMap[fullpath] = texture;
+
+	return texture;
+}
+
+
+Texture::SharedPtr Texture::createTextureFromFullPath(const std::string& fullpath, bool bCircle)
+{
+	SharedPtr pTexture = SharedPtr(new Texture);
+	if (fullpath.size() == 0)
+	{
+		return SharedPtr(genError("Image Name unknown", fullpath));
+	}
+	if (mTextureMap.find(fullpath) != mTextureMap.end())
+	{
+		return mTextureMap[fullpath];
+	}
+	
+#ifdef __APPLE__
+    std::string filePath = FuToolMac::GetCurrentAppPath() + "//" + fullpath;
+#else
+    std::string filePath = fullpath;
+#endif
+	cv::Mat icon = cv::imread(filePath.c_str(), cv::IMREAD_UNCHANGED);
+	if (icon.empty())
+	{
+		cv::VideoCapture capture;
+		cv::Mat imggif;
+		imggif = capture.open(filePath.c_str());
+		if (!capture.isOpened())
+		{
+			return SharedPtr(genError("Image Load Failed", fullpath));
+		}
+		while (capture.read(imggif))
+		{
+			icon = imggif.clone();
+		}
+		capture.release();
+
+		if ((icon.empty()))
+		{
+			return SharedPtr(genError("Image Load Failed", fullpath));
+		}
+	}
+
+
+	cv::Mat outData;
+	if (bCircle)
+	{
+		gui_tool::CutCircleInMiddle(icon, outData);
+	}
+	else
+	{
+		outData = icon;
+	}
+
+	cv::cvtColor(outData, outData, cv::COLOR_BGRA2RGBA);
+	pTexture->create(outData.cols, outData.rows, outData.data);
+
+	mTextureMap[fullpath] = pTexture;
+	return pTexture;
 }
 
 Texture::SharedPtr Texture::createTextureFromFile(const std::string filename, bool generateMips)

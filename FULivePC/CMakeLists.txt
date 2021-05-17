@@ -14,13 +14,17 @@ elseif(APPLE)
 elseif(UNIX)
 endif()
 
+# add_definitions(
+#     -DPERFORMANCE_OPEN
+# )
+
 if(APPLE)
 add_definitions(
     -DIMGUI_IMPL_OPENGL_LOADER_GL3W
     -DGLFW_EXPOSE_NATIVE_COCOA
     -DGLFW_EXPOSE_NATIVE_NSGL
 )
-else()
+else() 
 add_definitions(
     -DIMGUI_IMPL_OPENGL_LOADER_GL3W
     -DUNICODE
@@ -56,6 +60,7 @@ include_directories(${PROJECT_BINARY_DIR})
 include_directories(imgui)
 include_directories(common)
 include_directories(GUI)
+include_directories(Network)
 include_directories(../include)
 include_directories(../include/common)
 include_directories(../include/rapidjson)
@@ -111,6 +116,8 @@ set(${target}_GUI
     GUI/MouseControl.h
 	GUI/GuiCustomMakeup.cpp
 	GUI/GuiCustomMakeup.h
+    GUI/GuiSticker.cpp
+	GUI/GuiSticker.h
 )
 
 set(${target}_IMGUI
@@ -142,7 +149,6 @@ set(${target}_Sound_mac
 )
 
 set(${target}_SOURCES
-    authpack.h
     Config.h
     Camera.cpp
     Camera.h
@@ -151,7 +157,14 @@ set(${target}_SOURCES
     Nama.h
     UIBridge.h
 	FuController.cpp
-	FuController.h
+    FuController.h
+    BgSegUpdate.cpp
+    BgSegUpdate.h
+)
+
+file(GLOB_RECURSE NETWORKFILES Network/*.*)
+set(${target}_NETWORK
+    ${NETWORKFILES}
 )
 
 file(GLOB_RECURSE TINFILES tinfiledlg/*.*)
@@ -180,6 +193,7 @@ add_executable(${target}
     ${${target}_GUI}
     ${${target}_Sound}
 	${${target}_TINFILEDLG}
+    ${${target}_NETWORK}
 )
 elseif(APPLE)
 
@@ -196,6 +210,7 @@ add_executable(${target}
     ${${target}_GUI}
     ${${target}_GLCONTEXT}
     ${${target}_Sound_mac}
+    ${${target}_NETWORK}
     ${APP_UI_RES}
 )
 
@@ -207,6 +222,7 @@ source_group("Source Files" FILES ${${target}_SOURCES})
 source_group("Source Files\\imgui" FILES ${${target}_IMGUI})
 source_group("Source Files\\common" FILES ${${target}_COMMON})
 source_group("Source Files\\gui" FILES ${${target}_GUI})
+source_group("Source Files\\network" FILES ${${target}_NETWORK})
 
 if(WIN32)
 source_group("Source Files\\sound" FILES ${${target}_Sound})
@@ -223,6 +239,7 @@ import_custom_library(${target} Opencv)
 import_custom_library(${target} FreeImage)
 import_custom_library(${target} Glfw)
 import_custom_library(${target} ffmpeg)
+import_custom_library(${target} libcurl)
 
 
 if(WIN32)
@@ -235,21 +252,23 @@ if(WIN32)
 	if(${CMAKE_SIZEOF_VOID_P} EQUAL 4)
         set(SrcNamaDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/FaceUnity-SDK-PC/lib/win32)
         set(SrcFreeImageDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/FreeImage/lib/win32)
-        set(SrcOpenCVDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/opencv400/lib/win32)
+        set(SrcOpenCVDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/opencv400/lib/win32) 
 		set(SrcOpenCVDLLFileFFmpeg  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/opencv400/lib/win32/opencv_ffmpeg400.dll)
 		set(SrcFfmpegDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/ffmpeg/lib/win32)
 		set(SrcVirtualDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/VirtualCamera/lib/win32)
+        set(SrcCurlDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/libcurl/lib/win32)
 	else()
         set(SrcNamaDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/FaceUnity-SDK-PC/lib/win64)
         set(SrcFreeImageDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/FreeImage/lib/win64)
         set(SrcOpenCVDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/opencv400/lib/win64)
 		set(SrcOpenCVDLLFileFFmpeg  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/opencv400/lib/win64/opencv_ffmpeg400_64.dll)
 		set(SrcFfmpegDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/ffmpeg/lib/win64)
-		set(SrcVirtualDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/VirtualCamera/lib/win64)
+		set(SrcVirtualDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/VirtualCamera/lib/win64) 
+        set(SrcCurlDLLFolder  ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/libcurl/lib/win64)
 	endif()
 	
 	add_custom_command(TARGET ${target}
-                POST_BUILD
+                POST_BUILD 
 
 				COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 				COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
@@ -266,6 +285,9 @@ if(WIN32)
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/swresample-3.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/libwinpthread-1.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcVirtualDLLFolder}/VirtualCamera.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcCurlDLLFolder}/libcurl.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcCurlDLLFolder}/libcrypto.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcCurlDLLFolder}/libssl.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 
 
                 COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcNamaDLLFolder}/fuai.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
@@ -281,6 +303,10 @@ if(WIN32)
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/swresample-3.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/libwinpthread-1.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
 				COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcVirtualDLLFolder}/VirtualCamera.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcCurlDLLFolder}/libcurl.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcCurlDLLFolder}/libcrypto.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+                COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcCurlDLLFolder}/libssl.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
 
 				COMMENT "copy dll"
                 )
@@ -333,14 +359,15 @@ elseif(APPLE)
 
     add_custom_command(TARGET ${target} PRE_BUILD
         #需要先rm Resource.bundle 和 ResPic.bundle，否则删除时，无法刷新
-        COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
-        COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
         COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_LIST_DIR}/../assets  ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../res/config.json    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/../res    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
         COMMAND ${CMAKE_COMMAND} -E make_directory  ${MacOS_APP_Content}/Frameworks
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/glfw/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/FaceUnity-SDK-Mac/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libcurl/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/Framework/*.dylib  ${MacOS_APP_Content}/Frameworks
     )
 

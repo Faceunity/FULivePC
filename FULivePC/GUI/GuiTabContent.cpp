@@ -101,21 +101,9 @@ namespace gui_tab_content
 		ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));
 		//ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
-		LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_Facetype_open.png", false)->getTextureID(), u8"   脸型");
-		ImGui::SameLine();
-		std::string faceTypeNameArr[5] = { u8"自定义" ,u8"默认" ,u8"女神",u8"网红" ,u8"自然" };
-		int shapeHandle[5] = { 4,3,0,1,2 };
-		for (int i = 0; i < 5; i++)
-		{
-			if (LayoutSelectable(ImVec2(4, 11), ImVec2(44, 30), faceTypeNameArr[i].c_str(), UIBridge::faceType == i))
-			{
-				UIBridge::faceType = i;
-				nama->SetCurrentShape(shapeHandle[i]);
-			}
-			ImGui::SameLine();
-		}
-		ImGui::Spacing();
 
+		UIBridge::faceType = 0;
+		nama->SetCurrentShape(4);
 
 		std::string faceShapeIconNameArr[MAX_FACESHAPEPARAMTER] = { "list_icon_Thinface_open", "list_icon_Bigeye_open",
 			"list_icon_round_eye_open","list_icon_chin_open", "list_icon_forehead_open", "list_icon_Thinnose_open","list_icon_Mouthtype_open",
@@ -288,6 +276,32 @@ namespace gui_tab_content
 		}
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+
+		auto funIsAllClosed = []() {
+			
+			bool bTestOK = true;
+
+			for (int i = 0; i < MAX_BODY_SHAPE_PARAM; i++)
+			{
+				if (UIBridge::mBodyShapeLevel[i] != 0) {
+					bTestOK = false;
+					break;
+				}
+			}
+
+			return bTestOK;
+
+		};
+
+		if (funIsAllClosed() && UIBridge::m_bShowingBodyBeauty)
+		{
+			UIBridge::m_bShowingBodyBeauty = false;
+			// 处理音乐滤镜，重新开启音乐
+			if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3 && !UIBridge::showGreenScreen) {
+				nama->resumeCurrentMp3();
+			}
+			UIBridge::showItemSelectWindow = _showItemSelectWindow;
+		}
 
 		if (LayoutButton(ImVec2(145, 38), ImVec2(126, 40), u8"恢复默认"))
 		{

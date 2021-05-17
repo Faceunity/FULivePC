@@ -1281,6 +1281,48 @@
           1.0
         ]
       ]
+    },
+    {
+      "bundle": "mu_style_eyepupil_03",
+      "icon": "mu_style_eyepupil_03.png",
+      "colors": [
+      ]
+    },
+    {
+      "bundle": "mu_style_eyepupil_04",
+      "icon": "mu_style_eyepupil_04.png",
+      "colors": [
+      ]
+    },
+    {
+      "bundle": "mu_style_eyepupil_05",
+      "icon": "mu_style_eyepupil_05.png",
+      "colors": [
+      ]
+    },
+    {
+      "bundle": "mu_style_eyepupil_06",
+      "icon": "mu_style_eyepupil_06.png",
+      "colors": [
+      ]
+    },
+    {
+      "bundle": "mu_style_eyepupil_07",
+      "icon": "mu_style_eyepupil_07.png",
+      "colors": [
+      ]
+    },
+    {
+      "bundle": "mu_style_eyepupil_08",
+      "icon": "mu_style_eyepupil_08.png",
+      "colors": [
+      ]
+    },
+    {
+      "bundle": "mu_style_eyepupil_09",
+      "icon": "mu_style_eyepupil_09.png",
+      "colors": [
+      ]
     }
   ]
 }

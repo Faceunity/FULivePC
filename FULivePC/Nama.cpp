@@ -6,9 +6,10 @@
 #include "fu_tool.h"
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/document.h"
-
 #include <CNamaSDK.h>				//nama SDK
 #include <authpack.h>			//nama SDK
+
+#include "GuiGS.h"
 
 using namespace NamaExampleNameSpace;
 
@@ -48,9 +49,7 @@ Nama::UniquePtr Nama::create(uint32_t width, uint32_t height, bool enable)
 
 Nama::Nama()
 {
-
 	mFrameID = 0;
-	mMaxFace = 1;
 	mIsBeautyOn = true;
 	mBeautyHandles = 0;
 	mMakeUpHandle = 0;
@@ -132,6 +131,7 @@ cv::Mat Nama::GetFrame()
 			}	
 		}
 	}
+
 	return tmpMat;
 }
 
@@ -213,9 +213,9 @@ int Nama::GetCameraCaptureType()
 {
 	return mCapture->getCaptureType();
 }
-cv::Size Nama::getCameraResolution()
+cv::Size Nama::getCameraDstResolution()
 {
-	return mCapture->getCameraResolution();
+	return mCapture->getCameraDstResolution();
 }
 int Nama::GetCameraID()
 {
@@ -299,12 +299,12 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 {
 #ifdef _WIN32
 	HGLRC context = wglGetCurrentContext();
-	HWND wnd = (HWND)Gui::hWindow;
+	HWND wnd = (HWND)Gui::hOffscreenWindow;
 	new_context = wglCreateContext(GetDC(wnd));
 	wglMakeCurrent(GetDC(wnd), new_context);
 #else
 	void * curCtx = NaMaGetCurrentGLCtx();
-	new_context = NaMaCreateGLCtx(Gui::hWindow);
+	new_context = NaMaCreateGLCtx(Gui::hOffscreenWindow);
 	NaMaMakeAsCurrentCtx(new_context);
 #endif
 
@@ -315,7 +315,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 	{
 		CheckGLContext();
 
-		fuSetLogLevel(FU_LOG_LEVEL_INFO);
+		fuSetLogLevel(FU_LOG_LEVEL_ERROR);
 
 		fuSetup(nullptr, 0, nullptr, g_auth_package, sizeof(g_auth_package));
 		// setup without license, only render 1000 frames.
@@ -456,7 +456,7 @@ bool Nama::InitAvatarController()
 {
 	m_pCtrl = new FuController;
 	m_pCtrl->InitController(g_control, g_control_cfg);
-	m_pCtrl->InitFXAA(g_fxaa_flipx);
+	//m_pCtrl->InitFXAA(g_fxaa_flipx);
 	m_pCtrl->BindBundleToController(g_fakeman);
 	m_pCtrl->BindBundleToController(g_avatar_def_bg);
 
@@ -854,6 +854,25 @@ void Nama::UpdateGSBg(cv::Mat & dataRGBA)
 	printf("liufei cost time:%d \r\n", time2 - time1);*/
 }
 
+//更新背景分割的背景数据
+void Nama::UpdateSegBg(cv::Mat & dataRGBA)
+{
+	if (UIBridge::bundleCategory != BundleCategory::BackgroundSegmentation || UIBridge::m_curRenderItem == -1)
+	{
+		return;
+	}
+
+	fuItemSetParamd(UIBridge::m_curRenderItem, "bg_align_type", 1);
+	
+
+	char szVersion[1024] = { 0 };
+	//fuItemGetParams(UIBridge::m_curRenderItem, "script_creator_version", szVersion, 1024);
+	//if (strlen(szVersion) > 0) {
+	fuCreateTexForItem(UIBridge::m_curRenderItem, "tex_bg_seg", dataRGBA.data, dataRGBA.cols, dataRGBA.rows);
+	//}
+	
+}
+
 
 bool Nama::IsBodyShapeOpen()
 {
@@ -903,6 +922,14 @@ void Nama::SetCMDouble(const std::string& key, double v)
 	if (mMakeUpHandle > 0)
 	{
 		fuItemSetParamd(mMakeUpHandle, key.data(), v);
+	}
+}
+
+void Nama::SetCurDouble(const std::string& key, double v)
+{
+	if (UIBridge::m_curRenderItem > 0)
+	{
+		fuItemSetParamd(UIBridge::m_curRenderItem, key.data(), v);
 	}
 }
 
@@ -1014,7 +1041,7 @@ void Nama::ChangeCleanFlag(bool bOpen)
 	}
 }
 
-bool Nama::SelectBundle(string bundleName)
+bool Nama::SelectBundle(string bundleName, int maxFace)
 {
 	if (false == mEnableNama)
 	{
@@ -1032,7 +1059,7 @@ bool Nama::SelectBundle(string bundleName)
 		it->second->SetPositions(&current, NULL, true);
 		it->second->Stop();
 		UIBridge::m_curPlayingMusicItem = -1;
-		UIBridge::mNeedPlayMP3 = false;
+		UIBridge::mNeedPlayMP3 = false; 
 	}
 	
 	if (0 == mBundlesMap[bundleName])
@@ -1044,11 +1071,18 @@ bool Nama::SelectBundle(string bundleName)
 			return false;
 		}
 		vector<char> propData;
-		if (false == FuTool::LoadBundle(bundleName, propData))
+		std::string bundlePath;
+#ifdef __APPLE__
+    bundlePath = FuToolMac::GetCurrentAppPath() + "//" + bundleName;
+#endif
+        if (false == FuTool::LoadBundle(bundleName, propData))
 		{
-			cout << "load prop data failed." << endl;
-			UIBridge::m_curRenderItem = -1;
-			return false;
+            if(false == FuTool::LoadBundleByFullPath(bundlePath, propData))
+            {
+                cout << "load prop data failed." << endl;
+                UIBridge::m_curRenderItem = -1;
+                return false;
+            }
 		}
 		cout << "load prop data." << endl;
 		
@@ -1060,10 +1094,11 @@ bool Nama::SelectBundle(string bundleName)
 		}*/
 		DestroyAll();
 
+
 		
 		bundleID = fuCreateItemFromPackage(&propData[0], propData.size());
 		mBundlesMap[bundleName] = bundleID;
-
+		
 		if (UIBridge::bundleCategory == BundleCategory::GestureRecognition) {
 			fuItemSetParamd(bundleID, "rotMode", 0);
 			if (bundleName.find("ctrl_flower") != std::string::npos) {
@@ -1075,6 +1110,7 @@ bool Nama::SelectBundle(string bundleName)
 		{
 			fuBindItems(mMakeUpHandle, &bundleID, 1);
 			UIBridge::m_curBindedItem = bundleID;
+
 		}
 		else
 		{
@@ -1152,10 +1188,13 @@ bool Nama::SelectBundle(string bundleName)
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////
+	//旧版本统一设定参数
+	fuItemSetParamd(UIBridge::m_curRenderItem, "is3DFlipH", 1);
+	fuItemSetParamd(UIBridge::m_curRenderItem, "isFlipTrack", 1);
 
 	if (UIBridge::bundleCategory == Animoji)
 	{
-		mMaxFace = 1;
+		maxFace = 1;
 	}else if (UIBridge::bundleCategory ==BackgroundSegmentation)
 	{
 		vector<string> humanSegmentations = {"boyfriend1","boyfriend2","boyfriend3"};
@@ -1172,18 +1211,15 @@ bool Nama::SelectBundle(string bundleName)
 			
 		}
 		if (isHumanSegmentation) 
-			mMaxFace = 1;
+			maxFace = 1;
 		else 
-			mMaxFace = 4;
+			maxFace = 4;
 	}
 	else if (UIBridge::bundleCategory == BigHead)
 	{
-		mMaxFace = 1;
-		
+		maxFace = 1;
 	}
-	else{
-		mMaxFace = 4;
-	}
+
 	if (UIBridge::renderBundleCategory == Animoji)
 	{
 		fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 1);
@@ -1192,7 +1228,8 @@ bool Nama::SelectBundle(string bundleName)
 	{
 		fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 0);
 	}
-	fuSetMaxFaces(mMaxFace);
+
+	fuSetMaxFaces(maxFace);
 	return true;
 }
 
@@ -1201,8 +1238,9 @@ bool Nama::CheckModuleCode(int category)
 	return true;
 }
 
-void Nama::RenderDefNama(uchar * frame)
+void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
 {
+
 	if (UIBridge::mNeedPlayMP3)
 	{
 		if (mp3Map.find(UIBridge::m_curRenderItem) != mp3Map.end())
@@ -1245,8 +1283,21 @@ void Nama::RenderDefNama(uchar * frame)
 			}
 		}
 		//֧FU_FORMAT_BGRA_BUFFER  FU_FORMAT_NV21_BUFFER FU_FORMAT_I420_BUFFER FU_FORMAT_RGBA_BUFFER		
-		fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
-						 mFrameWidth, mFrameHeight, mFrameID, renderList.data(), renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+		//fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
+		//				 mFrameWidth, mFrameHeight, mFrameID, renderList.data(), renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+
+		fuSetInputCameraBufferMatrix((TRANSFORM_MATRIX)rotType);
+		fuRender(FU_FORMAT_RGBA_BUFFER,
+			(int*)(picInput.data),
+			FU_FORMAT_RGBA_BUFFER,
+			(int*)(picInput.data),
+			picInput.cols,
+			picInput.rows,
+			mFrameID,
+			renderList.data(),
+			(int32_t)renderList.size(),
+			NAMA_RENDER_FEATURE_FULL,
+			NULL);
 	}
 
 	if (fuGetSystemError())
@@ -1257,7 +1308,7 @@ void Nama::RenderDefNama(uchar * frame)
 }
 
 
-void Nama::RenderP2A(cv::Mat & picBg)
+void Nama::RenderP2A(cv::Mat & picBg, int rotType)
 {
 	m_pCtrl->RenderBundlesBuffer(picBg.data, picBg, mFrameID);
 }
@@ -1282,7 +1333,7 @@ FURect Nama::getGSPreviewRect()
 {
 	return gsPreviewRect;
 }
-void Nama::RenderGS(cv::Mat & picInput)
+void Nama::RenderGS(cv::Mat & picInput, int rotType)
 {
 	if (mGSHandle != -1)
 	{
@@ -1291,8 +1342,19 @@ void Nama::RenderGS(cv::Mat & picInput)
 		vecRender.push_back(mGSHandle);
 		vecRender.push_back(mBeautyHandles);
         
-		fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(picInput.data), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(picInput.data),
-			picInput.cols, picInput.rows, mFrameID, vecRender.data(), vecRender.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+		fuSetInputCameraBufferMatrix((TRANSFORM_MATRIX)rotType);
+
+		fuRender(FU_FORMAT_RGBA_BUFFER,
+			(void*)(picInput.data),
+			FU_FORMAT_RGBA_BUFFER,
+			(void*)(picInput.data),
+			picInput.cols,
+			picInput.rows,
+			mFrameID,
+			vecRender.data(),
+			(int32_t)vecRender.size(),
+			NAMA_RENDER_FEATURE_FULL,
+			NULL);
 	}
 
 	if (fuGetSystemError())
@@ -1305,9 +1367,10 @@ void Nama::RenderGS(cv::Mat & picInput)
 
 void Nama::RenderItems(cv::Mat & picMat)
 {
+
 #ifdef _WIN32
 	HGLRC context = wglGetCurrentContext();
-	HWND wnd = (HWND)Gui::hWindow;
+	HWND wnd = (HWND)Gui::hOffscreenWindow;
 	wglMakeCurrent(GetDC(wnd), new_context);
 #else
 	void * curCtx = NaMaGetCurrentGLCtx();
@@ -1316,21 +1379,25 @@ void Nama::RenderItems(cv::Mat & picMat)
 	
 	if (UIBridge::showGreenScreen)
 	{
-
-		RenderGS(picMat);
+		TRANSFORM_MATRIX type = (mCapture->getCaptureType() == CAPTURE_CAMERA) ? TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL: TRANSFORM_MATRIX::CCROT0;
+		RenderGS(picMat, type);
 
 	}
 	else
 	{
 		if (!mEnableAvatar)
 		{
-			RenderDefNama(picMat.data);
+			//cv::imshow("image", picMat);
+			//cv::waitKey();
+			RenderDefNama(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
 		}
 		else
 		{
-			RenderP2A(picMat);
+			RenderP2A(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
 		}
 	}
+
+	glFinish();
 
 #ifdef _WIN32
 	wglMakeCurrent(GetDC(wnd), context);
@@ -1425,11 +1492,11 @@ void Nama::SetAvatarType(AvatarType type)
 		break;
 	case NamaExampleNameSpace::AVATAR_TYPE_FULLBODY:
 		m_pCtrl->CheckHalfBody(false);
-		SetPos(m_pCtrl, (double*)g_FullArray);
+		m_pCtrl->SetPos(g_FullArray[0], g_FullArray[1], g_FullArray[2]);
 		break;
 	case NamaExampleNameSpace::AVATAR_TYPE_HALF:
 		m_pCtrl->CheckHalfBody(true);
-		SetPos(m_pCtrl, (double*)g_HalfArray);
+		m_pCtrl->SetPos(g_HalfArray[0], g_HalfArray[1], g_HalfArray[2]);
 		break;
 	default:
 		break;
