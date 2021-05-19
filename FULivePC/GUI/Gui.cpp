@@ -81,6 +81,7 @@ const FURect g_showViewRect = {
 	DEF_FRAME_SHOW_HEIGHT
 };
 
+static void ShowTipStr(string tipStr);
 bool doesFileExist(const string& filename)
 {
 #ifdef _WIN32
@@ -900,6 +901,44 @@ static void ShowTitle()
 	ImGui::End();
 }
 
+void Gui::tipToGrantCameraAcess(Nama * nama)
+{
+#ifndef _WIN32
+	ImGui::SetNextWindowPos(ImVec2(240 * scaleRatioW, 250 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(400 * scaleRatioW, 300 * scaleRatioH), ImGuiCond_Always);
+	ImGui::Begin("WindowGSI##3", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+
+	RectLayoutDesc desc;
+	desc.pos = ImVec2(160, 0);
+	desc.size = ImVec2(52, 52);
+
+	ImVec2 textPos = ImVec2(60, 0);
+
+	LayoutImage(desc, Texture::createTextureFromFile("icon_prompt.png", false)->getTextureID(), textPos,
+		u8"请在设置里面为 FULivePC 打开相机权限！");
+
+	ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(120.f / 255.f, 136.f / 255.f, 234.f / 255.f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(150.f / 255.f, 157.f / 255.f, 181.f / 255.f, 1.f));
+
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+
+	if (LayoutButton(ImVec2(120, 60), ImVec2(120, 40), u8"确定"))
+	{
+		FuToolMac::tipToOpenPrivacyPanel();
+	}
+
+
+	ImGui::PopStyleVar(2);
+	ImGui::PopStyleColor(4);
+
+	ImGui::End();
+#endif // !_WIN32
+
+}
+
 void Gui::ShowMainWindow(Nama * nama)
 {
 	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(58.f / 255.f, 61.f / 255.f, 82.f / 255.f, 1.f));
@@ -986,6 +1025,13 @@ void Gui::ShowMainWindow(Nama * nama)
 		}
 	}
 
+#ifndef _WIN32
+	if (!FuToolMac::granteCameraAccess()) {
+		tipToGrantCameraAcess(nama);
+	}
+#endif
+
+   
 	ImVec2 pos;
 	if (m_mouseControlSec->isSelected(&pos))
 	{

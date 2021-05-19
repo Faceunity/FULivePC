@@ -31,7 +31,8 @@ public:
 	void render(Nama::UniquePtr& nama);
 
 	void UpdateFrame(Nama * nama);
-
+    
+    void tipToGrantCameraAcess(Nama * nama);
 	void ShowMainWindow(Nama * nama);
 	
 	void onWindowResize(uint32_t width, uint32_t height);

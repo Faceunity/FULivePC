@@ -456,6 +456,13 @@ void CCameraDS::restartCamera()
 	closeCamera();
 	initCamera(rs_width, rs_height, 0);
 }
+void CCameraDS::restartCameraWhenClosed()
+{
+    if(!mCapture.isOpened()){
+        closeCamera();
+        initCamera(rs_width, rs_height, 0);
+    }
+}
 
 void CCameraDS::play() {
 	if (!m_isCameraInited) {
@@ -487,9 +494,9 @@ void CCameraDS::LoadDefIFNone()
 	if (frame.rows == 0 && frame.cols == 0)
 	{
 #if _WIN32
-		string defaultPicPath = "../../res/frame.png";
+		string defaultPicPath = "../../res/bg_no_camera_detected.png";
 #elif __APPLE__
-		string defaultPicPath = FuToolMac::GetFileFullPathFromResPicBundle("frame.png");
+		string defaultPicPath = FuToolMac::GetFileFullPathFromResPicBundle("bg_no_camera_detected.png");
 #endif
 		static cv::Mat defaulfFrame = cv::imread(defaultPicPath, cv::IMREAD_COLOR);
 		if (!defaulfFrame.empty())
