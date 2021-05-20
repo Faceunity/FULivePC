@@ -32,29 +32,25 @@ public:
 		, mIconName(strIconName)
 		, mIconUrl(strIconUrl)
 	{
-		std::string strDir = "bundleRes";
 
 #ifdef __APPLE__
-		mkdir(strDir.c_str(),0777);
-		strDir += "/";
-		strDir += strId;
-		mkdir(strDir.c_str(),0777);
+
+        mIconDir = FuToolMac::GetDocumentPath() + "/" + mIconName;
+        mBundleDir = FuToolMac::GetDocumentPath() + "/" + mBundleName;
+        
 #else
+        std::string strDir = "bundleRes";
 		mkdir(strDir.c_str());
 		strDir += "/";
 		strDir += strId;
 		mkdir(strDir.c_str());
+        
+        mIconDir = strDir + "/" + mIconName;
+        mBundleDir = strDir + "/" + mBundleName;
+        
 #endif
 
-		mIconDir = strDir + "/" + mIconName; 
-		mBundleDir = strDir + "/" + mBundleName;
-
-		std::string strPath;
-#ifdef __APPLE__
-		strPath = FuToolMac::GetCurrentAppPath() + "//" + strPath;
-#endif
-		strPath += mBundleDir;
-		FILE* pFile = fopen(strPath.c_str(), "r");
+		FILE* pFile = fopen(mBundleDir.c_str(), "r");
 		if (pFile)
 		{
 			mBundleIsDownload = true;

@@ -43,24 +43,6 @@ StikcerHolder::StikcerHolder()
 
 StikcerHolder::~StikcerHolder()
 {
-//	std::string strDir;
-//#ifdef __APPLE__
-//	strDir = FuToolMac::GetCurrentAppPath();
-//#endif
-//	for (auto bundleList : mTagBundleList)
-//	{
-//		for (auto bundle : bundleList)
-//		{
-//			remove((strDir + bundle->mIconDir).c_str());
-//			remove((strDir + bundle->mBundleDir).c_str());
-//
-//			std::string strResDir = strDir + "bundleRes/";
-//			strResDir += bundle->mId;
-//			rmdir(strResDir.c_str());
-//		}
-//	}
-//	rmdir((strDir + "bundleRes").c_str());
-
 	curl_easy_cleanup(mCurl);
 }
 
@@ -326,10 +308,6 @@ int StikcerHolder::WriteCallback(void* pBuffer, size_t nSize, size_t nMemByte, F
 bool StikcerHolder::DownLoadFile(std::string strUrl, std::string strPath)
 {
 	CURLcode curlRet;
-
-#ifdef __APPLE__
-	strPath = FuToolMac::GetCurrentAppPath() + "//" + strPath;
-#endif
 
 	if (mCurl == nullptr)
 	{

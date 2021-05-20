@@ -31,6 +31,8 @@ public:
     static string Convert2utf8(const char * path);
     
     static string GetCurrentAppPath();
+    
+    static string GetDocumentPath();
 private:
 	static FUCGSize culculatorTextSize(const char *string,float fontSize);
    

@@ -1077,9 +1077,7 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 		}
 		vector<char> propData;
 		std::string bundlePath;
-#ifdef __APPLE__
-    bundlePath = FuToolMac::GetCurrentAppPath() + "//" + bundleName;
-#endif
+
         if (false == FuTool::LoadBundle(bundleName, propData))
 		{
             if(false == FuTool::LoadBundleByFullPath(bundlePath, propData))

@@ -337,6 +337,7 @@ elseif(APPLE)
     set_target_properties(${target} PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Info.plist
+        XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "FULivePC/FULivePC.entitlements"
         XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH[variant=Debug] "YES"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Developer ID Application: Faceunity Technology Co., Ltd. (35A6KD62ZJ)"
         XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--deep"

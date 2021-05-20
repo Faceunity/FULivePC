@@ -127,12 +127,9 @@ Texture::SharedPtr Texture::createUnLoadTextureFromFullPath(const std::string& f
 	{
 		return mUnLoadTextureMap[fullpath];
 	}
-#ifdef __APPLE__
-	std::string filePath = FuToolMac::GetCurrentAppPath() + "//" + fullpath;
-#else
+
 	std::string filePath = fullpath;
-#endif
-	
+
 	cv::Mat icon = cv::imread(filePath.c_str(), cv::IMREAD_UNCHANGED);
 	if (icon.empty())
 	{
@@ -169,7 +166,7 @@ Texture::SharedPtr Texture::createUnLoadTextureFromFullPath(const std::string& f
 #ifdef _WIN32
 	std::string unLoadfullpath = GetFileFullPathFromeSearchPath("boutique_stickers_icon_download.png");
 #else
-	std::string unLoadfullpath = GetFileFullPathFromeSearchPath("boutique_stickers_icon_download.png");
+	std::string unLoadfullpath = FuToolMac::GetFileFullPathFromResPicBundle("boutique_stickers_icon_download.png");
 #endif
 
 	cv::Mat downIcon = cv::imread(unLoadfullpath.c_str(), cv::IMREAD_UNCHANGED);
@@ -195,11 +192,8 @@ Texture::SharedPtr Texture::createLoadingTextureFromFullPath(const std::string& 
 	{
 		return mLoadingTextureMap[fullpath];
 	}
-#ifdef __APPLE__
-	std::string filePath = FuToolMac::GetCurrentAppPath() + "//" + fullpath;
-#else
+
 	std::string filePath = fullpath;
-#endif
 
 	cv::Mat icon = cv::imread(filePath.c_str(), cv::IMREAD_UNCHANGED);
 	if (icon.empty())
@@ -237,7 +231,7 @@ Texture::SharedPtr Texture::createLoadingTextureFromFullPath(const std::string& 
 #ifdef _WIN32
 	std::string unLoadfullpath = GetFileFullPathFromeSearchPath("btnLoad.png");
 #else
-	std::string unLoadfullpath = GetFileFullPathFromeSearchPath("btnLoad.png");
+	std::string unLoadfullpath = FuToolMac::GetFileFullPathFromResPicBundle("btnLoad.png");
 #endif
 
 	cv::Mat downIcon = cv::imread(unLoadfullpath.c_str(), cv::IMREAD_UNCHANGED);
@@ -266,11 +260,8 @@ Texture::SharedPtr Texture::createTextureFromFullPath(const std::string& fullpat
 		return mTextureMap[fullpath];
 	}
 	
-#ifdef __APPLE__
-    std::string filePath = FuToolMac::GetCurrentAppPath() + "//" + fullpath;
-#else
     std::string filePath = fullpath;
-#endif
+    
 	cv::Mat icon = cv::imread(filePath.c_str(), cv::IMREAD_UNCHANGED);
 	if (icon.empty())
 	{

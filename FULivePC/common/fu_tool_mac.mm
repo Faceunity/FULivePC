@@ -97,6 +97,13 @@ string FuToolMac::GetCurrentAppPath()
     return [path UTF8String];
 }
 
+string FuToolMac::GetDocumentPath()
+{
+    NSString *documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+
+    return [documentPath UTF8String];
+}
+
 string FuToolMac::Convert2utf8(const char * path)
 {
    NSString * nstr =  [NSString stringWithUTF8String:path];
