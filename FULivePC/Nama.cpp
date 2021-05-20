@@ -8,7 +8,7 @@
 #include "rapidjson/document.h"
 #include <CNamaSDK.h>				//nama SDK
 #include <authpack.h>			//nama SDK
-
+#include "GuiTool.h"
 #include "GuiGS.h"
 
 using namespace NamaExampleNameSpace;
@@ -145,6 +145,11 @@ bool Nama::ReOpenCamera(int camID)
 		mFrameHeight = mCapture->m_dstFrameSize.height;
 		fuOnCameraChange();
 	}
+	return true;
+}
+bool Nama::restartCameraWhenClosed()
+{
+    mCapture->restartCameraWhenClosed();
 	return true;
 }
 
@@ -1072,9 +1077,7 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 		}
 		vector<char> propData;
 		std::string bundlePath;
-#ifdef __APPLE__
-    bundlePath = FuToolMac::GetCurrentAppPath() + "//" + bundleName;
-#endif
+
         if (false == FuTool::LoadBundle(bundleName, propData))
 		{
             if(false == FuTool::LoadBundleByFullPath(bundlePath, propData))

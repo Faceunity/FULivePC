@@ -3,7 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 #include "fu_common_def.h"
+
 using namespace std;
 struct FUCGSize {
     float width;
@@ -12,6 +14,12 @@ struct FUCGSize {
 class FuToolMac
 {
 public:
+    static void addLockScreenEventObser(std::function<void()> f);
+    static void addUnLockScreenEventObser(std::function<void()> f);
+    // 检测相机权限，如果不存在，则获取一次，并返回结果
+    static bool granteCameraAccess();
+    // 提示用户打开相机权限
+    static void tipToOpenPrivacyPanel();
     static vector<string> getVideoDevices();
 	static string GetFileFullPathFromResPicBundle(const char * path);
     static Bitmap * getBitmapFromAsset(string name);
@@ -23,8 +31,11 @@ public:
     static string Convert2utf8(const char * path);
     
     static string GetCurrentAppPath();
+    
+    static string GetDocumentPath();
 private:
 	static FUCGSize culculatorTextSize(const char *string,float fontSize);
+   
 	
 };
 

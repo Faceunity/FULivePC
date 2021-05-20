@@ -129,7 +129,17 @@ string FuTool::GetFileFullPathFromeSearchPath(const char * name,const char * InF
     
     return "";
 #else
-    return FuToolMac::GetFileFullPathFromResourceBundle(name);
+    FILE *fp = NULL;
+    
+    //完整路径直接返回，否则尝试拼成Resource目录下的数据
+    fp = openFile(name);
+    if(fp){
+        fclose(fp);
+        return name;
+    }else{
+        return FuToolMac::GetFileFullPathFromResourceBundle(name);
+    }
+    
 #endif
 }
 

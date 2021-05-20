@@ -73,9 +73,8 @@ public:
 	void connectCamera();
 	bool isPlaying();
 	void restartCamera();
-
 	void LoadDefIFNone();
-
+    void restartCameraWhenClosed();
 	void calculateRect();
 	bool checkFps();
 

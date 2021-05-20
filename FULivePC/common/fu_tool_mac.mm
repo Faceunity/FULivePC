@@ -14,7 +14,68 @@ vector<string> FuToolMac::getVideoDevices()
     
     return vecRet;
 }
+// 检测相机权限，如果不存在，则获取一次，并返回结果
+bool FuToolMac::granteCameraAccess()
+{
+    if (@available(macOS 10.14, *)) {
+        AVAuthorizationStatus st = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+        if (st == AVAuthorizationStatusAuthorized) {
+            return true;
+        }else if (st == AVAuthorizationStatusDenied || st == AVAuthorizationStatusRestricted)
+        {
 
+            return false;
+        }
+        
+        dispatch_group_t group = dispatch_group_create();
+        
+        __block bool accessGranted = false;
+        dispatch_group_enter(group);
+        [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+
+            accessGranted = granted;
+            NSLog(@"Granted!");
+            dispatch_group_leave(group);
+        }];
+        
+        dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+        
+        return accessGranted;
+    } else {
+        // 早期版本则认为已经获取
+        return true;
+    }
+}
+// 添加锁屏监听通知
+void FuToolMac::addLockScreenEventObser(std::function<void()> f)
+{
+    NSDistributedNotificationCenter *dnc = [NSDistributedNotificationCenter defaultCenter];
+    [dnc addObserverForName:@"com.apple.screenIsLocked" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note){
+        NSLog(@"锁屏了---------!!!!");
+      //  nama->CloseCurCamera();
+        f();
+    }];
+}
+// 添加解锁屏监听通知
+void FuToolMac::addUnLockScreenEventObser(std::function<void()> f)
+{
+    NSDistributedNotificationCenter *dnc = [NSDistributedNotificationCenter defaultCenter];
+    [dnc addObserverForName:@"com.apple.screenIsUnlocked" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note){
+        NSLog(@"解开屏了---------!!!!");
+        f();
+    }];
+}
+// 提示用户打开相机权限
+void FuToolMac::tipToOpenPrivacyPanel()
+{
+//    NSAlert *alert = [[NSAlert alloc] init];
+//    [alert setMessageText:@"提示"];
+//    [alert setInformativeText:@"请在隐私里面为 FULivePC 打开相机权限！"];
+//    [alert addButtonWithTitle:@"确定"];
+//    NSModalResponse r = [alert runModal];
+    NSString *urlString = @"x-apple.systempreferences:com.apple.preference.security?Privacy_Camera";
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:urlString]];
+}
 #define MyPicBUNDLE_NAME @ "ResPic.bundle"
 #define MyPicBUNDLE_PATH [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:MyPicBUNDLE_NAME]
 #define MyPicBUNDLE [NSBundle bundleWithPath: MyPicBUNDLE_PATH]
@@ -34,6 +95,13 @@ string FuToolMac::GetCurrentAppPath()
     }
 
     return [path UTF8String];
+}
+
+string FuToolMac::GetDocumentPath()
+{
+    NSString *documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+
+    return [documentPath UTF8String];
 }
 
 string FuToolMac::Convert2utf8(const char * path)

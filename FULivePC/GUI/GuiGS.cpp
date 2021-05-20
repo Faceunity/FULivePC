@@ -504,10 +504,23 @@ void GUIGS::ShowGreenScreenMenu(Nama * nama)
 	}
 	
 	
+#ifndef _WIN32
+
+	if (UIBridge::m_bNeedReChooseInputSrc && FuToolMac::granteCameraAccess())
+	{
+		ShowGSInputChoice(nama, UIBridge::m_bSetGSInputSrc);
+	}
+
+#else
+
 	if (UIBridge::m_bNeedReChooseInputSrc)
 	{
-		ShowGSInputChoice(nama,UIBridge::m_bSetGSInputSrc);
+		ShowGSInputChoice(nama, UIBridge::m_bSetGSInputSrc);
 	}
+
+#endif
+
+	
 	
 	UpdateGreenScreenBg(nama);
 	

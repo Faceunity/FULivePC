@@ -12,6 +12,9 @@
 #include <queue>
 #include "GuiTool.h"
 #include "MouseControl.h"
+#include <functional>
+#include <iostream>
+
 class CCameraDS;
 class FuController;
 typedef unsigned char uchar;
@@ -56,6 +59,18 @@ namespace NamaExampleNameSpace
 		cv::Mat GetFrame();
 		bool ReOpenCamera(int);
 		bool ReOpenCamera(std::string strVideoPath);
+        bool restartCameraWhenClosed();
+        // lambda 用于 oc 的 回调
+        std::function<void()> lock_screen_not_macosx() {
+            return [&]{ std::cout << "lock_screen_not_macosx" << std::endl;
+                CloseCurCamera();
+            };
+        }
+        std::function<void()> unlock_screen_not_macosx() {
+            return [&]{ std::cout << "unlock_screen_not_macosx" << std::endl;
+                restartCameraWhenClosed();
+            };
+        }
 		void CloseCurCamera();
 		void OpenCamera(int);
 		void OpenCamera(std::string strVideoPath);
