@@ -15,7 +15,7 @@ echo "Extract OpenCV DebugLib"
 
 set PLATFORM=x64
 set BUILD_ARCH=%~1
-if "%BUILD_ARCH%"=="" set BUILD_ARCH=x64
+if "%BUILD_ARCH%"=="" set BUILD_ARCH=x86
  
 if "%BUILD_ARCH%"=="x64" (
 	set CMAKE_GENERATOR=Visual Studio 15 2017

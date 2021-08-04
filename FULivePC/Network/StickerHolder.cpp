@@ -29,6 +29,15 @@ static size_t read_head_fun(void *ptr, size_t size, size_t nmemb, void *stream) 
 	return size * nmemb;
 }
 
+#define CATEGORY_STICKER "sticker"
+#define CATEGORY_AVATAR "avatar"
+#define CATEGORY_ANIMOJI "Animoji"
+
+bool BundleRes::IsAvatar()
+{
+	return mCategory == CATEGORY_AVATAR;
+}
+
 StikcerHolder::StikcerHolder()
 {
 	curl_global_init(CURL_GLOBAL_ALL);
@@ -46,15 +55,18 @@ StikcerHolder::~StikcerHolder()
 	curl_easy_cleanup(mCurl);
 }
 
-#define GET_QUEST_TAG_URL "https://items.faceunity.com:4006/api/guest/tags?platform=pc"
 
-#define POST_QUEST_TOOLS_URL "https://items.faceunity.com:4006/api/guest/tools"
+#define MAIN_URL  string("http://192.168.0.122:8089/api") //string("https://items.faceunity.com:4006/api") 
 
-#define POST_QUEST_DOWNLOAD "https://items.faceunity.com:4006/api/guest/download"
+#define GET_QUEST_TAG_URL  (MAIN_URL + "/guest/tags?platform=pc")
 
-#define POST_LOGIN_URL "https://items.faceunity.com:4006/api/user/login"
+#define POST_QUEST_TOOLS_URL  (MAIN_URL + "/guest/tools")
 
-#define POST_DOWNLOADLIST_URL "https://items.faceunity.com:4006/api/download/list"
+#define POST_QUEST_DOWNLOAD (MAIN_URL + "/guest/download")
+
+#define POST_LOGIN_URL (MAIN_URL + "/user/login")
+
+#define POST_DOWNLOADLIST_URL (MAIN_URL + "/download/list")
 
 #define FILENAME "curltest.log"
 
@@ -96,6 +108,7 @@ std::string StikcerHolder::RequestBundleUrl(std::string strId)
 
 void StikcerHolder::RequestTools()
 {
+	int addone = 0;
 	for (auto it : mTags)
 	{
 		rapidjson::StringBuffer buf;
@@ -118,82 +131,61 @@ void StikcerHolder::RequestTools()
 		const rapidjson::Value& dataObj = doc["data"];
 
 		std::vector<std::shared_ptr<BundleRes>> vecBundleRes;
-		std::vector<std::string> vecId;
 		const rapidjson::Value& docsObj = dataObj["docs"];
 		for (int i = 0; i < docsObj.Size(); i++)
 		{
 			const rapidjson::Value& docObj = docsObj[i];
-			std::string strId;
-			std::string iconUrl;
-			std::string iconName;
-			std::string bundleName;
-			int32_t nFlag = 0;
-			//std::string bundleUrl;
-			if (docObj.HasMember("tool"))
+			if (!docObj.HasMember("tool"))
+				continue;
+			auto& tool = docObj["tool"];
+			if (!tool.HasMember("_id") || !tool.HasMember("bundle")) //!tool.HasMember("icon")
 			{
-				if (docObj["tool"].HasMember("_id"))
-				{
-					strId = docObj["tool"]["_id"].GetString();
-				}
-				if (docObj["tool"].HasMember("icon"))
-				{
-					if (docObj["tool"]["icon"].HasMember("url"))
-					{
-						iconUrl = docObj["tool"]["icon"]["url"].GetString();
-					}
-					if (docObj["tool"]["icon"].HasMember("name"))
-					{
-						iconName = FuTool::convert2local8bit(docObj["tool"]["icon"]["name"].GetString());
-					}
-				}
+				continue;
+			}
+			
+			std::string iconName = !tool.HasMember("icon") ? "" : FuTool::convert2local8bit(tool["icon"]["name"].GetString());
 
-				if (docObj["tool"].HasMember("adapter"))
+			std::vector<std::string> names;
+			names.emplace_back(FuTool::convert2local8bit(tool["bundle"]["name"].GetString()));
+			auto bundleRes = std::make_shared<BundleRes>(tool["_id"].GetString(), 
+				names[0], names,
+				iconName);
+			bundleRes->mIconUrl = !tool.HasMember("icon") ? "" : tool["icon"]["url"].GetString();
+
+			if (tool.HasMember("adapter"))
+			{
+				int32_t nFlag = 0;
+				std::string strFlag = tool["adapter"].GetString();
+				if (strFlag.find('1') != strFlag.npos)
 				{
-					std::string strFlag = docObj["tool"]["adapter"].GetString();
-					if (strFlag.find('4') != strFlag.npos)
-					{
-						nFlag |= eStickerFlagAdapter::ADAPTER_FLAG_IS_NEED_3DFLIP;
-					}
-
-					if (strFlag.find('3') != strFlag.npos)
-					{
-						nFlag |= eStickerFlagAdapter::ADAPTER_FLAG_IS_NEED_CLICK;
-					}
-					if (strFlag.find('2') != strFlag.npos)
-					{
-						nFlag |= eStickerFlagAdapter::ADAPTER_FLAG_MAKEUP_FLIP;
-					}
-					if (strFlag.find('1') != strFlag.npos)
-					{
-						nFlag |= eStickerFlagAdapter::ADAPTER_FLAG_SINGLE_PEOPLE;
-					}
-
+					nFlag |= eStickerFlagAdapter::ADAPTER_FLAG_SINGLE_PEOPLE;
 				}
-
-				if (docObj["tool"].HasMember("bundle"))
+				if (strFlag.find('2') != strFlag.npos)
 				{
-					if (docObj["tool"]["bundle"].HasMember("name"))
-					{
-						bundleName = FuTool::convert2local8bit(docObj["tool"]["bundle"]["name"].GetString());
-					}
+					nFlag |= eStickerFlagAdapter::ADAPTER_FLAG_MAKEUP_FLIP;
 				}
+				if (strFlag.find('3') != strFlag.npos)
+				{
+					nFlag |= eStickerFlagAdapter::ADAPTER_FLAG_IS_NEED_CLICK;
+				}
+				if (strFlag.find('4') != strFlag.npos)
+				{
+					nFlag |= eStickerFlagAdapter::ADAPTER_FLAG_IS_NEED_3DFLIP;
+				}
+				bundleRes->mAdapterFlag = nFlag;
+			}
+			bundleRes->mCategory = CATEGORY_STICKER;
+			if (tool.HasMember("category")) {
+				std::string category = tool["category"].GetString();
+				if (category == CATEGORY_AVATAR)
+					bundleRes->mCategory = category;
+				else if (category == CATEGORY_ANIMOJI)
+					bundleRes->mCategory = category;
 			}
 
-			auto it = std::find_if(vecId.begin(), vecId.end(), [&](std::string id) {
-				return id == strId;
-			});
-			if (it == vecId.end())
-			{
-				if (!iconName.empty())
-				{
-					vecId.push_back(strId);
-					auto bundle = std::make_shared<BundleRes>(strId, bundleName, iconName, iconUrl);
-					bundle->mAdapterFlag = nFlag;
-
-					vecBundleRes.emplace_back(bundle);
-				}
-			}
+			vecBundleRes.emplace_back(bundleRes);
 		}
+
 		mTagBundleList.emplace_back(vecBundleRes);
 	}
 
@@ -307,6 +299,9 @@ int StikcerHolder::WriteCallback(void* pBuffer, size_t nSize, size_t nMemByte, F
 
 bool StikcerHolder::DownLoadFile(std::string strUrl, std::string strPath)
 {
+	if (strUrl == "")
+		return false;
+
 	CURLcode curlRet;
 
 	if (mCurl == nullptr)

@@ -119,7 +119,7 @@ std::string Texture::GetFileFullPathFromeSearchPath(const char * name)
 
 Texture::SharedPtr Texture::createUnLoadTextureFromFullPath(const std::string& fullpath, bool bCircle)
 {
-	if (fullpath.size() == 0)
+	if (fullpath.size() == 0 || !FuTool::IsFileExit(fullpath.data()))
 	{
 		return SharedPtr(genError("Image Name unknown", fullpath));
 	}
@@ -184,7 +184,7 @@ Texture::SharedPtr Texture::createUnLoadTextureFromFullPath(const std::string& f
 
 Texture::SharedPtr Texture::createLoadingTextureFromFullPath(const std::string& fullpath, bool bCircle)
 {
-	if (fullpath.size() == 0)
+	if (fullpath.size() == 0 || !FuTool::IsFileExit(fullpath.data()))
 	{
 		return SharedPtr(genError("Image Name unknown", fullpath));
 	}
@@ -247,17 +247,36 @@ Texture::SharedPtr Texture::createLoadingTextureFromFullPath(const std::string& 
 	return texture;
 }
 
+std::string Texture::GetPicPathFromResFolder(std::string Name) {
 
-Texture::SharedPtr Texture::createTextureFromFullPath(const std::string& fullpath, bool bCircle)
+#ifdef _WIN32
+	std::string resfullpath = GetFileFullPathFromeSearchPath(Name.data());
+#else
+	std::string resfullpath = FuToolMac::GetFileFullPathFromResPicBundle(Name.data());
+#endif
+
+	return resfullpath;
+
+}
+
+Texture::SharedPtr Texture::createTextureFromFullPath(const std::string& fullpath, bool bCircle, bool bForceRemake)
 {
 	SharedPtr pTexture = SharedPtr(new Texture);
-	if (fullpath.size() == 0)
+	if (fullpath.size() == 0 || !FuTool::IsFileExit(fullpath.data()))
 	{
 		return SharedPtr(genError("Image Name unknown", fullpath));
 	}
 	if (mTextureMap.find(fullpath) != mTextureMap.end())
 	{
-		return mTextureMap[fullpath];
+		if (bForceRemake)
+		{
+			auto itor = mTextureMap.find(fullpath);
+			mTextureMap.erase(itor);
+		}
+		else
+		{
+			return mTextureMap[fullpath];
+		}
 	}
 	
     std::string filePath = fullpath;
@@ -288,7 +307,24 @@ Texture::SharedPtr Texture::createTextureFromFullPath(const std::string& fullpat
 	cv::Mat outData;
 	if (bCircle)
 	{
-		gui_tool::CutCircleInMiddle(icon, outData);
+		cv::Mat tempMat = icon;
+		/* 弄成居中的正方形，进去切割 */
+		if (icon.cols != icon.rows)
+		{
+			int wide = MIN(icon.cols, icon.rows);
+			cv::Rect rectNeed;
+			if (icon.cols > icon.rows)
+			{
+				rectNeed = cv::Rect(icon.cols / 2 - wide / 2, 0, wide, wide);
+			}
+			else
+			{
+				rectNeed = cv::Rect(0, icon.rows / 2 - wide / 2, wide, wide);
+			}
+
+			tempMat = icon(rectNeed).clone();
+		}
+		gui_tool::CutCircleInMiddle(tempMat, outData);
 	}
 	else
 	{
@@ -344,4 +380,9 @@ Texture::SharedPtr Texture::createTextureFromData(uint32_t width, uint32_t heigh
 
 Texture::~Texture()
 {
+	if (mTextureID)
+	{
+		glDeleteTextures(1, &mTextureID);
+		mTextureID = 0;
+	}
 }

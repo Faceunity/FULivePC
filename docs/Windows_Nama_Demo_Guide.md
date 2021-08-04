@@ -76,7 +76,7 @@ vs2015
 #### 3.2 Preparing  
 - [Download demo](<https://github.com/Faceunity/FULivePC> )
 - Get certificates:
-  1. call **0571-88069272** 	
+  1. call **(86)-0571-89774660** 	
   2. send mail to **marketing@faceunity.com** 
 #### 3.3 Configurations
 

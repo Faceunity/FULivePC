@@ -23,7 +23,7 @@
 #ifndef _WIN32
 extern uint64_t GetTickCount();
 #endif
-
+//#define PERFORMANCE_OPEN
 extern int get_fps(bool);
 CCameraDS::CCameraDS()
 {
@@ -85,11 +85,12 @@ void CCameraDS::savePngFilesToLocalDir(string dirPath,cv::Mat frame)
 	cv::imwrite(pngPath.str(), frame);
 }
 #endif
+
 static void ProcessFrame(CCameraDS* cc)
 {
 	while (!cc->m_bThreadEnd)
 	{
-		if (!cc->checkFps())
+		if (!cc->checkFps() || !cc->isPlaying())
 		{
 			continue;
 		}
@@ -103,14 +104,26 @@ static void ProcessFrame(CCameraDS* cc)
 		{
 			cc->mCapture.retrieve(cc->tmpframe);
 
+			//static uint64_t lastTime = GetTickCount(); // ms
+			//static int frameCount = 0;
+			//++frameCount;
+
+			//uint64_t curTime = GetTickCount();
+			//if (curTime - lastTime > 1000)
+			//{
+			//	int time = frameCount - 1;
+			//	cout << time << endl;
+			//	frameCount = 0;
+			//	lastTime = curTime;
+		    //}
+
 			{
 #ifndef PERFORMANCE_OPEN
 				Locker locker(&cc->m_mtxFrame);
 				cc->frame = cc->tmpframe.clone();
 #else
 				cc->frame = cc->tmpframe;
-#endif
-				
+#endif		
 			}
 
 			bool justBreak = (cc->getCaptureType() == CAPTURE_FILE && cc->frameCount == 1) ||
@@ -271,7 +284,9 @@ void CCameraDS::InitCameraSinglePic(int width, int height, std::string path, boo
 			m_dstFrameSize.width = 0;
 		}
 		
+		status = STATUS_INIT;
 		m_capture_type = CAPTURE_FILE;
+		m_isCameraInited = true;
 	}
 	catch (...) {
 		loge("camera file init error\n");
@@ -328,8 +343,8 @@ void CCameraDS::calculateRect()
 		m_dstFrameSize.width = MIN(MIN(maxRes.width, maxRes.height*aN), neededRes.width);  //取符合比例的值，同时小于needWidth
 		m_dstFrameSize.height = m_dstFrameSize.width / aN;
 	}
-
-
+	//mCapture.set(cv::CAP_PROP_FPS, 30.0);
+	mCapture.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
 	mCapture.set(cv::CAP_PROP_FRAME_WIDTH, m_dstFrameSize.width);
 	mCapture.set(cv::CAP_PROP_FRAME_HEIGHT, m_dstFrameSize.height);
 
@@ -470,7 +485,7 @@ void CCameraDS::play() {
 	}
 
 	if (status == STATUS_PLAYING)return;
-	if (status == STATUS_STOP || status == STATUS_INIT) {
+	if (status == STATUS_STOP || status == STATUS_INIT || status == STATUS_PAUSE) {
 
 		status = STATUS_PLAYING;
 		return;
@@ -481,6 +496,12 @@ void CCameraDS::stop() {
 	if (status == STATUS_PLAYING) {
 		status = STATUS_STOP;
 
+	}
+}
+
+void CCameraDS::pause() {
+	if (status == STATUS_PLAYING) {
+		status = STATUS_PAUSE;
 	}
 }
 

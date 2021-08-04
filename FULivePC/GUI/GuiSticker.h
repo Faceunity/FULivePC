@@ -23,6 +23,8 @@ public:
 
 	static void ShowStickerList(NamaExampleNameSpace::Nama * nama, int tagIndex);
 
+	static bool mSelectSticker;
+	static int  mSelectTip;
 private:
 
 	static std::shared_ptr<StikcerHolder> mNetHolder;

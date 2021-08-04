@@ -15,6 +15,8 @@
 #include <direct.h>
 #endif
 
+#include "Config.h"
+
 enum eStickerFlagAdapter
 {
 	ADAPTER_FLAG_SINGLE_PEOPLE = 0x01,
@@ -23,20 +25,43 @@ enum eStickerFlagAdapter
 	ADAPTER_FLAG_IS_NEED_3DFLIP = 0x08,
 };
 
-class BundleRes
+class BundleRes	//ItemRes
 {
 public:
-	BundleRes(std::string strId, std::string strBundleName, std::string strIconName, std::string strIconUrl)
+	std::string mId;
+	std::string mItemName;
+	std::vector<std::string> mBundleNames;
+	std::string mIconName;
+
+	std::string mIconDir;
+	std::vector<std::string> mBundleDirs;
+	std::atomic_bool mBundleIsDownload;
+	std::atomic_bool mIsDownloading;
+	std::atomic_bool mHasNotBinded;
+
+	std::string mIconUrl;
+	int32_t mAdapterFlag = 0;
+	std::string mCategory = "";
+
+
+	std::string mConfigJson = "";
+	ItemFlag mItemFlag;
+	ItemCategory mCategory2;
+	BodyTrackConfig mBodyTrackConfig;
+
+
+	BundleRes(std::string strId, std::string itemName, std::vector<std::string> strBundleNames, std::string strIconName)
 		: mId(strId)
-		, mBundleName(strBundleName)
+		, mItemName(itemName)
+		, mBundleNames(strBundleNames)
 		, mIconName(strIconName)
-		, mIconUrl(strIconUrl)
 	{
 
 #ifdef __APPLE__
 
         mIconDir = FuToolMac::GetDocumentPath() + "/" + mIconName;
-        mBundleDir = FuToolMac::GetDocumentPath() + "/" + mBundleName;
+		for (auto& name : mBundleNames)
+			mBundleDirs.emplace_back(FuToolMac::GetDocumentPath() + "/" + name);
         
 #else
         std::string strDir = "bundleRes";
@@ -46,50 +71,31 @@ public:
 		mkdir(strDir.c_str());
         
         mIconDir = strDir + "/" + mIconName;
-        mBundleDir = strDir + "/" + mBundleName;
+		for (auto& name : mBundleNames)
+			mBundleDirs.emplace_back(strDir + "/" + name);
         
 #endif
 
-		FILE* pFile = fopen(mBundleDir.c_str(), "r");
-		if (pFile)
-		{
-			mBundleIsDownload = true;
-			fclose(pFile);
-		}
-		else
-		{
-			mBundleIsDownload = false;
+		mBundleIsDownload = true;
+		for (auto& dir : mBundleDirs) {
+			FILE* pFile = fopen(dir.c_str(), "r");
+			if (pFile)
+				fclose(pFile);
+			else
+			{
+				mBundleIsDownload = false;
+				break;
+			}
 		}
 		
 		mIsDownloading = false;
 		mHasNotBinded = false;
 	};
-	~BundleRes() 
-	{
-
-	};
 
 	bool IsOnlyOnePeople() {
-
 		return (mAdapterFlag & ADAPTER_FLAG_SINGLE_PEOPLE) != 0;
-
 	}
-
-	std::string mId;
-	std::string mBundleName;
-
-	std::string mIconName;
-	std::string mIconUrl;
-
-	std::string mIconDir;
-	std::string mBundleDir;
-
-	int32_t mAdapterFlag = 0;
-
-	std::atomic_bool mBundleIsDownload;
-	std::atomic_bool mIsDownloading;
-
-	std::atomic_bool mHasNotBinded;
+	bool IsAvatar();
 };
 
 class StikcerHolder
