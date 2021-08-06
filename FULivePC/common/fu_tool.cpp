@@ -76,16 +76,31 @@ static FILE * openFile(const char * fullPath)
 	return fp;
 }
 
+bool FuTool::IsFileExit(const char * fullPath)
+{
+	FILE *fp = NULL;
+
+	fp = openFile(fullPath);
+	if (fp) {
+		fclose(fp);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 string FuTool::GetFileFullPathFromeSearchPath(const char * name,const char * InFolderName)
 {
 #ifdef _WIN32
     FILE *fp = NULL;
     
-    fp = openFile(name);
-    if(fp){
-        fclose(fp);
-        return name;
-    }
+	fp = openFile(name);
+	if (fp) {
+		fclose(fp);
+		return name;
+	}
     
     // loop N times up the hierarchy, testing at each level
     string upPath;

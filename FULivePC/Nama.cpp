@@ -10,13 +10,15 @@
 #include <authpack.h>			//nama SDK
 #include "GuiTool.h"
 #include "GuiGS.h"
+#include "BgSegUpdate.h"
 
 using namespace NamaExampleNameSpace;
 
 bool Nama::mHasSetup = false;
-bool Nama::mEnableNama = false;
-bool Nama::mEnableAvatar = false;
 
+NamaState Nama::mNamaAppState;
+NamaState Nama::mNamaAppStateBackAR;
+NamaState Nama::mNamaAppStateBackGS;
 
 #ifdef _WIN32
 
@@ -33,6 +35,9 @@ static void * new_context;
 
 #endif
 
+#define DEF_CAMERA_WIDTH (1280)
+#define DEF_CAMERA_HEIGHT (720)
+
 map<int, Mp3*> mp3Map;
 
 string Nama::mFilters[6] = { "origin", "bailiang1", "fennen1", "xiaoqingxin1", "lengsediao1", "nuansediao1" };
@@ -40,7 +45,8 @@ string Nama::mFilters[6] = { "origin", "bailiang1", "fennen1", "xiaoqingxin1", "
 Nama::UniquePtr Nama::create(uint32_t width, uint32_t height, bool enable)
 {
 	UniquePtr pNama = UniquePtr(new Nama);
-	mEnableNama = enable;
+	mNamaAppState.EnableNama = enable;
+	mNamaAppStateBackGS.EnableNama = enable;
 	pNama->Init(width, height);
 	pNama->gsPreviewRect = {0.5,0.5,1.0,1.0};
 	pNama->changeGSPreviewRect(pNama->gsPreviewRect);
@@ -69,12 +75,6 @@ Nama::~Nama()
 		fuDestroyAllItems();
 		fuOnDeviceLost();
 		fuDestroyLibData();
-
-		if (m_pCtrl)
-		{
-			delete m_pCtrl;
-			m_pCtrl = nullptr;
-		}
 	}
 
 
@@ -140,7 +140,7 @@ bool Nama::ReOpenCamera(int camID)
 	if (mCapture->isInit())
 	{
 		mCapture->closeCamera();
-		mCapture->initCamera(mCapture->rs_width, mCapture->rs_height, camID);
+		mCapture->initCamera(DEF_CAMERA_WIDTH, DEF_CAMERA_HEIGHT, camID);
 		mFrameWidth = mCapture->m_dstFrameSize.width;
 		mFrameHeight = mCapture->m_dstFrameSize.height;
 		fuOnCameraChange();
@@ -182,7 +182,7 @@ void Nama::OpenCamera(int iCamID)
 	if ((CamID == iCamID && !mCapture->isInit()) || CamID != iCamID || curCaptureType != CAPTURE_CAMERA)
 	{
 		mCapture->closeCamera();
-		mCapture->initCamera(mCapture->rs_width, mCapture->rs_height, iCamID);
+		mCapture->initCamera(DEF_CAMERA_WIDTH, DEF_CAMERA_HEIGHT, iCamID);
 		mFrameWidth = mCapture->m_dstFrameSize.width;
 		mFrameHeight = mCapture->m_dstFrameSize.height;
 		fuOnCameraChange();
@@ -197,7 +197,7 @@ void Nama::OpenCamera(string strVideoPath)
 	if ((strPath == strVideoPath && !mCapture->isInit()) || strVideoPath != strPath || curCaptureType != CAPTURE_FILE)
 	{
 		mCapture->closeCamera();
-		mCapture->InitCameraFile(mCapture->rs_width, mCapture->rs_height, strVideoPath);
+		mCapture->InitCameraFile(DEF_CAMERA_WIDTH, DEF_CAMERA_HEIGHT, strVideoPath);
 		mFrameWidth = mCapture->m_dstFrameSize.width;
 		mFrameHeight = mCapture->m_dstFrameSize.height;
 		fuOnCameraChange();
@@ -316,7 +316,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 	mCapture->initCamera(width, height, UIBridge::mSelectedCamera);
 	mFrameWidth = mCapture->m_dstFrameSize.width;
 	mFrameHeight = mCapture->m_dstFrameSize.height;
-	if (false == mHasSetup && true == mEnableNama)
+	if (false == mHasSetup && true == mNamaAppState.EnableNama)
 	{
 		CheckGLContext();
 
@@ -377,8 +377,6 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 		}
 		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_gesture_model_data[0]), ai_gesture_model_data.size(), FUAITYPE::FUAITYPE_HANDGESTURE);
 
-
-
 		mModuleCode = fuGetModuleCode(0);
 		mModuleCode1 = fuGetModuleCode(1);
 		{
@@ -432,19 +430,32 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			mGSHandle = fuCreateItemFromPackage(&propData[0], propData.size());
 		}
 
+		{
+			vector<char> propData;
+			if (false == FuTool::LoadBundle(g_fxaa, propData))
+			{
+				cout << "load fx data failed." << endl;
+				return false;
+			}
+			cout << "load fx data." << endl;
+
+			mFxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
+		}
+
+
 		//fuSetDefaultOrientation(0);
 		float fValue = 0.5f;
 		fuSetFaceTrackParam((void*)"mouth_expression_more_flexible", &fValue);
 
 		fuSetMaxFaces(4);
 
-		InitAvatarController();
+		InitController();
 
 		mHasSetup = true;
 	}
 	else
 	{
-		if (mEnableNama) fuOnDeviceLost();
+		if (mNamaAppState.EnableNama) fuOnDeviceLost();
 		mHasSetup = false;
 	}
 
@@ -457,30 +468,58 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 	return true;
 }
 
-bool Nama::InitAvatarController()
+bool Nama::InitController()
 {
-	m_pCtrl = new FuController;
-	m_pCtrl->InitController(g_control, g_control_cfg);
-	//m_pCtrl->InitFXAA(g_fxaa_flipx);
-	m_pCtrl->BindBundleToController(g_fakeman);
-	m_pCtrl->BindBundleToController(g_avatar_def_bg);
+	if (m_Controller != nullptr)
+		return false;
+	m_Controller = std::make_shared<FuController>();
+	m_Controller->InitController(g_control, g_control_cfg);
+	m_Controller->InitFXAA(g_fxaa);
+	return true;
+}
 
+void Nama::LoadAvatarHandTrackBundle()
+{
+	if (m_Controller == nullptr)
+		return;
 	//Bind Animation For Hand
-	auto files = FuTool::getFilesInFolder(g_pose_track_folder, "bundle"); 
+	auto files = FuTool::getFilesInFolder(g_pose_track_folder, "bundle");
 	for (auto & file : files)
 	{
 #if __APPLE__
 		// 这里macosx 为绝对路径，我们需要获取相对于 Resource.bundle的相对路径
 		file = FuToolMac::GetRelativePathDependResourceBundle(file.c_str());
 #endif
-		m_pCtrl->BindBundleToController(file);
+		m_Controller->BindBundle(file);
+		avatarBundles.emplace_back(file);
 	}
-	return true;
+}
+
+void Nama::LoadAvatarBundles(const std::vector<std::string>& bundleNames)
+{
+	if (m_Controller == nullptr)
+		return;
+	for (auto& i : bundleNames) {
+		m_Controller->BindBundle(i);
+	}
+	avatarBundles = bundleNames;
+	Nama::mNamaAppState.RenderAvatar = true;
+}
+
+void Nama::UnLoadAvatar()
+{
+	if (m_Controller == nullptr)
+		return;
+	for (auto& i : avatarBundles) {
+		m_Controller->UnBindBundle(i);
+	}
+	avatarBundles.clear();
+	Nama::mNamaAppState.RenderAvatar = false;
 }
 
 int Nama::IsTracking()
 {
-	if (false == mEnableNama)
+	if (false == mNamaAppState.EnableNama)
 	{
 		return 0;
 	}
@@ -494,7 +533,7 @@ void Nama::SwitchBeauty(bool bValue)
 
 void Nama::SetCurrentShape(int index)
 {
-	if (false == mEnableNama || false == mIsBeautyOn || mBeautyHandles == 0)return;
+	if (false == mNamaAppState.EnableNama || false == mIsBeautyOn || mBeautyHandles == 0)return;
 	if (0 <= index <= 4)
 	{
 		int res = fuItemSetParamd(mBeautyHandles, "face_shape", index);
@@ -505,7 +544,7 @@ int Nama::CreateMakeupBundle(string bundleName)
 {
 	int fakeBundleID = 0;
 
-	if (false == mEnableNama || false == mIsBeautyOn || mMakeUpHandle == 0)return 0;
+	if (false == mNamaAppState.EnableNama || false == mIsBeautyOn || mMakeUpHandle == 0)return 0;
 	using namespace std;
 	using namespace rapidjson;
 
@@ -622,14 +661,14 @@ void Nama::SelectMakeupBundle(string bundleName)
 
 void Nama::UpdateFilter(int index)
 {
-	if (false == mEnableNama || false == mIsBeautyOn || mBeautyHandles == 0)return;
+	if (false == mNamaAppState.EnableNama || false == mIsBeautyOn || mBeautyHandles == 0)return;
 
 	fuItemSetParams(mBeautyHandles, "filter_name", &mFilters[index][0]);
 }
 
 void Nama::UpdateBeauty()
 {
-	if (false == mEnableNama || mBeautyHandles == 0)
+	if (false == mNamaAppState.EnableNama || mBeautyHandles == 0)
 	{
 		return;
 	}
@@ -896,7 +935,7 @@ bool Nama::IsBodyShapeOpen()
 
 void Nama::UpdateBodyShape()
 {
-	if (false == mEnableNama || mBodyShapeHandle == 0)
+	if (false == mNamaAppState.EnableNama || mBodyShapeHandle == 0)
 	{
 		return;
 	}
@@ -949,9 +988,9 @@ void Nama::ClearAllCM()
 	}
 }
 
-int Nama::SelectCostumMakeupBundle(string bundleName, string strType)
+int Nama::SelectCustomMakeupBundle(string bundleName, string strType)
 {
-	if (false == mEnableNama)
+	if (false == mNamaAppState.EnableNama)
 	{
 		return false;
 	}
@@ -962,11 +1001,11 @@ int Nama::SelectCostumMakeupBundle(string bundleName, string strType)
 
 	if (0 == m_CMakeupMap[bundleName])
 	{
-		if (!CheckModuleCode(UIBridge::bundleCategory))
+		/*if (!CheckModuleCode(UIBridge::bundleCategory))
 		{
 			cout << "no right to use." << endl;
 			return false;
-		}
+		}*/
 		vector<char> propData;
 		if (false == FuTool::LoadBundle(bundleName, propData))
 		{
@@ -1004,6 +1043,8 @@ int Nama::SelectCostumMakeupBundle(string bundleName, string strType)
 		UIBridge::renderBundleCategory = BundleCategory::Makeup;
 	}
 
+	Nama::mNamaAppState.RenderAvatar = false;
+
 	return m_CMakeupMap[bundleName];
 }
 
@@ -1023,6 +1064,11 @@ void Nama::DestroyAll()
 
 	UIBridge::m_curBindedItem = -1;
 	mBundlesMap.clear();
+}
+
+int Nama::GetLastNamaError()
+{
+	return fuGetSystemError();
 }
 
 void Nama::UnbindCurFixedMakeup()
@@ -1048,7 +1094,7 @@ void Nama::ChangeCleanFlag(bool bOpen)
 
 bool Nama::SelectBundle(string bundleName, int maxFace)
 {
-	if (false == mEnableNama)
+	if (false == mNamaAppState.EnableNama)
 	{
 		return false;
 	}
@@ -1070,11 +1116,11 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 	if (0 == mBundlesMap[bundleName])
 	{
 		
-		if (!CheckModuleCode(UIBridge::bundleCategory))
+		/*if (!CheckModuleCode(UIBridge::bundleCategory))
 		{
 			cout << "no right to use." << endl;
 			return false;
-		}
+		}*/
 		vector<char> propData;
 		std::string bundlePath;
 
@@ -1194,6 +1240,8 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 	//旧版本统一设定参数
 	fuItemSetParamd(UIBridge::m_curRenderItem, "is3DFlipH", 1);
 	fuItemSetParamd(UIBridge::m_curRenderItem, "isFlipTrack", 1);
+	//PC 就只有横屏
+	fuItemSetParamd(UIBridge::m_curRenderItem, "rotationMode", 2);
 
 	if (UIBridge::bundleCategory == Animoji)
 	{
@@ -1233,12 +1281,44 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 	}
 
 	fuSetMaxFaces(maxFace);
+
+	Nama::mNamaAppState.RenderAvatar = false;
+
 	return true;
 }
 
 bool Nama::CheckModuleCode(int category)
 {
-	return true;
+	if (!IsInited() || category == BUNDLE_CATEGORY_NOMEAN)
+	{
+		return true;
+	}
+
+	int passCode = fuGetModuleCode(g_checkIndex[category]);
+	int needCode = g_checkID[category];
+	bool bOK = false;
+	if ((passCode & needCode) == needCode) {
+		bOK = true;
+	}
+
+	return bOK;
+}
+
+bool Nama::CheckModuleCodeSide(int categorySide)
+{
+	if (!IsInited() || categorySide == BUNDLE_CATEGORY_NOMEAN)
+	{
+		return true;
+	}
+
+	int passCode = fuGetModuleCode(g_checkSideIndex[categorySide]);
+	int needCode = g_checkSideID[categorySide];
+	bool bOK = false;
+	if ((passCode & needCode) == needCode) {
+		bOK = true;
+	}
+
+	return bOK;
 }
 
 void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
@@ -1285,11 +1365,13 @@ void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
 				renderList.push_back(UIBridge::m_curRenderItem);
 			}
 		}
-		//֧FU_FORMAT_BGRA_BUFFER  FU_FORMAT_NV21_BUFFER FU_FORMAT_I420_BUFFER FU_FORMAT_RGBA_BUFFER		
-		//fuRenderItemsEx2(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame), FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(frame),
-		//				 mFrameWidth, mFrameHeight, mFrameID, renderList.data(), renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+
+		renderList.push_back(mFxaaHandles);
+
+		BgSegUpdate::instance().Update(this);
 
 		fuSetInputCameraBufferMatrix((TRANSFORM_MATRIX)rotType);
+
 		fuRender(FU_FORMAT_RGBA_BUFFER,
 			(int*)(picInput.data),
 			FU_FORMAT_RGBA_BUFFER,
@@ -1313,7 +1395,11 @@ void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
 
 void Nama::RenderP2A(cv::Mat & picBg, int rotType)
 {
-	m_pCtrl->RenderBundlesBuffer(picBg.data, picBg, mFrameID);
+	if (m_Controller == nullptr)
+		return;
+
+	fuSetInputCameraBufferMatrix((TRANSFORM_MATRIX)rotType);
+	m_Controller->RenderBundlesBuffer(picBg.data, picBg, mFrameID);
 }
 
 void Nama::changeGSPreviewRect(FURect rect)
@@ -1388,16 +1474,10 @@ void Nama::RenderItems(cv::Mat & picMat)
 	}
 	else
 	{
-		if (!mEnableAvatar)
-		{
-			//cv::imshow("image", picMat);
-			//cv::waitKey();
-			RenderDefNama(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
-		}
-		else
-		{
+		if (mNamaAppState.RenderAvatar)
 			RenderP2A(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
-		}
+		else
+			RenderDefNama(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
 	}
 
 	glFinish();
@@ -1414,7 +1494,7 @@ void Nama::RenderItems(cv::Mat & picMat)
 
 void Nama::DrawLandmarks(uchar* frame)
 {
-	if (false == mEnableNama) return;
+	if (false == mNamaAppState.EnableNama) return;
 	float landmarks[150];
 	float trans[3];
 	float rotat[4];
@@ -1451,55 +1531,38 @@ void Nama::DrawPoint(uchar* frame, int x, int y, unsigned char r, unsigned char 
 
 }
 
-AvatarType Nama::GetAvatarType()
+BodyTrackType Nama::GetBodyTrackType()
 {
-	return m_avaType;
+	return m_bodyTrackType;
 }
 
-void Nama::SwitchAvatar()
+void Nama::SwitchBodyTrackType()
 {
-	switch (m_avaType)
+	switch (m_bodyTrackType)
 	{
-	case NamaExampleNameSpace::AVATAR_TYPE_FULLBODY:
-		SetAvatarType(AVATAR_TYPE_HALF);
+	case BodyTrackType::FullBody:
+		SetBodyTrackType(BodyTrackType::HalfBody);
 		break;
-	case NamaExampleNameSpace::AVATAR_TYPE_HALF:
-		SetAvatarType(AVATAR_TYPE_FULLBODY);
+	case BodyTrackType::HalfBody:
+		SetBodyTrackType(BodyTrackType::FullBody);
 		break;
 	default:
 		break;
 	}
 }
 
-void SetPos(FuController* pCtrl, double * pdArray)
+void Nama::SetBodyTrackType(BodyTrackType type)
 {
-	pCtrl->SetParams("target_position", pdArray, 3);
-	pCtrl->SetParam("reset_all", 1.0);
-}
-
-/* 实际使用的时候可以通过其他方式调整模型位置,主要为了显示 */
-const double g_FullArray[] = { 0.0, 50.0, -900 };
-const double g_HalfArray[] = { 0.0, 0.0, -300 };
-
-void Nama::SetAvatarType(AvatarType type)
-{
-	if (!m_pCtrl)
-	{
-		return;
-	}
-
-	m_avaType = type;
+	m_bodyTrackType = type;
 	switch (type)
 	{
-	case NamaExampleNameSpace::AVATAR_TYPE_NONE:
+	case BodyTrackType::None:
 		break;
-	case NamaExampleNameSpace::AVATAR_TYPE_FULLBODY:
-		m_pCtrl->CheckHalfBody(false);
-		m_pCtrl->SetPos(g_FullArray[0], g_FullArray[1], g_FullArray[2]);
+	case BodyTrackType::HalfBody:
+		m_Controller->SetAvatar3DScene(BodyTrackType::HalfBody);
 		break;
-	case NamaExampleNameSpace::AVATAR_TYPE_HALF:
-		m_pCtrl->CheckHalfBody(true);
-		m_pCtrl->SetPos(g_HalfArray[0], g_HalfArray[1], g_HalfArray[2]);
+	case BodyTrackType::FullBody:
+		m_Controller->SetAvatar3DScene(BodyTrackType::FullBody);
 		break;
 	default:
 		break;

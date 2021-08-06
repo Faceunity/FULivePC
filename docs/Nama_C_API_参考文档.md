@@ -2,13 +2,30 @@
 <!--每次更新文档，更新时间-->
 
 级别：Public   
-更新日期：2021-01-25   
-SDK版本: 7.3.2
+更新日期：2021-07-08   
+SDK版本: 7.4.1
 
 ------
 ### 最新更新内容：
 
 <!--这个小节写每次最新以及次新的更新记录，时间，更新内容。新增函数，函数接口定义更新-->
+2021-07-08 v7.4.1:
+1. 优化高分辨美颜磨皮效果，相同尺度上对齐低分辨率  
+2. 修复人像分割贴纸人体和贴纸没有同时出现的问题  
+3. 修复道具切换过程中，偶现人脸检测重置问题。  
+
+
+2021-04-16 v7.4.0:
+
+1. 优化2D人体点位和美体性能。  
+2. 优化人像分割效果和性能。优化手臂和手识别不稳定问题，优化背景误识别问题。修复人像分割偏移问题。  
+3. 优化美妆效果。优化美瞳贴合效果和溢色问题；优化唇妆遮挡效果，遮挡时口红不再显现。  
+4. 优化Animoji面部驱动效果。优化小幅度动作，如小幅度张嘴和眨眼时，驱动效果更加灵敏。  
+5. 优化情绪识别，支持8种基本情绪识。  
+6. 新增接口fuSetUseAsyncAIInference，支持异步模式，开启异步模式，帧率提升，可改善客户在一些低端设备上帧率不足问题。  
+7. 新增fuRender接口，为所有业务统一渲染接口，详见接口定义。  
+8. 新增接口 fuSetInputCameraBufferMatrix，fuSetInputCameraBufferMatrixState，fuSetInputCameraTextureMatrix，fuSetInputCameraTextureMatrixState，fuSetOutputMatrix，fuSetOutputMatrixState，用于设置图像转换矩阵，用于调整输出图像方向，详见接口定义。  
+
 
 2021-01-25 v7.3.2:
 
@@ -570,6 +587,63 @@ __备注:__
 
 #### 2.3 主运行接口
 ------
+##### fuRender 函数
+通用渲染接口，将输入的图像数据，送入SDK流水线进行处理，并输出处理之后的图像数据。
+
+```C
+fuRender(int out_format, void* out_ptr, int in_format,void* in_ptr, int w, int h, int frame_id, int* p_items,int n_items, int func_flag, void* p_item_masks);
+```
+
+__参数:__  
+
+*out_format [in]*：输出的数据格式标识符。
+
+*out_ptr [out]*：内存指针，指向输出的数据内容。
+
+*in_format [in]*：输入的数据格式标识符。
+
+*in_ptr [in]*：内存指针，指向输入的数据内容。
+
+*w [in]*：输入的图像宽度。
+
+*h [in]*：输入的图像高度。
+
+*frame_id [in]*：当前处理的帧序列号，用于控制道具中的动画逻辑。
+
+*p_items [in]*：内存指针，指向需要执行的道具标识符数组。其中每个标识符应为调用 ```fuCreateItemFromPackage``` 函数的返回值，并且道具内容没有被销毁。
+
+*n_items [in]*：*p_items*数组中的道具个数。
+
+*func_flag*：流水线功能掩码，表示流水线启用的功能模组，以及特定的绘制选项。多个掩码通过运算符“或”进行连接。所有支持的掩码及其含义如下。
+
+| 流水线功能掩码     | 含义     |
+| ---- | ---- |
+| NAMA_RENDER_FEATURE_TRACK_FACE     | 人脸识别和跟踪功能     |
+| NAMA_RENDER_FEATURE_BEAUTIFY_IMAGE     | 输入图像美化功能     |
+| NAMA_RENDER_FEATURE_RENDER     | 人脸相关的绘制功能，如美颜、贴纸、人脸变形、滤镜等     |
+| NAMA_RENDER_FEATURE_ADDITIONAL_DETECTOR     | 其他非人脸的识别功能，包括背景分割、手势识别等     |
+| NAMA_RENDER_FEATURE_RENDER_ITEM     | 人脸相关的道具绘制，如贴纸     |
+| NAMA_RENDER_FEATURE_FULL     | 流水线功能全开     |
+| NAMA_RENDER_OPTION_FLIP_X     | 绘制选项，水平翻转     |
+| NAMA_RENDER_OPTION_FLIP_Y     | 绘制选项，垂直翻转     |
+
+*p_item_masks*：道具掩码，表示在多人模式下，每个道具具体对哪几个人脸生效。该数组长度应和 *p_items* 一致，每个道具一个int类型掩码。掩码中，从int低位到高位，第i位值为1代表该道具对第i个人脸生效，值为0代表不生效。
+
+
+__返回值:__  
+
+处理之后的输出图像的纹理ID。返回值小于等于0为异常，具体信息通过`fuGetSystemError`获取。
+
+__备注:__  
+
+即使在非纹理模式下，函数仍会返回输出图像的纹理ID。虽然该模式下输入输出都是内存数组，但是绘制工作仍然是通过GPU完成的，因此该输出图像的纹理ID同样存在。输出的OpenGL纹理为SDK运行时在当前OpenGL context中创建的纹理，其ID应与输入ID不同。输出后使用该纹理时需要确保OpenGL context保持一致。
+
+**该绘制接口需要OpenGL环境，环境异常会导致崩溃**。  
+
+使用该接口时，可以使用`fuSetInputCameraTextureMatrix`、`fuSetInputCameraBufferMatrix`进行原始图像的旋转和镜像，详见接口文档。  
+
+
+------
 ##### fuRenderItems 函数
 将输入的图像数据，送入SDK流水线进行处理，并输出处理之后的图像数据。该接口会执行所有道具要求、且证书许可的功能模块，包括人脸检测与跟踪、美颜、贴纸或avatar绘制等。
 
@@ -1040,8 +1114,222 @@ void fuDestroyLibData();
 
 ------
 
-#### 2.5 功能接口 - 系统
+#### 2.5 功能接口 - 系统  
+##### TRANSFORM_MATRIX 定义
+一张图像最多只有8个方位方向，TRANSFORM_MATRIX定义了将一张图像进行变换，变换的顺序为先逆时针旋转，然后镜像。
+```C
+typedef enum TRANSFORM_MATRIX {
+  /*
+   * 8 base orientation cases, first do counter-clockwise rotation in degree,
+   * then do flip
+   */
+  DEFAULT = 0,             // no rotation, no flip
+  CCROT0 = DEFAULT,        // no rotation, no flip
+  CCROT90,                 // counter-clockwise rotate 90 degree
+  CCROT180,                // counter-clockwise rotate 180 degree
+  CCROT270,                // counter-clockwise rotate 270 degree
+  CCROT0_FLIPVERTICAL,     // vertical flip
+  CCROT0_FLIPHORIZONTAL,   // horizontal flip
+  CCROT90_FLIPVERTICAL,    // first counter-clockwise rotate 90 degree，then
+                           // vertical flip
+  CCROT90_FLIPHORIZONTAL,  // first counter-clockwise rotate 90 degree，then
+                           // horizontal flip
+  /*
+   * enums below is alias to above enums, there are only 8 orientation cases
+   */
+  CCROT0_FLIPVERTICAL_FLIPHORIZONTAL = CCROT180,
+  CCROT90_FLIPVERTICAL_FLIPHORIZONTAL = CCROT270,
+  CCROT180_FLIPVERTICAL = CCROT0_FLIPHORIZONTAL,
+  CCROT180_FLIPHORIZONTAL = CCROT0_FLIPVERTICAL,
+  CCROT180_FLIPVERTICAL_FLIPHORIZONTAL = DEFAULT,
+  CCROT270_FLIPVERTICAL = CCROT90_FLIPHORIZONTAL,
+  CCROT270_FLIPHORIZONTAL = CCROT90_FLIPVERTICAL,
+  CCROT270_FLIPVERTICAL_FLIPHORIZONTAL = CCROT90,
+} TRANSFORM_MATRIX;
+```
+DEFAULT或CCROT0默认输入方向不做处理。CCROT90为逆时针旋转90度。CCROT90_FLIPVERTICAL为先逆时针旋转90度，然后再竖直方向翻转。如下图所示，
+![ orientation](./imgs/orientationall.png)
 
+------
+
+
+
+
+##### fuSetInputCameraTextureMatrix 函数
+
+定义输入纹理转换矩阵，输入包含纹理时，可用于旋转输入纹理。
+```C
+/**
+ \brief input description for fuRender api, use to transform the input gpu
+ texture to portrait mode(head-up). then the final output will portrait mode.
+ the outter user present render pass should use identity matrix to present the
+ result.
+ \param tex_trans_mat, the transform matrix use to transform the input
+ texture to portrait mode.
+ \note when your input is cpu buffer only don't use
+ this api, fuSetInputCameraBufferMatrix will handle all case.
+ */
+FUNAMA_API void fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX tex_trans_mat);
+```
+
+__参数:__  
+
+*tex_trans_mat [in]*：旋转类别，参见TRANSFORM_MATRIX定义。
+
+__返回值:__  
+
+无。  
+
+__备注:__  
+此接口只在使用fuRender接口进行渲染时有效。
+
+------
+##### fuSetInputCameraTextureMatrixState 函数
+设置由`fuSetInputCameraTextureMatrix`设置的TransformMatrix是否生效。
+```C
+/**
+ \brief set input camera texture transform matrix state, turn on or turn off
+ */
+
+FUNAMA_API void fuSetInputCameraTextureMatrixState(bool isEnable);
+```
+
+__参数:__  
+
+*isEnable [in]*：true，生效，false，关闭。
+
+__返回值:__  
+
+无。  
+
+__备注:__  
+
+
+------
+
+##### fuSetInputCameraBufferMatrix 函数
+定义输入Buffer转换矩阵，输入包含CPU Buffer时，可用于旋转输入。
+```C
+/**
+ \brief input description for fuRender api, use to transform the input cpu
+ buffer to portrait mode(head-up). then the final output will portrait mode. the
+ outter user present render pass should use identity matrix to present the
+ result.
+ \param buf_trans_mat, the transform matrix use to transform the input
+ cpu buffer to portrait mode.
+ \note when your input is gpu texture only don't
+ use this api, fuSetInputCameraTextureMatrix will handle all case.
+ */
+FUNAMA_API void fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX buf_trans_mat);
+```
+
+__参数:__  
+
+*tex_trans_mat [in]*：旋转类别，参见TRANSFORM_MATRIX定义。
+
+__返回值:__  
+
+无。  
+
+__备注:__  
+此接口只在使用fuRender接口进行渲染时有效。  
+
+------
+##### fuSetInputCameraBufferMatrixState 函数
+设置由`fuSetInputCameraBufferMatrix`设置的TransformMatrix是否生效。
+```C
+/**
+ \brief set input camera buffer transform matrix state, turn on or turn off
+ */
+FUNAMA_API void fuSetInputCameraBufferMatrixState(bool isEnable);
+```
+
+__参数:__  
+
+*isEnable [in]*：true，生效，false，关闭。
+
+__返回值:__  
+
+无。  
+
+__备注:__  
+
+------
+##### fuSetOutputMatrix 函数
+设置由`fuSetInputCameraBufferMatrix`设置的TransformMatrix是否生效。
+```C
+/**
+ \brief add optional transform for final result, when use
+ fuSetInputCameraTextureMatrix/fuSetInputCameraBufferMatrix, we means the output
+ is in portrait mode(head-up), and the outter user present render pass should
+ use identity matrix to present the result. but in some rare case, user would
+ like to use a diffent orientation output. in this case,use
+ fuSetInputCameraTextureMatrix/fuSetInputCameraBufferMatrix(portrait mode), then
+ use the additional fuSetOutputMatrix to transform the final result to perfer
+ orientation.
+ \note Don't use this api unless you have to!
+ */
+FUNAMA_API void fuSetOutputMatrix(TRANSFORM_MATRIX out_trans_mat);
+```
+
+__参数:__  
+
+*out_trans_mat [in]*：旋转类别，参见TRANSFORM_MATRIX定义。
+
+__返回值:__  
+
+无。  
+
+__备注:__  
+当使用`fuSetInputCameraTextureMatrix`,`fuSetInputCameraBufferMatrix`设置TransformMatrix后，如需要再调整输出图像buffer，可以`fuSetOutputMatrix`进一步调整输出方向。
+
+------
+##### fuSetOutputMatrixState 函数
+设置由`fuSetOutputMatrix`设置的TransformMatrix是否生效。
+```C
+/**
+ \brief set additional transform matrix state, turn on or turn off
+ */
+FUNAMA_API void fuSetOutputMatrixState(bool isEnable);
+```
+
+__参数:__  
+
+*isEnable [in]*：true，生效，false，关闭。
+
+__返回值:__  
+
+无。  
+
+__备注:__  
+
+
+------
+##### fuSetUseAsyncAIInference 函数
+设置是否使用AI异步模式。
+```C
+/**
+ * \brief set use async ai inference.
+ * \param use_async,
+ * ture or false.
+ */
+FUNAMA_API int fuSetUseAsyncAIInference(int use_async);
+```
+
+__参数:__  
+
+*use_async [in]*：true，开启，false，关闭。
+
+__返回值:__  
+
+1为设置成功，0设置失败  
+
+__备注:__  
+
+当开启异步时，整体渲染帧率能够提升，CPU占用率也升高。
+
+
+------
 ##### fuBindItems 函数
 将资源道具绑定到controller道具上
 ```C
@@ -1255,7 +1543,7 @@ __备注:__
 | armesh_trans_mat     | 4x4 |float| armesh 的transformation。 __注意:__ 1. 获取'armesh_trans_mat'前需要先获取对应脸的'armesh_vertices'。2. 该trans_mat,相比使用'position'和'rotation'重算的transform更加准确，配合armesh，更好贴合人脸。 | armesh  |
 | tongue_direction | 1 |int| 舌头方向，数值对应 FUAITONGUETYPE 定义，见下表。 | Avatar |
 | expression_type | 1 |int| 表情识别，数值对应 FUAIEXPRESSIONTYPE定义，见下表。 | Avatar |
-| rotation_euler | 3 |float| 返回头部旋转欧拉角，分别为roll、pitch、yaw | 默认 |
+| rotation_euler | 3 |float| 返回头部旋转欧拉角，分别为roll、pitch、yaw | Landmark |
 *注：旋转四元数转换为欧拉角可以参考 [该网页](https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles)。
 
 ```C
@@ -2031,11 +2319,11 @@ __备注:__
 
 ------
 ##### fuFaceProcessorGetResultHairMask  函数
-获取HumanProcessor人体算法模块头发mask。
+获取FaceProcessor人脸算法模块头发mask。
 ```C
 /**
- \brief get ai model HumanProcessor's tracking hair mask with index.
- \param index, index of fuHumanProcessorGetNumResults.
+ \brief get ai model FaceProcessor's tracking hair mask with index.
+ \param index, index of fuFaceProcessorGetNumResults.
  \param mask_width,  width of return.
  \param mask_height,  height of return.
  \return mask data.
@@ -2046,21 +2334,21 @@ FUNAMA_API const float* fuFaceProcessorGetResultHairMask(int index,
 ```
 __参数:__  
 
-*index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。  
+*index [in]*：第index个人脸，从0开始，不超过fuFaceProcessorGetNumResults。  
 *mask_width [out]*：返回的数据宽度。  
 *mask_height [out]*：返回的数据高度。  
-__返回值:__  当前HumanProcessor人体算法模块头发mask，长度由mask_width X mask_height决定；每个像素都是0到1的一个概率值，表示该像素属于头发的概率。
+__返回值:__  当前FaceProcessor人脸算法模块头发mask，长度由mask_width X mask_height决定；每个像素都是0到1的一个概率值，表示该像素属于头发的概率。
 
 __备注:__  
 底层算法返回的mask_width,height与原图未必一致，为了性能，有可能经过缩放。外部使用时，需要使将图像resize到和原图一致。
 
 ------
 ##### fuFaceProcessorGetResultHeadMask  函数
-获取HumanProcessor人体算法模块头部mask。
+获取FaceProcessor人脸算法模块头部mask。
 ```C
 /**
- \brief get ai model HumanProcessor's tracking head mask with index.
- \param index, index of fuHumanProcessorGetNumResults.
+ \brief get ai model FaceProcessor's tracking head mask with index.
+ \param index, index of fuFaceProcessorGetNumResults.
  \param mask_width,  width of return.
  \param mask_height,  height of return.
  \return mask data.
@@ -2071,10 +2359,10 @@ FUNAMA_API const float* fuFaceProcessorGetResultHeadMask(int index,
 ```
 __参数:__  
 
-*index [in]*：第index个人体，从0开始，不超过fuHumanProcessorGetNumResults。  
+*index [in]*：第index个人脸，从0开始，不超过fuFaceProcessorGetNumResults。  
 *mask_width [out]*：返回的数据宽度。  
 *mask_height [out]*：返回的数据高度。  
-__返回值:__  当前HumanProcessor人体算法模块头部mask，长度由mask_width X mask_height决定；每个像素都是0到1的一个概率值，表示该像素属于人头的概率。
+__返回值:__  当前FaceProcessor人脸算法模块头部mask，长度由mask_width X mask_height决定；每个像素都是0到1的一个概率值，表示该像素属于人头的概率。
 
 __备注:__  
 底层算法返回的mask_width,height与原图未必一致，为了性能，有可能经过缩放。外部使用时，需要使将图像resize到和原图一致。

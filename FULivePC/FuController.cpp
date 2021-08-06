@@ -19,7 +19,7 @@ FuController::~FuController()
 
 void FuController::InitController(std::string strControllerPath, std::string strConfigPath)
 {
-
+	fuSetLogLevel(FULOGLEVEL::FU_LOG_LEVEL_INFO);
 	std::vector<char> vecCtrlBundle, vecCfgBundle;
 	bool flag = FuTool::LoadBundle(strControllerPath, vecCtrlBundle);
 	bool flagCfg = FuTool::LoadBundle(strConfigPath, vecCfgBundle);
@@ -27,18 +27,13 @@ void FuController::InitController(std::string strControllerPath, std::string str
 	{
 		m_nCtrlHandle = fuCreateItemFromPackage(&vecCtrlBundle[0], vecCtrlBundle.size());
 		m_nCtrlCfgHandle = fuCreateItemFromPackage(&vecCfgBundle[0], vecCfgBundle.size());
-		//fuBindItems(m_nCtrlHandle, &m_nCtrlCfgHandle, 1);
 		m_vecRender.push_back(m_nCtrlHandle);
 
-		mScreenHandle = fuCreateScene();
-		mInstanceHandle = fuCreateInstance(mScreenHandle);
+		mSceneHandle = fuCreateScene();
+		mInstanceHandle = fuCreateInstance(mSceneHandle);
 
-		fuEnableHumanProcessor(mScreenHandle, 1.0);
-
-		fuBindItemsToInstance(mInstanceHandle, &m_nCtrlCfgHandle, 1);
-		fuSetInstanceTargetPosition(mInstanceHandle, 0.0, 50.0, -900);
-
-		//fuItemSetParamd(m_nCtrlHandle, "reset_all", 1.0);
+		fuEnableHumanProcessor(mSceneHandle, 1.0);
+		fuBindItemsToScene(mSceneHandle, &m_nCtrlCfgHandle, 1);
 	}
 }
 
@@ -51,12 +46,11 @@ void FuController::InitFXAA(std::string flipPath)
 		m_fxaaBundle = fuCreateItemFromPackage(&fxaabundle[0], fxaabundle.size());
 		m_vecRender.push_back(m_fxaaBundle);
 	}
-    
 }
 
 /// 向controller.bundle 上绑定道具
 /// @param strBundlePath 相对路径
-int FuController::BindBundleToController(std::string strBundlePath)
+int FuController::BindBundle(std::string strBundlePath)
 {
 	if (m_nCtrlHandle < 0)
 	{
@@ -67,25 +61,32 @@ int FuController::BindBundleToController(std::string strBundlePath)
 	if (flag)
 	{
 		int nHandle = fuCreateItemFromPackage(&vecBundle[0], vecBundle.size());
-
-		//fuBindItems(m_nCtrlHandle, &nHandle, 1);
 		fuBindItemsToInstance(mInstanceHandle, &nHandle, 1);
-		m_vecBundles.emplace_back(nHandle);
-
+		m_vecBundles.emplace(strBundlePath, nHandle);
 		return nHandle;
 	}
 	return -1;
 }
 
-void FuController::UnBindBundle(int nHandle)
+void FuController::UnBindBundle(std::string strBundlePath)
 {
-	//fuUnbindItems(m_nCtrlHandle, &nHandle, 1);
-	fuUnbindItemsFromInstance(mInstanceHandle, &nHandle, 1);
+	auto itr = m_vecBundles.find(strBundlePath);
+	if (itr != m_vecBundles.cend()) {
+		auto nHandle = itr->second;
+		fuUnbindItemsFromInstance(mInstanceHandle, &nHandle, 1);
+		fuDestroyItem(nHandle);
+		m_vecBundles.erase(itr);
+	}
 }
 
 void FuController::SetPos(float x, float y, float z)
 {
 	fuSetInstanceTargetPosition(mInstanceHandle, x, y, z);
+}
+
+void FuController::SetScale(float s)
+{
+	fuSetInstanceScaleDelta(mInstanceHandle, s);
 }
 
 int FuController::GetParam(std::string strKey)
@@ -117,20 +118,49 @@ unsigned int FuController::RenderBundlesBuffer(uint8_t* out_buffer, cv::Mat& bgr
 		bgraFrame.cols, bgraFrame.rows, frameId++, m_vecRender.data(), m_vecRender.size());
 }
 
-
-void FuController::OpenBodyTracking(bool bOpen)
-{
-	fuEnableHumanFollowMode(mScreenHandle, bOpen ? 1:0);
-}
-
-void FuController::CheckHalfBody(bool bHalfBody)
-{
-	fuHumanProcessorSet3DScene(mScreenHandle, bHalfBody ? 0:1);
-}
-
 int FuController::GetHumanStatus()
 {
 	return fuItemGetParamd(m_nCtrlHandle, "human_status");
+}
+
+void FuController::EnableFaceProcessor(int enable)
+{
+	fuEnableFaceProcessor(mSceneHandle, enable);
+}
+
+void FuController::EnableHumanFollowMode(int enable)
+{
+	fuEnableHumanFollowMode(mSceneHandle, enable);
+}
+
+void FuController::SetAvatar3DScene(BodyTrackType scene)
+{
+	fuHumanProcessorSet3DScene(mSceneHandle, (int)scene);
+}
+
+void FuController::SetAvatarGlobalOffset(float offset_x, float offset_y, float offset_z)
+{
+	fuHumanProcessorSetAvatarGlobalOffset(offset_x, offset_y, offset_z);
+}
+
+void FuController::SetAvatarScale(float scale)
+{
+	fuHumanProcessorSetAvatarScale(scale);
+}
+
+void FuController::UseRetargetRootScale(int enable, float scale)
+{
+	fuHumanProcessorSetAvatarUseRetargetRootScale(enable, scale);
+}
+
+void FuController::SetAvatarAnimFilterParams(int n_buffer_frames, float pos_w, float angle_w)
+{
+	fuHumanProcessorSetAvatarAnimFilterParams(n_buffer_frames, pos_w, angle_w);
+}
+
+void FuController::SetAvatarTranslationScale(float scale_x, float scale_y, float scale_z)
+{
+	fuSetHumanProcessorTranslationScale(mSceneHandle, scale_x, scale_y, scale_z);
 }
 
 void FuController::OpenFaceCapture(bool bOpen)

@@ -150,7 +150,7 @@ void CMEyeBrow::ShowUI()
 
 		if (LayoutRectImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile(config->vecType[i].strIconPath, false)->getTextureID(), config->vecType[i].strName.data()))
 		{
-			m_pNama->SelectCostumMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
+			m_pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
 			m_pNama->SetCMDouble("brow_warp_type", config->vecType[i].iType);
 			SetIntensity();
 			m_iCurType = config->vecType[i].iType;
@@ -287,7 +287,7 @@ void CMNormalNode::ShowUINormal(FunCBShowUI funCB, Nama * pNamaA, void * pUserDa
 
 		if (LayoutRectImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile(m_vecData[i]->strIconPath, false)->getTextureID(), m_vecData[i]->strName.data()))
 		{
-			pNama->SelectCostumMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + m_vecData[i]->strBundlePath + ".bundle", strDecKey);
+			pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + m_vecData[i]->strBundlePath + ".bundle", strDecKey);
 			pPage->SetIntensity();
 			m_curConfig = m_vecData[i];
 			m_curBag = nullptr; //需要重新选择颜色
@@ -705,7 +705,7 @@ void CMFoundation::ShowUI()
 		if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), bag->pTex->getTextureID(),
 			bag->pTex->getTextureID(), ""))
 		{
-			m_pNama->SelectCostumMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
+			m_pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
 			std::vector<double> colors0 = GetDoubles(bag->vecColorRGBA[0]);
 			m_pNama->SetCMDoubles("makeup_foundation_color", colors0.data(), colors0.size());
 			SetIntensity();
@@ -721,7 +721,7 @@ void CMFoundation::ShowUI()
 		if (!m_curBag && config->vecColor.size() > 0)
 		{
 			m_curBag = config->vecColor[0];
-			m_pNama->SelectCostumMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
+			m_pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
 			std::vector<double> colors0 = GetDoubles(m_curBag->vecColorRGBA[0]);
 			m_pNama->SetCMDoubles("makeup_foundation_color", colors0.data(), colors0.size());
 			SetIntensity();
@@ -1058,7 +1058,7 @@ void CMLip::ShowUI()
 
 		if (LayoutRectImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile(config->vecType[i].strIconPath, false)->getTextureID(), config->vecType[i].strName.data()))
 		{
-			m_pNama->SelectCostumMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
+			m_pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
 			if (config->vecType[i].iType == YAO_CHUN)
 			{
 				m_pNama->SetCMDouble("lip_type", 0);

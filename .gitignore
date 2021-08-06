@@ -43,7 +43,9 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+.pdb
 
 #!! ERROR: oc is undefined. Use list command to see defined gitignore types !!#
 
 # End of https://www.gitignore.io/api/oc,macos
+/bundleRes

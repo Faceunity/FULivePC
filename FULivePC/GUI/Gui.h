@@ -50,6 +50,7 @@ public:
 	static GLFWwindow* offscreen_window;
 
 	static bool mIsOpenMiniWindow;
+	static bool mIsEnableHumanFollowMode;
 
 protected:
 private:

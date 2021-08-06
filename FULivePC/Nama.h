@@ -15,17 +15,13 @@
 #include <functional>
 #include <iostream>
 
+#include "Config.h"
+
 class CCameraDS;
 class FuController;
 typedef unsigned char uchar;
 namespace NamaExampleNameSpace
 {
-	enum AvatarType
-	{
-		AVATAR_TYPE_NONE,
-		AVATAR_TYPE_FULLBODY,
-		AVATAR_TYPE_HALF
-	};
 
 	enum MakeupParamType
 	{
@@ -45,6 +41,25 @@ namespace NamaExampleNameSpace
 		float brow_warp;
 		int brow_warp_type;
 	};
+
+	typedef struct tagNamaState
+	{
+		bool EnableNama;
+		bool EnableAvatar;
+		bool EnableAvatarUI;
+		bool RenderAvatar;
+
+		tagNamaState() {
+
+			EnableNama = false;
+			EnableAvatar = false;
+			EnableAvatarUI = false;
+			RenderAvatar = false;
+
+		}
+
+	}NamaState;
+
 	class Nama
 	{		
 	public:
@@ -83,19 +98,24 @@ namespace NamaExampleNameSpace
 
 		bool CheckGLContext();
 		bool Init(uint32_t& width, uint32_t& height);
-		bool InitAvatarController();
+		bool InitController();
 		bool IsInited() { return mHasSetup; }
+
+		void LoadAvatarHandTrackBundle();
+		void LoadAvatarBundles(const std::vector<std::string>& bundleNames);
+		void UnLoadAvatar();
 
 		void SetCurDouble(const std::string& key, double v);
 		void SetCMDoubles(const std::string& key, double* values, uint32_t count);
 		void SetCMDouble(const std::string& key, double v);
-		int SelectCostumMakeupBundle(std::string bundleName, std::string strType);
+		int SelectCustomMakeupBundle(std::string bundleName, std::string strType);
 		void ClearAllCM();
 		void UnbindCurFixedMakeup();
 		void ChangeCleanFlag(bool bOpen);
 
 		bool SelectBundle(std::string bundleName, int maxFace = 4);
 		bool CheckModuleCode(int category);
+		bool CheckModuleCodeSide(int categorySide);
 		int  IsTracking();
 		void SetCurrentShape(int index);
 		int CreateMakeupBundle(std::string bundleName);
@@ -120,9 +140,9 @@ namespace NamaExampleNameSpace
 		void DrawLandmarks(uchar*  frame);		
 		void DrawPoint(uchar*  frame, int x, int y, unsigned char r = 255, unsigned char g = 240, unsigned char b = 33);
 
-		AvatarType GetAvatarType();
-		void SetAvatarType(AvatarType type);
-		void SwitchAvatar();
+		BodyTrackType GetBodyTrackType();
+		void SwitchBodyTrackType();
+		void SetBodyTrackType(BodyTrackType type);
 
 		void AddRecentColor(cv::Vec4b data);
 		
@@ -133,6 +153,7 @@ namespace NamaExampleNameSpace
 		FURect getGSPreviewRect();
 
 		void DestroyAll();
+		int GetLastNamaError();
 	private:
 		
 		void RenderGS(cv::Mat & picInput, int rotType);
@@ -151,16 +172,19 @@ namespace NamaExampleNameSpace
 		int mFxaaHandles;
 		int mGSHandle = -1;
 		uint32_t mFrameWidth, mFrameHeight;
-		static bool mHasSetup;
 		std::queue<gui_tool::ColorBag> m_queueRencetColor;
 		std::map<std::string, int> m_CMakeupTypeMap;
 		std::unordered_map<std::string, int> m_CMakeupMap;
 
+		std::vector<std::string> avatarBundles;
        
+		static bool mHasSetup;
 	public:	
-		static bool mEnableNama;
-		static bool mEnableAvatar;
-		int mIsBeautyOn;	
+		static NamaState mNamaAppState;
+		static NamaState mNamaAppStateBackAR;
+		static NamaState mNamaAppStateBackGS;
+
+		int mIsBeautyOn;
 		int mIsDrawPoints;
 		int mFrameID;		
 		int mModuleCode, mModuleCode1;
@@ -174,8 +198,8 @@ namespace NamaExampleNameSpace
 		static std::string mFilters[6];
 		std::map<std::string, int> mBundlesMap;
 		std::unordered_map<std::string, std::vector<MakeupParam> > mMakeupsMap;
-		FuController * m_pCtrl;
-		AvatarType m_avaType = AVATAR_TYPE_FULLBODY;
+		std::shared_ptr<FuController> m_Controller;
+		BodyTrackType m_bodyTrackType = BodyTrackType::FullBody;
 	};
 }
 

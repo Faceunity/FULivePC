@@ -12,7 +12,9 @@ public:
 
 public:
 	void SetSource(std::string strURL);
+	bool SaveCurFrame2File(std::string strPath);
 	void Update(NamaExampleNameSpace::Nama * nama);
+	cv::Size GetDstResolution();
 
 private:
 	CCameraDS * m_pFrameInput = nullptr;

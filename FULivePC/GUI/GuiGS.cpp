@@ -43,6 +43,13 @@ string UIBridge::m_openLocalFileTip = "";
 string UIBridge::mCurRenderGSItemName = "";
 int UIBridge::gsBundleCategory = BUNDLE_CATEGORY_NOMEAN;
 
+int UIBridge::m_localBgSegVideoRotation = 0;
+// 用于区别是图片类型还是视频类型
+bool UIBridge::m_localBgSegVideoType = 0;
+// 记录本地视频的分辨率
+float UIBridge::m_localBgSegVideoWidth = 0;
+float UIBridge::m_localBgSegVideoHeight = 0;
+
 CCameraDS * GUIGS::m_pCamBG = new CCameraDS();
 bool GUIGS::m_bHasSetedBgForOnceChange = false;
 vector<ColorBag> GUIGS::m_vecColorTex;
@@ -489,7 +496,7 @@ void GUIGS::ShowGreenScreenMenu(Nama * nama)
 					auto funSetSelectd = [&](int index) {
 						UIBridge::gsBundleCategory = index + GS_START;
 						UIBridge::showItemSelectWindow = true;
-						Nama::mEnableAvatar = false;
+						Nama::mNamaAppState.EnableAvatar = false;
 					};
 					
 					funSetSelectd(i);

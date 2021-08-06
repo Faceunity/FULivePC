@@ -43,6 +43,7 @@ typedef enum {
 	STATUS_NAMA_UN_INIT,
 	STATUS_INIT,
 	STATUS_PLAYING,
+	STATUS_PAUSE,
 	STATUS_STOP,
 	STATUS_NO_CAMERA,
 	STATUS_ERROR
@@ -57,6 +58,7 @@ public:
 
 	void play();
 	void stop();
+	void pause();
 #if 0
 	void savePngFilesToLocalDir(string dirPath,cv::Mat frame);
 #endif

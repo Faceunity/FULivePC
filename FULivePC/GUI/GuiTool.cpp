@@ -184,6 +184,7 @@ namespace gui_tool
 	}
 
 	void CutCircleInMiddle(cv::Mat & dataIn, cv::Mat & dataOut) {
+
 		Mat & srcImg = dataIn;
 		Mat maskImg;
 
@@ -192,8 +193,8 @@ namespace gui_tool
 		dataOut = srcImg.clone();
 		maskImg = Mat::zeros(srcImg.rows, srcImg.cols, CV_8UC1);
 
-		int X = srcImg.rows / 2;
-		int Y = srcImg.cols / 2;
+		int X = srcImg.cols / 2;
+		int Y = srcImg.rows / 2;
         cv::Point pt_o = cv::Point(X, Y);
 		int r = MIN(srcImg.rows, srcImg.cols) / 2;
 

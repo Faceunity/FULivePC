@@ -12,9 +12,70 @@
 #define MAX_BODY_SHAPE_PARAM  7
 #define MAX_GREEN_SCREEN_PARAM 3
 
+
+#define MAKEUP_CUSTOM_NAME ("demo_icon_customize.bundle")
+#define BGSEG_CUSTOM_NAME ("others/bg_segment.bundle")
+#define BGSEG_USERFILE_PIC ("bg_seg_shot.png")
+#define BGSEG_ADD_ICON ("portrait_segmentation_icon_add.png")
+
 using namespace std;
+
+enum CERTIFACITE_TYPE
+{
+	DEFINE_Face_Beautify,
+	DEFINE_2D_Sticker,
+	DEFINE_3D_Sticker,
+	DEFINE_Skeletal_animation,
+	DEFINE_Avatar,
+	DEFINE_AR_Mask,
+	DEFINE_AR_Mask_HD,
+	DEFINE_Face_Transfer,
+	DEFINE_Background_Segmentation,
+	DEFINE_Gesture_Recognition,
+	DEFINE_Video_Filter,
+	DEFINE_Expression_Recognition,
+	DEFINE_P2A_Prime,
+	DEFINE_P2A_Creative,
+	DEFINE_Portrait_Relighting,
+	DEFINE_Dynamic_Portrait,
+	DEFINE_Facewarp,
+	DEFINE_Music_filter,
+	DEFINE_Make_Up,
+	DEFINE_HAIR_COLOR,
+	DEFINE_CARTOON_FILTER,
+	DEFINE_GESTURE_TRACKING,
+	DEFINE_FACE_FUSION,
+
+
+	DEFINE_SIZE
+};
+static const int define_arr[DEFINE_SIZE] = { 0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80,0x100,0x200,
+0x400,0x800,0x1000,0x2000,0x4000,0x8000,0x10000,0x20000,0x80000,
+0x100000,0x200000,0x400000,0x800000 };
+
+enum CERTIFACITE_TYPE_EXT
+{
+	DEFINE_P2A_IMAGE,
+	DEFINE_P2A_VIDEO,
+	DEFINE_P2A_GIF,
+	DEFINE_LIGHT_MAKEUP,
+	DEFINE_NAMA_KNEAD_FACE,
+	DEFINE_BODY_SHAPE,
+	DEFINE_RENDER,
+	DEFINE_BODY_TRACK,
+	DEFINE_BODY_TRACK_GESTURE,
+	DEFINE_GREEN_SCREEN_EDIT,
+	DEFINE_PKGAME,
+
+	DEFINE_SIZE_EXT
+};
+static const int define_arr_ext[DEFINE_SIZE_EXT] = { 0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80,0x100,0x200,
+0x80000 };
+
+
 enum BundleCategory 
 {
+	Avatar,
 	Animoji,
 	ItemSticker,
 	ItemJingpin,
@@ -30,6 +91,39 @@ enum BundleCategory
 	GreenScreen,
 
 	Count
+};
+
+static const int g_checkIndex[Count] = {
+	0,0,0,0,0,0,0,0,0,0,0,0,0,1
+};
+
+static const int g_checkID[Count] = 
+{ 
+	define_arr[DEFINE_Avatar], define_arr[DEFINE_3D_Sticker],define_arr[DEFINE_2D_Sticker],define_arr[DEFINE_2D_Sticker],
+	define_arr[DEFINE_AR_Mask],  define_arr[DEFINE_Expression_Recognition], define_arr[DEFINE_Music_filter],
+	define_arr[DEFINE_Background_Segmentation], define_arr[DEFINE_Gesture_Recognition], define_arr[DEFINE_Video_Filter],
+	define_arr[DEFINE_Make_Up], define_arr[DEFINE_HAIR_COLOR], define_arr[DEFINE_Expression_Recognition],
+	define_arr_ext[DEFINE_GREEN_SCREEN_EDIT]
+};
+
+enum SideCategory {
+
+	BeautifyFaceSkin,
+	BeautifyFaceShape,
+	BeautifyFilter,
+	BeautifyBody,
+
+	SideCount
+};
+
+static const int g_checkSideIndex[SideCount] = {
+	0,0,0,1
+};
+
+static const int g_checkSideID[Count] =
+{
+	define_arr[DEFINE_Face_Beautify], define_arr[DEFINE_Face_Beautify],define_arr[DEFINE_Video_Filter],
+	define_arr_ext[DEFINE_BODY_SHAPE]
 };
 
 enum eGS_INPUT_TYPE
@@ -109,6 +203,15 @@ public:
 	static float m_localVideoHeight;
 	static bool m_bResetPreviewRect;
 	static string m_openLocalFileTip;
+
+	//背景分割用
+	// 获取本地视频的角度
+	static int m_localBgSegVideoRotation;
+	// 用于区别是图片类型还是视频类型
+	static bool m_localBgSegVideoType;
+	// 记录本地视频的分辨率
+	static float m_localBgSegVideoWidth;
+	static float m_localBgSegVideoHeight;
 	
 	static int mEnableSkinDect;
 	static int mEnableHeayBlur;
@@ -175,8 +278,14 @@ const string g_GSParamName[MAX_GREEN_SCREEN_PARAM] = {"chroma_thres","chroma_thr
 /////////////////////////////////////////////////////////////
 
 
-extern const string g_assetDir;
+#ifdef __APPLE__
+const string g_assetDir = "";
+#else
+const string g_assetDir = "assets/";
+#endif
+
 const string gBundlePath[] = {
+	g_assetDir + "Avatars/",
 	g_assetDir + "items/" + "Animoji",
 	g_assetDir + "items/" + "ItemSticker",
 	g_assetDir + "items/" + "JINPINHOLDER",
@@ -192,12 +301,15 @@ const string gBundlePath[] = {
 	g_assetDir + "items/" + "GreenScreen"
 };
 
-const string gGSBgPic = g_assetDir + "items/" + "GreenScreenBg";
+const string g_pose_track_folder = g_assetDir + "PoseTrack/";
 
+const string gGSBgPic = g_assetDir + "items/" + "GreenScreenBg";
 
 const string gGSColorConfig = g_assetDir + "colorConfig.json";
 
 const string gCustomCMConfig = g_assetDir + "items/Makeup/subs_setup.json";
+
+const string gBgSegUserConfig = "BgSegUserConfig.json";
 
 
 #endif

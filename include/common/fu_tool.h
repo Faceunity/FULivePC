@@ -19,6 +19,8 @@ public:
 	*/
 	static string GetFileFullPathFromeSearchPath(const char * name, const char * InFolderName = "res");
 
+	static bool IsFileExit(const char * fullPath);
+
 	static Bitmap * getBitmapFromFile(string file);
 
 	static vector<string> getVideoDevices();

@@ -274,7 +274,7 @@ FUNAMA_API int fuEnableHumanProcessor(unsigned int handle_id, int enable);
 /**
  \brief set human processor 3D scene.
  \param handle_id is the target scene handle
- \param scene = 0 means dance, enable > 0 means selfie
+ \param scene = 0 means selfie, enable > 0 means dance
  \return zero for failed, one for success
 */
 FUNAMA_API int fuHumanProcessorSet3DScene(unsigned int handle_id, int scene);
@@ -286,6 +286,16 @@ FUNAMA_API int fuHumanProcessorSet3DScene(unsigned int handle_id, int scene);
  \return zero for failed, one for success
 */
 FUNAMA_API int fuEnableHumanFollowMode(unsigned int handle_id, int enable);
+
+/**
+ \brief set human processor translation scale in not follow mode.
+ \param handle_id is the target scene handle
+ \param scale
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetHumanProcessorTranslationScale(unsigned int handle_id,
+                                                   float scale_x, float scale_y,
+                                                   float scale_z);
 
 /**
  \brief Open or close hand detetor for the target scene.

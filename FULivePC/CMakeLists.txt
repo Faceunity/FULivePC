@@ -118,6 +118,8 @@ set(${target}_GUI
 	GUI/GuiCustomMakeup.h
     GUI/GuiSticker.cpp
 	GUI/GuiSticker.h
+    GUI/GuiBgSeg.cpp
+    GUI/GuiBgSeg.h
 )
 
 set(${target}_IMGUI

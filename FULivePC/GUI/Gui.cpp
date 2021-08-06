@@ -15,6 +15,8 @@
 #include "imgui/imgui_internal.h"
 #include "GuiCustomMakeup.h"
 #include "GuiSticker.h"
+#include "FuController.h"
+#include "GuiBgSeg.h"
 
 #if __APPLE__
 #include "fu_tool_mac.h"
@@ -71,6 +73,8 @@ bool UIBridge::mNeedPlayMP3 = false;
 bool UIBridge::mNeedStopMP3 = false;
 
 bool Gui::mIsOpenMiniWindow = true;
+bool Gui::mIsEnableHumanFollowMode = false;
+
 //{ "blur_level","color_level", "red_level", "eye_bright", "tooth_whiten" ,"remove_pouch_strength", "remove_nasolabial_folds_strength" };
 
 const char * g_szMainFrameWinName = "MainFrameWindow";
@@ -121,7 +125,6 @@ int get_fps(bool bADDFrame)
     
 	static uint64_t lastTime = GetTickCount(); // ms
 	static int frameCount = 0;
-
 	++frameCount;
 
 	uint64_t curTime = GetTickCount();
@@ -176,6 +179,7 @@ GLFWwindow* Gui::offscreen_window;
 Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 {
 	GUISticker::LoadResource();
+	GUIBgSeg::LoadResource();
 	UniquePtr pGui = UniquePtr(new Gui);
 	
 	// Setup window
@@ -201,7 +205,7 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
 	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 	offscreen_window = glfwCreateWindow(width, height, "", NULL, window);
     glfwMakeContextCurrent(offscreen_window);
-    glfwSwapInterval(1); // Enable vsync
+    //glfwSwapInterval(1); // Enable vsync
     
 	glfwMakeContextCurrent(window); 
 #if __APPLE__
@@ -211,7 +215,7 @@ Gui::UniquePtr Gui::create(uint32_t width, uint32_t height)
     hWindow = glfwGetWin32Window(window);
 	hOffscreenWindow = glfwGetWin32Window(offscreen_window);
 #endif
-	glfwSwapInterval(1); // Enable vsync
+	//glfwSwapInterval(1); // Enable vsync
 	gl3wInit();
 	glfwSetWindowSizeCallback(window, window_size_callback);
 
@@ -272,6 +276,9 @@ Gui::~Gui()
 	glfwTerminate();
 }
 
+
+static void ShowTipLabel(string tip);
+
 static MyDocument GDocs[4];
 
 static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
@@ -311,21 +318,45 @@ static void ShowTabs(const char* title, bool* p_open, Nama::UniquePtr& nama)
 		{
 		case 0:
 		{
+			if (!nama->CheckModuleCodeSide(BeautifyFaceSkin))
+			{
+				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+				string tipStr = u8"美颜权限不足";
+				ShowTipLabel(tipStr);
+			}
 			gui_tab_content::ShowTabBeautySkin(nama.get());
 		}
 		break;
 		case 1:
 		{
+			if (!nama->CheckModuleCodeSide(BeautifyFaceShape))
+			{
+				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+				string tipStr = u8"美颜权限不足";
+				ShowTipLabel(tipStr);
+			}
 			gui_tab_content::ShowTabFaceBeauty(nama.get());
 		}
 		break;
 		case 2:
 		{
+			if (!nama->CheckModuleCodeSide(BeautifyFilter))
+			{
+				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+				string tipStr = u8"滤镜权限不足";
+				ShowTipLabel(tipStr);
+			}
 			gui_tab_content::ShowTabFilter(nama.get());
 		}
 		break;
 		case 3:
 		{
+			if (!nama->CheckModuleCodeSide(BeautifyBody))
+			{
+				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+				string tipStr = u8"美体权限不足";
+				ShowTipLabel(tipStr);
+			}
 			gui_tab_content::ShowTabBodyBeauty(nama.get());
 		}
 		break;
@@ -361,6 +392,19 @@ static void ShowCustomMakeupTip(Nama * nama)
 
 }
 
+BodyTrackConfig bodyTrackConfig;
+static void ApplyBodyTrackConfig(Nama * nama) {
+	auto& params = nama->GetBodyTrackType() == BodyTrackType::FullBody ? bodyTrackConfig.FullBody : bodyTrackConfig.HalfBody;
+	nama->m_Controller->EnableFaceProcessor(params.EnableFaceProcessor);
+	nama->m_Controller->UseRetargetRootScale(params.UseRetargetRootScale, params.UseRetargetRootScaleValue);
+	nama->m_Controller->SetAvatarAnimFilterParams(params.AnimFilterParams_n_buffer_frames, params.AnimFilterParams_pos_w, params.AnimFilterParams_angle_w);
+	nama->m_Controller->SetAvatarGlobalOffset(params.GlobalOffset_x, params.GlobalOffset_y, params.GlobalOffset_z);
+	nama->m_Controller->SetAvatarScale(params.Scale);
+	nama->m_Controller->SetPos(params.Pos_x, params.Pos_y, params.Pos_z);
+	//nama->m_Controller->EnableHumanFollowMode(params.EnableHumanFollowMode);
+	nama->m_Controller->SetAvatarTranslationScale(params.TrackMoveRange_x, params.TrackMoveRange_y, params.TrackMoveRange_z);
+}
+
 static void ShowAvatarMenu(Nama * nama)
 {
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, 0.0f));
@@ -369,19 +413,18 @@ static void ShowAvatarMenu(Nama * nama)
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
 	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 584 * scaleRatioH), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(300 * scaleRatioW, 80 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 530 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(300 * scaleRatioW, 40 * scaleRatioH), ImGuiCond_Always);
 	ImGui::Begin("avatarChange", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize
 		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
 
 	string strIconName = "";
-	auto avaType = nama->GetAvatarType();
-	switch (avaType)
+	switch (nama->GetBodyTrackType())
 	{
-	case NamaExampleNameSpace::AVATAR_TYPE_FULLBODY:
+	case BodyTrackType::FullBody:
 		strIconName = "switch_whole_body.png";
 		break;
-	case NamaExampleNameSpace::AVATAR_TYPE_HALF:
+	case BodyTrackType::HalfBody:
 		strIconName = "switch_half_body.png";
 		break;
 	default:
@@ -397,8 +440,14 @@ static void ShowAvatarMenu(Nama * nama)
 
 	if (ImGui::ImageButton(tex->getTextureID(), ImVec2(88 * scaleRatioW, 28 * scaleRatioH)))
 	{
-		nama->SwitchAvatar();
+		nama->SwitchBodyTrackType();
+		ApplyBodyTrackConfig(nama);
 	}
+
+	//ImGui::Checkbox("MiniWindow", &Gui::mIsOpenMiniWindow);
+	//if (ImGui::Checkbox("HumanFollowMode", &Gui::mIsEnableHumanFollowMode)) {
+	//	nama->m_Controller->EnableHumanFollowMode(Gui::mIsEnableHumanFollowMode);
+	//}
 
 	ImGui::End();
 	ImGui::PopStyleVar();
@@ -408,8 +457,6 @@ static void ShowAvatarMenu(Nama * nama)
 	ImGui::PopStyleColor();
 	ImGui::PopStyleColor();
 }
-
-
 
 static void ShowAvatarMiniCameraView(GLuint & texId, float rotio, ImVec2 frameSize)
 {
@@ -483,31 +530,218 @@ static void ShowDebugMenu()
 	}
 }
 
-#define MAKEUP_CUSTOM_NAME ("demo_icon_customize.bundle")
-
 static void ShowFloatMenuAR(Nama * nama)
 {
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .0f));
-	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 584 * scaleRatioH), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(888 * scaleRatioW, 90 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 580 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(876 * scaleRatioW, 95 * scaleRatioH), ImGuiCond_Always);
 	ImGui::Begin("itemSelect##1563", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
-	for (int i = 0; i < BundleCategory::Count; i++)
-	{
-		if (UIBridge::categoryBundles[i].size() == 0)
-		{
-			if (i >= sizeof(gBundlePath) / sizeof(gBundlePath[0]))
-			{
-				break;
-			}
-			UIBridge::FindAllBundle(gBundlePath[i], UIBridge::categoryBundles[i]);
-		}
-	}
+
 
 	auto bundleCategory = UIBridge::bundleCategory;
 
-	if (bundleCategory < BundleCategory::Count && bundleCategory >= BundleCategory::Animoji)
+	if (bundleCategory == BundleCategory::Avatar) {
+		auto& path = gBundlePath[BundleCategory::Avatar];
+		{
+			ImGui::PushID(0);
+			string itemName = "fakeman";
+			string iconName = Texture::GetPicPathFromResFolder("fakeman.png");
+			Texture::SharedPtr tex = Texture::createTextureFromFullPath(iconName, true);
+			if (!tex)
+				tex = Texture::createTextureFromFile("icon_Movebutton_nor.png", false);
+			bool buttonClick;
+			if (UIBridge::mCurRenderItemName == itemName)
+			{
+				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Select);
+			}
+			else {
+				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Deselect);
+			}
+			if (buttonClick)
+			{
+				if (UIBridge::mCurRenderItemName != itemName)
+				{
+					UIBridge::mCurRenderItemName = itemName;
+					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+					UIBridge::showItemTipsWindow = false;
+
+					nama->UnLoadAvatar();
+					std::vector<std::string> mBundleDirs;
+					mBundleDirs.emplace_back(path + "fakeman.bundle");
+					mBundleDirs.emplace_back(path + "default_bg.bundle");
+					nama->LoadAvatarBundles(mBundleDirs);
+					nama->LoadAvatarHandTrackBundle();
+
+					BodyTrackConfig c;
+					c.DefaultType = BodyTrackType::FullBody;
+
+					c.FullBody.EnableFaceProcessor = false;
+					//c.FullBody.EnableHumanFollowMode = true;
+					c.FullBody.UseRetargetRootScale = true;
+					c.FullBody.UseRetargetRootScaleValue = 0;
+					c.FullBody.AnimFilterParams_n_buffer_frames = 5;
+					c.FullBody.AnimFilterParams_pos_w = 0;
+					c.FullBody.AnimFilterParams_angle_w = 0;
+					c.FullBody.GlobalOffset_x = 0;
+					c.FullBody.GlobalOffset_y = 0;
+					c.FullBody.GlobalOffset_z = 0;
+					c.FullBody.Scale = 1.0f;
+					c.FullBody.Pos_x = 0;
+					c.FullBody.Pos_y = 50;
+					c.FullBody.Pos_z = -900;
+					c.FullBody.TrackMoveRange_x = 0.0f;
+					c.FullBody.TrackMoveRange_y = 0.0f;
+					c.FullBody.TrackMoveRange_z = 0.0f;
+
+					c.HalfBody.EnableFaceProcessor = false;
+					//c.HalfBody.EnableHumanFollowMode = false;
+					c.HalfBody.UseRetargetRootScale = true;
+					c.HalfBody.UseRetargetRootScaleValue = 0;
+					c.HalfBody.AnimFilterParams_n_buffer_frames = 5;
+					c.HalfBody.AnimFilterParams_pos_w = 0;
+					c.HalfBody.AnimFilterParams_angle_w = 0;
+					c.HalfBody.GlobalOffset_x = 0;
+					c.HalfBody.GlobalOffset_y = 0;
+					c.HalfBody.GlobalOffset_z = 0;
+					c.HalfBody.Scale = 1.0f;
+					c.HalfBody.Pos_x = 0;
+					c.HalfBody.Pos_y = 0;
+					c.HalfBody.Pos_z = -300;
+					c.HalfBody.TrackMoveRange_x = 0.0f;
+					c.HalfBody.TrackMoveRange_y = 0.0f;
+					c.HalfBody.TrackMoveRange_z = 0.0f;
+
+					bodyTrackConfig = c;
+					ApplyBodyTrackConfig(nama);
+
+					Gui::mIsOpenMiniWindow = true;
+					Gui::mIsEnableHumanFollowMode = false;
+					nama->m_Controller->EnableHumanFollowMode(Gui::mIsEnableHumanFollowMode);
+					Nama::mNamaAppState.EnableAvatarUI = true;
+				}
+				else
+				{
+					UIBridge::mCurRenderItemName = "NONE";
+					UIBridge::mLastTime = 0.0;
+					UIBridge::showItemTipsWindow = false;
+					UIBridge::mNeedStopMP3 = true;
+
+					nama->UnLoadAvatar();
+				}
+			}
+
+			ImGui::SameLine(0.f, 22.f * scaleRatioW);
+			ImGui::PopID();
+		}
+		{
+			ImGui::PushID(1);
+			string itemName = "xiong";
+			string iconName = Texture::GetPicPathFromResFolder("xiong.png");
+			Texture::SharedPtr tex = Texture::createTextureFromFullPath(iconName, true);
+			if (!tex)
+				tex = Texture::createTextureFromFile("icon_Movebutton_nor.png", false);
+			bool buttonClick;
+			if (UIBridge::mCurRenderItemName == itemName)
+			{
+				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Select);
+			}
+			else {
+				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Deselect);
+			}
+			if (buttonClick)
+			{
+				if (UIBridge::mCurRenderItemName != itemName)
+				{
+					UIBridge::mCurRenderItemName = itemName;
+					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+					UIBridge::showItemTipsWindow = false;
+
+					nama->UnLoadAvatar();
+					std::vector<std::string> mBundleDirs;
+					mBundleDirs.emplace_back(path + "xiong.bundle");
+					mBundleDirs.emplace_back(path + "xiong_light.bundle");
+					mBundleDirs.emplace_back(path + "xiong_weixiao_ani00.bundle");
+					nama->LoadAvatarBundles(mBundleDirs);
+
+					BodyTrackConfig c;
+					c.DefaultType = BodyTrackType::FullBody;
+
+					c.FullBody.EnableFaceProcessor = false;
+					//c.FullBody.EnableHumanFollowMode = true;
+					c.FullBody.UseRetargetRootScale = true;
+					c.FullBody.UseRetargetRootScaleValue = 0;
+					c.FullBody.AnimFilterParams_n_buffer_frames = 10;
+					c.FullBody.AnimFilterParams_pos_w = 0;
+					c.FullBody.AnimFilterParams_angle_w = 0;
+					c.FullBody.GlobalOffset_x = 0;
+					c.FullBody.GlobalOffset_y = 0;
+					c.FullBody.GlobalOffset_z = 0;
+					c.FullBody.Scale = 1.0f;
+					c.FullBody.Pos_x = 70;
+					c.FullBody.Pos_y = 50;
+					c.FullBody.Pos_z = -1100;
+					c.FullBody.TrackMoveRange_x = 0.9f;
+					c.FullBody.TrackMoveRange_y = 0.9f;
+					c.FullBody.TrackMoveRange_z = 0.1f;
+
+					c.HalfBody.EnableFaceProcessor = false;
+					//c.HalfBody.EnableHumanFollowMode = false;
+					c.HalfBody.UseRetargetRootScale = true;
+					c.HalfBody.UseRetargetRootScaleValue = 0;
+					c.HalfBody.AnimFilterParams_n_buffer_frames = 10;
+					c.HalfBody.AnimFilterParams_pos_w = 0;
+					c.HalfBody.AnimFilterParams_angle_w = 0;
+					c.HalfBody.GlobalOffset_x = 0;
+					c.HalfBody.GlobalOffset_y = 0;
+					c.HalfBody.GlobalOffset_z = 0;
+					c.HalfBody.Scale = 1.0f;
+					c.HalfBody.Pos_x = 0;
+					c.HalfBody.Pos_y = 60;
+					c.HalfBody.Pos_z = -300;
+					c.HalfBody.TrackMoveRange_x = 0.0f;
+					c.HalfBody.TrackMoveRange_y = 0.0f;
+					c.HalfBody.TrackMoveRange_z = 0.0f;
+
+					bodyTrackConfig = c;
+					nama->SetBodyTrackType(BodyTrackType::FullBody);
+					ApplyBodyTrackConfig(nama);
+
+					Gui::mIsOpenMiniWindow = false;
+					Gui::mIsEnableHumanFollowMode = false;
+					nama->m_Controller->EnableHumanFollowMode(Gui::mIsEnableHumanFollowMode);
+					Nama::mNamaAppState.EnableAvatarUI = false;
+				}
+				else
+				{
+					UIBridge::mCurRenderItemName = "NONE";
+					UIBridge::mLastTime = 0.0;
+					UIBridge::showItemTipsWindow = false;
+					UIBridge::mNeedStopMP3 = true;
+
+					nama->UnLoadAvatar();
+				}
+			}
+
+			ImGui::SameLine(0.f, 24.f * scaleRatioW);
+			ImGui::PopID();
+		}
+
+	}
+	else if (bundleCategory < BundleCategory::Count)
 	{
+		for (int i = BundleCategory::Avatar+1; i < BundleCategory::Count; i++)
+		{
+			if (UIBridge::categoryBundles[i].size() == 0)
+			{
+				if (i >= sizeof(gBundlePath) / sizeof(gBundlePath[0]))
+				{
+					break;
+				}
+				UIBridge::FindAllBundle(gBundlePath[i], UIBridge::categoryBundles[i]);
+			}
+		}
+
 		for (int i = 0; i < UIBridge::categoryBundles[bundleCategory].size(); i++)
 		{
 			ImGui::PushID(i);
@@ -524,10 +758,10 @@ static void ShowFloatMenuAR(Nama * nama)
 			bool buttonClick;
 			if (UIBridge::mCurRenderItemName == itemName)
 			{
-				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Select);
+				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(57 * scaleRatioW, 57 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Select);
 			}
 			else {
-				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Deselect);
+				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(57 * scaleRatioW, 57 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Deselect);
 			}
 			if (buttonClick)
 			{
@@ -578,22 +812,34 @@ static void ShowFloatMenu(Nama * nama)
 {
 	if (!UIBridge::showGreenScreen)
 	{
-		if (UIBridge::bundleCategory == BundleCategory::ItemJingpin)
+		switch (UIBridge::bundleCategory)
+		{
+		case BundleCategory::ItemJingpin:
 		{
 			GUISticker::ShowStickerPannel(nama);
 		}
-		else
+		break;
+
+		case BundleCategory::BackgroundSegmentation:
 		{
+			GUIBgSeg::ShowBgSegPannel(nama);
+		}
+		break;
+
+		default:
+			/* 通用显示逻辑 */
 			ShowFloatMenuAR(nama);
+			break;
 		}
 	}
 	else
 	{
+		GUISticker::mSelectSticker = true;
 		GUIGS::ShowFloatMenuGS(nama);
 	}
 }
 
-static void ShowArMenu()
+static void ShowArMenu(Nama * nama)
 {
 	string *categoryNameArr = nullptr;
 	string allCategory[] = { "list_icon_avatar_nor","list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_Jinpin_nor","list_icon_AR_nor",
@@ -606,12 +852,11 @@ static void ShowArMenu()
 	categoryNameArr = allCategory;
 
 	/* 这是个例外逻辑,把Avatar放在最前面，这样后面加起来正常的就没啥问题 */
-#define INDEX_AVATAR (0)
 
 	for (int i = 0; i < amount; i++)
 	{
 		/* bundleCategory对于于bundle载入路径的Array,前面多了个Avatar所以加1 */
-		if ((UIBridge::bundleCategory + 1) == i)
+		if (UIBridge::bundleCategory == i)
 		{
 			if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_propmap_collapse.png", false)->getTextureID(),
 				Texture::createTextureFromFile("list_icon_propmap_collapse.png", false)->getTextureID(), categoryNameArr[amount + i].c_str()))
@@ -620,12 +865,11 @@ static void ShowArMenu()
 					UIBridge::bundleCategory = BUNDLE_CATEGORY_NOMEAN;
 					UIBridge::showItemSelectWindow = false;
 
-					if (INDEX_AVATAR == index)
+					if (BundleCategory::Avatar == index)
 					{
-						Nama::mEnableAvatar = false;
+						Nama::mNamaAppState.EnableAvatar = false;
 					}
 				};
-
 				funSetUnSelectd(i);
 			}
 		}
@@ -636,19 +880,18 @@ static void ShowArMenu()
 				Texture::createTextureFromFile(iconFileName, false)->getTextureID(), categoryNameArr[amount + i].c_str()))
 			{
 				auto funSetSelectd = [&](int index) {
-					if (INDEX_AVATAR == index)
+					GUISticker::mSelectSticker = true;
+					if (BundleCategory::Avatar == index)
 					{
-						/* -1现在意味着AVATAR */
-						UIBridge::bundleCategory = -1;
-						UIBridge::showItemSelectWindow = false;
-						Nama::mEnableAvatar = true;
+						UIBridge::bundleCategory = index;
+						UIBridge::showItemSelectWindow = true;
+						Nama::mNamaAppState.EnableAvatar = true;
 					}
 					else
 					{
-						/* bundleCategory对于于bundle载入路径的Array,前面多了个Avatar所以减1 */
-						UIBridge::bundleCategory = index - 1;
+						UIBridge::bundleCategory = index;
 						UIBridge::showItemSelectWindow = true;
-						Nama::mEnableAvatar = false;
+						Nama::mNamaAppState.EnableAvatar = false;
 					}
 
 				};
@@ -760,20 +1003,22 @@ static void ShowMainMenu(Nama * nama)
 		
 		if (UIBridge::showGreenScreen)
 		{
+			Nama::mNamaAppStateBackGS = Nama::mNamaAppState;
 			ReCoverGSState(nama);
 			GUIGS::ShowGreenScreenMenu(nama);
 		}
 		else
 		{
+			Nama::mNamaAppStateBackAR = Nama::mNamaAppState;
 			ReCoverArState(nama);
 			if (UIBridge::m_bShowingBodyBeauty) {
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.30f);
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-				ShowArMenu();
+				ShowArMenu(nama);
 				ImGui::PopItemFlag();
 				ImGui::PopStyleVar();
 			}else{
-				ShowArMenu();
+				ShowArMenu(nama);
 			}
 		}
 		
@@ -794,6 +1039,8 @@ static void ShowMainMenu(Nama * nama)
 			
 			if (UIBridge::showGreenScreen)
 			{
+				Nama::mNamaAppState = Nama::mNamaAppStateBackGS;
+
 				if(UIBridge::m_bSetGSInputSrc == false)
 				{
 					// 关闭默认相机输入源
@@ -801,7 +1048,7 @@ static void ShowMainMenu(Nama * nama)
 					UIBridge::m_bNeedReChooseInputSrc = true;
 				}
 				UIBridge::showItemSelectWindow = true;
-				Nama::mEnableAvatar = false;
+				Nama::mNamaAppState.EnableAvatar = false;
 				
 				// 处理音乐滤镜,关闭音乐
 				if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3) {
@@ -810,6 +1057,7 @@ static void ShowMainMenu(Nama * nama)
 			}
 			else
 			{
+				Nama::mNamaAppState = Nama::mNamaAppStateBackAR;
 				GUIGS::CloseGreenScreenBg();
 				UIBridge::showItemSelectWindow = (UIBridge::bundleCategory != BUNDLE_CATEGORY_NOMEAN);
 				/*if (!nama->IsCameraPlaying() || nama->GetCameraCaptureType() == 2){
@@ -963,8 +1211,8 @@ void Gui::ShowMainWindow(Nama * nama)
 	auto srcType = nama->GetCameraCaptureType();
 	/* 相机输入需要镜像，文件不需要 */
 	bool bNeedFlip = false;
-	if(UIBridge::showGreenScreen){
-		bNeedFlip = srcType != GS_INPUT_TYPE_FILE;
+	if (UIBridge::showGreenScreen) {
+		bNeedFlip = srcType != GS_INPUT_TYPE_FILE && !UIBridge::m_bSamplingColor;
 	}
 
 	funShowImg(texidNeedShow, ((float)m_processedFrame.cols) / m_processedFrame.rows, ImVec2(frameWidth, frameHeight), bNeedFlip);
@@ -1036,48 +1284,51 @@ void Gui::ShowMainWindow(Nama * nama)
 	if (m_mouseControlSec->isSelected(&pos))
 	{
 		nama->SetCurDouble("is_click", 1.0);
+		nama->SetCurDouble("mouse_down", 1.0);
 	}
 }
 
+#include<ctime>
 
 void Gui::UpdateFrame(Nama * nama)
 {
-
 
 	cv::Mat frameMat = nama->GetFrame();
 	if (frameMat.data)
 	{
 		m_processedFrame.release();
 		m_processedFrame = frameMat.clone();
-		
+
+		cv::cvtColor(frameMat, m_processedFrame, cv::COLOR_BGR2RGBA);
 		//imshow("test1", m_processedFrame);
 			
-		cv::cvtColor(frameMat, m_processedFrame, cv::COLOR_BGR2RGBA);
 
-		bool bNeedOri = (Nama::mEnableAvatar && Gui::mIsOpenMiniWindow) || UIBridge::m_bSamplingColor;
+		bool bNeedOri = (Nama::mNamaAppState.EnableAvatar && Nama::mNamaAppState.EnableAvatarUI && Gui::mIsOpenMiniWindow) || UIBridge::m_bSamplingColor;
 		
+	
 		if (bNeedOri)
 		{
 			UpdateFrame2Tex(m_processedFrame, m_texIDOrignal);
 		}
 
-		float tempTime = GetTickCount();
 		//if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
 		{
 			nama->RenderItems(m_processedFrame);
 		}
-		
+
 		if (UIBridge::showGreenScreen && !UIBridge::m_bSetGSInputSrc)
 		{
 			m_processedFrame.setTo(150);
 		}else{
-			cv::Mat bgra[4]; 
+			cv::Mat bgra[4];
 			cv::split(m_processedFrame, bgra);
 			bgra[3] = 255.0;
 			cv::merge(bgra, 4, m_processedFrame);
 		}
 
 		UpdateFrame2Tex(m_processedFrame, m_texIDNamaProcess);
+
+		//imshow("test2", m_processedFrame);
 
 #ifndef PERFORMANCE_OPEN
 		//更新Texture操作需要同步，否则某些机器会出现撕裂
@@ -1200,9 +1451,21 @@ void Gui::ProcessGSSampleClick(Nama * nama)
 
 					printf("keycolor pos find:(%d,%d) \r\n", point.x, point.y);
 
-					auto dataBGR = frameMat.at<cv::Vec3b>(point.y, point.x);
+					cv::Vec4b colorNeed = {};
 
-					cv::Vec4b colorNeed = { dataBGR[2],dataBGR[1], dataBGR[0], 255 };
+					if (frameMat.channels() == 3)
+					{
+						auto dataBGR = frameMat.at<cv::Vec3b>(point.y, point.x);
+
+						colorNeed = { dataBGR[2],dataBGR[1], dataBGR[0], 255 };
+					}
+					else if (frameMat.channels() == 4)
+					{
+						auto dataBGRA = frameMat.at<cv::Vec4b>(point.y, point.x);
+
+						colorNeed = { dataBGRA[2],dataBGRA[1], dataBGRA[0], 255 };
+					}
+					
 					nama->SetGSKeyColor(colorNeed);
 					GUIGS::SetCurColorCircle(colorNeed);
 					UIBridge::m_bSamplingColor = false;
@@ -1240,6 +1503,7 @@ void Gui::render(Nama::UniquePtr& nama)
 	int frameId = 0;
 	while (!glfwWindowShouldClose(window))
 	{
+		
 		glfwMakeContextCurrent(window);
 
 		// Poll and handle events (inputs, window resize, etc.)
@@ -1259,6 +1523,7 @@ void Gui::render(Nama::UniquePtr& nama)
 		{
 			showUI = !showUI;
 		}
+
 
 		ProcessGSSampleClick(nama.get());
 
@@ -1282,11 +1547,10 @@ void Gui::render(Nama::UniquePtr& nama)
 				//main menu
 				ShowMainMenu(nama.get());	
 			}
-
 			glfwMakeContextCurrent(offscreen_window);
 			UpdateFrame(nama.get());
 			glfwMakeContextCurrent(window);
-            
+
 			//main window
 			ShowMainWindow(nama.get());
 			if (showUI)
@@ -1306,7 +1570,7 @@ void Gui::render(Nama::UniquePtr& nama)
 					ShowFloatMenu(nama.get());
 				}
 
-				if (Nama::mEnableAvatar)
+				if (Nama::mNamaAppState.EnableAvatar && Nama::mNamaAppState.EnableAvatarUI)
 				{
 					ShowAvatarMenu(nama.get());
 
@@ -1321,7 +1585,12 @@ void Gui::render(Nama::UniquePtr& nama)
 			}
 		}
 		// 選擇了含有中文字符的 png 提示
-		if (UIBridge::m_bLoadWrongNamePNGFile) {
+		int err = nama->GetLastNamaError();
+		if (err == 20 || err == 21)
+		{
+			string tipStr = u8"证书过期，请联系FaceUnity技术支持";
+			ShowTipStr(tipStr);
+		}else if (UIBridge::m_bLoadWrongNamePNGFile) {
 			string tipStr = UIBridge::m_openLocalFileTip;
 			ShowTipLabel(tipStr);
 			if (UIBridge::mLastTime < ImGui::GetTime())
@@ -1335,10 +1604,15 @@ void Gui::render(Nama::UniquePtr& nama)
 			string tipStr = u8"AR功能跟美体模块无法共用";
 			ShowTipLabel(tipStr);
 
-		}else if (showUI)//道具提示
-			{
-				ShowTip(doc);
-			}
+		}
+		else if (!nama->CheckModuleCode(UIBridge::bundleCategory)) {
+			string tipStr = u8"道具权限不足，请联系FaceUnity技术支持";
+			ShowTipStr(tipStr);
+		}
+		else if (showUI)//道具提示
+		{
+			ShowTip(doc);
+		}
 		
 		//right window
 		if (showUI)
@@ -1352,7 +1626,7 @@ void Gui::render(Nama::UniquePtr& nama)
 			}
 			else
 			{
-				if (Nama::mEnableAvatar)
+				if (Nama::mNamaAppState.EnableAvatar)
 				{
 					ShowAvatarTip();
 				}
@@ -1364,6 +1638,7 @@ void Gui::render(Nama::UniquePtr& nama)
 					ShowTabs("rightTabs", 0, nama);
 				}
 			}
+
 		}
 		
 		// Rendering
@@ -1381,6 +1656,7 @@ void Gui::render(Nama::UniquePtr& nama)
 		glfwSwapBuffers(window);
 
 		frameId++;
+
 	}
 
 	printf("frame total %d\n", frameId);
