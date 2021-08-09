@@ -8,6 +8,9 @@ VIRTURALCAMERA_API void createVirturalCamera(int type = 0, int width = 3940, int
 
 VIRTURALCAMERA_API void pushDataToVirturalCamera(void* pData, int width, int height);
 
+// audio format:16bits per sample,44100hz,two channels pcm
+VIRTURALCAMERA_API void pushAudioToVirturalCamera(void* pData, int nLength, double nDuration);
+
 VIRTURALCAMERA_API void changeResolutionOfVirturalCamera(int width, int height);
 
 #endif //VIRTURALCAMERA_H
