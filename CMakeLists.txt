@@ -5,6 +5,6 @@ set(CMAKE_CXX_COMPILER "g++")
 if(APPLE)
 set(CMAKE_OSX_ARCHITECTURES "$(ARCHS_STANDARD_64_BIT)")
 endif()
-project(FULivePC)
-add_subdirectory(FULivePC)
+project(FULivePCQT)
+add_subdirectory(FULivePCQT)
 

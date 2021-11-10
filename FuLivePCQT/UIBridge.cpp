@@ -1,0 +1,1578 @@
+﻿#include "UIBridge.h"
+#include <QDir>
+#include <QDebug>
+#include <QStringList>
+#include "MainClass.h"
+#include <QJsonParseError>
+#include <QJsonObject>
+#include <QJsonArray>
+#include "Nama.h"
+#include "Camera.h"
+#include <QMediaPlaylist>
+#include <future>
+#include <CNamaSDK.h>
+#include <QBitmap>
+#include <QPainter>
+#include <QThread>
+
+#pragma execution_character_set("utf-8")
+
+UIBridge::UIBridge()
+{
+    connect(this, SIGNAL(updataConfig()), this, SLOT(updataUserConfig()));
+    initBodyTrackConfig();
+    //fps定时器刷新
+    m_timer = new QTimer();
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(getFPS()));
+    m_timer->start(1000);
+    //avator小窗口
+    m_ImageProvider = new ImageProvider();
+    //美肤,美型,美体,绿幕相同
+    //第一个QStringList是qml中显示列表文字,括号中分成按钮显示
+    //第二个QStringList是qml中显示图标中间名
+    //第三个QStringList是nama中fuItemSetParamd设置道具名
+    //第四个QStringList是nama中fuItemSetParamd设置值,也是qml滑块值和按钮选中项
+    //第五个QStringList是qml中滑块显示是否在中间,true中间[-50,50],false[0,100],""转换qml为false,"1"转换为true
+    //美肤
+    m_beautySkin.append(QStringList{"精准美肤 开启|关闭", "美肤模式 均匀磨皮|精细磨皮|朦胧磨皮|清晰磨皮", "磨皮", "美白", "红润", "锐化", "亮眼", "美牙", "去黑眼圈", "去法令纹"});
+    m_beautySkin.append(QStringList{ "skinbeauty", "BeautyMode", "Grindingskin", "Skinwhitening", "Ruddy", "sharpen",
+                                     "Brighteye", "Beautifulteeth", "dark_circles", "wrinkle"});
+    m_beautySkin.append(QStringList{ "skin_detect", "blur_type", "blur_level", "color_level", "red_level","sharpen", "eye_bright", "tooth_whiten",
+                                     "remove_pouch_strength", "remove_nasolabial_folds_strength"});
+    m_defaultBeautySkin = QStringList{ "0", "0", "70", "30", "30", "20", "0", "0", "0", "0"};
+    m_beautySkin.append(m_defaultBeautySkin);
+    m_beautySkin.append(QStringList{ "","","","","","","","","",""});
+    //美型
+    m_beautyFace.append(QStringList{ "瘦脸", "大眼", "圆眼", "下巴", "额头", "瘦鼻", "嘴型", "V脸", "窄脸", "短脸",
+                                     "小脸", "瘦颧骨", "瘦下颌骨", "开眼角", "眼距", "眼睛角度", "长鼻", "缩人中", "微笑嘴角"});
+    m_beautyFace.append(QStringList{ "Thinface", "Bigeye", "round_eye", "chin", "forehead", "Thinnose", "Mouthtype", "v",
+                                     "narrow_face", "short_face", "little_face", "cheekbones", "lower_jaw", "open_eyes", "eye_distance",
+                                     "eye_angle", "proboscis", "shrinking", "smile_mouth"});
+    m_beautyFace.append(QStringList{ "cheek_thinning", "eye_enlarging_v2", "intensity_eye_circle", "intensity_chin", "intensity_forehead_v2",
+                                     "intensity_nose_v2", "intensity_mouth_v2", "cheek_v", "cheek_narrow_v2", "cheek_short", "cheek_small_v2", "intensity_cheekbones",
+                                     "intensity_lower_jaw", "intensity_canthus", "intensity_eye_space", "intensity_eye_rotate",
+                                     "intensity_long_nose", "intensity_philtrum", "intensity_smile" });
+    m_defaultBeautyFace = QStringList{ "0", "0", "0", "-20", "-20", "50", "-10", "50", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"};
+    m_beautyFace.append(m_defaultBeautyFace);
+    m_beautyFace.append(QStringList{ "","","","1","1","","1","","","","","","","","1","1","1","1",""});
+    //美体
+    m_beautyBody.append(QStringList{ "瘦身", "长腿", "瘦腰", "美肩", "美臀", "小头", "瘦腿"});
+    m_beautyBody.append(QStringList{ "slimming", "stovepipe", "thin_waist", "shoulder", "hip", "little_head", "thin_leg"});
+    m_beautyBody.append(QStringList{ "BodySlimStrength","LegSlimStrength" ,"WaistSlimStrength" , "ShoulderSlimStrength",
+                                     "HipSlimStrength" , "HeadSlim", "LegSlim"});
+    m_defaultBeautyBody = QStringList{ "0", "0", "0", "0", "0", "0", "0"};
+    m_beautyBody.append(m_defaultBeautyBody);
+    m_beautyBody.append(QStringList{ "","","","1","","",""});
+    //滤镜
+    //第一个QStringList是qml中显示图标中间名,也是nama中fuItemSetParamd设置道具名
+    //第二个QStringList是qml中显示滑块值,也是设置nama中filter_level的参数（需要/100.0)
+    m_filter.append(QStringList{ "origin", "bailiang1", "fennen1", "xiaoqingxin1", "lengsediao1", "nuansediao1"});
+    m_filter.append(QStringList{ "0", "40", "40", "40", "40", "40"});
+    //绿幕
+    m_greenScreen.append(QStringList{"相似度", "平滑", "透明度"});
+    m_greenScreen.append(QStringList{"tolerance", "smooth", "transparency"});
+    m_greenScreen.append(QStringList{"chroma_thres", "chroma_thres_T", "alpha_L"});
+    m_defaultGreenScreen = QStringList{ "45", "30", "20"};
+    m_greenScreen.append(m_defaultGreenScreen);
+    m_greenScreen.append(QStringList{ "","",""});
+
+    //绿幕道具、图片名
+    m_greenScreenIcon.append(QStringList{"green_screen_bg_atechnology", "green_screen_bg_beach", "green_screen_bg_classroom",
+                                         "green_screen_bg_ink painting", "green_screen_bg_jforest"});
+    m_greenScreenIcon.append(QStringList{"gs_savearea", "safe_area_high", "safe_area_low"});
+
+    //自定义美妆
+    //一为显示中文名,二为道具名,三为对应强度名称,四为强度系数,五为选中下标,六选中颜色下标
+    m_tempCustomMakeup.append(QStringList{"腮红", "makeup_blusher_color", "makeup_intensity_blusher", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{"阴影", "makeup_shadow_color", "makeup_intensity_shadow", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{"眉毛", "makeup_eyeBrow_color", "makeup_intensity_eyeBrow", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{"睫毛", "makeup_eyelash_color", "makeup_intensity_eyelash", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{"眼线", "makeup_eyeLiner_color", "makeup_intensity_eyeLiner", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{"美瞳", "makeup_pupil_color", "makeup_intensity_pupil", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{"眼影", "makeup_eye_color", "makeup_intensity_eye", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{"粉底", "makeup_foundation_color", "makeup_intensity_foundation", "100", "0", "-1"});
+    m_tempCustomMakeup.append(QStringList{"高亮", "makeup_highlight_color", "makeup_intensity_highlight", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{"口红", "makeup_lip_color", "makeup_intensity_lip", "100", "-1", "-1"});
+    readCustomMakeup();
+    //保存一份默认,一键卸妆用
+    m_defaultCustomMakeup = m_customMakeup;
+    //读取道具
+    readCategoryBundle();
+    //读取道具提示
+    readBundleTip();
+    //读取json配置
+    readUserConfig();
+}
+
+UIBridge::~UIBridge()
+{
+}
+
+void UIBridge::readBundleTip()
+{
+    QFile file(":/res/config.json");
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        qDebug()<<tr("config.json路径错误");
+        return;
+    }
+    QString value = file.readAll();
+    file.close();
+    QJsonParseError parseJsonErr;
+    QJsonDocument document = QJsonDocument::fromJson(value.toUtf8(),&parseJsonErr);
+    if(!(parseJsonErr.error == QJsonParseError::NoError))
+    {
+        qDebug()<<tr("解析config.json文件错误！");
+        return;
+    }
+    QJsonObject jsonObject = document.object();
+    for(auto it = jsonObject.begin(); it != jsonObject.end(); it++)
+    {
+        m_tipMap.insert(it.key().split(".").first(),it.value().toString());
+    }
+}
+
+void UIBridge::readCategoryBundle()
+{
+    //这里根据Bundle路径找到所有bundle并在res找到相应名称的图标显示
+    for(int i = 0; i < BundleCategory::Count; i++){
+        QStringList tempList;
+        if(i == BundleCategory::GreenScreen){
+            return;
+        }else if(i == BundleCategory::ItemJingpin){
+            m_categoryBundles.append(QStringList());
+            continue;
+        }else if(i == BundleCategory::BackgroundSegmentation){
+            tempList.append("bg_segment");
+        }else if(i == BundleCategory::Avatar){
+            QStringList tempList;
+            tempList<<"fakeman";
+            m_categoryBundles.append(tempList);
+            continue;
+        }
+        QDir dir(gBundlePath[i]);
+        if(!dir.exists())
+        {
+            qDebug()<<gBundlePath[i]<<"目录路径错误,请在Config.h中修改g_assetDir路径"<<endl;
+            return ;
+        }
+        //文件过滤器
+        QStringList filter;
+        filter<<"*.bundle";
+        dir.setNameFilters(filter);//设置文件名的过滤
+        QFileInfoList list = dir.entryInfoList();
+        if(list.length()!=0){
+            for (int j = 0; j < list.size(); j++)
+            {
+                tempList.append(list.at(j).fileName().split(".").at(0));
+            }
+            m_categoryBundles.append(tempList);
+        }
+        else
+        {
+            qDebug()<<gBundlePath[i]<<"no bundle file";
+        }
+    }
+}
+
+void UIBridge::updataCategory(QList<QVariant> &lv, int place, int index, QString value)
+{
+    QStringList tempList = lv[place].toStringList();
+    tempList.replace(index, value);
+    lv.replace(place, tempList);
+}
+
+void UIBridge::readCustomMakeup()
+{
+    //从配置文件读取彩妆
+    //读取完m_customMakeup结构为
+    //第一组 0 {"腮红", "makeup_blusher_color", "makeup_intensity_blusher", "100", "-1", "-1"}
+    //      1 {"苹果肌", "-1", "demo_style_blush_01.png","mu_style_blush_01","#F4706B","#ED596D","#E24247","#E24266","#FF6351"}
+    //      2 {"扇形", "-1", "demo_style_blush_02.png","mu_style_blush_02","#F4706B","#ED596D","#E24247","#E24266","#FF6351"}
+    //数据第一个显示文字, 二非-1表示有意义下标(眉毛变形类型brow_warp_type,lip_type口红类型 用到),三显示图片,四使用的模型,之后为颜色组,其中眉毛有双色,三色情况
+    //这里如果需要exe直接运行需要改绝对路径
+    QFile file(":/assets/items/Makeup/subs_setup.json");
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        qDebug()<<tr("subs_setup.json路径错误");
+    }
+    QString value = file.readAll();
+    file.close();
+    QJsonParseError parseJsonErr;
+    QJsonDocument document = QJsonDocument::fromJson(value.toUtf8(),&parseJsonErr);
+    if(!(parseJsonErr.error == QJsonParseError::NoError))
+    {
+        qDebug()<<tr("解析subs_setup.json文件错误！");
+        return;
+    }
+    QJsonObject jsonObject = document.object();
+    int index = 0;
+    for(auto it = jsonObject.begin(); it != jsonObject.end(); it++)
+    {
+        QList<QVariant> tempList;
+        tempList.append(m_tempCustomMakeup.at(index));
+        index++;
+        QJsonArray array = it->toArray();
+        QJsonObject mainObj = array.at(0).toObject();
+        if(mainObj.contains("types")){
+            QString bundle = mainObj["bundle"].toString();
+            QJsonArray types = mainObj["types"].toArray();
+            for(int i = 0; i < types.size(); i++){
+                QStringList tempStr;
+                QJsonObject type = types.at(i).toObject();
+                QString typeIndex = "-1";
+                if(type.contains("brow_type")){
+                    typeIndex = QString::number(type["brow_type"].toInt());
+                }else if(type.contains("lip_type")){
+                    typeIndex = QString::number(type["lip_type"].toInt());
+                }
+                tempStr<<type["name"].toString()<<typeIndex<<type["icon"].toString()<<bundle;
+                QJsonArray colors = mainObj["colors"].toArray();
+                for(int j = 0; j < colors.size(); j++){
+                    QJsonArray color = colors.at(j).toArray();
+                    QString hexColor;
+                    hexColor += "#" + QString("%1").arg(int(color.at( 0).toDouble() * 255),2,16,QChar('0')) +
+                            QString("%1").arg(int(color.at(1).toDouble() * 255),2,16,QChar('0')) +
+                            QString("%1").arg(int(color.at(2).toDouble() * 255),2,16,QChar('0'));
+                    //第四个透明度都为1
+                    //+QString("%1").arg(int(color.at(3).toDouble() * 255),2,16,QChar('0'));
+                    tempStr.append(hexColor);
+                }
+                tempList.append(tempStr);
+            }
+        }else{
+            for(int i = 0; i < array.size(); i++)
+            {
+                QStringList tempStr;
+                QJsonObject item = array.at(i).toObject();
+                QString type = "0";
+                if(item.contains("type")){
+                    type = QString::number(item["type"].toInt());
+                }
+                tempStr<<item["name"].toString()<<type<<item["icon"].toString()<<item["bundle"].toString();
+                QJsonArray colorArray = item.value("colors").toArray();
+                for(int j = 0; j < colorArray.size(); j++){
+                    QJsonArray color = colorArray.at(j).toArray();
+                    QString hexColor;
+                    //这里考虑双色眼影,三色情况
+                    for(int k = 0; k < color.size(); k += 4){
+                        hexColor += "#" + QString("%1").arg(int(color.at(k + 0).toDouble() * 255),2,16,QChar('0')) +
+                                QString("%1").arg(int(color.at(k + 1).toDouble() * 255),2,16,QChar('0')) +
+                                QString("%1").arg(int(color.at(k + 2).toDouble() * 255),2,16,QChar('0'));
+                        //+QString("%1").arg(int(color.at(k + 3).toDouble() * 255),2,16,QChar('0'));
+                    }
+                    tempStr.append(hexColor);
+                }
+                tempList.append(tempStr);
+            }
+        }
+        m_customMakeup.append(tempList);
+    }
+}
+
+void UIBridge::creatdefaultFrame()
+{
+    string defaultPicPath = "../res/frame.png";
+    static cv::Mat defaulfFrame = cv::imread(defaultPicPath, cv::IMREAD_COLOR);
+    cv::cvtColor(defaulfFrame, MainClass::getInstance()->m_nama->m_frame, cv::COLOR_RGB2RGBA);
+}
+
+void UIBridge::initBodyTrackConfig()
+{
+    m_bodyTrackConfig.FakeManHalf.Pos_y = 0;
+    m_bodyTrackConfig.FakeManHalf.Pos_z = -300;
+    m_bodyTrackConfig.BearFull.AnimFilterParams_n_buffer_frames = 10;
+    m_bodyTrackConfig.BearFull.Pos_x = 70;
+    m_bodyTrackConfig.BearFull.Pos_y = 50;
+    m_bodyTrackConfig.BearFull.Pos_z = -1100;
+    m_bodyTrackConfig.BearFull.TrackMoveRange_x = 0.9f;
+    m_bodyTrackConfig.BearFull.TrackMoveRange_y = 0.9f;
+    m_bodyTrackConfig.BearFull.TrackMoveRange_z = 0.1f;
+    m_bodyTrackConfig.BearHalf.AnimFilterParams_n_buffer_frames = 10;
+    m_bodyTrackConfig.BearHalf.Pos_y = 60;
+    m_bodyTrackConfig.BearHalf.Pos_z = -300;
+}
+
+void UIBridge::getGSPresentFrame(const cv::Mat &frame)
+{
+    UIBridge *m_UIBridge = MainClass::getInstance()->m_UIBridge;
+    if(m_UIBridge->m_bgsSelectVideo){
+        m_UIBridge->m_bgsSelectVideo = false;
+        double width = frame.cols;
+        double height = frame.rows;
+        m_frameSize = QString::number(int(width)) + "x" + QString::number(int(height));
+        frameSizeChanged();
+        double widthBgs = width/height * 9/16 * 0.5;
+        if(widthBgs >= 0.5){
+            double heightBgs = height/width * 16/9 * 0.5;
+            double starty = 1 - heightBgs;
+            m_UIBridge->m_gsStart = QPointF(0.5,starty);
+            m_UIBridge->m_gsSize = QPointF(0.5,heightBgs);
+        }else{
+            double startx = 1 - widthBgs;
+            m_UIBridge->m_gsStart = QPointF(startx,0.5);
+            m_UIBridge->m_gsSize = QPointF(widthBgs,0.5);
+        }
+        MainClass::getInstance()->m_nama->changeGSPreviewRect(m_gsStart.x(), m_gsStart.y(), m_gsStart.x() + m_gsSize.x(), m_gsStart.y() + m_gsSize.y());
+    }
+    if(frame.channels() == 4){
+        cv::cvtColor(frame, frame, cv::COLOR_RGBA2BGRA);
+        if(m_bodyTrackType != BodyTrackType::None || m_bGSCameraImage){
+            m_ImageProvider->m_showImage = QImage(frame.data, frame.cols, frame.rows, frame.cols * 4, QImage::Format_ARGB32).mirrored(true, false);
+            emit callQmlRefeshImg();
+        }
+        MainClass::getInstance()->m_nama->getPresentFrame(frame.clone());
+    }else{
+        cv::Mat resultframe;
+        cv::cvtColor(frame, resultframe, cv::COLOR_BGR2BGRA);
+        MainClass::getInstance()->m_nama->getPresentFrame(resultframe.clone());
+    }
+}
+
+void UIBridge::getPresentFrame(const cv::Mat &frame)
+{
+    MainClass::getInstance()->m_nama->getPresentFrame(frame);
+    if(m_bodyTrackType != BodyTrackType::None || m_bGSCameraImage){
+        m_ImageProvider->m_showImage = QImage(frame.data, frame.cols, frame.rows, frame.cols * 4, QImage::Format_ARGB32).mirrored(true, false);
+        emit callQmlRefeshImg();
+    }
+}
+
+void UIBridge::UpdateGreenScreenSegment(const cv::Mat &dataRGBA)
+{
+    MainClass::getInstance()->m_nama->UpdateGreenScreenSegment(dataRGBA);
+}
+
+void UIBridge::UpdateBackgroundSegment(const cv::Mat &dataRGBA)
+{
+    //第一次保存图标图片,截取图片中心圆
+    if(m_bNeedSavebg_seg){
+        m_bNeedSavebg_seg = false;
+        cv::Mat saveMat;
+        cv::cvtColor(dataRGBA,saveMat,cv::COLOR_RGBA2BGRA);
+        QImage image((const uchar*)saveMat.data, saveMat.cols, saveMat.rows, saveMat.step, QImage::Format_ARGB32);
+        image = image.scaled(128, 72, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        QSize size(128, 72);
+        QBitmap mask(size);
+        QPainter painter(&mask);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform);
+        painter.fillRect(0, 0, size.width(), size.height(), Qt::white);
+        painter.setBrush(QColor(0, 0, 0));
+        painter.drawRoundedRect(28,0,72,72,100,100);
+        QPixmap imagepix = QPixmap::fromImage(image);
+        imagepix.setMask(mask);
+        imagepix = imagepix.copy(28,0,72,72);
+        imagepix.save("bg_seg_shot.png");
+        QStringList tempList = m_categoryBundles.at(7).toStringList();
+        if(!tempList.contains("bg_seg_shot")){
+            tempList.insert(1, "bg_seg_shot");
+            m_categoryBundles.replace(7, tempList);
+        }
+        emit updataBsgPic();
+    }
+    MainClass::getInstance()->m_nama->UpdateBackgroundSegment(dataRGBA.clone());
+}
+
+void UIBridge::setARFunction(bool ar){
+    MainClass *main = MainClass::getInstance();
+    Nama *nama = main->m_nama;
+    m_arFunction = ar;
+    //绿幕打开绿幕选中摄像头
+    if(!m_arFunction){
+        if(nama->m_bundleCategory == BundleCategory::MusicFilter && nama->m_mp3 != nullptr)
+        {
+            nama->m_mp3->Pause();
+        }
+        m_selectCategory = BundleCategory::GreenScreen;
+        //默认打开背景视频
+        useProps(m_gsSelectBgIndex);
+        if(m_gsSelectCamera){
+            fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+            main->m_camera->m_QCamera->start();
+            m_gsVideoMediaPlayer.stop();
+        }else{
+            gsSelectVideo(m_gsSelectVideoPath);
+        }
+        //设置绿幕颜色背景绿色
+        nama->SetGSKeyColor(m_gsColor);
+        //更新绿幕参数
+        for(int i = 0 ; i < m_greenScreen.at(0).toStringList().size(); i++){
+            namaFuItemSetParamd(nama->m_GSHandle, m_greenScreen, i, false);
+        }
+        if(m_gsSelectSafeArea >= 0){
+            m_selectCategory = BundleCategory::SafeArea;
+            useProps(m_gsSelectSafeArea);
+        }
+        nama->changeRenderList(RENDER_GREEN);
+    }else{
+        fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+        //停止绿幕背景,视频播放器
+        m_gsMediaPlayer.stop();
+        m_gsVideoMediaPlayer.stop();
+        if(m_flagARBody){
+            nama->changeRenderList(RENDER_BODY);
+        }else{
+            nama->changeRenderList(RENDER_AR);
+            if(nama->m_bundleCategory == BundleCategory::MusicFilter && nama->m_mp3 != nullptr)
+            {
+                nama->m_mp3->Play();
+            }
+        }
+        main->m_camera->m_QCamera->start();
+        m_frameSize = QString::number(MainClass::getInstance()->m_camera->m_FrameWidth) + "x" +
+                QString::number(MainClass::getInstance()->m_camera->m_FrameHeight);
+        emit frameSizeChanged();
+    }
+}
+
+void UIBridge::setSelectCategory(int index)
+{
+    m_selectCategory = index;
+    MainClass::getInstance()->m_nama->m_bundleCategory = BundleCategory(m_selectCategory);
+    if(m_selectCategory == BundleCategory::SafeArea){
+        m_tip = "白色区域为安全区域,不参与绿幕抠像";
+        tipChanged();
+    }
+}
+
+void UIBridge::setBodyTrackType(int type)
+{
+    Nama *nama = MainClass::getInstance()->m_nama;
+    m_bodyTrackType = BodyTrackType(type);
+    if(m_bodyTrackType != BodyTrackType::None){
+        nama->DestroyAll();
+        if(nama->m_mp3 != nullptr)
+        {
+            nama->m_mp3->Pause();
+        }
+        if(m_bLoadBear){
+            MainClass::getInstance()->m_nama->UnLoadAvatar();
+            m_bLoadAvatar = false;
+            m_bLoadBear = false;
+        }
+        if(!m_bLoadAvatar){
+            std::vector<std::string> mBundleDirs;
+            mBundleDirs.emplace_back(g_assetDir + "Avatars/fakeman.bundle");
+            mBundleDirs.emplace_back(g_assetDir + "Avatars/default_bg.bundle");
+            nama->LoadAvatarBundles(mBundleDirs);
+            nama->LoadAvatarHandTrackBundle();
+            m_bLoadAvatar = true;
+        }
+        nama->SetBodyTrackType(m_bodyTrackType);
+        if(m_bodyTrackType == BodyTrackType::HalfBody){
+            nama->ApplyBodyTrackConfig(m_bodyTrackConfig.FakeManHalf);
+        }else{
+            nama->ApplyBodyTrackConfig(m_bodyTrackConfig.FakeManFull);
+        }
+        nama->m_Controller->EnableHumanFollowMode(false);
+    }
+}
+
+bool UIBridge::virturalCamera(){
+    return MainClass::getInstance()->m_nama->m_bVirturalCamera;
+}
+
+void UIBridge::setVirturalCamera(bool vc){
+    MainClass::getInstance()->m_nama->m_bVirturalCamera = vc;
+}
+
+void UIBridge::setGSCameraImage(bool flag){
+    m_bGSCameraImage = flag;
+    MainClass::getInstance()->m_camera->m_QCamera->start();
+}
+
+void UIBridge::unLoadAvatar()
+{
+    if(m_bLoadAvatar){
+        MainClass::getInstance()->m_nama->UnLoadAvatar();
+        m_bodyTrackType = BodyTrackType::None;
+        updataBodyTrackType(-1);
+        m_bLoadAvatar = false;
+        m_bLoadBear = false;
+    }
+}
+
+void UIBridge::readUserConfig()
+{
+    //读取自定义背景分割配置
+    QFile *file = new QFile(QDir::currentPath()+"/CustomUserConfig.json");
+    if(file->open(QFile::ReadOnly))
+    {
+        QString value = file->readAll();
+        QJsonParseError parseJsonErr;
+        QJsonDocument document = QJsonDocument::fromJson(value.toUtf8(),&parseJsonErr);
+        if(!(parseJsonErr.error == QJsonParseError::NoError))
+        {
+            qDebug()<<tr("解析json文件错误！");
+        }else{
+            QJsonObject jsonObject = document.object();
+            if(jsonObject.contains("BgSegPath")){
+                m_begUserFilePath = jsonObject["BgSegPath"].toString();
+                //将背景分割里添加自定义背景分割图标。
+                QStringList tempList = m_categoryBundles.at(7).toStringList();
+                tempList.insert(1, "bg_seg_shot");
+                m_categoryBundles.replace(7, tempList);
+            }
+            if(jsonObject.contains("GsSafePath")){
+                m_gsSafeUserFilePath = jsonObject["GsSafePath"].toString();
+                QStringList tempList = m_greenScreenIcon.at(1).toStringList();
+                if(!tempList.contains("gs_savearea_shot")){
+                    tempList.insert(1, "gs_savearea_shot");
+                    m_greenScreenIcon.replace(1, tempList);
+                }
+            }
+            if(jsonObject.contains("CameraName")){
+                m_cameraName = jsonObject["CameraName"].toString();
+            }
+            if(jsonObject.contains("CameraSet")){
+                m_cameraSet = jsonObject["CameraSet"].toInt();
+            }
+            if(jsonObject.contains("BeautySkin")){
+                m_beautySkin.replace(3, jsonObject["BeautySkin"].toString().split(","));
+            }
+            if(jsonObject.contains("BeautyFace")){
+                m_beautyFace.replace(3, jsonObject["BeautyFace"].toString().split(","));
+            }
+            if(jsonObject.contains("BeautyBody")){
+                m_beautyBody.replace(3, jsonObject["BeautyBody"].toString().split(","));
+            }
+            if(jsonObject.contains("GreenScreen")){
+                m_greenScreen.replace(3, jsonObject["GreenScreen"].toString().split(","));
+            }
+            if(jsonObject.contains("FilterIndex")){
+                m_filterIndex = jsonObject["FilterIndex"].toInt();
+            }
+            if(jsonObject.contains("Filter")){
+                m_filter.replace(1, jsonObject["Filter"].toString().split(","));
+            }
+            if(jsonObject.contains("SelectCategory")){
+                m_selectCategory = jsonObject["SelectCategory"].toInt();
+            }
+            if(jsonObject.contains("SelectCategoryIndex")){
+                m_selectCategoryIndex = jsonObject["SelectCategoryIndex"].toInt();
+            }
+            if(jsonObject.contains("BodyTrackType")){
+                m_bodyTrackType = BodyTrackType(jsonObject["BodyTrackType"].toInt());
+            }
+            if(jsonObject.contains("StickerIndex")){
+                m_stickerIndex = (jsonObject["StickerIndex"].toInt());
+            }
+            if(jsonObject.contains("GSPreviewRect")){
+                QStringList RectList = jsonObject["GSPreviewRect"].toString().split(",");
+                m_gsStart.setX(RectList.at(0).toDouble());
+                m_gsStart.setY(RectList.at(1).toDouble());
+                m_gsSize.setX(RectList.at(2).toDouble());
+                m_gsSize.setY(RectList.at(3).toDouble());
+            }
+            if(jsonObject.contains("GSSelectBgIndex")){
+                m_gsSelectBgIndex = jsonObject["GSSelectBgIndex"].toInt();
+            }
+            if(jsonObject.contains("GSSelectSafeArea")){
+                m_gsSelectSafeArea = jsonObject["GSSelectSafeArea"].toInt();
+            }
+            if(jsonObject.contains("GSSelectCamera")){
+                m_gsSelectCamera = jsonObject["GSSelectCamera"].toBool();
+            }
+            if(jsonObject.contains("GSSelectVideoPath")){
+                m_gsSelectVideoPath = jsonObject["GSSelectVideoPath"].toString();
+            }
+            if(jsonObject.contains("GSSelectColor")){
+                QStringList colorList = jsonObject["GSSelectColor"].toString().split(",");
+                m_gsColor = {uchar(colorList.at(0).toInt()), uchar(colorList.at(1).toInt()), uchar(colorList.at(2).toInt()), uchar(colorList.at(3).toInt())};
+            }
+            if(jsonObject.contains("CustomMakeup")){
+                m_userCustomMakeup = jsonObject["CustomMakeup"].toString().split(",");
+            }
+        }
+        file->close();
+    }
+}
+
+void UIBridge::getCameraList()
+{
+    Camera *camera = MainClass::getInstance()->m_camera;
+    const QList<QCameraInfo> availableCameras = QCameraInfo::availableCameras();
+    int cameraIndex = 0;
+    if(availableCameras.size() > 0){
+        camera->m_cameraList.clear();
+        for(int i = 0; i < availableCameras.size(); i++){
+            QString cameraName = availableCameras.at(i).description();
+            camera->m_cameraList<<cameraName;
+            if(cameraName.compare(m_cameraName) == 0){
+                camera->m_mapCameraSet.insert(cameraName, m_cameraSet);
+                m_cameraName = "";
+                cameraIndex = i;
+            }else{
+                camera->m_mapCameraSet.insert(cameraName, 0);
+            }
+            cameraListChanged();
+        }
+    }
+    if(cameraIndex != 0){
+        emit updataCameraIndex(cameraIndex);
+    }
+    if(m_cameraSet != 0){
+        emit updataCameraSet(m_cameraSet);
+    }
+}
+
+void UIBridge::saveUserConfig()
+{
+    //保存摄像头选择,和参数
+    //保存美颜美妆美型参数
+    //保存使用道具
+    Camera *camera = MainClass::getInstance()->m_camera;
+    QFile file(QDir::currentPath()+"/CustomUserConfig.json");
+    if(file.open(QIODevice::ReadWrite | QIODevice::Text))
+    {
+        QString value = file.readAll();
+        file.close();
+        QJsonParseError parseJsonErr;
+        QJsonDocument document = QJsonDocument::fromJson(value.toUtf8(),&parseJsonErr);
+        if(!(parseJsonErr.error == QJsonParseError::NoError) && value.compare("") != 0)
+        {
+            qDebug()<<tr("解析json文件错误！");
+        }
+        QJsonObject jsonObject = document.object();
+        QString cameraName = camera->m_arCamera.description();
+        //保存摄像头名称
+        jsonObject["CameraName"] = cameraName;
+        //保存摄像头参数
+        jsonObject["CameraSet"] = camera->m_mapCameraSet[cameraName];
+        //保存参数值
+        jsonObject["BeautySkin"] = m_beautySkin.at(3).toStringList().join(",");
+        jsonObject["BeautyFace"] = m_beautyFace.at(3).toStringList().join(",");
+        jsonObject["BeautyBody"] = m_beautyBody.at(3).toStringList().join(",");
+        jsonObject["GreenScreen"] = m_greenScreen.at(3).toStringList().join(",");
+        jsonObject["FilterIndex"] = m_filterIndex;
+        jsonObject["Filter"] = m_filter.at(1).toStringList().join(",");
+        jsonObject["SelectCategory"] = m_selectCategory;
+        jsonObject["SelectCategoryIndex"] = m_selectCategoryIndex;
+        jsonObject["BodyTrackType"] = int(m_bodyTrackType);
+        //精品贴纸
+        jsonObject["StickerIndex"] = int(m_stickerIndex);
+        //绿幕
+        jsonObject["GSSelectBgIndex"] = m_gsSelectBgIndex;
+        jsonObject["GSSelectSafeArea"] = m_gsSelectSafeArea;
+        //绿幕选择视频还是摄像头,视频存路径
+        jsonObject["GSSelectCamera"] = m_gsSelectCamera;
+        jsonObject["GSSelectVideoPath"] = m_gsSelectVideoPath;
+        QStringList gsRect;
+        gsRect<<QString::number(m_gsStart.x())<<QString::number(m_gsStart.y())<<QString::number(m_gsSize.x())<<QString::number(m_gsSize.y());
+        jsonObject["GSPreviewRect"] = gsRect.join(",");
+        QStringList gsColor;
+        gsColor<<QString::number(m_gsColor[0])<<QString::number(m_gsColor[1])<<QString::number(m_gsColor[2])<<QString::number(m_gsColor[3]);
+        jsonObject["GSSelectColor"] = gsColor.join(",");
+        //存自定义美妆配置
+        QStringList customMakeup;
+        if(m_selectCategory == BundleCategory::Makeup && m_selectCategoryIndex == 0){
+            for(int i = 0; i < m_customMakeup.size(); i++){
+                QStringList tempList= m_customMakeup.at(i).at(0).toStringList();
+                customMakeup.append(tempList.at(4));
+                customMakeup.append(tempList.at(5));
+            }
+        }
+        jsonObject["CustomMakeup"] = customMakeup.join(",");
+        QJsonDocument saveDoc(jsonObject);
+        file.open(QFile::WriteOnly);
+        file.write(saveDoc.toJson());
+        file.close();
+    }
+}
+
+void UIBridge::updataUserConfig()
+{
+    Nama *nama = MainClass::getInstance()->m_nama;
+    //加载美颜,美肤等参数
+    for(int i = 0 ; i < m_beautySkin.at(0).toStringList().size(); i++){
+        if(i <= 1){
+            namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, true);
+        }else{
+            namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, false);
+        }
+    }
+    for(int i = 0 ; i < m_beautyFace.at(0).toStringList().size(); i++){
+        namaFuItemSetParamd(nama->m_BeautyHandles, m_beautyFace, i, false);
+    }
+    for(int i = 0 ; i < m_beautyBody.at(0).toStringList().size(); i++){
+        namaFuItemSetParamd(nama->m_BeautyHandles, m_beautyBody, i, false);
+    }
+    for(int i = 0 ; i < m_greenScreen.at(0).toStringList().size(); i++){
+        namaFuItemSetParamd(nama->m_GSHandle, m_greenScreen, i, false);
+    }
+    nama->itemSetParams(nama->m_BeautyHandles, "filter_name", m_filter.at(0).toStringList()[m_filterIndex].toStdString());
+    nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", m_filter.at(1).toStringList()[m_filterIndex].toDouble() / 100);
+    nama->changeGSPreviewRect(m_gsStart.x(), m_gsStart.y(), m_gsStart.x() + m_gsSize.x(), m_gsStart.y() + m_gsSize.y());
+    QString color = "#" + QString("%1").arg(m_gsColor[0],2,16,QChar('0')) +
+            QString("%1").arg(m_gsColor[1],2,16,QChar('0')) +
+            QString("%1").arg(m_gsColor[2],2,16,QChar('0'));
+    emit selectColorChanged(color);
+    nama->m_bundleCategory = BundleCategory(m_selectCategory);
+    //加载使用道具
+    if(m_selectCategory >= 13){
+        if(!m_gsSelectCamera){
+            gsSelectVideo(m_gsSelectVideoPath);
+        }
+        setARFunction(false);
+        if(m_gsSelectSafeArea >= 0){
+            m_selectCategory = BundleCategory::SafeArea;
+            useProps(m_gsSelectSafeArea);
+        }
+        updataGSSelectIndex(m_gsSelectBgIndex, m_gsSelectSafeArea);
+    }else{
+        if(m_selectCategory >= 0 && m_selectCategoryIndex >= 0 ){
+            if(m_selectCategory == BundleCategory::Avatar && m_selectCategoryIndex == 0){
+                updataBodyTrackType(int(m_bodyTrackType));
+            }else if(m_selectCategory == 3){
+                downloadSticker(m_selectCategoryIndex);
+            }else{
+                useProps(m_selectCategoryIndex);
+            }
+            updataSelectCategory(m_selectCategory,m_selectCategoryIndex,m_stickerIndex);
+        }
+    }
+    if(m_selectCategory == BundleCategory::Makeup && m_selectCategoryIndex == 0){
+        if(m_userCustomMakeup.size() > 0){
+            for(int i = 0; i < m_customMakeup.size(); i++){
+                int index = m_userCustomMakeup.at(2*i).toInt();
+                if(index >= 0){
+                    setCustomMakeupIndex(i, m_userCustomMakeup.at(2*i));
+                }
+                int colorIndex = m_userCustomMakeup.at(2*i + 1).toInt();
+                if(colorIndex >= 0){
+                    setCustomMakeupColor(i, m_userCustomMakeup.at(2*i + 1));
+                }
+            }
+            nama->changeRenderList(RENDER_AR,true);
+        }
+    }
+}
+
+void UIBridge::updataGSSafeArea(QImage &image)
+{
+    cv::Mat mat;
+    switch(image.format())
+    {
+    case QImage::Format_ARGB32:
+    case QImage::Format_RGB32:
+    case QImage::Format_ARGB32_Premultiplied:
+        mat = cv::Mat(image.height(), image.width(), CV_8UC4, (void*)image.constBits(), image.bytesPerLine());
+        break;
+    case QImage::Format_RGB888:
+        mat = cv::Mat(image.height(), image.width(), CV_8UC3, (void*)image.constBits(), image.bytesPerLine());
+        cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
+        break;
+    case QImage::Format_Indexed8:
+        mat = cv::Mat(image.height(), image.width(), CV_8UC1, (void*)image.constBits(), image.bytesPerLine());
+        break;
+    default:
+        return;
+    }
+    cv::resize(mat,m_matSafeArea,cv::Size(1280, 720));
+    cv::cvtColor(m_matSafeArea, m_matSafeArea, cv::COLOR_BGR2RGBA);
+    //    b_needCreateTex = true;
+    MainClass::getInstance()->m_nama->UpdateGreenScreenSafeArea(m_matSafeArea);
+}
+
+void UIBridge::useProps(int index)
+{
+    Nama *nama = MainClass::getInstance()->m_nama;
+    std::unique_lock<std::mutex> lock(nama->m_frameMutex);
+    m_bgsVideoMediaPlayer.stop();
+    if(m_selectCategoryLast == int(BundleCategory::ItemJingpin) &&
+            m_selectCategory != int(BundleCategory::ItemJingpin)){
+        nama->ReloadItems();
+        reloadItemParam();
+    }
+    if(nama->m_mp3 != nullptr)
+    {
+        nama->m_mp3->Pause();
+    }
+    m_selectCategoryLast = m_selectCategory;
+    if(m_selectCategory != BundleCategory::Avatar){
+        unLoadAvatar();
+    }
+    if(m_arFunction){
+        m_selectCategoryIndex = index;
+        QString name = m_categoryBundles[m_selectCategory].toStringList()[m_selectCategoryIndex];
+        //使用自定义背景分割
+        QString full_path;
+        if(name.compare("bg_seg_shot") == 0){
+            name = "bg_segment";
+        }
+        if(name.compare("bg_segment") == 0){
+            bgsSelectVideo(m_begUserFilePath);
+            full_path = QString::fromStdString(g_assetDir) + "others/bg_segment.bundle";
+        }else{
+            full_path = gBundlePath[m_selectCategory] + "/" + name + ".bundle";
+        }
+        //qDebug()<<"使用道具"<<m_selectCategory<<m_selectCategoryIndex<<name;
+        if(m_tipMap.find(name) != m_tipMap.end()){
+            m_tip = m_tipMap.find(name).value();
+            tipChanged();
+        }
+        m_bmakeupFlag = true;
+        //新增冻龄,混血, 国风不需要绑定face_makeup
+        if(name == "makeup_icon_combination_1_freezing_age" || name == "makeup_icon_combination_1_guo_feng" || name == "makeup_icon_combination_1_mixed_race" || name == "makeup_icon_combination_1_combination_rabbit"){
+            m_bmakeupFlag = false;
+        }
+        //自定义美妆不用加载bundle
+        if(name != "demo_icon_customize"){
+            nama->SelectBundle(g_assetDir + full_path.toStdString(), 4, m_bmakeupFlag);
+        }else{
+            nama->DestroyAll();
+            nama->LoadMakeup();
+            nama->ChangeCleanFlag(false);
+        }
+        if(m_flagARBody){
+            nama->changeRenderList(RENDER_BODY);
+        }else{
+            nama->changeRenderList(RENDER_AR, m_bmakeupFlag);
+        }
+    }else{
+        //绿幕切换背景视频
+        if(m_selectCategory == BundleCategory::GreenScreen){
+            m_gsSelectBgIndex = index;
+            QString fullpath = QString::fromStdString(g_assetDir) + "items/GreenScreenBg/" + m_greenScreenIcon[0].toStringList()[index] + ".mp4";
+            gsPlayBGVideo(fullpath);
+        }
+        //绿幕安全区域
+        else{
+            m_gsSelectSafeArea = index;
+            QString name = m_greenScreenIcon[1].toStringList()[m_gsSelectSafeArea];
+            nama->changeRenderList(RENDER_GREEN);
+            //使用自定义安全区域
+            if(name.compare("gs_savearea_shot") == 0){
+                QImage image(m_gsSafeUserFilePath);
+                updataGSSafeArea(image);
+            }else{
+                QString imagepath = gBundlePath[m_selectCategory] + "/" + name + ".jpg";
+                cv::Mat image = cv::imread(imagepath.toStdString(), cv::IMREAD_COLOR);
+                cv::resize(image,m_matSafeArea,cv::Size(1280, 720));
+                cv::cvtColor(m_matSafeArea, m_matSafeArea, cv::COLOR_BGR2RGBA);
+                //                b_needCreateTex = true;
+                MainClass::getInstance()->m_nama->UpdateGreenScreenSafeArea(m_matSafeArea);
+            }
+        }
+    }
+}
+
+void UIBridge::nonuseProps()
+{
+    Nama *nama = MainClass::getInstance()->m_nama;
+    unLoadAvatar();
+    if(m_arFunction){
+        m_selectCategoryIndex = -1;
+        nama->DestroyAll();
+        if(nama->m_mp3 != nullptr)
+        {
+            nama->m_mp3->Pause();
+        }
+        if(m_flagARBody){
+            nama->changeRenderList(RENDER_BODY);
+        }else{
+            nama->changeRenderList(RENDER_AR);
+        }
+    }else{
+        if(m_selectCategory == BundleCategory::SafeArea){
+            m_gsSelectSafeArea = -1;
+            nama->NonuseGreenScreenSafeArea();
+        }else{
+            m_gsSelectBgIndex = -1;
+            m_gsMediaPlayer.stop();
+            cv::Mat dataRGBA(nama->m_frame.rows, nama->m_frame.cols,CV_8UC4,cv::Scalar(0));
+            nama->UpdateGreenScreenSegment(dataRGBA);
+        }
+    }
+}
+
+void UIBridge::updataItemParam(int item, int index, QString value)
+{
+    Nama *nama = MainClass::getInstance()->m_nama;
+    ItemParam itemParam = ItemParam(item);
+    switch (itemParam) {
+    case BeautySkin:
+        updataCategory(m_beautySkin, 3, index, value);
+        //前两个是按钮
+        if(index <= 1){
+            namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, index, true);
+        }else{
+            namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, index, false);
+        }
+        break;
+    case BeautyFace:
+        updataCategory(m_beautyFace, 3, index, value);
+        namaFuItemSetParamd(nama->m_BeautyHandles, m_beautyFace, index, false);
+        break;
+    case BeautyBody:
+        //显示AR功能跟美体模块无法共用
+        if(!m_flagARBody && value.toInt() > 0){
+            m_flagARBody = true;
+            nama->changeRenderList(RENDER_BODY);
+            m_tip = "AR功能跟美体模块无法共用";
+            tipChanged();
+            arBodyFlagChanged(m_flagARBody);
+        }
+        updataCategory(m_beautyBody, 3, index, value);
+        checkBodyParam();
+        namaFuItemSetParamd(nama->m_BodyShapeHandle, m_beautyBody, index, false);
+        break;
+    case ItemGreenScreen:
+        updataCategory(m_greenScreen, 3, index, value);
+        namaFuItemSetParamd(nama->m_GSHandle, m_greenScreen, index, false);
+        break;
+    }
+}
+
+void UIBridge::resetItemParam(int item)
+{
+    ItemParam itemParam = ItemParam(item);
+    switch (itemParam) {
+    case BeautySkin:
+        m_beautySkin.replace(3, m_defaultBeautySkin);
+        break;
+    case BeautyFace:
+        m_beautyFace.replace(3, m_defaultBeautyFace);
+        break;
+    case BeautyBody:
+        m_flagARBody = false;
+        MainClass::getInstance()->m_nama->changeRenderList(RENDER_AR);
+        m_beautyBody.replace(3, m_defaultBeautyBody);
+        break;
+    case ItemGreenScreen:
+        m_greenScreen.replace(3, m_defaultGreenScreen);
+        break;
+    }
+}
+
+void UIBridge::setFilter(QString value)
+{
+    updataCategory(m_filter, 1, m_filterIndex, value);
+    Nama *nama = MainClass::getInstance()->m_nama;
+    nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", value.toDouble() / 100);
+}
+
+void UIBridge::resetFilterIndex(int index) {
+    m_filterIndex = index;
+    Nama *nama = MainClass::getInstance()->m_nama;
+    //qDebug()<<m_filter.at(1).toStringList();
+    nama->itemSetParams(nama->m_BeautyHandles, "filter_name", m_filter.at(0).toStringList()[index].toStdString());
+}
+
+void UIBridge::setCustomMakeupValue(int index, QString value)
+{
+    QList<QVariant> tempList = m_customMakeup.at(index);
+    QStringList strList = tempList.at(0).toStringList();
+    strList.replace(3, value);
+    tempList.replace(0, strList);
+    m_customMakeup.replace(index, tempList);
+    //nama更新sdk参数
+    Nama *nama = MainClass::getInstance()->m_nama;
+    //qDebug()<<strList.at(2)<<value.toDouble() / 100;
+    nama->itemSetParamd(nama->m_MakeUpHandle, strList.at(2).toStdString(), value.toDouble() / 100);
+}
+
+void UIBridge::setCustomMakeupIndex(int index, QString value)
+{
+    QList<QVariant> tempList = m_customMakeup.at(index);
+    QStringList strList = tempList.at(0).toStringList();
+    strList.replace(4, value);
+    tempList.replace(0, strList);
+    m_customMakeup.replace(index, tempList);
+    Nama *nama = MainClass::getInstance()->m_nama;
+    //这里要做加载道具,如果是眉毛口红,更新type
+    //(眉毛变形类型brow_warp_type,口红类型lip_type)
+    //第一组 0 {"腮红", "makeup_blusher_color", "makeup_intensity_blusher", "100", "-1", "-1"}
+    //      1 {"苹果肌", "-1", "demo_style_blush_01.png","mu_style_blush_01","#F4706B","#ED596D","#E24247","#E24266","#FF6351"}
+    //      2 {"扇形", "-1", "demo_style_blush_02.png","mu_style_blush_02","#F4706B","#ED596D","#E24247","#E24266","#FF6351"}
+    //例如选苹果肌(下标0),加载mu_style_blush_01道具
+    QString typeName = strList.at(0);
+    QString name = tempList.at(value.toInt() + 1).toStringList().at(3);
+    QString bundleName = gBundlePath[m_selectCategory] + "/subs/" + name + ".bundle";
+    int type = tempList.at(value.toInt() + 1).toStringList().at(1).toInt();
+    int form = 0;
+    m_bmakeup_moisturized = false;
+    if(index == 2 || index == 9){
+        //眉毛和口红要加载道具还要设置类型
+        if(index == 9){
+            form = 1;
+        }
+        if(name.compare("mu_style_lip_05") == 0){
+            m_bmakeup_moisturized = true;
+        }
+        nama->appendMakeUpItems(typeName.toStdString(), bundleName.toStdString(), type, form);
+    }else{
+        nama->appendMakeUpItems(typeName.toStdString(), bundleName.toStdString());
+    }
+    //qDebug()<<"setCustomMakeupIndex"<<index<<value<<typeName<<bundleName<<type<<form;
+    //设置完再设置强度
+    nama->itemSetParamd(nama->m_MakeUpHandle, strList.at(2).toStdString(), strList.at(3).toDouble() / 100);
+}
+
+std::vector<double> UIBridge::GetColorDouble(QString color)
+{
+    std::vector<double> ret;
+    if(color.compare("") != 0){
+        cv::Vec4b cvC = { uchar(color.mid(1,2).toInt(NULL,16)),uchar(color.mid(3,2).toInt(NULL,16)), uchar(color.mid(5,2).toInt(NULL,16)), 255 };
+        ret.push_back((double)cvC[0] / 255.0f);
+        ret.push_back((double)cvC[1] / 255.0f);
+        ret.push_back((double)cvC[2] / 255.0f);
+        ret.push_back((double)cvC[3] / 255.0f);
+    }
+    return ret;
+}
+
+void UIBridge::setCustomMakeupColor(int index, QString value)
+{
+    QList<QVariant> tempList = m_customMakeup.at(index);
+    QStringList strList = tempList.at(0).toStringList();
+    strList.replace(5, value);
+    tempList.replace(0, strList);
+    QString color0 = "", color1 = "", color2 = "";
+    QStringList colorList = tempList.at(strList.at(4).toInt() + 1).toStringList();
+    if(colorList.size() < 5){
+        return;
+    }
+    QString colorFull = tempList.at(strList.at(4).toInt() + 1).toStringList().at(value.toInt() + 4);
+    if(colorFull.length() >= 7){
+        color0 = colorFull.mid(0,7);
+    }
+    if(colorFull.length() >= 14){
+        color1 = colorFull.mid(7,14);
+    }
+    if(colorFull.length() >= 21){
+        color2 = colorFull.mid(14);
+    }
+    m_customMakeup.replace(index, tempList);
+    QString name = strList.at(1);
+    if(m_bmakeup_moisturized){
+        name = "makeup_lip_color_v2";
+    }
+    //qDebug()<<"setCustomMakeupColor"<<name<<colorFull;
+    MainClass::getInstance()->m_nama->setMakeUpColor(name.toStdString(), GetColorDouble(color0), GetColorDouble(color1), GetColorDouble(color2));
+}
+
+void UIBridge::resetCustomMakeup()
+{
+    m_customMakeup = m_defaultCustomMakeup;
+    MainClass::getInstance()->m_nama->ClearAllCM();
+}
+
+void UIBridge::changeCamera(int index)
+{
+    MainClass::getInstance()->m_camera->changeCamera(index);
+}
+
+void UIBridge::changeCameraSet(int index)
+{
+    if(index >= 0){
+        MainClass::getInstance()->m_camera->changeCameraSet(index);
+    }
+}
+
+void UIBridge::gsCameraConfirm()
+{
+    //暂停选择视频播放
+    m_gsSelectCamera = true;
+    m_gsSelectVideoPath = "";
+    gsSelectCameraChanged();
+    m_gsVideoMediaPlayer.stop();
+    fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+    m_gsStart = QPointF(0.5,0.5);
+    m_gsSize = QPointF(0.5,0.5);
+    MainClass::getInstance()->m_nama->changeGSPreviewRect(0.5, 0.5, 1, 1);
+    m_frameSize = QString::number(MainClass::getInstance()->m_camera->m_FrameWidth) + "x" +
+            QString::number(MainClass::getInstance()->m_camera->m_FrameHeight);
+    emit frameSizeChanged();
+}
+
+void UIBridge::selectColor(int mouseX, int mouseY)
+{
+    MainClass *main = MainClass::getInstance();
+    double ratio = main->m_nama->m_frame.cols / double(main->m_UIBridge->m_cameraWidth);
+    cv::Mat frameMat = main->m_nama->m_frame;
+    //绿幕选择相机,图像要水平翻转
+    if(m_gsSelectCamera){
+        cv::flip(frameMat, frameMat, 1);
+    }
+    if (frameMat.data)
+    {
+        int posx = ratio * mouseX;
+        int posy = ratio * mouseY;
+        auto dataBGR = frameMat.at<cv::Vec4b>(posy, posx);
+        QString color = "#" + QString("%1").arg(dataBGR[2],2,16,QChar('0')) +
+                QString("%1").arg(dataBGR[1],2,16,QChar('0')) +
+                QString("%1").arg(dataBGR[0],2,16,QChar('0'));
+        emit selectColorChanged(color);
+    }
+}
+
+void UIBridge::gsColorChange(QString color)
+{
+    m_gsColor = { uchar(color.mid(1,2).toInt(NULL,16)),uchar(color.mid(3,2).toInt(NULL,16)), uchar(color.mid(5,2).toInt(NULL,16)), 255 };
+    MainClass::getInstance()->m_nama->SetGSKeyColor(m_gsColor);
+}
+
+void UIBridge::gsPlayBGVideo(QString videopath)
+{
+    //qDebug()<<"gsPlayBGVideo"<<videopath;
+    m_gsMediaPlayer.stop();
+    QtCameraCapture *videoSurface = new QtCameraCapture(true);
+    m_gsMediaPlayer.setVideoOutput(videoSurface);
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    //循环播放
+    playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
+    playlist->addMedia(QUrl::fromLocalFile(videopath));
+    m_gsMediaPlayer.setPlaylist(playlist);
+    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(UpdateGreenScreenSegment(const cv::Mat &)), Qt::QueuedConnection);
+    m_gsMediaPlayer.play();
+}
+
+void UIBridge::gsSelectColor()
+{
+    m_bSelectColor = true;
+    MainClass::getInstance()->m_nama->changeRenderList(RENDER_PICKCOLOR);
+    MainClass::getInstance()->m_nama->changeGSPreviewRect(0, 0, 1, 1);
+}
+
+void UIBridge::gsUnSelectColor()
+{
+    m_bSelectColor = false;
+    MainClass::getInstance()->m_nama->changeRenderList(RENDER_GREEN);
+    gsTranslocation(0,0);
+}
+
+void UIBridge::gsSelectVideo(QString path)
+{
+    m_gsSelectCamera = false;
+    gsSelectCameraChanged();
+    MainClass::getInstance()->m_camera->m_QCamera->stop();
+    //关闭摄像头输入
+    fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0);
+    m_bgsSelectVideo = true;
+    MainClass::getInstance()->m_nama->m_FrameID = 0;
+    if(m_gsSelectVideoPath==path){
+        m_gsVideoMediaPlayer.play();
+        return;
+    }
+    m_gsSelectVideoPath = path;
+    QtCameraCapture *videoSurface = new QtCameraCapture(true);
+    m_gsVideoMediaPlayer.setVideoOutput(videoSurface);
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    //循环播放
+    if(path.contains(".png") || path.contains(".jpg")){
+        playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+    }else{
+        playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
+    }
+    playlist->addMedia(QUrl(path));
+    m_gsVideoMediaPlayer.setPlaylist(playlist);
+    //第一帧改变绿幕起始位置,绿幕图像大小
+    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(getGSPresentFrame(const cv::Mat &)), Qt::QueuedConnection);
+    m_gsVideoMediaPlayer.play();
+}
+
+void UIBridge::bgsSelectVideo(QString path)
+{
+    QFile file(QDir::currentPath()+"/CustomUserConfig.json");
+    m_begUserFilePath = path;
+    if(file.open(QIODevice::ReadWrite | QIODevice::Text))
+    {
+        QString value = file.readAll();
+        file.close();
+        QJsonParseError parseJsonErr;
+        QJsonDocument document = QJsonDocument::fromJson(value.toUtf8(),&parseJsonErr);
+        if(!(parseJsonErr.error == QJsonParseError::NoError) && value.compare("") != 0)
+        {
+            qDebug()<<tr("解析json文件错误！");
+        }
+        QJsonObject jsonObject = document.object();
+        jsonObject["BgSegPath"] = path;
+        QJsonDocument saveDoc(jsonObject);
+        file.open(QFile::WriteOnly);
+        file.write(saveDoc.toJson());
+        file.close();
+    }
+    m_bNeedSavebg_seg = true;
+    MainClass::getInstance()->m_nama->m_FrameID = 0;
+    m_bgsVideoMediaPlayer.stop();
+    QtCameraCapture *videoSurface = new QtCameraCapture(true);
+    m_bgsVideoMediaPlayer.setVideoOutput(videoSurface);
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    m_bgsVideoMediaPlayer.setPlaylist(playlist);
+    //循环播放
+    playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
+    playlist->addMedia(QUrl(path));
+    m_bgsVideoMediaPlayer.setPlaylist(playlist);
+    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(UpdateBackgroundSegment(const cv::Mat &)), Qt::QueuedConnection);
+    m_bgsVideoMediaPlayer.play();
+}
+
+void UIBridge::gsSafeAreaSelect(QString path)
+{
+    path = path.mid(8);
+    QImage image(path);
+    updataGSSafeArea(image);
+    image = image.scaled(128, 72, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QSize size(128, 72);
+    QBitmap mask(size);
+    QPainter painter(&mask);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+    painter.fillRect(0, 0, size.width(), size.height(), Qt::white);
+    painter.setBrush(QColor(0, 0, 0));
+    painter.drawRoundedRect(28,0,72,72,100,100);
+    QPixmap imagepix = QPixmap::fromImage(image);
+    imagepix.setMask(mask);
+    imagepix = imagepix.copy(28,0,72,72);
+    imagepix.save("gs_savearea_shot.png");
+    QStringList tempList = m_greenScreenIcon.at(1).toStringList();
+    if(!tempList.contains("gs_savearea_shot")){
+        tempList.insert(1, "gs_savearea_shot");
+        m_greenScreenIcon.replace(1, tempList);
+    }
+    emit updataGSSafePic();
+    QFile file(QDir::currentPath()+"/CustomUserConfig.json");
+    m_gsSafeUserFilePath = path;
+    if(file.open(QIODevice::ReadWrite | QIODevice::Text))
+    {
+        QString value = file.readAll();
+        file.close();
+        QJsonParseError parseJsonErr;
+        QJsonDocument document = QJsonDocument::fromJson(value.toUtf8(),&parseJsonErr);
+        if(!(parseJsonErr.error == QJsonParseError::NoError) && value.compare("") != 0)
+        {
+            qDebug()<<tr("解析json文件错误！");
+        }
+        QJsonObject jsonObject = document.object();
+        jsonObject["GsSafePath"] = path;
+        QJsonDocument saveDoc(jsonObject);
+        file.open(QFile::WriteOnly);
+        file.write(saveDoc.toJson());
+        file.close();
+    }
+}
+
+void UIBridge::openHelpText()
+{
+    WinExec("notepad.exe README.md", SW_SHOW);
+}
+
+int UIBridge::getStickerLength()
+{
+    return MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex].size();
+}
+
+QStringList UIBridge::cameraSetList(){
+    return MainClass::getInstance()->m_camera->m_cameraSetList;
+}
+
+
+QStringList UIBridge::cameraList(){
+    return MainClass::getInstance()->m_camera->m_cameraList;
+}
+
+QStringList UIBridge::stickerTip()
+{
+    if(m_stickerTip.size() == 0){
+        for(int i = 0; i < MainClass::getInstance()->m_stickerHolder->mTags.size(); i++){
+            m_stickerTip.append(QString::fromStdString(MainClass::getInstance()->m_stickerHolder->mTags[i]));
+        }
+    }
+    return m_stickerTip;
+}
+
+QVariant UIBridge::getStickerValue(int index, int n)
+{
+    switch (n){
+    case 0:
+        return QString::fromLocal8Bit(MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mIconDir.c_str());
+        break;
+    case 1:
+        return bool(MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleIsDownload);
+        break;
+    case 2:
+        return bool(MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mIsDownloading);
+        break;
+    default:
+        return "";
+        break;
+    }
+}
+
+void UIBridge::downloadSticker(int index)
+{
+    m_selectCategoryIndex = index;
+    //没下载下载
+    if (MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleIsDownload == false &&
+            MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mIsDownloading == false && m_GIsDownloading == false)
+    {
+        std::packaged_task<void()> task([&, index]() {
+            MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mIsDownloading = true;
+            auto strUrl = MainClass::getInstance()->m_stickerHolder->RequestBundleUrl(MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mId);
+            if (strUrl.length() > 0)
+            {
+                for (auto& bundledir : MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleDirs)
+                {
+                    //如果包括,则是zip文件,替换文件名
+                    bool bZip = false;
+                    string dirpath;
+                    if(bundledir.find(",") != string::npos){
+                        dirpath = bundledir.substr(0,bundledir.find("/",10) + 1);
+                        bundledir = dirpath + "bundle.zip";
+                        bZip = true;
+                    }
+                    MainClass::getInstance()->m_stickerHolder->DownLoadFile(strUrl, bundledir);
+                    if(bZip){
+                        MainClass::getInstance()->m_stickerHolder->UnzipFile(bundledir, dirpath, m_stickerIndex, index);
+                        break;
+                    }
+                }
+                MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleIsDownload = true;
+                emit finishDownload(index);
+                useBoutique(index);
+            }
+            m_GIsDownloading = false;
+            m_GDownloadBundleThread.detach();
+        });
+        m_GIsDownloading = true;
+        m_GDownloadBundleThread = std::thread(std::move(task));
+    }
+    //已经下载直接使用
+    else{
+        useBoutique(index);
+    }
+}
+
+
+void UIBridge::useBoutique(int index)
+{
+    m_selectCategoryLast = m_selectCategory;
+    m_bLoadBear = false;
+    int maxPeople = 4;
+    Nama *nama = MainClass::getInstance()->m_nama;
+    std::unique_lock<std::mutex> lock(nama->m_frameMutex);
+    if (MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->IsOnlyOnePeople())
+    {
+        maxPeople = 1;
+    }
+    if(nama->m_mp3 != nullptr)
+    {
+        nama->m_mp3->Pause();
+    }
+    //小熊贴纸特有
+    if(MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleDirs.size() > 1){
+        unLoadAvatar();
+        m_bodyTrackType = BodyTrackType::FullBody;
+        std::vector<std::string> mBundleDirs;
+        for (auto& index: MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleDirs){
+            mBundleDirs.emplace_back(index);
+        }
+        nama->LoadAvatarBundles(mBundleDirs);
+        nama->SetBodyTrackType(BodyTrackType::FullBody);
+        nama->ApplyBodyTrackConfig(m_bodyTrackConfig.BearFull);
+        nama->m_Controller->EnableHumanFollowMode(false);
+        nama->DestroyAll();
+        m_bLoadAvatar = true;
+        m_bLoadBear = true;
+    }else{
+        unLoadAvatar();
+        for (auto& index: MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleDirs){
+            nama->SelectBundle(index,maxPeople);
+            if(m_flagARBody){
+                nama->changeRenderList(RENDER_BODY);
+            }else{
+                nama->changeRenderList(RENDER_AR);
+            }
+        }
+
+    }
+}
+
+void UIBridge::reloadItemParam()
+{
+    Nama *nama = MainClass::getInstance()->m_nama;
+    for(int i = 0 ; i < m_beautySkin.at(0).toStringList().size(); i++){
+        if(i <= 1){
+            namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, true);
+        }else{
+            namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, false);
+        }
+    }
+    for(int i = 0 ; i < m_beautyFace.at(0).toStringList().size(); i++){
+        namaFuItemSetParamd(nama->m_BeautyHandles, m_beautyFace, i, false);
+    }
+    for(int i = 0 ; i < m_beautyBody.at(0).toStringList().size(); i++){
+        namaFuItemSetParamd(nama->m_BodyShapeHandle, m_beautyBody, i, false);
+    }
+    for(int i = 0 ; i < m_greenScreen.at(0).toStringList().size(); i++){
+        namaFuItemSetParamd(nama->m_GSHandle, m_greenScreen, i, false);
+    }
+    nama->itemSetParams(nama->m_BeautyHandles, "filter_name", m_filter.at(0).toStringList()[m_filterIndex].toStdString());
+    nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", m_filter.at(1).toStringList()[m_filterIndex].toDouble() / 100);
+    nama->changeGSPreviewRect(m_gsStart.x(), m_gsStart.y(), m_gsStart.x() + m_gsSize.x(), m_gsStart.y() + m_gsSize.y());
+}
+
+void UIBridge::checkBodyParam()
+{
+    Nama *nama = MainClass::getInstance()->m_nama;
+    QStringList valueList = m_beautyBody.at(3).toStringList();
+    bool allzeroFlag = true;
+    for(int i = 0 ; i < valueList.size(); i++){
+        if(valueList.at(i).toInt() > 0){
+            allzeroFlag = false;
+        }
+    }
+    if(allzeroFlag){
+        m_flagARBody = false;
+    }
+    arBodyFlagChanged(m_flagARBody);
+    if(m_flagARBody){
+        nama->changeRenderList(RENDER_BODY);
+        if(nama->m_bundleCategory == BundleCategory::MusicFilter)
+        {
+            nama->m_mp3->Pause();
+        }
+    }else{
+        nama->changeRenderList(RENDER_AR, m_bmakeupFlag);
+        if(nama->m_bundleCategory == BundleCategory::MusicFilter)
+        {
+            nama->m_mp3->Play();
+        }
+    }
+}
+
+void UIBridge::itemJingpinClick()
+{
+    MainClass::getInstance()->m_nama->itemJingpinClick();
+}
+
+QPointF UIBridge::gsLocation(double moveX, double moveY)
+{
+    QPointF gsTemp = QPointF(m_gsStart.x() + moveX, m_gsStart.y() + moveY);
+    QPointF maxPos(1 - m_gsSize.x(), 1 - m_gsSize.y());
+    if(gsTemp.x() < 0){
+        gsTemp.setX(0);
+    }else if(gsTemp.x() > maxPos.x()){
+        gsTemp.setX(maxPos.x());
+    }
+    if(gsTemp.y() < 0){
+        gsTemp.setY(0);
+    }else if(gsTemp.y() > maxPos.y()){
+        gsTemp.setY(maxPos.y());
+    }
+    return gsTemp;
+}
+
+void UIBridge::gsTranslocation(double moveX, double moveY)
+{
+    QPointF gsTemp = gsLocation(moveX, moveY);
+    QPointF gsEnd = QPointF(gsTemp.x() + m_gsSize.x(), gsTemp.y() + m_gsSize.y());
+    MainClass::getInstance()->m_nama->changeGSPreviewRect(gsTemp.x(), gsTemp.y(), gsEnd.x(), gsEnd.y());
+}
+
+void UIBridge::gsZoom(bool zoom)
+{
+    if(zoom){
+        m_gsSize.setX(m_gsSize.x()*1.1);
+        m_gsSize.setY(m_gsSize.y()*1.1);
+    }else{
+        m_gsSize.setX(m_gsSize.x()*0.9);
+        m_gsSize.setY(m_gsSize.y()*0.9);
+    }
+    //比例限制0.2-1.0
+    if(m_gsSize.x() > 1.0 || m_gsSize.y() > 1.0){
+        m_gsSize.setX(1);
+        m_gsSize.setY(1);
+    }else if(m_gsSize.x() < 0.2 || m_gsSize.y() < 0.2){
+        m_gsSize.setX(0.2);
+        m_gsSize.setY(0.2);
+    }
+    gsTranslocation(0,0);
+}
+
+void UIBridge::gsUpdatalocation(double moveX, double moveY)
+{
+    m_gsStart = gsLocation(moveX, moveY);
+}
+
+void UIBridge::namaFuItemSetParamd(int handle, QList<QVariant> &valueList, int index, bool flag)
+{
+    Nama *nama = MainClass::getInstance()->m_nama;
+    QString name = valueList[2].toStringList().at(index);
+    double dValue = valueList[3].toStringList().at(index).toDouble();
+    if(flag){
+        //按钮选项
+        nama->itemSetParamd(handle, name.toStdString(), dValue);
+    }else{
+        //滑块
+        bool bFlag = valueList[4].toStringList().at(index).toInt();
+        //如果有负数
+        if (bFlag)
+        {
+            dValue += 50;
+        }
+        //磨皮0-6
+        if(name == "blur_level"){
+            nama->itemSetParamd(handle, name.toStdString(), dValue * 6.0/ 100.0);
+        }else{
+            nama->itemSetParamd(handle, name.toStdString(), dValue / 100.0);
+        }
+    }
+}
+
+void UIBridge::getFPS()
+{
+    Nama *nama = MainClass::getInstance()->m_nama;
+    int FrameID = nama->m_FrameID;//视频帧Id
+    static int FrameIDLast = 0;//上一秒计算时的视频帧id计算rendertime用
+    static int FrameIDFPSLast = 0;//上一秒计算时的帧id计算fps用
+    int frameCount = FrameID - FrameIDLast;
+    m_FPS = m_FrameIDFPS - FrameIDFPSLast;
+    //最小化不刷新
+    if(frameCount == 0){
+        frameCount = 1;
+    }
+    m_renderTime = m_secondRenderTime / frameCount;
+    emit fpsChanged();
+    emit renderTimeChanged();
+    m_secondRenderTime = 0;
+    FrameIDFPSLast = m_FrameIDFPS;
+    FrameIDLast = FrameID;
+}
+
+void UIBridge::openWebCamera(QString path)
+{
+    //qDebug()<<path;
+    QtCameraCapture *videoSurface = new QtCameraCapture(true);
+    m_webcamMediaPlayer.setVideoOutput(videoSurface);
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    //循环播放
+    playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
+    playlist->addMedia(QUrl(path));
+    m_webcamMediaPlayer.setPlaylist(playlist);
+    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(getGSPresentFrame(const cv::Mat &)), Qt::QueuedConnection);
+    m_webcamMediaPlayer.play();
+}
+
+void UIBridge::stopStartWebCamera(bool flag)
+{
+    if(flag){
+        m_webcamMediaPlayer.pause();
+    }else{
+        m_webcamMediaPlayer.play();
+    }
+}
+
+void UIBridge::changeCameraType(bool type)
+{
+    if(type){
+        MainClass::getInstance()->m_camera->m_QCamera->stop();
+        m_webcamMediaPlayer.play();
+        fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0);
+    }
+    else{
+        MainClass::getInstance()->m_camera->m_QCamera->start();
+        m_webcamMediaPlayer.stop();
+        fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+    }
+}

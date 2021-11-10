@@ -374,6 +374,12 @@ FUNAMA_API int fuOpenFileLog(const char* file_pullname, int max_file_size,
 FUNAMA_API int fuSetLogLevel(FULOGLEVEL level);
 
 /**
+ \brief set log prefix
+ \param prefix, log prefix
+ */
+FUNAMA_API void fuSetLogPrefix(const char* prefix);
+
+/**
  \brief Get current log level
  \return ref to FULOGLEVEL
 */
@@ -444,6 +450,14 @@ FUNAMA_API int fuSetup(float* sdk_data, int sz_sdk_data, float* ardata,
 FUNAMA_API int fuSetupLocal(float* v3data, int sz_v3data, float* ardata,
                             void* authdata, int sz_authdata,
                             void** offline_bundle_ptr, int* offline_bundle_sz);
+
+FUNAMA_API int fuSetupLocal2(float* v3data, int sz_v3data, float* ardata,
+                             void* authdata, int sz_authdata,
+                             void* offline_input_bundle_ptr,
+                             int offline_input_bundle_sz,
+                             void** offline_output_bundle_ptr,
+                             int* offline_output_bundle_sz);
+
 /**
  \brief Initialize and authenticate your SDK instance with internal check,
  must be called exactly once before all other functions. The buffers should
@@ -1412,6 +1426,13 @@ FUNAMA_API int fuSetFaceProcessorDetectMode(int mode);
 FUNAMA_API void fuFaceProcessorSetMinFaceRatio(float ratio);
 
 /**
+ \brief set ai model FaceProcessor's landmark quality.
+ \param quality, landmark quality, 0 for low quality, 1 for mediem, 2 for high
+ quality. 1 by default.
+ */
+FUNAMA_API void fuFaceProcessorSetFaceLandmarkQuality(int quality);
+
+/**
  \brief get ai model FaceProcessor's tracking hair mask with index.
  \param index, index of fuFaceProcessorGetNumResults.
  \param mask_width,  width of return.
@@ -1439,6 +1460,19 @@ FUNAMA_API const float* fuFaceProcessorGetResultHeadMask(int index,
  \return zero for no occlusion, one for occlusion, minus one for no tracked face
  */
 FUNAMA_API int fuFaceProcessorGetResultFaceOcclusion(int index);
+
+/**
+ \brief get ai model FaceProcessor's face detection confidence score.
+ \param index, index of fuFaceProcessorGetNumResults.
+ \return face detection confidence score.
+ */
+FUNAMA_API float fuFaceProcessorGetConfidenceScore(int index);
+
+/**
+ \brief get ai model FaceProcessor's tracking face count.
+ \return  num of faces.
+ */
+FUNAMA_API int fuFaceProcessorGetNumResults();
 
 /**
  HumanProcessor related api
@@ -1636,6 +1670,14 @@ FUNAMA_API float fuHandDetectorGetResultHandScore(int index);
 FUNAMA_API void fuSetOutputImageSize(int w, int h);
 
 /**
+ \brief when application pause calling fuRender,  call
+ fuSetRenderPauseState(true) to pause the internal physis update.
+ \param pause ,pause state, if true SDK will pause physis update, and will be
+ turn on in next fuRender call automatically.
+ */
+FUNAMA_API void fuSetRenderPauseState(bool pause);
+
+/**
  \brief internal api for profile
  */
 FUNAMA_API int fuProfileGetNumTimers();
@@ -1645,6 +1687,8 @@ FUNAMA_API long long fuProfileGetTimerCount(int index);
 FUNAMA_API long long fuProfileGetTimerMin(int index);
 FUNAMA_API long long fuProfileGetTimerMax(int index);
 FUNAMA_API int fuProfileResetAllTimers();
+
+FUNAMA_API void fuSetForcePortraitMode(int mode);
 
 #ifdef __cplusplus
 }
