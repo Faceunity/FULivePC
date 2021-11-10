@@ -129,9 +129,53 @@ void GUISticker::ShowStickerList(Nama * nama, int tagIndex)
 		}
 
 		bundle->mHasNotBinded = true;
+		//¼ÓÔØÐ¡ÐÜ
+		if (bundle->mBundleDirs.size() > 1) {
+				nama->UnLoadAvatar();
+				nama->UnLoadMakeup();
+				std::vector<std::string> mBundleDirs;
+				for (auto& i : bundle->mBundleDirs) {
+					mBundleDirs.emplace_back(i);
+				}
+				nama->LoadAvatarBundles(mBundleDirs);
 
-		for (auto& i : bundle->mBundleDirs)
-			nama->SelectBundle(i, maxPeople);
+				BodyTrackConfig c;
+				c.DefaultType = BodyTrackType::FullBody;
+				c.FullBody.EnableFaceProcessor = false;
+				c.FullBody.UseRetargetRootScale = true;
+				c.FullBody.UseRetargetRootScaleValue = 0;
+				c.FullBody.AnimFilterParams_n_buffer_frames = 10;
+				c.FullBody.AnimFilterParams_pos_w = 0;
+				c.FullBody.AnimFilterParams_angle_w = 0;
+				c.FullBody.GlobalOffset_x = 0;
+				c.FullBody.GlobalOffset_y = 0;
+				c.FullBody.GlobalOffset_z = 0;
+				c.FullBody.Scale = 1.0f;
+				c.FullBody.Pos_x = 70;
+				c.FullBody.Pos_y = 50;
+				c.FullBody.Pos_z = -1100;
+				c.FullBody.TrackMoveRange_x = 0.9f;
+				c.FullBody.TrackMoveRange_y = 0.9f;
+				c.FullBody.TrackMoveRange_z = 0.1f;
+
+				nama->SetBodyTrackType(BodyTrackType::FullBody);
+				auto& params = c.FullBody;
+				nama->m_Controller->EnableFaceProcessor(params.EnableFaceProcessor);
+				nama->m_Controller->UseRetargetRootScale(params.UseRetargetRootScale, params.UseRetargetRootScaleValue);
+				nama->m_Controller->SetAvatarAnimFilterParams(params.AnimFilterParams_n_buffer_frames, params.AnimFilterParams_pos_w, params.AnimFilterParams_angle_w);
+				nama->m_Controller->SetAvatarGlobalOffset(params.GlobalOffset_x, params.GlobalOffset_y, params.GlobalOffset_z);
+				nama->m_Controller->SetAvatarScale(params.Scale);
+				nama->m_Controller->SetPos(params.Pos_x, params.Pos_y, params.Pos_z);
+				//nama->m_Controller->EnableHumanFollowMode(params.EnableHumanFollowMode);
+				nama->m_Controller->SetAvatarTranslationScale(params.TrackMoveRange_x, params.TrackMoveRange_y, params.TrackMoveRange_z);
+				nama->m_Controller->EnableHumanFollowMode(false);
+				Nama::mNamaAppState.RenderAvatarBear = true;
+		}
+		else {
+			nama->UnLoadAvatar();
+			for (auto& i : bundle->mBundleDirs)
+				nama->SelectBundle(i, maxPeople);
+		}
 
 	};
 
@@ -207,9 +251,21 @@ void GUISticker::ShowStickerList(Nama * nama, int tagIndex)
 						auto strUrl = mNetHolder->RequestBundleUrl(mNetHolder->mTagBundleList[tagIndex][i]->mId);
 						if (strUrl.length() > 0)
 						{
-							for (auto& bundledir : mNetHolder->mTagBundleList[tagIndex][i]->mBundleDirs)
-								mNetHolder->DownLoadFile(strUrl, bundledir);
 
+							for (auto& bundledir : mNetHolder->mTagBundleList[tagIndex][i]->mBundleDirs) {
+								bool bZip = false;
+								string dirpath;
+								if (bundledir.find(",") != string::npos) {
+									dirpath = bundledir.substr(0, bundledir.rfind("/") + 1);
+									bundledir = dirpath + "bundle.zip";
+									bZip = true;
+								}
+								mNetHolder->DownLoadFile(strUrl, bundledir);
+								if (bZip) {
+									mNetHolder->UnzipFile(bundledir, dirpath, tagIndex, i);
+									break;
+								}
+							}
 							mNetHolder->mTagBundleList[tagIndex][i]->mBundleIsDownload = true;
 						}
 						

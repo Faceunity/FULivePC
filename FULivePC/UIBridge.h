@@ -8,7 +8,7 @@
 
 #define MAX_PATH_LENGTH 1024  
 #define MAX_BEAUTYFACEPARAMTER 8
-#define MAX_FACESHAPEPARAMTER 18
+#define MAX_FACESHAPEPARAMTER 19
 #define MAX_BODY_SHAPE_PARAM  7
 #define MAX_GREEN_SCREEN_PARAM 3
 
@@ -16,6 +16,7 @@
 #define MAKEUP_CUSTOM_NAME ("demo_icon_customize.bundle")
 #define BGSEG_CUSTOM_NAME ("others/bg_segment.bundle")
 #define BGSEG_USERFILE_PIC ("bg_seg_shot.png")
+#define GSSAFEAREA_USERFILE_PIC ("gs_safearea_shot.png")
 #define BGSEG_ADD_ICON ("portrait_segmentation_icon_add.png")
 
 using namespace std;
@@ -89,7 +90,7 @@ enum BundleCategory
 	BeautyHair,
 	BigHead,
 	GreenScreen,
-
+	SafeArea,
 	Count
 };
 
@@ -122,7 +123,7 @@ static const int g_checkSideIndex[SideCount] = {
 
 static const int g_checkSideID[Count] =
 {
-	define_arr[DEFINE_Face_Beautify], define_arr[DEFINE_Face_Beautify],define_arr[DEFINE_Video_Filter],
+	define_arr[DEFINE_Face_Beautify], define_arr[DEFINE_Face_Beautify],define_arr[DEFINE_Face_Beautify],
 	define_arr_ext[DEFINE_BODY_SHAPE]
 };
 
@@ -153,6 +154,7 @@ class UIBridge
 public:
 
 	static int bundleCategory;
+	static int bundleCategoryLast;
 	// 用于绿幕
 	static int gsBundleCategory;
 	static int renderBundleCategory;
@@ -162,8 +164,9 @@ public:
 	static bool showItemTipsWindow;
 	static bool showDegubInfoWindow;
 	static bool showFilterSlider; 
-	static int showGreenScreen;
+	static int  showGreenScreen;
 	static bool showCustomMakeup;
+	static bool newMakeupType;
 
 	static bool mNeedIpcWrite; 
 	static bool mNeedPlayMP3;
@@ -190,6 +193,7 @@ public:
 	static bool m_bNeedReChooseInputSrc;
 	static bool m_bSamplingColor;
 	static bool m_bShowColorChoice;
+	static bool m_bShowingSafeAreaTip;
 	// 是否正在显示美体功能
 	static bool m_bShowingBodyBeauty;
 	// 加載含有中文字符的png 文件，需要給用戶提示
@@ -228,6 +232,7 @@ public:
 	static string mCurRenderItemName;
 	// 专用于绿幕
 	static string mCurRenderGSItemName;
+	static string mCurRenderGSSAItemName;
 	static vector<string> categoryBundles[BundleCategory::Count];
 
     static void FindAllBundle(string folder,vector<string> &files);
@@ -245,8 +250,8 @@ private:
 
 const string g_faceBeautyParamName[MAX_BEAUTYFACEPARAMTER] = { "blur_level","color_level", "red_level","sharpen","eye_bright", "tooth_whiten" ,"remove_pouch_strength", "remove_nasolabial_folds_strength" };
 
-const string g_faceShapeParamName[MAX_FACESHAPEPARAMTER] = { "cheek_thinning","eye_enlarging","intensity_eye_circle", "intensity_chin", "intensity_forehead", "intensity_nose","intensity_mouth",
-		"cheek_v","cheek_narrow","cheek_small","intensity_cheekbones","intensity_lower_jaw",
+const string g_faceShapeParamName[MAX_FACESHAPEPARAMTER] = { "cheek_thinning","eye_enlarging_v2","intensity_eye_circle", "intensity_chin", "intensity_forehead_v2", "intensity_nose_v2","intensity_mouth_v2",
+		"cheek_v","cheek_narrow_v2","cheek_short","cheek_small_v2","intensity_cheekbones","intensity_lower_jaw",
 	"intensity_canthus", "intensity_eye_space", "intensity_eye_rotate", "intensity_long_nose",
 	"intensity_philtrum", "intensity_smile" };
 
@@ -255,7 +260,7 @@ const string g_faceShapeParamName[MAX_FACESHAPEPARAMTER] = { "cheek_thinning","e
 #define FACE_SHAPE_SHOW_FLAG_MIDDLE (1)
 
 const int g_faceShapeParamShowFlag[MAX_FACESHAPEPARAMTER] = { 0,0,0,1,1,0,
-1,0,0,0,0,0,0,
+1,0,0,0,0,0,0,0,
 1,1,1,1,0 };
 
 /////////////////////////////////////////////////////////////
@@ -305,11 +310,13 @@ const string g_pose_track_folder = g_assetDir + "PoseTrack/";
 
 const string gGSBgPic = g_assetDir + "items/" + "GreenScreenBg";
 
+const string gGSSAPic = g_assetDir + "items/" + "SafeArea";
+
 const string gGSColorConfig = g_assetDir + "colorConfig.json";
 
 const string gCustomCMConfig = g_assetDir + "items/Makeup/subs_setup.json";
 
-const string gBgSegUserConfig = "BgSegUserConfig.json";
+const string gUserConfig = "UserConfig.json";
 
 
 #endif

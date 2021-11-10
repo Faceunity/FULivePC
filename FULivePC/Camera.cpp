@@ -19,6 +19,7 @@
 #endif
 
 #include <regex>
+#include <CNamaSDK.h>
 
 #ifndef _WIN32
 extern uint64_t GetTickCount();
@@ -35,6 +36,7 @@ CCameraDS::~CCameraDS()
 	status = STATUS_NO_CAMERA;
 	closeCamera();
 }
+
 
 void CCameraDS::init() {
 	m_isCameraInited = false;
@@ -86,6 +88,7 @@ void CCameraDS::savePngFilesToLocalDir(string dirPath,cv::Mat frame)
 }
 #endif
 
+#include <future> 
 static void ProcessFrame(CCameraDS* cc)
 {
 	while (!cc->m_bThreadEnd)
@@ -103,20 +106,6 @@ static void ProcessFrame(CCameraDS* cc)
 		if (cc->mCapture.isOpened())
 		{
 			cc->mCapture.retrieve(cc->tmpframe);
-
-			//static uint64_t lastTime = GetTickCount(); // ms
-			//static int frameCount = 0;
-			//++frameCount;
-
-			//uint64_t curTime = GetTickCount();
-			//if (curTime - lastTime > 1000)
-			//{
-			//	int time = frameCount - 1;
-			//	cout << time << endl;
-			//	frameCount = 0;
-			//	lastTime = curTime;
-		    //}
-
 			{
 #ifndef PERFORMANCE_OPEN
 				Locker locker(&cc->m_mtxFrame);
@@ -264,9 +253,7 @@ void CCameraDS::InitCameraSinglePic(int width, int height, std::string path, boo
 			//最高720的宽，防止图片过大造成卡顿
 			rs_height = MIN(720, frame.rows);
 			rs_width = (float)frame.cols / frame.rows * rs_height;
-
 			cv::resize(frame, frame, cv::Size(rs_width, rs_height));
-
 			m_filepath = path;
 
 			rs_width = frame.cols;
@@ -344,13 +331,15 @@ void CCameraDS::calculateRect()
 		m_dstFrameSize.height = m_dstFrameSize.width / aN;
 	}
 	//mCapture.set(cv::CAP_PROP_FPS, 30.0);
-	mCapture.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+	//mCapture.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M','J','P','G'));
 	mCapture.set(cv::CAP_PROP_FRAME_WIDTH, m_dstFrameSize.width);
 	mCapture.set(cv::CAP_PROP_FRAME_HEIGHT, m_dstFrameSize.height);
+	mCapture.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
 
 	//不一定能设置进去，所以还得读一遍
 	m_dstFrameSize.width = (int)mCapture.get(cv::CAP_PROP_FRAME_WIDTH);
 	m_dstFrameSize.height = (int)mCapture.get(cv::CAP_PROP_FRAME_HEIGHT);
+	cout << "++++++++++" << m_dstFrameSize.width << "+++++" << m_dstFrameSize.height<< "+++++" << mCapture.get(cv::CAP_PROP_FOURCC)<<endl;
 }
 
 void CCameraDS::initCamera(int width, int height, int camID) {
@@ -529,7 +518,7 @@ void CCameraDS::LoadDefIFNone()
 }
 
 cv::Mat CCameraDS::getFrame() {
-	
+
 	LoadDefIFNone();
 
 	//性能测试，不加锁切换视频容易崩
@@ -543,7 +532,6 @@ cv::Mat CCameraDS::getFrame() {
 	cv::Mat frameCopy = frame.clone();
 
 #endif
-
 	return frameCopy;
 }
 
@@ -773,4 +761,178 @@ std::vector<std::string> CCameraDS::getDeviceNameList()
 }
 
 
-#pragma endregion enum_camera
+#define DEF_CAMERA_WIDTH (1280)
+#define DEF_CAMERA_HEIGHT (720)
+
+
+CCameraManage::CCameraManage()
+{
+	if (mCapture == nullptr) {
+#ifdef _WIN32
+		mCapture = tr1::shared_ptr<CCameraDS>(new CCameraDS);
+#else
+		mCapture = shared_ptr<CCameraDS>(new CCameraDS);
+#endif
+	}
+}
+
+CCameraManage::~CCameraManage()
+{
+}
+
+CCameraManage* CCameraManage::mInstance = nullptr;
+
+CCameraManage* CCameraManage::getInstance()
+{
+	if (mInstance == nullptr)
+	{
+		mInstance = new CCameraManage();
+	}
+	return mInstance;
+}
+
+vector<string> CCameraManage::CameraList()
+{
+	return mCapture->getDeviceNameList();
+}
+cv::Mat CCameraManage::GetOriginFrame()
+{
+	return mCapture->getFrame();
+}
+
+cv::Mat CCameraManage::GetFrame()
+{
+	cv::Mat frameMat = mCapture->getFrame();
+	cv::Mat tmpMat;
+	if (!UIBridge::showGreenScreen) {
+		tmpMat = frameMat;
+	}
+	else {
+		auto srcType = mCapture->getCaptureType();
+		bool bNeedFlip = srcType != GS_INPUT_TYPE_FILE;
+
+		if (bNeedFlip)
+			cv::flip(frameMat, tmpMat, 1);
+		else {   // 本地视频文件
+			switch (UIBridge::m_localVideoRotation) {
+			case 0:
+				tmpMat = frameMat;
+				break;
+			case 90:
+				cv::rotate(frameMat, tmpMat, cv::ROTATE_90_CLOCKWISE);
+				break;
+			case 180:
+				tmpMat = frameMat;
+				break;
+			case 270:
+				tmpMat = frameMat;
+				break;
+
+			default:
+				tmpMat = frameMat;
+				break;
+			}
+		}
+	}
+
+	return tmpMat;
+}
+
+
+bool CCameraManage::ReOpenCamera(int camID)
+{
+	if (mCapture->isInit())
+	{
+		mCapture->closeCamera();
+		mCapture->initCamera(DEF_CAMERA_WIDTH, DEF_CAMERA_HEIGHT, camID);
+		mFrameWidth = mCapture->m_dstFrameSize.width;
+		mFrameHeight = mCapture->m_dstFrameSize.height;
+		fuOnCameraChange();
+	}
+	return true;
+}
+bool CCameraManage::restartCameraWhenClosed()
+{
+	mCapture->restartCameraWhenClosed();
+	return true;
+}
+
+bool CCameraManage::ReOpenCamera(string strVideoPath)
+{
+	if (mCapture->isInit())
+	{
+		mCapture->closeCamera();
+		mCapture->InitCameraFile(mCapture->rs_width, mCapture->rs_height, strVideoPath);
+		mFrameWidth = mCapture->m_dstFrameSize.width;
+		mFrameHeight = mCapture->m_dstFrameSize.height;
+		fuOnCameraChange();
+	}
+	return true;
+}
+
+void CCameraManage::CloseCurCamera()
+{
+	if (mCapture->isInit())
+	{
+		mCapture->closeCamera();
+	}
+}
+
+void CCameraManage::OpenCamera(int iCamID)
+{
+	int CamID = mCapture->getCaptureCameraID();
+	auto curCaptureType = mCapture->getCaptureType();
+
+	if ((CamID == iCamID && !mCapture->isInit()) || CamID != iCamID || curCaptureType != CAPTURE_CAMERA)
+	{
+		mCapture->closeCamera();
+		mCapture->initCamera(DEF_CAMERA_WIDTH, DEF_CAMERA_HEIGHT, iCamID);
+		mFrameWidth = mCapture->m_dstFrameSize.width;
+		mFrameHeight = mCapture->m_dstFrameSize.height;
+		fuOnCameraChange();
+	}
+}
+
+void CCameraManage::OpenCamera(string strVideoPath)
+{
+	auto strPath = mCapture->getFilePath();
+	auto curCaptureType = mCapture->getCaptureType();
+
+	if ((strPath == strVideoPath && !mCapture->isInit()) || strVideoPath != strPath || curCaptureType != CAPTURE_FILE)
+	{
+		mCapture->closeCamera();
+		mCapture->InitCameraFile(DEF_CAMERA_WIDTH, DEF_CAMERA_HEIGHT, strVideoPath);
+		mFrameWidth = mCapture->m_dstFrameSize.width;
+		mFrameHeight = mCapture->m_dstFrameSize.height;
+		fuOnCameraChange();
+	}
+}
+
+bool CCameraManage::IsCameraPlaying()
+{
+	return mCapture->isPlaying();
+}
+
+bool CCameraManage::IsCameraInit()
+{
+	return mCapture->isInit();
+}
+
+int CCameraManage::GetCameraCaptureType()
+{
+	return mCapture->getCaptureType();
+}
+cv::Size CCameraManage::getCameraDstResolution()
+{
+	return mCapture->getCameraDstResolution();
+}
+int CCameraManage::GetCameraID()
+{
+	return mCapture->getCaptureCameraID();
+}
+
+/// 手动设置最后一帧为默认画面
+void CCameraManage::setDefaultFrame()
+{
+	mCapture->setDefaultFrame();
+}

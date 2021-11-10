@@ -961,60 +961,53 @@ bool CMLip::InitFrom(const rapidjson::Value & json)
 
 	if (json.IsArray())
 	{
+		auto config = std::make_shared<CMLipConfig>();
 		for (int i = 0; i < json.Size(); ++i) {
-
-			auto config = std::make_shared<CMLipConfig>();
 			const auto & dictData = json[i];
-
+			LipType bt;
 			if (dictData.HasMember("bundle"))
 			{
-				config->strBundlePath = dictData["bundle"].GetString();
+				bt.strBundlePath = dictData["bundle"].GetString();
 				Flag1 = true;
 			}
 
-			if (dictData.HasMember("types") && dictData["types"].IsArray())
+			if (dictData.HasMember("icon"))
 			{
-				const auto & arrayData = dictData["types"];
-				for (int j = 0; j < arrayData.Size(); j++)
-				{
-					const auto & v = arrayData[j];
-					if (v.HasMember("lip_type") && v.HasMember("icon"))
-					{
-						LipType bt;
-						bt.iType = v["lip_type"].GetInt();
-						bt.strIconPath = v["icon"].GetString();
-
-						if (v.HasMember("name"))
-						{
-							bt.strName = v["name"].GetString();
-						}
-
-						config->vecType.push_back(bt);
-
-						Flag2 = true;
-					}
-				}
+				bt.strIconPath = dictData["icon"].GetString();
 			}
 
-			if (dictData.HasMember("colors") && dictData["colors"].IsArray())
+			if (dictData.HasMember("name"))
 			{
-				const auto & arrayData = dictData["colors"];
-				for (int j = 0; j < arrayData.Size(); j++)
+				bt.strName = dictData["name"].GetString();
+			}
+
+			if (dictData.HasMember("type"))
+			{
+				bt.iType = dictData["type"].GetInt();
+			}
+			config->vecType.push_back(bt);
+			Flag2 = true;
+			if (config->vecColor.size() == 0) {
+				if (dictData.HasMember("colors") && dictData["colors"].IsArray())
 				{
-					if (arrayData[j].IsArray() && arrayData[j].Size() == 4)
+					const auto& arrayData = dictData["colors"];
+					for (int j = 0; j < arrayData.Size(); j++)
 					{
-						cv::Vec4b color;
-
-						for (int m = 0; m < 4; m++)
+						if (arrayData[j].IsArray() && arrayData[j].Size() == 4)
 						{
-							int v = (255 * arrayData[j][m].GetFloat());
-							color[m] = v % 256;
+							cv::Vec4b color;
+
+							for (int m = 0; m < 4; m++)
+							{
+								int v = (255 * arrayData[j][m].GetFloat());
+								color[m] = v % 256;
+							}
+
+							auto bag = std::make_shared<ColorBag>(color);
+							config->vecColor.push_back(bag);
+
+							Flag3 = true;
 						}
-
-						auto bag = std::make_shared<ColorBag>(color);
-						config->vecColor.push_back(bag);
-
-						Flag3 = true;
 					}
 				}
 			}
@@ -1029,6 +1022,7 @@ bool CMLip::InitFrom(const rapidjson::Value & json)
 }
 
 #define YAO_CHUN (1)
+#define SHUI_RUN (7)
 
 void CMLip::ShowUI()
 {
@@ -1058,7 +1052,7 @@ void CMLip::ShowUI()
 
 		if (LayoutRectImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile(config->vecType[i].strIconPath, false)->getTextureID(), config->vecType[i].strName.data()))
 		{
-			m_pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
+			m_pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->vecType[i].strBundlePath + ".bundle", GetDescName());
 			if (config->vecType[i].iType == YAO_CHUN)
 			{
 				m_pNama->SetCMDouble("lip_type", 0);
@@ -1113,7 +1107,13 @@ void CMLip::ShowUI()
 				bag->pTex->getTextureID(), ""))
 			{
 				std::vector<double> colors0 = GetDoubles(bag->vecColorRGBA[0]);
-				m_pNama->SetCMDoubles("makeup_lip_color", colors0.data(), colors0.size());
+				if (m_iCurType == SHUI_RUN)
+				{
+					m_pNama->SetCMDoubles("makeup_lip_color_v2", colors0.data(), colors0.size());
+				}
+				else {
+					m_pNama->SetCMDoubles("makeup_lip_color", colors0.data(), colors0.size());
+				}
 				m_curBag = bag;
 			}
 
@@ -1296,6 +1296,7 @@ void GUICustomMakeup::Reset(Nama * pNama)
 	if (pNama)
 	{
 		pNama->SetCMDouble("is_two_color", 0); //清除咬唇的设定
+		pNama->ChangeCleanFlag(true);
 		pNama->ClearAllCM();
 	}
 	

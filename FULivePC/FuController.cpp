@@ -27,11 +27,13 @@ void FuController::InitController(std::string strControllerPath, std::string str
 	{
 		m_nCtrlHandle = fuCreateItemFromPackage(&vecCtrlBundle[0], vecCtrlBundle.size());
 		m_nCtrlCfgHandle = fuCreateItemFromPackage(&vecCfgBundle[0], vecCfgBundle.size());
+		m_vecRender.clear();
 		m_vecRender.push_back(m_nCtrlHandle);
 
 		mSceneHandle = fuCreateScene();
 		mInstanceHandle = fuCreateInstance(mSceneHandle);
 
+		fuSetCurrentScene(mSceneHandle);
 		fuEnableHumanProcessor(mSceneHandle, 1.0);
 		fuBindItemsToScene(mSceneHandle, &m_nCtrlCfgHandle, 1);
 	}

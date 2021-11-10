@@ -332,12 +332,12 @@ namespace gui_tool
 	void resetBeautyParam()
 	{
 		UIBridge::mEnableSkinDect = 1;
-		UIBridge::mEnableHeayBlur = 0;
+		UIBridge::mEnableHeayBlur = 3;
 		UIBridge::mEnableExBlur = 0;
 		UIBridge::mFaceBeautyLevel[0] = 70;
 		UIBridge::mFaceBeautyLevel[1] = 30;
 		UIBridge::mFaceBeautyLevel[2] = 30;
-		UIBridge::mFaceBeautyLevel[3] = 70;
+		UIBridge::mFaceBeautyLevel[3] = 20;
 		UIBridge::mFaceBeautyLevel[4] = 0;
 		UIBridge::mFaceBeautyLevel[5] = 0;
 		UIBridge::mFaceBeautyLevel[6] = 0;
@@ -365,7 +365,8 @@ namespace gui_tool
 		UIBridge::mFaceShapeLevel[14] = 0;
 		UIBridge::mFaceShapeLevel[15] = 0;
 		UIBridge::mFaceShapeLevel[16] = 0;
-		UIBridge::mFaceShapeLevel[17] = 50;
+		UIBridge::mFaceShapeLevel[17] = 0;
+		UIBridge::mFaceShapeLevel[18] = 0;
 	}
 
 	void resetBodyShapeParam()

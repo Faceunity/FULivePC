@@ -44,12 +44,12 @@ static string GetCongfigPath() {
 
 #ifdef __APPLE__
 
-	ConfPath = FuToolMac::GetDocumentPath() + "/" + gBgSegUserConfig;
+	ConfPath = FuToolMac::GetDocumentPath() + "/" + gUserConfig;
 
 
 #else
 
-	ConfPath = gBgSegUserConfig;
+	ConfPath = gUserConfig;
 
 #endif
 
@@ -60,7 +60,7 @@ bool GUIBgSeg::LoadUserConfig() {
 
 	ifstream in(GetCongfigPath().c_str());
 	if (!in.is_open()) {
-		fprintf(stderr, "fail to read json file: %s\n", gBgSegUserConfig.data());
+		fprintf(stderr, "fail to read json file: %s\n", gUserConfig.data());
 		return false;
 	}
 
@@ -70,9 +70,9 @@ bool GUIBgSeg::LoadUserConfig() {
 	rapidjson::Document dom;
 	if (!dom.Parse(json_content.c_str()).HasParseError())
 	{
-		if (dom.HasMember("UserFilePath") && dom["UserFilePath"].IsString())
+		if (dom.HasMember("BgSegFilePath") && dom["BgSegFilePath"].IsString())
 		{
-			mConfig.strFilePath = dom["UserFilePath"].GetString();
+			mConfig.strFilePath = dom["BgSegFilePath"].GetString();
 		}
 	}
 
@@ -93,7 +93,7 @@ void GUIBgSeg::SaveUserConfig() {
 
 	writer.StartObject();
 
-	writer.Key("UserFilePath");
+	writer.Key("BgSegFilePath");
 
 	writer.String(mConfig.strFilePath.data());
 
@@ -105,7 +105,7 @@ void GUIBgSeg::SaveUserConfig() {
 	ofstream outfile;
 	outfile.open(GetCongfigPath().data());
 	if (!outfile.is_open()) {
-		fprintf(stderr, "fail to open file to write: %s\n", gBgSegUserConfig.data());
+		fprintf(stderr, "fail to open file to write: %s\n", gUserConfig.data());
 	}
 
 	outfile << json_content << endl;

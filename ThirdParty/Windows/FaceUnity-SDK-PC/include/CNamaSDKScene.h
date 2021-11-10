@@ -108,6 +108,50 @@ FUNAMA_API int fuUnbindItemsFromInstance(unsigned int handle_id, int* p_items,
 /*
  * render related api
  */
+/**
+ \brief Enable or not render for the target scene.
+ \param handle_id is the target scene handle
+ \param enable > 0 means render, enable <= 0 means not render
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuEnableRender(unsigned int handle_id, int enable);
+
+/*
+ * dof related api
+ */
+/**
+ \brief set dof parameters to camera.
+   \param enable > 0 means open dof, enable <= 0 means close dof
+ \return zero for failed, one for success
+*/
+
+FUNAMA_API int fuEnableDof(unsigned int handle_id, int enable);
+
+/*
+ * dof related api
+ */
+/**
+ \brief set dof parameters to camera.
+ \param enable is a coc visual swith;
+ \return zero for failed, one for success
+*/
+
+FUNAMA_API int fuEnableDofDebug(unsigned int handle_id, int enable);
+
+/*
+ * dof related api
+ */
+/**
+ \brief set dof parameters to camera.
+ \param handle_id is the target scene handle
+ \param focalLength,focusDistance,maxCoC,aperture is physical camera parameters;
+ \param blurSize contain(0->smacll, 1->medium, 2->large, 3->verylarge);
+ \return zero for failed, one for success
+*/
+
+FUNAMA_API int fuSetDofParamters(unsigned int handle_id, float focalLength,
+                                 float focusDistance, float maxCoC,
+                                 float aperture, int blurSize);
 
 /**
  \brief Enable or not render camera for the target scene.
@@ -146,6 +190,24 @@ FUNAMA_API int fuSetBackgroundColor(unsigned int handle_id, int r, int g, int b,
 FUNAMA_API int fuEnableShadow(unsigned int handle_id, int enable);
 
 /**
+ \brief Set main light shadow map size for the target scene.
+ \param handle_id is the target scene handle
+ \param size
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetShadowMapSize(unsigned int handle_id, int size);
+
+/**
+ \brief Set main light shadow bias for the target scene.
+ \param handle_id is the target scene handle
+ \param uniform_bias, is 0.01 defaultly
+ \param normal_bias, is 0.1 defaultly
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetShadowBias(unsigned int handle_id, float uniform_bias,
+                               float normal_bias);
+
+/**
  \brief Set instance main light shadow PCF level
  \param handle_id is the target instance handle
  \param level = 0, 1, 2
@@ -177,6 +239,14 @@ FUNAMA_API int fuEnableBloom(unsigned int handle_id, int enable);
  \return zero for failed, one for success
 */
 FUNAMA_API int fuEnableLowQualityLighting(unsigned int handle_id, int enable);
+
+/**
+ \brief Enable use or not low resolution texture for the target scene.
+ \param handle_id is the target scene handle
+ \param enable > 0 means use, enable <= 0 means not
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuEnableLowResolutionTexture(unsigned int handle_id, int enable);
 
 /*
  * ai related api
@@ -216,6 +286,23 @@ FUNAMA_API int fuSetInstanceInputCameraBufferMatrix(unsigned int handle_id,
 */
 FUNAMA_API int fuSetInstanceFaceProcessorFaceId(unsigned int handle_id,
                                                 int value);
+
+/**
+ \brief Set instance face processor type.
+ \param handle_id is the target instance handle
+ \param type is face processor type,  1 : use inner face processor, 2 : use
+ outer face data result \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceFaceProcessorType(unsigned int handle_id, int type);
+
+/**
+ \brief Set instance face processor outer data ptr.
+ \param handle_id is the target instance handle
+ \param void* is pointer to FaceProcessorResult
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceFaceProcessorOuterResultPtr(unsigned int handle_id,
+                                                        void* ptr);
 
 /**
  \brief Set instance filter size of face processor.
@@ -443,7 +530,7 @@ FUNAMA_API int fuSetInstanceFaceBeautyOrder(unsigned int handle_id, int* value,
                                             int n);
 
 /**
- \brief Set instance face body visible list.
+ \brief Set instance body visible list.
  \param handle_id is the target instance handle
  \param value points to an array of ints
  \param n specifies the number of elements in value
@@ -451,6 +538,15 @@ FUNAMA_API int fuSetInstanceFaceBeautyOrder(unsigned int handle_id, int* value,
 */
 FUNAMA_API int fuSetInstanceBodyVisibleList(unsigned int handle_id, int* value,
                                             int n);
+/**
+ \brief Set instance body invisible list.
+ \param handle_id is the target instance handle
+ \param value points to an array of ints
+ \param n specifies the number of elements in value
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceBodyInvisibleList(unsigned int handle_id,
+                                              int* value, int n);
 
 /**
  \brief Enable instance hide neck or not.
@@ -494,6 +590,45 @@ FUNAMA_API int fuSetInstanceFacepup(unsigned int handle_id, const char* name,
 */
 FUNAMA_API int fuSetInstanceDeformation(unsigned int handle_id,
                                         const char* name, float value);
+
+/**
+ \brief Set instance skeleton deformation rotation.
+ \param handle_id is the target instance handle
+ \param name is the skeleton name
+ \param angle_x is euler angle x
+ \param angle_y is euler angle y
+ \param angle_z is euler angle z
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceDeformationRotation(unsigned int handle_id,
+                                                const char* name, float angle_x,
+                                                float angle_y, float angle_z);
+
+/**
+ \brief Set instance skeleton deformation translation.
+ \param handle_id is the target instance handle
+ \param name is the skeleton name
+ \param x is the translation x
+ \param y is the translation y
+ \param z is the translation z
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceDeformationTranslation(unsigned int handle_id,
+                                                   const char* name, float x,
+                                                   float y, float z);
+
+/**
+ \brief Set instance skeleton deformation scale.
+ \param handle_id is the target instance handle
+ \param name is the skeleton name
+ \param x is the scale x
+ \param y is the scale y
+ \param z is the scale z
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceDeformationScale(unsigned int handle_id,
+                                             const char* name, float x, float y,
+                                             float z);
 
 /**
  \brief Enable instance expression blend or not.
@@ -600,128 +735,88 @@ FUNAMA_API int fuSetInstanceTargetPosition(unsigned int handle_id, float x,
                                            float y, float z);
 
 /**
- \brief Set instance skin color.
+ \brief Set instance target rotation angle gradually.
  \param handle_id is the target instance handle
+ \param value is target rotation angle
+ \param frame_count is frame count
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceTargetAngleGradually(unsigned int handle_id,
+                                                 float value, int frame_count);
+
+/**
+ \brief Set instance target xyz position gradually.
+ \param handle_id is the target instance handle
+ \param x is position of x world coordinate
+ \param y is position of y world coordinate
+ \param z is position of z world coordinate
+ \param frame_count is frame count
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceTargetPositionGradually(unsigned int handle_id,
+                                                    float x, float y, float z,
+                                                    int frame_count);
+
+/**
+ \brief Enable instance rotation without animation translation.
+ \param handle_id is the target instance handle
+ \param enable > 0 rotate without animation translation
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuEnableInstanceRotateWithoutAnimationTranslation(
+    unsigned int handle_id, int enable);
+
+/**
+ \brief Set instance target xyz position range.
+ \param handle_id is the target instance handle
+ \param min_x is min position of x world coordinate
+ \param min_y is min position of y world coordinate
+ \param min_z is min position of z world coordinate
+ \param max_x is max position of x world coordinate
+ \param max_y is max position of y world coordinate
+ \param max_z is max position of z world coordinate
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceTargetPositionRange(unsigned int handle_id,
+                                                float min_x, float min_y,
+                                                float min_z, float max_x,
+                                                float max_y, float max_z);
+
+/**
+ \brief Set instance scale center and scale ratio.
+ \param handle_id is the target instance handle
+ \param x is scale center position of x
+ \param y is scale center position of y
+ \param z is scale center position of z
+ \param scale is scale ratio
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceScale(unsigned int handle_id, float scale_center_x,
+                                  float scale_center_y, float scale_center_z,
+                                  float scale_ratio);
+
+/**
+ \brief Set instance color.
+ \param handle_id is the target instance handle
+ \param color_name is the color name
  \param r is color of R channel, from 0 to 255
  \param g is color of G channel, from 0 to 255
  \param b is color of B channel, from 0 to 255
  \return zero for failed, one for success
 */
-FUNAMA_API int fuSetInstanceSkinColor(unsigned int handle_id, int r, int g,
-                                      int b);
+FUNAMA_API int fuSetInstanceColor(unsigned int handle_id,
+                                  const char* color_name, int r, int g, int b);
 
 /**
- \brief Set instance iris color.
+ \brief Set instance color intensity, for old color change type.
  \param handle_id is the target instance handle
- \param r is color of R channel, from 0 to 255
- \param g is color of G channel, from 0 to 255
- \param b is color of B channel, from 0 to 255
- \return zero for failed, one for success
-*/
-FUNAMA_API int fuSetInstanceIrisColor(unsigned int handle_id, int r, int g,
-                                      int b);
-
-/**
- \brief Set instance iris color intensity, for old color change type.
- \param handle_id is the target instance handle
+ \param color_name is the color name
  \param intensity, intensity
  \return zero for failed, one for success
 */
-FUNAMA_API int fuSetInstanceIrisColorIntensity(unsigned int handle_id,
-                                               float intensity);
-
-/**
- \brief Set instance eyebrow color.
- \param handle_id is the target instance handle
- \param r, is color of R channel, from 0 to 255
- \param g, is color of G channel, from 0 to 255
- \param b, is color of B channel, from 0 to 255
- \return zero for failed, one for success
-*/
-FUNAMA_API int fuSetInstanceEyebrowColor(unsigned int handle_id, int r, int g,
-                                         int b);
-
-/**
- \brief Set instance eyebrow color intensity, for old color change type.
- \param handle_id is the target instance handle
- \param intensity, intensity
- \return zero for failed, one for success
-*/
-FUNAMA_API int fuSetInstanceEyebrowColorIntensity(unsigned int handle_id,
-                                                  float intensity);
-
-/**
- \brief Set instance hair color.
- \param handle_id is the target instance handle
- \param r is color of R channel, from 0 to 255
- \param g is color of G channel, from 0 to 255
- \param b is color of B channel, from 0 to 255
- \return zero for failed, one for success
-*/
-FUNAMA_API int fuSetInstanceHairColor(unsigned int handle_id, int r, int g,
-                                      int b);
-
-/**
- \brief Set instance hair color intensity, for old color change type.
- \param handle_id is the target instance handle
- \param intensity, intensity
- \return zero for failed, one for success
-*/
-FUNAMA_API int fuSetInstanceHairColorIntensity(unsigned int handle_id,
-                                               float intensity);
-
-/**
- \brief Set instance beard color.
- \param handle_id is the target instance handle
- \param r is color of R channel, from 0 to 255
- \param g is color of G channel, from 0 to 255
- \param b is color of B channel, from 0 to 255
- \return zero for failed, one for success
-*/
-FUNAMA_API int fuSetInstanceBeardColor(unsigned int handle_id, int r, int g,
-                                       int b);
-
-/**
- \brief Set instance beard color intensity, for old color change type.
- \param handle_id is the target instance handle
- \param intensity, intensity
- \return zero for failed, one for success
-*/
-FUNAMA_API int fuSetInstanceBeardColorIntensity(unsigned int handle_id,
-                                                float intensity);
-
-/**
- \brief Set instance hat color.
- \param handle_id is the target instance handle
- \param r is color of R channel, from 0 to 255
- \param g is color of G channel, from 0 to 255
- \param b is color of B channel, from 0 to 255
- \return zero for failed, one for success
-*/
-FUNAMA_API int fuSetInstanceHatColor(unsigned int handle_id, int r, int g,
-                                     int b);
-
-/**
- \brief Set instance glass color.
- \param handle_id is the target instance handle
- \param r is color of R channel, from 0 to 255
- \param g is color of G channel, from 0 to 255
- \param b is color of B channel, from 0 to 255
- \return zero for failed, one for success
-*/
-FUNAMA_API int fuSetInstanceGlassColor(unsigned int handle_id, int r, int g,
-                                       int b);
-
-/**
- \brief Set instance glass frame color.
- \param handle_id is the target instance handle
- \param r is color of R channel, from 0 to 255
- \param g is color of G channel, from 0 to 255
- \param b is color of B channel, from 0 to 255
- \return zero for failed, one for success
-*/
-FUNAMA_API int fuSetInstanceGlassFrameColor(unsigned int handle_id, int r,
-                                            int g, int b);
+FUNAMA_API int fuSetInstanceColorIntensity(unsigned int handle_id,
+                                           const char* color_name,
+                                           float intensity);
 
 /**
  \brief Set instance single face beauty color.
@@ -806,12 +901,12 @@ FUNAMA_API int fuEnableInstanceAnimationInternalLerp(unsigned int handle_id,
  */
 
 /**
- \brief Enable instance DynamicBone or not.
- \param handle_id is the target instance handle
+ \brief Enable DynamicBone or not.
+ \param handle_id is the target scene handle
  \param enable > 0 means turn on , enable <= 0 means turn off
  \return zero for failed, one for success
 */
-FUNAMA_API int fuEnableInstanceDynamicBone(unsigned int handle_id, int enable);
+FUNAMA_API int fuEnableDynamicBone(unsigned int handle_id, int enable);
 
 /**
  \brief Reset instance DynamicBone rigid body position.
@@ -908,14 +1003,40 @@ FUNAMA_API int fuSetProjectionMatrixOrthoSize(unsigned int handle_id,
                                               float size);
 
 /**
- \brief Set projection matrix's z_near and z_farr for the target scene.
+ \brief Set projection matrix's z_near for the target scene.
  \param handle_id is the target scene handle
  \param z_near
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetProjectionMatrixZnear(unsigned int handle_id, float z_near);
+
+/**
+ \brief Set projection matrix's z_far for the target scene.
+ \param handle_id is the target scene handle
  \param z_far
  \return zero for failed, one for success
 */
-FUNAMA_API int fuSetProjectionMatrixZnearZfar(unsigned int handle_id,
-                                              float z_near, float z_far);
+FUNAMA_API int fuSetProjectionMatrixZfar(unsigned int handle_id, float z_far);
+
+/**
+ \brief Set view matrix for the target scene.
+ \param handle_id is the target scene handle
+ \param eye_x
+ \param eye_y
+ \param eye_z
+ \param center_x
+ \param center_y
+ \param center_z
+ \param up_x
+ \param up_y
+ \param up_z
+ \return zero for failed, one for success
+*/
+
+FUNAMA_API int fuSetViewMatrix(unsigned int handle_id, float eye_x, float eye_y,
+                               float eye_z, float center_x, float center_y,
+                               float center_z, float up_x, float up_y,
+                               float up_z);
 
 /**
  \brief Enable use outer MVP matrix for the target scene.
@@ -951,11 +1072,99 @@ FUNAMA_API int fuSetOuterViewMatrix(unsigned int handle_id, const float* mat);
  \param x_offset is normalized offset , form -1.0 to 1.0
  \param x_offset is normalized offset , form -1.0 to 1.0
  \param is_foreground, is foreground or background
+ \param mode, 0 is for stretch, 1 is for crop
+ \param is_mask, if >0, will be used rendered to stencil, otherwise will be rendered to scene color 
+ \param scissor_target, the handle of a background or sprite9 bundle to be scissored by this
  \return zero for failed, one for success
 */
 FUNAMA_API int fuSetBackgroundParams(unsigned int handle_id, int bg_handle,
                                      float x_size, float y_size, float x_offset,
-                                     float y_offset, int is_foreground);
+                                     float y_offset, int is_foreground,
+                                     int mode);
+
+/**
+ \brief Set background usage, by default background is a normal 2d sprite, set is_mask>0 make this item to a 2d mask
+ \param handle_id is the target scene handle
+ \param bg_handle is the target background item handle
+ \param is_mask, if >0, will be used rendered to stencil, otherwise will be rendered to scene color 
+ \param scissor_target, the handle of a background or sprite9 bundle to be scissored by this 
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetBackgroundUsage(unsigned int handle_id, int bg_handle,
+                                    int is_mask, int scissor_target);
+
+/**
+ \brief Update background texture with a rgba buffer
+ \param handle_id is the target scene handle
+ \param bg_handle is the target background item handle
+ \param value rgba buffer
+ \param width image width
+ \param height image height
+ \return zero for failure, non-zero for success
+*/
+FUNAMA_API int fuUpdateBackgroundTexture(unsigned int handle_id, int bg_handle,
+                                         void* value, int width, int height);
+
+/**
+ \brief Set sprite9 params for the target scene.
+ \param handle_id is the target scene handle
+ \param bg_handle is the target background item handle
+ \param src_offset_to_left_edge is the distance from source image left edge in pixel
+ \param src_offset_to_right_edge is the distance from source image right edge in pixel
+ \param src_offset_to_top_edge is the distance from source image top edge in pixel
+ \param src_offset_to_bottom_edge is the distance from source image bottom edge in pixel
+ \param x_size is normalized width of background, from 0.0 to 1.0
+ \param y_size is normalized height of background, from 0.0 to 1.0
+ \param x_offset is normalized offset , form -1.0 to 1.0
+ \param x_offset is normalized offset , form -1.0 to 1.0
+ \param is_foreground, is foreground or background
+ \param is_mask, if >0, will be used rendered to stencil, otherwise will be rendered to scene color
+ \param scissor_target, the handle of a background or sprite9 bundle to be scissored by this
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetSprite9Params(unsigned int handle_id, int bg_handle,
+                                  int src_offset_to_left_edge, int src_offset_to_right_edge,
+                                  int src_offset_to_top_edge, int src_offset_to_bottom_edge,
+                                  float x_size, float y_size, float x_offset, float y_offset,
+                                  int is_foreground, int is_mask, int scissor_target);
+
+/**
+ \brief Update sprite9 texture with a rgba buffer
+ \param handle_id is the target scene handle
+ \param bg_handle is the target background item handle
+ \param value rgba buffer
+ \param width image width
+ \param height image height
+ \return zero for failure, non-zero for success
+*/
+FUNAMA_API int fuUpdateSprite9Texture(unsigned int handle_id, int bg_handle,
+                                         void* value, int width, int height);
+
+/**
+ \brief Reset 2D background or foreground animation for the target scene.
+ \param handle_id is the target scene handle
+ \param bg_handle is the target background item handle
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuResetBackgroundAnimation(unsigned int handle_id,
+                                          int bg_handle);
+
+/**
+ \brief Enable 2D background or foreground animation Loop.
+ \param handle_id is the target scene handle
+ \param bg_handle is the target background item handle
+ \param enable is enable loop
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuEnableBackgroundAnimationLoop(unsigned int handle_id,
+                                               int bg_handle, int enable);
+
+/**
+ \brief Reset light animation for the target scene.
+ \param handle_id is the target scene handle
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuResetLightAnimation(unsigned int handle_id);
 
 /**
  \brief Set outer model matrix for the target scene.
@@ -968,6 +1177,20 @@ FUNAMA_API int fuSetOuterModelMatrix(unsigned int handle_id, const float* mat);
 /*
  * get api
  */
+
+/**
+ \brief Get projection matrix's z_near for the target scene.
+ \param handle_id is the target scene handle
+ \return z_near
+*/
+FUNAMA_API float fuGetProjectionMatrixZnear(unsigned int handle_id);
+
+/**
+ \brief Get projection matrix's z_far for the target scene.
+ \param handle_id is the target scene handle
+ \return z_far
+*/
+FUNAMA_API int fuGetProjectionMatrixZfar(unsigned int handle_id);
 
 /**
  \brief Get camera animation frame number for the target scene.
@@ -1021,6 +1244,16 @@ FUNAMA_API int fuGetInstanceFacepupArray(unsigned int handle_id, float* ret,
 FUNAMA_API int fuGetInstanceSkinColorIndex(unsigned int handle_id);
 
 /**
+ \brief Get instance local boundingbox, six dimensional
+ \param handle_id is the target instance handle
+ \param ret allocated memory space as container
+ \param size is number of float allocated in ret
+ \return 1 means successful fetch, container filled with info 0 means failure
+ */
+FUNAMA_API int fuGetInstanceLocalBoundingBox(unsigned int handle_id, float* ret,
+                                             int size);
+
+/**
  \brief Get instance position, three dimensional
  \param handle_id is the target instance handle
  \param ret allocated memory space as container
@@ -1053,7 +1286,7 @@ FUNAMA_API int fuGetInstanceBoneScreenCoordinate(unsigned int handle_id,
                                                  int size);
 
 /**
- \brief Get instance Face vertex screen coordinate, three dimensional
+ \brief Get instance Face vertex screen coordinate, two dimensional
  \param handle_id is the target instance handle
  \param index is the target instance handle
  \param ret allocated memory space as container
@@ -1063,6 +1296,16 @@ FUNAMA_API int fuGetInstanceBoneScreenCoordinate(unsigned int handle_id,
 FUNAMA_API int fuGetInstanceFaceVertexScreenCoordinate(unsigned int handle_id,
                                                        int index, float* ret,
                                                        int size);
+
+/**
+ \brief Get instance boundingBox screen coordinate, four dimensional
+ \param handle_id is the target instance handle
+ \param ret allocated memory space as container
+ \param size is number of float allocated in ret
+ \return 1 means successful fetch, container filled with info 0 means failure
+ */
+FUNAMA_API int fuGetInstanceBoundingBoxScreenCoordinate(unsigned int handle_id,
+                                                        float* ret, int size);
 
 /**
  \brief Get instance target animation frame number.

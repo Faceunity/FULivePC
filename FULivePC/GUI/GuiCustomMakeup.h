@@ -30,6 +30,7 @@ typedef struct tagCMEyeBrowConfig
 
 typedef struct tagLipType
 {
+	std::string strBundlePath;
 	int32_t iType;
 	std::string strIconPath;
 	std::string strName;
@@ -37,7 +38,6 @@ typedef struct tagLipType
 
 typedef struct tagCMLipConfig
 {
-	std::string strBundlePath;
 	std::vector<LipType> vecType;
 	std::vector<std::shared_ptr<gui_tool::ColorBag> > vecColor;
 }CMLipConfig;

@@ -6,7 +6,6 @@
 #include <string.h>
 
 
-
 #ifdef _WIN32
 #include <windows.h>
 #elif __APPLE__
@@ -44,17 +43,17 @@ int main(int argc, char* argv[])
 #endif
 	
 	using namespace NamaExampleNameSpace;
+
 	Gui::UniquePtr gui = Gui::create(1360, 830);
+
 	if (nullptr == gui)
 	{
 		return -1;
 	}
 
-	Nama::UniquePtr nama = Nama::create(1280, 720, enableNama);
-#if __APPLE__
- //   FuToolMac::addLockScreenEventObser(nama->lock_screen_not_macosx());
-    FuToolMac::addUnLockScreenEventObser(nama->unlock_screen_not_macosx());
-#endif
-	gui->render(nama);
+	gui->init(1280, 720, enableNama);
+
+	gui->render(Nama::get());
+
     return 0;
 }

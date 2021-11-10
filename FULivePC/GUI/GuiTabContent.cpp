@@ -37,19 +37,25 @@ namespace gui_tab_content
 		}
 		LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_BeautyMode_open.png", false)->getTextureID(), u8"美肤模式");
 		ImGui::SameLine();
-		if (LayoutSelectable(ImVec2(22, 11), ImVec2(78, 30), u8"精细磨皮##3", UIBridge::mEnableHeayBlur == 0))
+		if (LayoutSelectable(ImVec2(22, 11), ImVec2(51, 30), u8"均匀磨皮##3", UIBridge::mEnableHeayBlur == 3))
+		{
+			UIBridge::mEnableHeayBlur = 3;
+			nama->UpdateBeauty();
+		}
+		ImGui::SameLine();
+		if (LayoutSelectable(ImVec2(5, 11), ImVec2(51, 30), u8"精细磨皮##2", UIBridge::mEnableHeayBlur == 0))
 		{
 			UIBridge::mEnableHeayBlur = 0;
 			nama->UpdateBeauty();
 		}
 		ImGui::SameLine();
-		if (LayoutSelectable(ImVec2(5, 11), ImVec2(78, 30), u8"清晰磨皮##2", UIBridge::mEnableHeayBlur == 1))
+		if (LayoutSelectable(ImVec2(5, 11), ImVec2(51, 30), u8"清晰磨皮##2", UIBridge::mEnableHeayBlur == 1))
 		{
 			UIBridge::mEnableHeayBlur = 1;
 			nama->UpdateBeauty();
 		}
 		ImGui::SameLine();
-		if (LayoutSelectable(ImVec2(5, 11), ImVec2(78, 30), u8"朦胧磨皮##2", UIBridge::mEnableHeayBlur == 2))
+		if (LayoutSelectable(ImVec2(5, 11), ImVec2(51, 30), u8"朦胧磨皮##2", UIBridge::mEnableHeayBlur == 2))
 		{
 			UIBridge::mEnableHeayBlur = 2;
 			nama->UpdateBeauty();
@@ -107,14 +113,14 @@ namespace gui_tab_content
 
 		std::string faceShapeIconNameArr[MAX_FACESHAPEPARAMTER] = { "list_icon_Thinface_open", "list_icon_Bigeye_open",
 			"list_icon_round_eye_open","list_icon_chin_open", "list_icon_forehead_open", "list_icon_Thinnose_open","list_icon_Mouthtype_open",
-			"list_icon_v_open","list_icon_narrow_face_open","list_icon_little_face_open",
+			"list_icon_v_open","list_icon_narrow_face_open","list_icon_short_face_open","list_icon_little_face_open",
 		"list_icon_cheekbones_open" ,"list_icon_lower_jaw_open" ,"list_icon_open_eyes_open" ,"list_icon_eye_distance_open" ,"list_icon_eye_angle_open" ,
 		"list_icon_proboscis_open" ,"list_icon_shrinking_open" ,"list_icon_smile_mouth_open" };
 
 		//眼角、眼距、眼睛角度、长鼻、缩人中、微笑嘴角
 
 		std::string faceShapeNameArr[MAX_FACESHAPEPARAMTER] = { u8"   瘦脸" ,u8"   大眼" ,u8"   圆眼" ,u8"   下巴",u8"   额头" ,
-			u8"   瘦鼻",u8"   嘴型",u8"   V脸",u8"   窄脸",u8"   小脸" ,
+			u8"   瘦鼻",u8"   嘴型",u8"   V脸",u8"   窄脸",u8"   短脸" ,u8"   小脸" ,
 		 u8"  瘦颧骨", u8" 瘦下颌骨" ,u8"  开眼角", u8"   眼距", u8"眼睛角度", u8"   长鼻", u8"  缩人中", u8"微笑嘴角" };
 
 
@@ -216,7 +222,6 @@ namespace gui_tab_content
 			"list_icon_little_head_open","list_icon_thin_leg_open" };
 
 		std::string sliderNameArr[MAX_BODY_SHAPE_PARAM] = { u8"   瘦身", u8"   长腿",u8"   瘦腰", u8"   美肩", u8"   美臀" ,u8"    小头", u8"    瘦腿" };
-		static bool _showItemSelectWindow;
 		for (int i = 0; i < MAX_BODY_SHAPE_PARAM; i++)
 		{
 			if (UIBridge::mBodyShapeLevel[i] == 0)
@@ -246,7 +251,6 @@ namespace gui_tab_content
 					}
 					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
 					UIBridge::m_bShowingBodyBeauty = true;
-					_showItemSelectWindow = UIBridge::showItemSelectWindow;
 					UIBridge::showItemSelectWindow = false;
 					nama->UpdateBodyShape();
 				}
@@ -264,7 +268,6 @@ namespace gui_tab_content
 						}
 					}
 					UIBridge::m_bShowingBodyBeauty = true;
-					_showItemSelectWindow = UIBridge::showItemSelectWindow;
 					UIBridge::showItemSelectWindow = false;
 					nama->UpdateBodyShape();
 				}
@@ -300,7 +303,7 @@ namespace gui_tab_content
 			if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3 && !UIBridge::showGreenScreen) {
 				nama->resumeCurrentMp3();
 			}
-			UIBridge::showItemSelectWindow = _showItemSelectWindow;
+			UIBridge::showItemSelectWindow = (UIBridge::bundleCategory != BUNDLE_CATEGORY_NOMEAN);
 		}
 
 		if (LayoutButton(ImVec2(145, 38), ImVec2(126, 40), u8"恢复默认"))
@@ -310,7 +313,7 @@ namespace gui_tab_content
 			if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3 && !UIBridge::showGreenScreen) {
 				nama->resumeCurrentMp3();
 			}
-			UIBridge::showItemSelectWindow = _showItemSelectWindow;
+			UIBridge::showItemSelectWindow = (UIBridge::bundleCategory != BUNDLE_CATEGORY_NOMEAN);
 			resetBodyShapeParam();
 			nama->UpdateBodyShape();
 		}

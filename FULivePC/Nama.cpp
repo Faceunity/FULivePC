@@ -1,4 +1,4 @@
-#include "Camera.h"
+﻿#include "Camera.h"
 #include "FuController.h"
 #include "Nama.h"
 #include "Config.h"	
@@ -23,34 +23,27 @@ NamaState Nama::mNamaAppStateBackGS;
 #ifdef _WIN32
 
 #include "Sound/MP3.h"
-
-static HGLRC new_context;
-
-#elif __APPLE__
+extern HGLRC new_context;
+#else
+#include "NaMaGLContext.h"
 #include "fu_tool_mac.h"
 #include "Sound/MP3_mac.h"
-#include "NaMaGLContext.h"
-
-static void * new_context;
-
+extern void* new_context;
 #endif
-
-#define DEF_CAMERA_WIDTH (1280)
-#define DEF_CAMERA_HEIGHT (720)
 
 map<int, Mp3*> mp3Map;
 
 string Nama::mFilters[6] = { "origin", "bailiang1", "fennen1", "xiaoqingxin1", "lengsediao1", "nuansediao1" };
+std::unique_ptr<Nama> Nama::pNama = nullptr;
 
-Nama::UniquePtr Nama::create(uint32_t width, uint32_t height, bool enable)
+void Nama::create( bool enable)
 {
-	UniquePtr pNama = UniquePtr(new Nama);
+	pNama = UniquePtr(new Nama);
 	mNamaAppState.EnableNama = enable;
 	mNamaAppStateBackGS.EnableNama = enable;
-	pNama->Init(width, height);
+	pNama->Init();
 	pNama->gsPreviewRect = {0.5,0.5,1.0,1.0};
 	pNama->changeGSPreviewRect(pNama->gsPreviewRect);
-	return pNama;
 }
 
 Nama::Nama()
@@ -59,23 +52,24 @@ Nama::Nama()
 	mIsBeautyOn = true;
 	mBeautyHandles = 0;
 	mMakeUpHandle = 0;
-#ifdef _WIN32
-	mCapture = tr1::shared_ptr<CCameraDS>(new CCameraDS);
-#else
-	mCapture = shared_ptr<CCameraDS>(new CCameraDS);
-#endif
+}
+
+bool Nama::Release() {
+	if (true == mHasSetup)
+	{
+		fuDestroyAllItems();
+		fuOnDeviceLost();
+		fuDestroyLibData();
+		return true;
+	}
+	return false;
 }
 
 Nama::~Nama()
 {
 	SaveRencentColorToFile();
 
-	if (true == mHasSetup)
-	{
-		fuDestroyAllItems();
-		fuOnDeviceLost();
-		fuDestroyLibData();
-	}
+	
 
 
 	map<int, Mp3*>::iterator it;
@@ -86,151 +80,6 @@ Nama::~Nama()
 		UIBridge::mNeedPlayMP3 = false;
 	}
 
-}
-
-vector<string> Nama::CameraList()
-{
-	return mCapture->getDeviceNameList();
-}
-cv::Mat Nama::GetOriginFrame()
-{
-	return mCapture->getFrame();
-}
-
-cv::Mat Nama::GetFrame()
-{
-	cv::Mat frameMat = mCapture->getFrame();
-	cv::Mat tmpMat;
-	if(!UIBridge::showGreenScreen){
-		tmpMat = frameMat;
-	}
-	else{
-		auto srcType =  mCapture->getCaptureType();
-		bool bNeedFlip = srcType != GS_INPUT_TYPE_FILE;
-		
-		if (bNeedFlip)
-			cv::flip(frameMat, tmpMat, 1);
-		else {   // 本地视频文件
-			switch (UIBridge::m_localVideoRotation) {
-				case 0:
-					tmpMat = frameMat;
-					break;
-				case 90:
-					cv::rotate(frameMat, tmpMat, cv::ROTATE_90_CLOCKWISE);
-					break;
-				case 180:
-					tmpMat = frameMat;
-					break;
-				case 270:
-					tmpMat = frameMat;
-					break;
-					
-				default:
-					tmpMat = frameMat;
-					break;
-			}	
-		}
-	}
-
-	return tmpMat;
-}
-
-bool Nama::ReOpenCamera(int camID)
-{
-	if (mCapture->isInit())
-	{
-		mCapture->closeCamera();
-		mCapture->initCamera(DEF_CAMERA_WIDTH, DEF_CAMERA_HEIGHT, camID);
-		mFrameWidth = mCapture->m_dstFrameSize.width;
-		mFrameHeight = mCapture->m_dstFrameSize.height;
-		fuOnCameraChange();
-	}
-	return true;
-}
-bool Nama::restartCameraWhenClosed()
-{
-    mCapture->restartCameraWhenClosed();
-	return true;
-}
-
-bool Nama::ReOpenCamera(string strVideoPath)
-{
-	if (mCapture->isInit())
-	{
-		mCapture->closeCamera();
-		mCapture->InitCameraFile(mCapture->rs_width, mCapture->rs_height, strVideoPath);
-		mFrameWidth = mCapture->m_dstFrameSize.width;
-		mFrameHeight = mCapture->m_dstFrameSize.height;
-		fuOnCameraChange();
-	}
-	return true;
-}
-
-void Nama::CloseCurCamera()
-{
-	if (mCapture->isInit())
-	{
-		mCapture->closeCamera();
-	}
-}
-
-void Nama::OpenCamera(int iCamID)
-{
-	int CamID = mCapture->getCaptureCameraID();
-	auto curCaptureType = mCapture->getCaptureType();
-
-	if ((CamID == iCamID && !mCapture->isInit()) || CamID != iCamID || curCaptureType != CAPTURE_CAMERA)
-	{
-		mCapture->closeCamera();
-		mCapture->initCamera(DEF_CAMERA_WIDTH, DEF_CAMERA_HEIGHT, iCamID);
-		mFrameWidth = mCapture->m_dstFrameSize.width;
-		mFrameHeight = mCapture->m_dstFrameSize.height;
-		fuOnCameraChange();
-	}
-}
-
-void Nama::OpenCamera(string strVideoPath)
-{
-	auto strPath = mCapture->getFilePath();
-	auto curCaptureType = mCapture->getCaptureType();
-
-	if ((strPath == strVideoPath && !mCapture->isInit()) || strVideoPath != strPath || curCaptureType != CAPTURE_FILE)
-	{
-		mCapture->closeCamera();
-		mCapture->InitCameraFile(DEF_CAMERA_WIDTH, DEF_CAMERA_HEIGHT, strVideoPath);
-		mFrameWidth = mCapture->m_dstFrameSize.width;
-		mFrameHeight = mCapture->m_dstFrameSize.height;
-		fuOnCameraChange();
-	}
-}
-
-bool Nama::IsCameraPlaying()
-{
-	return mCapture->isPlaying();
-}
-
-bool Nama::IsCameraInit()
-{
-	return mCapture->isInit();
-}
-
-int Nama::GetCameraCaptureType()
-{
-	return mCapture->getCaptureType();
-}
-cv::Size Nama::getCameraDstResolution()
-{
-	return mCapture->getCameraDstResolution();
-}
-int Nama::GetCameraID()
-{
-	return mCapture->getCaptureCameraID();
-}
-
-/// 手动设置最后一帧为默认画面
-void Nama::setDefaultFrame()
-{
-	mCapture->setDefaultFrame();
 }
 
 #ifdef _WIN32
@@ -300,27 +149,13 @@ bool Nama::CheckGLContext()
 
 }
 
-bool Nama::Init(uint32_t& width, uint32_t& height)
+bool Nama::Init()
 {
-#ifdef _WIN32
-	HGLRC context = wglGetCurrentContext();
-	HWND wnd = (HWND)Gui::hOffscreenWindow;
-	new_context = wglCreateContext(GetDC(wnd));
-	wglMakeCurrent(GetDC(wnd), new_context);
-#else
-	void * curCtx = NaMaGetCurrentGLCtx();
-	new_context = NaMaCreateGLCtx(Gui::hOffscreenWindow);
-	NaMaMakeAsCurrentCtx(new_context);
-#endif
-
-	mCapture->initCamera(width, height, UIBridge::mSelectedCamera);
-	mFrameWidth = mCapture->m_dstFrameSize.width;
-	mFrameHeight = mCapture->m_dstFrameSize.height;
 	if (false == mHasSetup && true == mNamaAppState.EnableNama)
 	{
 		CheckGLContext();
 
-		fuSetLogLevel(FU_LOG_LEVEL_ERROR);
+		fuSetLogLevel(FU_LOG_LEVEL_DEBUG);
 
 		fuSetup(nullptr, 0, nullptr, g_auth_package, sizeof(g_auth_package));
 		// setup without license, only render 1000 frames.
@@ -442,7 +277,7 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 			mFxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
 		}
 
-
+		fuItemSetParamd(mBodyShapeHandle, "Debug", 0.0);
 		//fuSetDefaultOrientation(0);
 		float fValue = 0.5f;
 		fuSetFaceTrackParam((void*)"mouth_expression_more_flexible", &fValue);
@@ -458,12 +293,6 @@ bool Nama::Init(uint32_t& width, uint32_t& height)
 		if (mNamaAppState.EnableNama) fuOnDeviceLost();
 		mHasSetup = false;
 	}
-
-#ifdef _WIN32
-	wglMakeCurrent(GetDC(wnd), context);
-#else
-	NaMaMakeAsCurrentCtx(curCtx);
-#endif
 
 	return true;
 }
@@ -504,6 +333,7 @@ void Nama::LoadAvatarBundles(const std::vector<std::string>& bundleNames)
 	}
 	avatarBundles = bundleNames;
 	Nama::mNamaAppState.RenderAvatar = true;
+	UIBridge::m_curRenderItem = -1;
 }
 
 void Nama::UnLoadAvatar()
@@ -515,6 +345,98 @@ void Nama::UnLoadAvatar()
 	}
 	avatarBundles.clear();
 	Nama::mNamaAppState.RenderAvatar = false;
+	Nama::mNamaAppState.RenderAvatarBear = false;
+}
+
+void Nama::UnLoadMakeup() 
+{
+	if (UIBridge::bundleCategory != BundleCategory::Makeup)
+	{
+		fuUnbindItems(mMakeUpHandle, &UIBridge::m_curRenderItem, 1);
+		UIBridge::m_curBindedItem = -1;
+		UIBridge::m_curRenderItem = -1;
+	}
+}
+
+void Nama::ReloadItems() {
+#ifdef _WIN32
+	HGLRC context = wglGetCurrentContext();
+	HWND wnd = (HWND)Gui::hOffscreenWindow;
+	wglMakeCurrent(GetDC(wnd), new_context);
+#else
+	void* curCtx = NaMaGetCurrentGLCtx();
+	NaMaMakeAsCurrentCtx(new_context);
+#endif
+	UnLoadAvatar();
+	DestroyAll();
+	fuDestroyAllItems();
+	fuOnDeviceLost();
+	UIBridge::m_curRenderItem = -1;
+	UIBridge::m_curPlayingMusicItem = -1;
+	m_CMakeupMap.clear();
+	m_CMakeupTypeMap.clear();
+	mBundlesMap.clear();
+	{
+		vector<char> propData;
+		if (false == FuTool::LoadBundle(g_assetDir + g_faceBeautification, propData))
+		{
+			cout << "load face beautification data failed." << endl;
+		}
+		cout << "load face beautification data." << endl;
+		mBeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
+	}
+	{
+		vector<char> propData;
+		if (false == FuTool::LoadBundle(g_assetDir + g_Makeup, propData))
+		{
+			cout << "load face makeup data failed." << endl;
+		}
+		cout << "load face makeup data." << endl;
+
+		mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+		//fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1);
+	}
+
+	{
+		vector<char> propData;
+		if (false == FuTool::LoadBundle(g_assetDir + g_bodySlim, propData))
+		{
+			cout << "load body slim data failed." << endl;
+		}
+		cout << "load body slim data." << endl;
+
+		mBodyShapeHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+	}
+
+	{
+		vector<char> propData;
+		if (false == FuTool::LoadBundle(g_assetDir + g_greenscreen, propData))
+		{
+			cout << "load gs data failed." << endl;
+		}
+		cout << "load gs data." << endl;
+
+		mGSHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+	}
+
+	{
+		vector<char> propData;
+		if (false == FuTool::LoadBundle(g_assetDir + g_fxaa, propData))
+		{
+			cout << "load fx data failed." << endl;
+		}
+		cout << "load fx data." << endl;
+
+		mFxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
+	}
+
+	float fValue = 0.5f;
+	fuSetFaceTrackParam((void*)"mouth_expression_more_flexible", &fValue);
+
+	fuSetMaxFaces(4);
+
+	m_Controller->InitController(g_assetDir + g_control, g_assetDir + g_control_cfg);
+	m_Controller->InitFXAA(g_assetDir + g_fxaa);
 }
 
 int Nama::IsTracking()
@@ -709,7 +631,7 @@ void Nama::UpdateBeauty()
 		}
 	}
 	fuItemSetParamd(mBeautyHandles, "skin_detect", UIBridge::mEnableSkinDect);
-	map<int, int> blurType = { {0,2},{1,0},{2,1} };
+	map<int, int> blurType = { {0,2},{1,0},{2,1},{3,3} };
 	fuItemSetParamd(mBeautyHandles, "blur_type", blurType[UIBridge::mEnableHeayBlur]);
 	fuItemSetParamd(mBeautyHandles, "face_shape_level", 1);
 	fuItemSetParamd(mBeautyHandles, "filter_level", UIBridge::mFilterLevel[UIBridge::m_curFilterIdx] / 100.0f);
@@ -890,13 +812,22 @@ void Nama::UpdateGSBg(cv::Mat & dataRGBA)
 	}
 
 	//DWORD time1 = GetTickCount();
-
 	fuCreateTexForItem(mGSHandle, "tex_bg", dataRGBA.data, dataRGBA.cols, dataRGBA.rows);
 
 	/*DWORD time2 = GetTickCount();
 
 	printf("liufei cost time:%d \r\n", time2 - time1);*/
 }
+
+void Nama::UpdateGSSA(cv::Mat& dataRGBA) {
+	fuItemSetParamd(mGSHandle, "is_use_template", 1);
+	fuCreateTexForItem(mGSHandle, "tex_template", dataRGBA.data, dataRGBA.cols, dataRGBA.rows);
+}
+
+void Nama::NonuseGSSA() {
+	fuItemSetParamd(mGSHandle, "is_use_template", 0);
+}
+
 
 //更新背景分割的背景数据
 void Nama::UpdateSegBg(cv::Mat & dataRGBA)
@@ -908,13 +839,8 @@ void Nama::UpdateSegBg(cv::Mat & dataRGBA)
 
 	fuItemSetParamd(UIBridge::m_curRenderItem, "bg_align_type", 1);
 	
-
-	char szVersion[1024] = { 0 };
-	//fuItemGetParams(UIBridge::m_curRenderItem, "script_creator_version", szVersion, 1024);
-	//if (strlen(szVersion) > 0) {
 	fuCreateTexForItem(UIBridge::m_curRenderItem, "tex_bg_seg", dataRGBA.data, dataRGBA.cols, dataRGBA.rows);
-	//}
-	
+
 }
 
 
@@ -983,7 +909,9 @@ void Nama::ClearAllCM()
 	{
 		for (auto & v : m_CMakeupTypeMap)
 		{
-			fuUnbindItems(mMakeUpHandle, &v.second, 1);
+			if (v.second > 0) {
+				fuUnbindItems(mMakeUpHandle, &v.second, 1);
+			}
 		}
 	}
 }
@@ -1044,6 +972,7 @@ int Nama::SelectCustomMakeupBundle(string bundleName, string strType)
 	}
 
 	Nama::mNamaAppState.RenderAvatar = false;
+	Nama::mNamaAppState.RenderAvatarBear = false;
 
 	return m_CMakeupMap[bundleName];
 }
@@ -1052,14 +981,16 @@ void Nama::DestroyAll()
 {
 	ClearAllCM();
 
-	if (UIBridge::bundleCategory == BundleCategory::Makeup && UIBridge::m_curBindedItem != -1)
+	if (UIBridge::bundleCategory == BundleCategory::Makeup && UIBridge::m_curBindedItem != -1 && mMakeUpHandle > 0)
 	{
 		fuUnbindItems(mMakeUpHandle, &UIBridge::m_curBindedItem, 1);
 	}
 
 	for (auto & data: mBundlesMap)
 	{
-		fuDestroyItem(data.second);
+		if (data.second > 0) {
+			fuDestroyItem(data.second);
+		}
 	}
 
 	UIBridge::m_curBindedItem = -1;
@@ -1075,10 +1006,16 @@ void Nama::UnbindCurFixedMakeup()
 {
 	if (UIBridge::bundleCategory == BundleCategory::Makeup)
 	{
-		if (UIBridge::m_curBindedItem != -1)
-		{
-			fuUnbindItems(mMakeUpHandle, &UIBridge::m_curBindedItem, 1);
-			UIBridge::m_curBindedItem = -1;
+		DestroyAll();
+		UIBridge::m_curRenderItem = -1;
+		if (mMakeUpHandle == -1) {
+			vector<char> propData;
+			if (false == FuTool::LoadBundle(g_Makeup, propData))
+			{
+				cout << "load face makeup data failed." << endl;
+			}
+			cout << "load face makeup data." << endl;
+			mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
 		}
 	}
 }
@@ -1098,7 +1035,27 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 	{
 		return false;
 	}
-	
+	if (UIBridge::bundleCategoryLast == BundleCategory::ItemJingpin &&
+		UIBridge::bundleCategory != BundleCategory::ItemJingpin) {
+		ReloadItems();
+		UpdateFilter(UIBridge::m_curFilterIdx);
+		UpdateBeauty();
+		UpdateGreenScreen();
+		SetGSKeyColor(GUIGS::GetCurColorCircle());
+		changeGSPreviewRect(gsPreviewRect);
+		if (UIBridge::mCurRenderGSSAItemName != "NONE") {
+			string imagePath;
+#if _WIN32
+			imagePath = gGSSAPic + "/" + UIBridge::mCurRenderGSSAItemName;
+#elif __APPLE__
+			imagePath = UIBridge::GetFileFullPathFromResourceBundle((gGSSAPic + "/" + UIBridge::mCurRenderGSSAItemName + ".jpg").c_str());
+#endif 
+			cv::Mat mat = cv::imread(imagePath);
+			cv::cvtColor(mat, mat, cv::COLOR_BGR2RGBA);
+			UpdateGSSA(mat);
+		}
+	}
+	UIBridge::bundleCategoryLast = UIBridge::bundleCategory;
 	ChangeCleanFlag(true);
 
 	int bundleID = -1;
@@ -1157,9 +1114,25 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 
 		if (UIBridge::bundleCategory == BundleCategory::Makeup)
 		{
-			fuBindItems(mMakeUpHandle, &bundleID, 1);
-			UIBridge::m_curBindedItem = bundleID;
-
+			if (!UIBridge::newMakeupType) {
+				if (mMakeUpHandle == -1) {
+					vector<char> propData;
+					if (false == FuTool::LoadBundle(g_Makeup, propData))
+					{
+						cout << "load face makeup data failed." << endl;
+					}
+					cout << "load face makeup data." << endl;
+					mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+				}
+				fuBindItems(mMakeUpHandle, &bundleID, 1);
+				UIBridge::m_curBindedItem = bundleID;
+			}
+			else {
+				if (mMakeUpHandle > 0) {
+					fuDestroyItem(mMakeUpHandle);
+					mMakeUpHandle = -1;
+				}
+			}
 		}
 		else
 		{
@@ -1202,8 +1175,10 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 			{
 				fuUnbindItems(mMakeUpHandle, &UIBridge::m_curBindedItem, 1);
 			}
-			fuBindItems(mMakeUpHandle, &bundleID, 1);
-			UIBridge::m_curBindedItem = bundleID;
+			if (!UIBridge::newMakeupType) {
+				fuBindItems(mMakeUpHandle, &bundleID, 1);
+				UIBridge::m_curBindedItem = bundleID;
+			}
 		}
 		
 		if (UIBridge::bundleCategory == BundleCategory::MusicFilter)
@@ -1283,6 +1258,7 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 	fuSetMaxFaces(maxFace);
 
 	Nama::mNamaAppState.RenderAvatar = false;
+	Nama::mNamaAppState.RenderAvatarBear = false;
 
 	return true;
 }
@@ -1310,7 +1286,6 @@ bool Nama::CheckModuleCodeSide(int categorySide)
 	{
 		return true;
 	}
-
 	int passCode = fuGetModuleCode(g_checkSideIndex[categorySide]);
 	int needCode = g_checkSideID[categorySide];
 	bool bOK = false;
@@ -1355,14 +1330,16 @@ void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
 		}else{
 			renderList.push_back(mBeautyHandles);
 			
-			if (UIBridge::renderBundleCategory == BundleCategory::Makeup)
+			if (UIBridge::newMakeupType)
 			{
 				renderList.push_back(UIBridge::m_curRenderItem);
-				renderList.push_back(mMakeUpHandle);
 			}
 			else
 			{
-				renderList.push_back(UIBridge::m_curRenderItem);
+				if (UIBridge::m_curRenderItem != -1) {
+					renderList.push_back(UIBridge::m_curRenderItem);
+				}
+				renderList.push_back(mMakeUpHandle);
 			}
 		}
 
@@ -1432,7 +1409,6 @@ void Nama::RenderGS(cv::Mat & picInput, int rotType)
 		vecRender.push_back(mBeautyHandles);
         
 		fuSetInputCameraBufferMatrix((TRANSFORM_MATRIX)rotType);
-
 		fuRender(FU_FORMAT_RGBA_BUFFER,
 			(void*)(picInput.data),
 			FU_FORMAT_RGBA_BUFFER,
@@ -1456,37 +1432,24 @@ void Nama::RenderGS(cv::Mat & picInput, int rotType)
 
 void Nama::RenderItems(cv::Mat & picMat)
 {
-
-#ifdef _WIN32
-	HGLRC context = wglGetCurrentContext();
-	HWND wnd = (HWND)Gui::hOffscreenWindow;
-	wglMakeCurrent(GetDC(wnd), new_context);
-#else
-	void * curCtx = NaMaGetCurrentGLCtx();
-	NaMaMakeAsCurrentCtx(new_context);
-#endif
 	
 	if (UIBridge::showGreenScreen)
 	{
-		TRANSFORM_MATRIX type = (mCapture->getCaptureType() == CAPTURE_CAMERA) ? TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL: TRANSFORM_MATRIX::CCROT0;
-		RenderGS(picMat, type);
-
+		TRANSFORM_MATRIX type = (CCameraManage::getInstance()->mCapture->getCaptureType() == CAPTURE_CAMERA) ? TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL: TRANSFORM_MATRIX::CCROT0;
+		RenderGS(picMat, TRANSFORM_MATRIX::CCROT0);
 	}
 	else
 	{
-		if (mNamaAppState.RenderAvatar)
+		if (UIBridge::m_bShowingBodyBeauty) {
+			RenderDefNama(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+		}else if (mNamaAppState.RenderAvatarBear) {
+			RenderDefNama(picMat, TRANSFORM_MATRIX::CCROT0);
+			RenderP2A(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+		}else if (mNamaAppState.RenderAvatar)
 			RenderP2A(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
 		else
 			RenderDefNama(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
 	}
-
-	glFinish();
-
-#ifdef _WIN32
-	wglMakeCurrent(GetDC(wnd), context);
-#else
-	NaMaMakeAsCurrentCtx(curCtx);
-#endif
 
 	return;
 }

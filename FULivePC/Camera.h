@@ -5,6 +5,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
+#include <deque>
 
 #ifdef _WIN32
 #include <dshow.h>
@@ -140,21 +141,70 @@ public:
 	int rs_width;
 	int rs_height;
 	bool useDefaultFrame;
+
 	cv::VideoCapture mCapture;
+	int getFrameID = 0;
 	cv::Mat tmpframe;
 	cv::Mat frame;
 	cv::Mat resize_frame;
 	cv::Size m_dstFrameSize;
-
+	bool getNewFrame = false;
 	//本来应该弄事件，但是阔平台有点烦
 	volatile bool m_bThreadEnd = false;
 	L_Mutex m_mtxFrame;
-    
+
 #ifdef _WIN32
 	HANDLE m_hThread = nullptr;
 #else
     pthread_t m_pid = 0;
 #endif
+};
+
+
+class CCameraManage {
+public:
+	CCameraManage();
+	~CCameraManage();
+	static CCameraManage* getInstance();
+
+#ifdef _WIN32
+    std::tr1::shared_ptr<CCameraDS> mCapture;
+#else
+	std::shared_ptr<CCameraDS> mCapture;
+#endif
+
+	std::vector<std::string> CameraList();
+	cv::Mat GetOriginFrame();
+	cv::Mat GetFrame();
+	bool GetNewFrame() { return mCapture->getNewFrame; }
+	void SetNewFrame(bool flag) { mCapture->getNewFrame = flag; }
+	bool ReOpenCamera(int);
+	bool ReOpenCamera(std::string strVideoPath);
+	bool restartCameraWhenClosed();
+	// lambda 用于 oc 的 回调
+	std::function<void()> lock_screen_not_macosx() {
+		return [&] { std::cout << "lock_screen_not_macosx" << std::endl;
+		CloseCurCamera();
+		};
+	}
+	std::function<void()> unlock_screen_not_macosx() {
+		return [&] { std::cout << "unlock_screen_not_macosx" << std::endl;
+		restartCameraWhenClosed();
+		};
+	}
+	void CloseCurCamera();
+	void OpenCamera(int);
+	void OpenCamera(std::string strVideoPath);
+	cv::Size getCameraDstResolution();
+	bool IsCameraPlaying();
+	bool IsCameraInit();
+	int GetCameraCaptureType();
+	int GetCameraID();
+	void setDefaultFrame();
+private:
+	uint32_t mFrameWidth, mFrameHeight;
+	static CCameraManage* mInstance;
+
 };
 
 #endif

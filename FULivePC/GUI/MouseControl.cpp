@@ -50,7 +50,7 @@ bool MouseControl::isSelected(ImVec2* pos){
 		float minX = viewRect.origin.x;
 		float maxX = viewRect.origin.x + viewRect.size.width;
 		float minY = viewRect.origin.y;
-		float maxY = viewRect.origin.y+viewRect.size.height;
+		float maxY = viewRect.origin.y + viewRect.size.height;
 		if (minX<=curMouseX&&curMouseX<=maxX
 			&&minY<=curMouseY&&curMouseY<=maxY) {
 			*pos = curPos;
@@ -105,6 +105,9 @@ bool MouseControl::dragComplete(ImVec2* dealt){
 /// @param rect  新的位置
 void MouseControl::callback(FURect rect){
 	tmpRect = rect;
+}
+void MouseControl::changeRect(FURect rect){
+	viewRect = rect;
 }
 MouseControl::~MouseControl()
 {

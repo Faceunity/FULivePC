@@ -48,14 +48,14 @@ namespace NamaExampleNameSpace
 		bool EnableAvatar;
 		bool EnableAvatarUI;
 		bool RenderAvatar;
-
+		bool RenderAvatarBear;
 		tagNamaState() {
 
 			EnableNama = false;
 			EnableAvatar = false;
 			EnableAvatarUI = false;
 			RenderAvatar = false;
-
+			RenderAvatarBear = false;
 		}
 
 	}NamaState;
@@ -64,46 +64,24 @@ namespace NamaExampleNameSpace
 	{		
 	public:
 		using UniquePtr = std::unique_ptr<Nama>;
-		static UniquePtr create(uint32_t width, uint32_t height,bool enable = true);
+		static void create(bool enable = true);
+		static UniquePtr pNama;
+		static Nama* get() {return pNama.get();}
 
 		Nama();
 		~Nama();
-
-		std::vector<std::string> CameraList();
-		cv::Mat GetOriginFrame();
-		cv::Mat GetFrame();
-		bool ReOpenCamera(int);
-		bool ReOpenCamera(std::string strVideoPath);
-        bool restartCameraWhenClosed();
-        // lambda 用于 oc 的 回调
-        std::function<void()> lock_screen_not_macosx() {
-            return [&]{ std::cout << "lock_screen_not_macosx" << std::endl;
-                CloseCurCamera();
-            };
-        }
-        std::function<void()> unlock_screen_not_macosx() {
-            return [&]{ std::cout << "unlock_screen_not_macosx" << std::endl;
-                restartCameraWhenClosed();
-            };
-        }
-		void CloseCurCamera();
-		void OpenCamera(int);
-		void OpenCamera(std::string strVideoPath);
-		cv::Size getCameraDstResolution();
-		bool IsCameraPlaying();
-		bool IsCameraInit();
-		int GetCameraCaptureType();
-		int GetCameraID();
-		void setDefaultFrame();
-
+		
 		bool CheckGLContext();
-		bool Init(uint32_t& width, uint32_t& height);
+		bool Init();
+        bool Release();
 		bool InitController();
 		bool IsInited() { return mHasSetup; }
 
 		void LoadAvatarHandTrackBundle();
 		void LoadAvatarBundles(const std::vector<std::string>& bundleNames);
 		void UnLoadAvatar();
+		void UnLoadMakeup();
+		void ReloadItems();
 
 		void SetCurDouble(const std::string& key, double v);
 		void SetCMDoubles(const std::string& key, double* values, uint32_t count);
@@ -125,6 +103,8 @@ namespace NamaExampleNameSpace
 		void SwitchBeauty(bool);
 
 		void UpdateGSBg(cv::Mat & dataRGBA);
+		void UpdateGSSA(cv::Mat& dataRGBA);
+		void NonuseGSSA();
 		void UpdateGreenScreen();
 		void SetGSKeyColor(cv::Vec4b data);
 
@@ -171,7 +151,6 @@ namespace NamaExampleNameSpace
 		int mGestureHandles;
 		int mFxaaHandles;
 		int mGSHandle = -1;
-		uint32_t mFrameWidth, mFrameHeight;
 		std::queue<gui_tool::ColorBag> m_queueRencetColor;
 		std::map<std::string, int> m_CMakeupTypeMap;
 		std::unordered_map<std::string, int> m_CMakeupMap;
@@ -184,17 +163,13 @@ namespace NamaExampleNameSpace
 		static NamaState mNamaAppStateBackAR;
 		static NamaState mNamaAppStateBackGS;
 
+		uint32_t mFrameWidth, mFrameHeight;
 		int mIsBeautyOn;
 		int mIsDrawPoints;
 		int mFrameID;		
 		int mModuleCode, mModuleCode1;
 		FURect gsPreviewRect;
-		
-#ifdef _WIN32
-		std::tr1::shared_ptr<CCameraDS> mCapture;
-#else
-        std::shared_ptr<CCameraDS> mCapture;
-#endif
+	
 		static std::string mFilters[6];
 		std::map<std::string, int> mBundlesMap;
 		std::unordered_map<std::string, std::vector<MakeupParam> > mMakeupsMap;

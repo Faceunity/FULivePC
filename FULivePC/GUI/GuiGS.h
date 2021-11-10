@@ -8,6 +8,17 @@
 using namespace std;
 class CCameraDS;
 
+
+typedef struct tagGSSafeAreaUserConfig
+{
+	string strFilePath;
+
+	tagGSSafeAreaUserConfig() {
+		strFilePath = "";
+	}
+
+}GSSafeAreaUserConfig;
+
 class GUIGS
 {
 public:
@@ -42,6 +53,8 @@ public:
 
 	static void ChangeGreenScreenBg(std::string strFilePath);
 
+	static void ChangeGreenScreenSA(std::string strFilePath, NamaExampleNameSpace::Nama* nama);
+
 	static void CloseGreenScreenBg();
 
 	static void UpdateGreenScreenBg(NamaExampleNameSpace::Nama * nama);
@@ -60,11 +73,16 @@ public:
 
 	static FURect previewRect;
 	static void calculatePreViewForHalfScreen(float orgW,float orgH,float* dstW,float* dstH);
-	
+
+	static void LoadResource();
+	static void SelectGSSafeAreaFile();
+	static void SaveUserConfig();
 private:
 	static CCameraDS * m_pCamBG;
 	static bool m_bHasSetedBgForOnceChange;
-
+	static bool mIsSelectGSSafeAreaFileOK;
+	static bool mIsUserConfigOK;
+	static GSSafeAreaUserConfig mConfig;
 	static std::vector<gui_tool::ColorBag> m_vecColorTex;
 	static std::vector<gui_tool::ColorBag> m_vecColorRecentTex;
 	static gui_tool::ColorBag m_curColor;

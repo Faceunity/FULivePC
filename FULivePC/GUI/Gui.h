@@ -28,7 +28,8 @@ public:
 
 	~Gui(); 
 
-	void render(Nama::UniquePtr& nama);
+	void init(int width, int height,bool enableNama);
+	void render(Nama* nama);
 
 	void UpdateFrame(Nama * nama);
     
@@ -38,7 +39,7 @@ public:
 	void onWindowResize(uint32_t width, uint32_t height);
 
 	void ProcessGSSampleClick(Nama * nama);
-	void ResetPreviewRect(Nama::UniquePtr& nama);
+	void ResetPreviewRect(Nama* nama);
 #ifdef _WIN32
 	static HWND hWindow;
 	static HWND hOffscreenWindow;

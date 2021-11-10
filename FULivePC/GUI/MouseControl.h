@@ -39,6 +39,7 @@ public:
 	bool draging(ImVec2* dealt);
 	bool dragComplete(ImVec2* dealt);
 	void callback(FURect rect);
+	void changeRect(FURect rect);
 	bool isSelected(ImVec2* pos);
 private:
 	ImGuiIO& io=ImGui::GetIO();

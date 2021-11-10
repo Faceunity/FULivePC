@@ -14,10 +14,13 @@
 #include <iostream>
 #include <string>
 #include <regex>
+#include "rapidjson/filereadstream.h"
+#include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/prettywriter.h"
 
 using namespace gui_tool;
 using namespace NamaExampleNameSpace;
-
 
 //有空改下
 extern float scaleRatioW;
@@ -33,6 +36,7 @@ float UIBridge::mGSParam[MAX_GREEN_SCREEN_PARAM] = { 0.0f };
 bool UIBridge::m_bSamplingColor = false;
 bool UIBridge::m_bShowColorChoice = false;
 bool UIBridge::m_bShowingBodyBeauty = false;
+bool UIBridge::m_bShowingSafeAreaTip = false;
 bool UIBridge::m_bLoadWrongNamePNGFile = false;
 int UIBridge::m_localVideoRotation = 0;
 bool UIBridge::m_localVideoType = false;
@@ -41,6 +45,7 @@ bool UIBridge::m_bResetPreviewRect = false;
 float UIBridge::m_localVideoHeight = 0;
 string UIBridge::m_openLocalFileTip = "";
 string UIBridge::mCurRenderGSItemName = "";
+string UIBridge::mCurRenderGSSAItemName = "NONE";
 int UIBridge::gsBundleCategory = BUNDLE_CATEGORY_NOMEAN;
 
 int UIBridge::m_localBgSegVideoRotation = 0;
@@ -58,7 +63,9 @@ ColorBag GUIGS::m_curColor = ColorBag();
 Texture::SharedPtr GUIGS::m_hsvTexture = nullptr;
 cv::Mat GUIGS::m_hsvMat;
 FURect GUIGS::previewRect = {DEF_FRAME_SHOW_POS_X+DEF_FRAME_SHOW_WIDTH/2.0,DEF_FRAME_SHOW_POS_Y + DEF_FRAME_SHOW_HEIGHT/2.0,DEF_FRAME_SHOW_WIDTH/2.0,DEF_FRAME_SHOW_HEIGHT/2.0};
-
+bool GUIGS::mIsSelectGSSafeAreaFileOK = false;
+bool GUIGS::mIsUserConfigOK = false;
+GSSafeAreaUserConfig GUIGS::mConfig;
 /////////////////////////////////////////////////////////////////
 
 GUIGS::GUIGS()
@@ -72,7 +79,7 @@ GUIGS::~GUIGS()
 
 static bool openDeafultCamera(Nama * nama)
 {
-	int iLen = nama->CameraList().size();
+	int iLen = CCameraManage::getInstance()->CameraList().size();
 	
 	if (iLen == 0)
 	{
@@ -83,18 +90,19 @@ static bool openDeafultCamera(Nama * nama)
 	UIBridge::m_bResetPreviewRect = true;
 	int index = iLen > UIBridge::mSelectedCamera ? UIBridge::mSelectedCamera : 0;
 	UIBridge::mSelectedCamera = index;
-	nama->ReOpenCamera(index);
+	CCameraManage::getInstance()->ReOpenCamera(index);
 }
 
 static bool IsCamDeviceOpen(Nama * nama)
 {
-	bool bCamDeviceOpen = nama->IsCameraInit() && (nama->GetCameraCaptureType() == GS_INPUT_TYPE_CAMERA);
+	bool bCamDeviceOpen = CCameraManage::getInstance()->IsCameraInit() && (CCameraManage::getInstance()->GetCameraCaptureType() == GS_INPUT_TYPE_CAMERA);
 	return bCamDeviceOpen;
 }
 
 static void LayoutShowCamChoice(Nama * nama)
 {
-	if (nama->CameraList().size())
+	vector<string> CameraList = CCameraManage::getInstance()->CameraList();
+	if (CameraList.size())
 	{
 		if (!IsCamDeviceOpen(nama))
 		{
@@ -102,21 +110,21 @@ static void LayoutShowCamChoice(Nama * nama)
 		}
 
 		ImGui::PushItemWidth(244 * scaleRatioW);
-		static string item_current = nama->CameraList()[0];
+		static string item_current = CameraList[0];
 		if (ImGui::BeginCombo("##slect camera2", item_current.c_str())) // The second parameter is the label previewed before opening the combo.
 		{
-			for (int n = 0; n < nama->CameraList().size(); n++)
+			for (int n = 0; n < CameraList.size(); n++)
 			{
-				bool is_selected = (item_current == nama->CameraList()[n]);
-				if (ImGui::Selectable(nama->CameraList()[n].c_str(), is_selected))
+				bool is_selected = (item_current == CameraList[n]);
+				if (ImGui::Selectable(CameraList[n].c_str(), is_selected))
 				{
-					item_current = nama->CameraList()[n];
+					item_current = CameraList[n];
 					bool bCamDeviceOpen = IsCamDeviceOpen(nama);
 
 					if (UIBridge::mSelectedCamera != n || !bCamDeviceOpen)
 					{
 						UIBridge::mSelectedCamera = n;
-						nama->ReOpenCamera(n);
+						CCameraManage::getInstance()->ReOpenCamera(n);
 					}
 				}
 				if (is_selected)
@@ -157,9 +165,9 @@ void GUIGS::ShowCameraChoiceForGS(Nama * nama)
 	float frameHeight = (float)DEF_FRAME_SHOW_HEIGHT / 1.8f;
 	bool bSuccessShow = false;
 
-	if (nama->GetCameraCaptureType() == GS_INPUT_TYPE_CAMERA && nama->IsCameraInit())
+	if (CCameraManage::getInstance()->GetCameraCaptureType() == GS_INPUT_TYPE_CAMERA && CCameraManage::getInstance()->IsCameraInit())
 	{
-		cv::Mat frameMat = nama->GetOriginFrame();
+		cv::Mat frameMat = CCameraManage::getInstance()->GetOriginFrame();
 		if (frameMat.data)
 		{
 			cv::Mat processedFrame = frameMat.clone();
@@ -195,7 +203,7 @@ void GUIGS::ShowCameraChoiceForGS(Nama * nama)
 	if (ImGui::Button(u8"确定"))
 	{
 		UIBridge::m_gsState.inputType = GS_INPUT_TYPE_CAMERA;
-		UIBridge::m_gsState.iCmaeraID = nama->GetCameraID();
+		UIBridge::m_gsState.iCmaeraID = CCameraManage::getInstance()->GetCameraID();
 		
 		
 		
@@ -368,7 +376,7 @@ void GUIGS::ShowGSInputChoice(Nama * nama,bool canCancel)
 					{
 						UIBridge::m_localVideoRotation = 0;
 						float imgWidth,imgHeight, dstW, dstH;
-						cv::Size imgSize = nama->getCameraDstResolution();
+						cv::Size imgSize = CCameraManage::getInstance()->getCameraDstResolution();
 						imgWidth = imgSize.width;
 						imgHeight = imgSize.height;
 						calculatePreViewForHalfScreen(imgWidth, imgHeight, &dstW, &dstH);
@@ -419,9 +427,9 @@ bool GUIGS::SetCameraFileInput(NamaExampleNameSpace::Nama * nama, const char * p
 {
 	bool bRet = false;
 	string path_string{path};
-	nama->OpenCamera(path_string);
+	CCameraManage::getInstance()->OpenCamera(path_string);
 	
-	if (nama->GetCameraCaptureType() == GS_INPUT_TYPE_FILE && nama->IsCameraInit())
+	if (CCameraManage::getInstance()->GetCameraCaptureType() == GS_INPUT_TYPE_FILE && CCameraManage::getInstance()->IsCameraInit())
 	{
 		UIBridge::m_gsState.inputType = GS_INPUT_TYPE_FILE;
 		UIBridge::m_gsState.strFilePath = path_string;
@@ -448,9 +456,9 @@ void GUIGS::ShowGreenScreenMenu(Nama * nama)
 	
 	string *categoryNameArr = nullptr;
 	/* 目前绿幕就一个 */
-	string allCategory[] = { "list_icon_green_screen_cutout_nor",
-		u8"  绿幕" };
-	int amount = 1;
+	string allCategory[] = { "list_icon_green_screen_cutout_nor", "list_icon_safe_area_nor",
+		u8"  绿幕", u8"  安全区域" };
+	int amount = 2;
 	
 	categoryNameArr = allCategory;
 	
@@ -500,6 +508,11 @@ void GUIGS::ShowGreenScreenMenu(Nama * nama)
 					};
 					
 					funSetSelectd(i);
+					if (UIBridge::gsBundleCategory == BundleCategory::SafeArea) {
+						UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+						UIBridge::m_bShowingSafeAreaTip = true;
+						UIBridge::showItemTipsWindow = true;
+					}
 				}
 			}
 			if (!UIBridge::m_bSetGSInputSrc){  
@@ -557,7 +570,7 @@ void GUIGS::CloseCamera(Nama * nama)
 {
 	if (nama)
 	{
-		nama->CloseCurCamera();
+		CCameraManage::getInstance()->CloseCurCamera();
 	}
 }
 
@@ -585,6 +598,33 @@ void GUIGS::ChangeGreenScreenBg(string strFilePath)
 		}
 	}
 }
+
+void GUIGS::ChangeGreenScreenSA(string strFilePath, NamaExampleNameSpace::Nama* nama)
+{
+	cv::Mat mat = cv::imread(strFilePath);
+	cv::cvtColor(mat, mat, cv::COLOR_BGR2RGBA);
+	nama->UpdateGSSA(mat);
+}
+
+static string GetUserIconPath() {
+
+	string IconPath = "";
+
+#ifdef __APPLE__
+
+	IconPath = FuToolMac::GetDocumentPath() + "/" + GSSAFEAREA_USERFILE_PIC;
+
+
+#else
+
+	IconPath = GSSAFEAREA_USERFILE_PIC;
+
+#endif
+
+	return IconPath;
+
+}
+
 /// 输入绿幕背景视频
 /// @param itemName 视频名称
 void GUIGS::inputGreenScreenBg(string itemName){
@@ -599,9 +639,10 @@ void GUIGS::inputGreenScreenBg(string itemName){
 #endif 
 	ChangeGreenScreenBg(videoPath);
 }
+
 void GUIGS::ShowFloatMenuGS(NamaExampleNameSpace::Nama * nama)
 {
-	if (UIBridge::gsBundleCategory != BundleCategory::GreenScreen)
+	if (UIBridge::gsBundleCategory < BundleCategory::GreenScreen)
 	{
 		return;
 	}
@@ -613,65 +654,169 @@ void GUIGS::ShowFloatMenuGS(NamaExampleNameSpace::Nama * nama)
 	ImGui::SetNextWindowSize(ImVec2(888 * scaleRatioW, 90 * scaleRatioH), ImGuiCond_Always);
 	ImGui::Begin("itemSelect##1564", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
 
-	vector<string> vecFiles;
-#if _WIN32	
-	UIBridge::FindAllCommonPIC(gGSBgPic, vecFiles);
-#elif __APPLE__
-	UIBridge::FindAllCommonPICNameFromResourceBundle(gGSBgPic, vecFiles);
-#endif
-	{
-		for (int i = 0; i < vecFiles.size(); i++)
-		{
-			string itemName = vecFiles[i];
+	//如果是安全区域，增加添加和自定义安全区域图片
+	if (UIBridge::gsBundleCategory == BundleCategory::SafeArea) {
 
-			string iconName = itemName.substr(0, itemName.find_last_of('.'));
-			Texture::SharedPtr tex = Texture::createTextureFromFile(iconName + ".png", false);
-			//找不到图标
-			if (!tex)
-			{
-				tex = Texture::createTextureFromFile("icon_Movebutton_nor.png", false);
-			}
-			// 正在取色时，禁止点击
-			if (UIBridge::m_bSamplingColor){  
+		// 正在取色时，禁止点击
+		if (UIBridge::m_bSamplingColor) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.3f);
+		}
+		Texture::SharedPtr tex = Texture::createTextureFromFile(BGSEG_ADD_ICON, false);
+		if (ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(),
+			ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1,
+			ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Reset))
+		{
+			SelectGSSafeAreaFile();
+		}
+
+		ImGui::SameLine(0.f, 22.f * scaleRatioW);
+
+		if (mIsUserConfigOK) {
+			string iconName = GetUserIconPath();
+			tex = Texture::createTextureFromFullPath(iconName, true);
+            string itemName = GSSAFEAREA_USERFILE_PIC;
+			if (mIsSelectGSSafeAreaFileOK) {
+				UIBridge::mCurRenderGSSAItemName = GSSAFEAREA_USERFILE_PIC;
+				ChangeGreenScreenSA(iconName, nama);
+				mIsSelectGSSafeAreaFileOK = false;
 			}
 			bool buttonClick;
-			if (UIBridge::mCurRenderGSItemName == itemName)
+			if (UIBridge::mCurRenderGSSAItemName == itemName)
 			{
-				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH),ImVec2(0, 0),ImVec2(1, 1),-1,ImVec4(0, 0, 0, 0),ImVec4(1, 1, 1, 1),ImGui::ImGUI_Button_Operation_Type_Select);
-			}else{
-				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH),ImVec2(0, 0),ImVec2(1, 1),-1,ImVec4(0, 0, 0, 0),ImVec4(1, 1, 1, 1),ImGui::ImGUI_Button_Operation_Type_Deselect);
+				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Select);
+			}
+			else {
+				buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Deselect);
 			}
 			if (buttonClick)
-
 			{
-				if (UIBridge::mCurRenderGSItemName != itemName)
+				if (UIBridge::mCurRenderGSSAItemName != itemName)
 				{
-					UIBridge::mCurRenderGSItemName = itemName;
-					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+					UIBridge::mCurRenderGSSAItemName = itemName;
 					UIBridge::showItemTipsWindow = false;
-					string videoPath;
-#if _WIN32
-					videoPath = gGSBgPic + "/" + itemName;
-#elif __APPLE__
-					videoPath = UIBridge::GetFileFullPathFromResourceBundle((gGSBgPic + "/" + itemName + ".mp4").c_str());
-#endif 
-					ChangeGreenScreenBg(videoPath);
+					ChangeGreenScreenSA(iconName, nama);
 				}
-				else
-				{
-					UIBridge::mCurRenderGSItemName = "NONE";
-					UIBridge::mLastTime = 0.0;
+				else {
+					UIBridge::mCurRenderGSSAItemName = "NONE";
 					UIBridge::showItemTipsWindow = false;
-					ChangeGreenScreenBg(UIBridge::mCurRenderGSItemName);
+					nama->NonuseGSSA();
 				}
-
 			}
 			ImGui::SameLine(0.f, 22.f * scaleRatioW);
-			if (UIBridge::m_bSamplingColor){ 
-			ImGui::PopItemFlag();
-			ImGui::PopStyleVar();
+		}
+
+		vector<string> vecFiles;
+#if _WIN32	
+		UIBridge::FindAllCommonPIC(gGSSAPic, vecFiles);
+#elif __APPLE__
+		UIBridge::FindAllCommonPICNameFromResourceBundle(gGSSAPic, vecFiles);
+#endif
+		{
+			for (int i = 0; i < vecFiles.size(); i++)
+			{
+				string itemName = vecFiles[i];
+				string iconName = itemName.substr(0, itemName.find_last_of('.'));
+				Texture::SharedPtr tex = Texture::createTextureFromFile(iconName + ".png", false);
+				bool buttonClick;
+				if (UIBridge::mCurRenderGSSAItemName == itemName)
+				{
+					buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Select);
+				}
+				else {
+					buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Deselect);
+				}
+				if (buttonClick)
+				{
+					if (UIBridge::mCurRenderGSSAItemName != itemName)
+					{
+						UIBridge::mCurRenderGSSAItemName = itemName;
+						string imagePath;
+#if _WIN32
+						imagePath = gGSSAPic + "/" + itemName;
+#elif __APPLE__
+						imagePath = UIBridge::GetFileFullPathFromResourceBundle((gGSSAPic + "/" + itemName + ".jpg").c_str());
+#endif 
+						ChangeGreenScreenSA(imagePath, nama);
+					}
+					else {
+						UIBridge::mCurRenderGSSAItemName = "NONE";
+						UIBridge::showItemTipsWindow = false;
+						nama->NonuseGSSA();
+					}
+				}
+				ImGui::SameLine(0.f, 22.f * scaleRatioW);
+				if (UIBridge::m_bSamplingColor) {
+					ImGui::PopItemFlag();
+					ImGui::PopStyleVar();
+				}
+			}
+		}
+	}
+	else {
+
+		vector<string> vecFiles;
+#if _WIN32	
+		UIBridge::FindAllCommonPIC(gGSBgPic, vecFiles);
+#elif __APPLE__
+		UIBridge::FindAllCommonPICNameFromResourceBundle(gGSBgPic, vecFiles);
+#endif
+		{
+			for (int i = 0; i < vecFiles.size(); i++)
+			{
+				string itemName = vecFiles[i];
+
+				string iconName = itemName.substr(0, itemName.find_last_of('.'));
+				Texture::SharedPtr tex = Texture::createTextureFromFile(iconName + ".png", false);
+				//找不到图标
+				if (!tex)
+				{
+					tex = Texture::createTextureFromFile("icon_Movebutton_nor.png", false);
+				}
+				// 正在取色时，禁止点击
+				if (UIBridge::m_bSamplingColor) {
+					ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+					ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.3f);
+				}
+				bool buttonClick;
+				if (UIBridge::mCurRenderGSItemName == itemName)
+				{
+					buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Select);
+				}
+				else {
+					buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Deselect);
+				}
+
+				if (buttonClick)
+
+				{
+					if (UIBridge::mCurRenderGSItemName != itemName)
+					{
+						UIBridge::mCurRenderGSItemName = itemName;
+						UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+						UIBridge::showItemTipsWindow = false;
+						string videoPath;
+#if _WIN32
+						videoPath = gGSBgPic + "/" + itemName;
+#elif __APPLE__
+						videoPath = UIBridge::GetFileFullPathFromResourceBundle((gGSBgPic + "/" + itemName + ".mp4").c_str());
+#endif 
+						ChangeGreenScreenBg(videoPath);
+					}
+					else
+					{
+						UIBridge::mCurRenderGSItemName = "NONE";
+						UIBridge::mLastTime = 0.0;
+						UIBridge::showItemTipsWindow = false;
+						ChangeGreenScreenBg(UIBridge::mCurRenderGSItemName);
+					}
+
+				}
+				ImGui::SameLine(0.f, 22.f * scaleRatioW);
+				if (UIBridge::m_bSamplingColor) {
+					ImGui::PopItemFlag();
+					ImGui::PopStyleVar();
+				}
 			}
 		}
 	}
@@ -979,6 +1124,9 @@ void GUIGS::ShowGSParamRight(NamaExampleNameSpace::Nama * nama)
 		m_curColor.setColor(colorBag.vecColorRGBA[0]);
 		// 取消选中
 		UIBridge::m_curRenderItemUIIDSec = 0;
+		//取消绿幕安全区域选中
+		UIBridge::mCurRenderGSSAItemName = "NONE";
+		nama->NonuseGSSA();
 		ResetDefParam();
 		nama->UpdateGreenScreen();
 	}
@@ -997,7 +1145,7 @@ void GUIGS::ShowRightPanel(NamaExampleNameSpace::Nama * nama)
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 1.f));
 	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(150.f / 255.f, 157.f / 255.f, 181.f / 255.f, 1.f));
 
-	if (UIBridge::showItemSelectWindow && UIBridge::gsBundleCategory == BundleCategory::GreenScreen)
+	if (UIBridge::showItemSelectWindow && UIBridge::gsBundleCategory >= BundleCategory::GreenScreen)
 	{
 		ShowGSParamRight(nama);
 	}
@@ -1009,4 +1157,114 @@ void GUIGS::ShowRightPanel(NamaExampleNameSpace::Nama * nama)
 
 	ImGui::PopStyleColor(4);
 	ImGui::End();
+}
+
+
+static string GetCongfigPath() {
+
+
+	string ConfPath = "";
+
+#ifdef __APPLE__
+
+	ConfPath = FuToolMac::GetDocumentPath() + "/" + gUserConfig;
+
+
+#else
+
+	ConfPath = gUserConfig;
+
+#endif
+
+	return ConfPath;
+}
+
+void GUIGS::LoadResource()
+{
+	ifstream in(GetCongfigPath().c_str());
+	if (!in.is_open()) {
+		fprintf(stderr, "fail to read json file: %s\n", gUserConfig.data());
+		return;
+	}
+
+	string json_content((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
+	in.close();
+
+	rapidjson::Document dom;
+	if (!dom.Parse(json_content.c_str()).HasParseError())
+	{
+		if (dom.HasMember("GSSaveAreaFilePath") && dom["GSSaveAreaFilePath"].IsString())
+		{
+			mConfig.strFilePath = dom["GSSaveAreaFilePath"].GetString();
+		}
+	}
+
+	//Check
+	if (mConfig.strFilePath.length() > 0)
+	{
+		mIsUserConfigOK = FuTool::IsFileExit(mConfig.strFilePath.data());
+	}
+}
+
+
+void GUIGS::SelectGSSafeAreaFile() {
+
+	const int iCount = 3;
+	const char* open_filename = nullptr;
+	char const* filter_patterns[iCount] = { "*.png","*.jpeg","*.jpg" };  // "*.png",
+#if _WIN32
+	open_filename = tinyfd_openFileDialog(
+		"Load Pic",
+		"",
+		iCount,
+		filter_patterns,
+		nullptr,
+		0);
+#elif __APPLE__
+	vector<const char*> _filePaths = {};
+	vector<const char*> types = { "png","jpeg","jpg" };
+	FuToolMac::importFilesInObjectC("~/Desktop", types, &_filePaths, false);
+	if (_filePaths.size() > 0) {
+		open_filename = *_filePaths.begin();
+	}
+#endif
+	if (open_filename) {
+		mConfig.strFilePath = open_filename;
+		cv::Mat mat = cv::imread(open_filename);
+		cv::imwrite(GetUserIconPath(), mat);
+        SaveUserConfig();
+		Texture::createTextureFromFullPath(GetUserIconPath(), true, true);
+		mIsUserConfigOK = true;
+		mIsSelectGSSafeAreaFileOK = true;
+	}
+
+}
+
+void GUIGS::SaveUserConfig() {
+
+	rapidjson::StringBuffer buf;
+	//rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buf); // it can word wrap
+
+	writer.StartObject();
+
+	writer.Key("GSSaveAreaFilePath");
+
+	//writer.String(mConfig.strFilePath.data());
+    writer.String(GetUserIconPath().data());
+    
+	writer.EndObject();
+
+
+	const char* json_content = buf.GetString();
+
+	ofstream outfile;
+	outfile.open(GetCongfigPath().data());
+	if (!outfile.is_open()) {
+		fprintf(stderr, "fail to open file to write: %s\n", gUserConfig.data());
+	}
+
+	outfile << json_content << endl;
+	outfile.close();
+
 }

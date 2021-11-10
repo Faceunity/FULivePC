@@ -1,30 +1,32 @@
-#include "StickerHolder.h"
+﻿#include "StickerHolder.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <thread>
 #include <algorithm>
-
 #include "rapidjson/document.h"
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
 #include "fu_tool.h"
 #include "fu_tool_mac.h"
+#include <fstream>
+#include "zlib.h"
+#include "zip.h"
 
 //#define CURL_DEBUG 1
 #define CURL_WAIT_TIMEOUT_MSECS 60000 //60s
 #define CURL_MULIT_MAX_NUM 5
 
-static size_t recive_data_fun(void *buffer, size_t size, size_t nmemb, void *stream) {
+static size_t recive_data_fun(void* buffer, size_t size, size_t nmemb, void* stream) {
 	//return fwrite(ptr, size, nmemb, (FILE*)stream);
-	(static_cast<std::string *>(stream))->append((char*)buffer, size * nmemb);
+	(static_cast<std::string*>(stream))->append((char*)buffer, size * nmemb);
 	return (size * nmemb);
 }
 
-static size_t read_head_fun(void *ptr, size_t size, size_t nmemb, void *stream) {
+static size_t read_head_fun(void* ptr, size_t size, size_t nmemb, void* stream) {
 	char head[2048] = { 0 };
-	memcpy(head, ptr, size*nmemb + 1);
+	memcpy(head, ptr, size * nmemb + 1);
 	printf(" %s \n", head);
 	return size * nmemb;
 }
@@ -56,7 +58,7 @@ StikcerHolder::~StikcerHolder()
 }
 
 
-#define MAIN_URL  string("https://items.faceunity.com:4006/api") 
+#define MAIN_URL  string("http://192.168.0.122:8089/api") //string("https://items.faceunity.com:4006/api") 
 
 #define GET_QUEST_TAG_URL  (MAIN_URL + "/guest/tags?platform=pc")
 
@@ -102,7 +104,7 @@ std::string StikcerHolder::RequestBundleUrl(std::string strId)
 			}
 		}
 	}
-	
+
 	return strUrl;
 }
 
@@ -142,12 +144,12 @@ void StikcerHolder::RequestTools()
 			{
 				continue;
 			}
-			
+
 			std::string iconName = !tool.HasMember("icon") ? "" : FuTool::convert2local8bit(tool["icon"]["name"].GetString());
 
 			std::vector<std::string> names;
 			names.emplace_back(FuTool::convert2local8bit(tool["bundle"]["name"].GetString()));
-			auto bundleRes = std::make_shared<BundleRes>(tool["_id"].GetString(), 
+			auto bundleRes = std::make_shared<BundleRes>(tool["_id"].GetString(),
 				names[0], names,
 				iconName);
 			bundleRes->mIconUrl = !tool.HasMember("icon") ? "" : tool["icon"]["url"].GetString();
@@ -182,7 +184,9 @@ void StikcerHolder::RequestTools()
 				else if (category == CATEGORY_ANIMOJI)
 					bundleRes->mCategory = category;
 			}
-
+#ifdef __APPLE__
+			if(bundleRes->mIconName != "小熊icon.png")
+#endif
 			vecBundleRes.emplace_back(bundleRes);
 		}
 
@@ -308,7 +312,7 @@ bool StikcerHolder::DownLoadFile(std::string strUrl, std::string strPath)
 	{
 		mCurl = curl_easy_init();
 	}
-	
+
 	curl_easy_setopt(mCurl, CURLOPT_WRITEDATA, this);
 	CURLcode code = curl_easy_setopt(mCurl, CURLOPT_URL, strUrl.c_str());
 
@@ -328,4 +332,33 @@ bool StikcerHolder::DownLoadFile(std::string strUrl, std::string strPath)
 	curlRet = curl_easy_perform(mCurl);
 	fclose(pFile);
 	return curlRet == CURLE_OK ? true : false;
+}
+
+void StikcerHolder::UnzipFile(string strPath, string dirPath, int stickerIndex, int index)
+{
+
+	struct zip* pZip;
+	pZip = zip_open(strPath.c_str(), 0, &errno);
+	int numitems = zip_get_num_files(pZip);
+
+	mTagBundleList[stickerIndex][index]->mBundleDirs.clear();
+	for (int i = 0; i < numitems; i++)
+	{
+		struct zip_stat zipStat = { 0 };
+		zip_stat_init(&zipStat);
+		zip_stat_index(pZip, i, 0, &zipStat);
+		struct zip_file* pzipFile = zip_fopen_index(pZip, i, 0);
+		char* buf = new char[zipStat.size];
+		zip_fread(pzipFile, buf, zipStat.size);
+		std::fstream fs;
+		string file = dirPath + zipStat.name;
+		fs.open(file, std::fstream::binary | std::fstream::out);
+		fs.write(buf, zipStat.size);
+		fs.close();
+		string fileName(zipStat.name);
+		if (fileName.find(".bundle") != string::npos) {
+			mTagBundleList[stickerIndex][index]->mBundleDirs.emplace_back(dirPath + fileName);
+		}
+	}
+
 }
