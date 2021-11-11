@@ -350,7 +350,7 @@ void Nama::UnLoadAvatar()
 
 void Nama::UnLoadMakeup() 
 {
-	if (UIBridge::bundleCategory != BundleCategory::Makeup)
+	if (UIBridge::bundleCategory != BundleCategory::Makeup && mMakeUpHandle != -1)
 	{
 		fuUnbindItems(mMakeUpHandle, &UIBridge::m_curRenderItem, 1);
 		UIBridge::m_curBindedItem = -1;
