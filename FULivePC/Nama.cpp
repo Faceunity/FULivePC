@@ -350,7 +350,7 @@ void Nama::UnLoadAvatar()
 
 void Nama::UnLoadMakeup() 
 {
-	if (UIBridge::bundleCategory != BundleCategory::Makeup && mMakeUpHandle != -1)
+	if (UIBridge::bundleCategory != BundleCategory::Makeup)
 	{
 		fuUnbindItems(mMakeUpHandle, &UIBridge::m_curRenderItem, 1);
 		UIBridge::m_curBindedItem = -1;
@@ -1202,7 +1202,7 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 	else
 	{
 		// 如果不是美妆，首先解除美妆效果
-		if (UIBridge::bundleCategory != BundleCategory::Makeup)
+		if (UIBridge::bundleCategory != BundleCategory::Makeup && mMakeUpHandle != -1)
 		{
 			fuUnbindItems(mMakeUpHandle, &UIBridge::m_curRenderItem, 1);
 			UIBridge::m_curBindedItem = -1;
