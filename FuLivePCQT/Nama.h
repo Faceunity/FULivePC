@@ -21,6 +21,7 @@ enum BundleCategory
     GestureRecognition,     //手势识别
     MagicMirror,            //哈哈镜
     Makeup,                 //美妆
+    LightMakeup,            //轻美妆
     BeautyHair,             //美发
     BigHead,                //搞笑大头
     GreenScreen,            //绿幕
@@ -86,6 +87,7 @@ public:
     std::vector<std::string> avatarBundles;
     //打开虚拟摄像头
     bool m_bVirturalCamera = false;
+    bool m_bIsCreateVirturalCamera = false;
 public:
     void InitOpenGL();
     bool CheckGLContext();
@@ -134,7 +136,6 @@ public:
     void RenderBear();
     //设置Avatar类型
     void SetBodyTrackType(BodyTrackType type);
-    //    void SetAvatarType(AvatarType type);
     //设置绿幕背景色
     void SetGSKeyColor(cv::Vec4b data);
     //改变绿幕相机输入图像位置
