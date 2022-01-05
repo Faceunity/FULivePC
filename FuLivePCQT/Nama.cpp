@@ -230,6 +230,7 @@ void Nama::InitNama()
 
         m_FxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
     }
+
     fuItemSetParamd(m_BodyShapeHandle,"Debug",0.0);
     float fValue = 0.5f;
     fuSetFaceTrackParam((void*)"mouth_expression_more_flexible", &fValue);
@@ -243,7 +244,6 @@ void Nama::InitNama()
     //设置输出矩阵
     //    fuSetOutputMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
     m_EnableNama = true;
-
     changeRenderList(RENDER_AR);
 }
 
@@ -286,6 +286,7 @@ void Nama::RenderDefNama()
             m_mp3->CirculationPlayCheck();
         }
     }
+    static bool is_create_vc = false;
 #ifdef SynchronizingCamera
     if(m_getNewFrame){
 #endif
@@ -293,7 +294,7 @@ void Nama::RenderDefNama()
         if(m_FrameWidth != m_frame.cols){
             m_FrameWidth = m_frame.cols;
             fuHumanProcessorReset();
-            if(m_bIsCreateVirturalCamera){
+            if(is_create_vc){
                 changeResolutionOfVirturalCamera(m_frame.cols, m_frame.rows);
             }
         }
@@ -304,10 +305,10 @@ void Nama::RenderDefNama()
                 m_texID = fuRender(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(result.data), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(m_frame.data),
                                    m_frame.cols, m_frame.rows, m_FrameID++, m_renderList.data(),
                                    m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
-                if (!m_bIsCreateVirturalCamera)
+                if (!is_create_vc)
                 {
                     createVirturalCamera(0);
-                    m_bIsCreateVirturalCamera = true;
+                    is_create_vc = true;
                 }
                 pushDataToVirturalCamera(result.data, result.cols, result.rows);
             }
@@ -602,10 +603,11 @@ void Nama::RenderP2A()
     if(m_getNewFrame){
         if(m_bVirturalCamera){
             cv::Mat result(m_frame.rows, m_frame.cols, CV_8UC4);
-            if (!m_bIsCreateVirturalCamera)
+            static bool is_create_vc = false;
+            if (!is_create_vc)
             {
                 createVirturalCamera(0);
-                m_bIsCreateVirturalCamera = true;
+                is_create_vc = true;
             }
             m_Controller->RenderBundlesBuffer(result.data, m_frame, m_FrameID);
             pushDataToVirturalCamera(result.data, result.cols, result.rows);
@@ -632,10 +634,11 @@ void Nama::RenderBear()
                  renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
         fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
         if(m_bVirturalCamera){
-            if (!m_bIsCreateVirturalCamera)
+            static bool is_create_vc = false;
+            if (!is_create_vc)
             {
                 createVirturalCamera(0);
-                m_bIsCreateVirturalCamera = true;
+                is_create_vc = true;
             }
             m_Controller->RenderBundlesBuffer(result.data, m_frame, m_FrameID);
             pushDataToVirturalCamera(result.data, result.cols, result.rows);

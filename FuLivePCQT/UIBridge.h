@@ -31,7 +31,6 @@ const QString gBundlePath[] = {
     QString::fromStdString(g_assetDir) + "items/" + "GestureRecognition",
     QString::fromStdString(g_assetDir) + "items/" + "MagicMirror",
     QString::fromStdString(g_assetDir) + "items/" + "Makeup",
-    QString::fromStdString(g_assetDir) + "items/" + "LightMakeup",
     QString::fromStdString(g_assetDir) + "items/" + "BeautyHair",
     QString::fromStdString(g_assetDir) + "items/" + "BigHead",
     QString::fromStdString(g_assetDir) + "items/" + "GreenScreen",
@@ -88,6 +87,7 @@ public:
     void setBodyTrackType(int type);
     void setCameraWidth(int width){ m_cameraWidth = width;}
     void setCameraHeight(int height){ m_cameraHeight = height;}
+    //    void setGSCameraName(QString name){ m_gsCameraName = name;}
     bool virturalCamera();
     void setVirturalCamera(bool vc);
     bool gsSelectCamera(){return m_gsSelectCamera;}
@@ -156,7 +156,6 @@ public:
     QStringList      m_userCustomMakeup;
     //右侧滤镜
     QList<QVariant>  m_filter;
-    //
     //临时美妆列表,最终存到m_customMakeup每个的第一条
     QList<QVariant>  m_tempCustomMakeup;
     //自定义美妆
@@ -251,8 +250,6 @@ public:
     cv::Vec4b m_gsColor = {0,255,0,255};
     //是否为老美妆道具,需要绑到Makeup
     bool m_bmakeupFlag = true;
-    //轻美妆道具名称
-    QString m_lightMakeUpName;
 signals:
     //qml界面相关
     void cameraSetListChanged();
@@ -382,14 +379,6 @@ public slots:
     void stopMediaPlayer(){
         m_gsVideoMediaPlayer.stop();
     }
-    //轻美妆设置参数
-    void setLightMakeUpParam(QString name);
-    //轻美妆加载设置图片
-    void setLightMakeUpTex(string value,string imagepath);
-    //轻美妆设置口红颜色
-    void setLightMakeUpLipColor(string colorpath);
-    //更新滤镜
-    void updataFilter();
 };
 
 #endif // UIBRIDGE_H
