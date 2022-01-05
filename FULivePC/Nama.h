@@ -17,7 +17,6 @@
 
 #include "Config.h"
 
-extern struct LightMakeupParam;
 class CCameraDS;
 class FuController;
 typedef unsigned char uchar;
@@ -135,7 +134,6 @@ namespace NamaExampleNameSpace
 
 		void DestroyAll();
 		int GetLastNamaError();
-		void setLightMakeupParam(LightMakeupParam param);
 	private:
 		
 		void RenderGS(cv::Mat & picInput, int rotType);

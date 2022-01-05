@@ -178,12 +178,8 @@ namespace gui_tab_content
 		ImGui::PopStyleColor();
 	}
 
-	void ShowTabFilter(Nama* nama)
+	void ShowTabFilter(Nama * nama)
 	{
-		if (UIBridge::showLightMakeupTip && !UIBridge::showGreenScreen) {
-			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.3f);
-		}
 		ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));
 		std::string filterNameArr[6] = { "list_image_origin", "list_image_bailiang1", "list_image_fennen1", "list_image_xiaoqingxin1", "list_image_lengsediao1", "list_image_nuansediao1" };
 		for (int i = 0; i < 6; i++)
@@ -208,22 +204,11 @@ namespace gui_tab_content
 				ImGui::SameLine(0.f, 27.f);
 			}
 		}
-		if (UIBridge::showLightMakeupTip && !UIBridge::showGreenScreen) {
-			ImGui::PopItemFlag();
-			ImGui::PopStyleVar();
-			LayoutImageSameLine(ImVec2(34, 86), ImVec2(20, 20), Texture::createTextureFromFile("icon_tips.png", false)->getTextureID(), u8"轻美妆与滤镜无法共用，如需编辑请先取消");
-			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.3f);
-		}
 		if (UIBridge::showFilterSlider) {
-			if (LayoutSlider(ImVec2(54, 200), ImVec2(252, 10), "##slider36", &UIBridge::mFilterLevel[UIBridge::m_curFilterIdx], 0, 100))
+			if (LayoutSlider(ImVec2(54, 280), ImVec2(252, 10), "##slider36", &UIBridge::mFilterLevel[UIBridge::m_curFilterIdx], 0, 100))
 			{
 				nama->UpdateBeauty();
 			}
-		}
-		if (UIBridge::showLightMakeupTip && !UIBridge::showGreenScreen) {
-			ImGui::PopItemFlag();
-			ImGui::PopStyleVar();
 		}
 	}
 
@@ -264,10 +249,6 @@ namespace gui_tab_content
 							nama->pauseCurrentMp3();
 						}
 					}
-					if (UIBridge::bundleCategory == BundleCategory::LightMakeup && UIBridge::showLightMakeupTip) {
-						nama->UpdateFilter(UIBridge::m_curFilterIdx);
-						UIBridge::showLightMakeupTip = false;
-					}
 					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
 					UIBridge::m_bShowingBodyBeauty = true;
 					UIBridge::showItemSelectWindow = false;
@@ -285,10 +266,6 @@ namespace gui_tab_content
 						if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3) {
 							nama->pauseCurrentMp3();
 						}
-					}
-					if (UIBridge::bundleCategory == BundleCategory::LightMakeup && UIBridge::showLightMakeupTip) {
-						nama->UpdateFilter(UIBridge::m_curFilterIdx);
-						UIBridge::showLightMakeupTip = false;
 					}
 					UIBridge::m_bShowingBodyBeauty = true;
 					UIBridge::showItemSelectWindow = false;
@@ -326,10 +303,6 @@ namespace gui_tab_content
 			if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3 && !UIBridge::showGreenScreen) {
 				nama->resumeCurrentMp3();
 			}
-			if (UIBridge::bundleCategory == BundleCategory::LightMakeup && UIBridge::m_curRenderItem != -1) {
-				nama->setLightMakeupParam(UIBridge::m_lightMakeupParam);
-				UIBridge::showLightMakeupTip = true;
-			}
 			UIBridge::showItemSelectWindow = (UIBridge::bundleCategory != BUNDLE_CATEGORY_NOMEAN);
 		}
 
@@ -339,10 +312,6 @@ namespace gui_tab_content
 			// 处理音乐滤镜，重新开启音乐
 			if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3 && !UIBridge::showGreenScreen) {
 				nama->resumeCurrentMp3();
-			}
-			if (UIBridge::bundleCategory == BundleCategory::LightMakeup && UIBridge::m_curRenderItem != -1) {
-				nama->setLightMakeupParam(UIBridge::m_lightMakeupParam);
-				UIBridge::showLightMakeupTip = true;
 			}
 			UIBridge::showItemSelectWindow = (UIBridge::bundleCategory != BUNDLE_CATEGORY_NOMEAN);
 			resetBodyShapeParam();
