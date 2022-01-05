@@ -50,7 +50,7 @@ const string g_assetDir = "";
 #else
 const string g_assetDir = "../assets/";
 #endif
-const string g_pose_track_folder = "PoseTrack/";
+const string g_pose_track_folder = g_assetDir+"PoseTrack/";
 
 const string g_avatar_def_bg = "others/default_bg.bundle";
 

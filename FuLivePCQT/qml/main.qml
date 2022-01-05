@@ -40,14 +40,6 @@ Window {
     property var i_selectSticker: 0
     //渲染美体
     property var b_arBody: false
-    //道具选项下标
-    property var i_category_avatar: 0;
-    property var i_category_jingpin: 3;
-    property var i_category_backgroundSegmentation: 7;
-    property var i_category_makeup: 10;
-    property var i_category_lightMakeup: 11;
-    property var i_category_greenScreen: 14;
-    property var i_category_safeArea: 15;
     //窗体大小改变
     onWidthChanged: {
         xScale = width / 1360.0
@@ -76,13 +68,13 @@ Window {
             //选中第二个背景图片
             i_arSelectCategoryPoint.y = 1
             //更新自定义背景图片
-            updataPropOption(i_category_backgroundSegmentation)
+            updataPropOption(7)
         }
         onUpdataGSSafePic: {
             //选中第二个绿幕安全图片
             i_gsSelectSaveArea = 1
             //更新自定义绿幕安全区域图片
-            updataPropOption(i_category_safeArea - i_category_greenScreen)
+            updataPropOption(1)
         }
         onUpdataCameraIndex:{
             m_cCamera.currentIndex = index
@@ -94,12 +86,12 @@ Window {
             i_avatarType = type
         }
         onUpdataSelectCategory:{
-            if(x < i_category_greenScreen){
+            if(x <= 12){
                 i_arSelectCategoryPoint = Qt.point(x,y);
                 i_selectCategory = x
                 if(x == 0 && y == 0){
                     showAvator(true);
-                }else if(x == i_category_jingpin){
+                }else if(x == 3){
                     i_selectSticker = z
                     m_lStickerTips.currentIndex = z
                 }else{
@@ -115,7 +107,7 @@ Window {
             i_gsSelectVideo = x
             updataPropOption(0)
             i_gsSelectSaveArea = y
-            if(y >= 0){
+            if(y >= 0 ){
                 updataPropOption(1)
             }
         }
@@ -142,7 +134,7 @@ Window {
     function arBodyFlagChanged(arBody){
         b_arBody = arBody
         m_rPropShadow.visible = arBody
-        if(i_arSelectCategoryPoint.x == i_category_jingpin){
+        if(i_arSelectCategoryPoint.x == 3){
             m_rBoutiqueSticker.visible = !arBody
         }else if(i_arSelectCategoryPoint.x > 0){
             m_rpropOption.visible = !arBody
@@ -165,15 +157,14 @@ Window {
             m_rARbackgroud.x = 137
             showAvator(false);
             m_lProp.x = 380
-            m_lProp.contentX = 0
             //第一次没选择摄像头或视频时遮挡
             m_rGreenScreen.visible = !b_setGreenScreen
             m_rPropShadow.visible = !b_setGreenScreen
             m_maCameraDisplay.enabled = true
             //绿幕默认选中第一个
             if(i_gsSelectSaveArea >= 0){
-                i_selectCategory = i_category_safeArea - i_category_greenScreen
-                updataPropOption(i_category_safeArea - i_category_greenScreen)
+                i_selectCategory = 1
+                updataPropOption(1)
             }else{
                 i_selectCategory = 0
                 updataPropOption(0)
@@ -186,7 +177,6 @@ Window {
         }else{
             m_rARbackgroud.x = 2
             m_lProp.x = 0
-            m_lProp.contentX = 0
             m_rGreenScreen.visible = false
             m_greenScreenSelectCamera.visible = false
             m_maCameraDisplay.enabled = false
@@ -199,21 +189,21 @@ Window {
                 updataPropOption(i_arSelectCategoryPoint.x)
                 if(i_arSelectCategoryPoint.x == 0){
                     showAvator(true)
-                }else if(i_arSelectCategoryPoint.x == i_category_jingpin){
+                }else if(i_arSelectCategoryPoint.x == 3){
                     showBoutiqueSticker(true)
                     UIBridge.downloadSticker(i_arSelectCategoryPoint.y)
                 }
             }
             m_rSelectGreenScreen.visible = false
-            //如果选择美体
-            if(b_arBody){
-                m_rPropShadow.visible = b_arBody
-                if(i_arSelectCategoryPoint.x == i_category_jingpin){
-                    m_rBoutiqueSticker.visible = !b_arBody
-                    m_rpropOption.visible = false
-                }else{
-                    m_rpropOption.visible = !b_arBody
-                }
+        }
+        //如果选择美体
+        if(b_arBody){
+            m_rPropShadow.visible = b_arBody
+            if(i_arSelectCategoryPoint.x == 3){
+                m_rBoutiqueSticker.visible = !b_arBody
+                m_rpropOption.visible = false
+            }else{
+                m_rpropOption.visible = !b_arBody
             }
         }
         UIBridge.arFunction = arfun
@@ -288,7 +278,6 @@ Window {
             m_lmProp.append( { icon: "gesturerecognition", text:"手势识别", selected: false })
             m_lmProp.append( { icon: "Hahamirror", text:"哈哈镜", selected: false })
             m_lmProp.append( { icon: "makeup", text:"美妆", selected: false })
-            m_lmProp.append( { icon: "lightmakeup", text:"轻美妆", selected: false })
             m_lmProp.append( { icon: "hairdressing", text:"美发", selected: false })
             m_lmProp.append( { icon: "photo_sticker", text:"搞笑大头", selected: false })
         }else{
@@ -306,7 +295,7 @@ Window {
                 var iconValue = UIBridge.categoryBundles[index][i];
                 var pathType = true;
                 //如果是人像分割
-                if(index === i_category_backgroundSegmentation && iconValue === "bg_seg_shot"){
+                if(index === 7 && iconValue === "bg_seg_shot"){
                     pathType = false;
                 }
                 if(index === i_arSelectCategoryPoint.x && i === i_arSelectCategoryPoint.y){
@@ -320,7 +309,7 @@ Window {
             {
                 var pathType1 = true;
                 var iconValue1 = UIBridge.greenScreenIcon[index][j];
-                if(index === (i_category_safeArea - i_category_greenScreen) && iconValue1 === "gs_savearea_shot"){
+                if(index === 1 && iconValue1 === "gs_savearea_shot"){
                     pathType1 = false;
                 }
                 if((index === 0 && j === i_gsSelectVideo) || (index === 1 && j === i_gsSelectSaveArea)){
@@ -896,7 +885,6 @@ Window {
                 height: 140
                 orientation: ListView.Horizontal
                 clip: true
-                interactive:false
                 model: ListModel
                 {
                     id: m_lmProp
@@ -915,10 +903,10 @@ Window {
                             if(model.icon === selectName){
                                 model.selected = !model.selected;
                                 m_rpropOption.visible = false
-                                if(i === i_category_jingpin && b_ARFunction){
+                                if(i === 3 && b_ARFunction){
                                     //更新精品贴纸
-                                    i_selectCategory = i_category_jingpin
-                                    UIBridge.selectCategory = i_category_jingpin
+                                    i_selectCategory = 3
+                                    UIBridge.selectCategory = 3
                                     showBoutiqueSticker(selected)
                                 }else if(b_ARFunction){
                                     m_rpropOption.visible = model.selected
@@ -930,15 +918,14 @@ Window {
                                     m_rpropOption.visible = model.selected
                                     if(model.selected){
                                         updataPropOption(i)
-                                        UIBridge.selectCategory = i + i_category_greenScreen
+                                        UIBridge.selectCategory = i + 13
                                         i_selectCategory = i
+                                        //如果在绿幕状态显示绿幕参数设置
+                                        showGreenScreenList(model.selected)
                                     }
-                                    //如果在绿幕状态显示绿幕参数设置
-                                    showGreenScreenList(model.selected)
                                 }
                             }else{
                                 model.selected = false;
-
                             }
                         }
                     }
@@ -969,7 +956,7 @@ Window {
                 width: 910
                 height: 13
                 size: m_lProp.width / m_lProp.contentWidth
-                policy: ScrollBar.AsNeeded
+                policy: ScrollBar.AlwaysOn
                 //定义样式
                 contentItem: Rectangle {
                     radius: 8
@@ -1021,7 +1008,7 @@ Window {
                                         }else{
                                             if(i_selectCategory == 0){
                                                 i_gsSelectVideo = i
-                                            }else if(i_selectCategory == i_category_safeArea - i_category_greenScreen){
+                                            }else if(i_selectCategory == 1){
                                                 if(i > 0){
                                                     i_gsSelectSaveArea = i
                                                 }
@@ -1030,16 +1017,16 @@ Window {
                                         if(m_rCustomMakeupWindow.visible){
                                             resetMakeup()
                                         }
-                                        if(UIBridge.selectCategory === i_category_backgroundSegmentation && i === 0){
+                                        if(UIBridge.selectCategory === 7 && i === 0){
                                             UIBridge.useProps(i)
                                             //显示自定义背景分割
                                             m_rPropShadow.visible = true
                                             m_rBGSegment.visible = true
                                             m_rARGSShadow.visible = true
                                             m_fileDialogBGS.open()
-                                        }else if(UIBridge.selectCategory === i_category_avatar && i === 0){
+                                        }else if(UIBridge.selectCategory === 0 && i === 0){
                                             showAvator(true)
-                                        }else if(UIBridge.selectCategory === i_category_safeArea && i === 0){
+                                        }else if(UIBridge.selectCategory === 14 && i === 0){
                                             //打开自定义绿幕安全区域选择
                                             m_rPropShadow.visible = true
                                             m_rARGSShadow.visible = true
@@ -1420,7 +1407,7 @@ Window {
                     //恢复默认
                     onClickRestoreDefault: {
                         UIBridge.resetItemParam(0)
-                        var list = [1, 3, 70, 30, 30, 20, 0, 0, 0, 0]
+                        var list = [0, 0, 70, 30, 30, 20, 0, 0, 0, 0]
                         for(var i = 0; i < m_lmBeautySkin.count - 1; i++){
                             m_lBeautySkin.itemAtIndex(i).resetValue(list[i])
                         }
@@ -1601,36 +1588,6 @@ Window {
                     anchors.centerIn: m_slider
                     text: "0"
                 }
-                //轻美妆提示
-                Rectangle{
-                    anchors.fill: parent
-                    color: "#82FFFFFF"
-                    visible: i_arSelectCategoryPoint.x == i_category_lightMakeup && b_ARFunction && !b_arBody
-                    MouseArea{
-                        anchors.fill: parent
-                    }
-                    Rectangle{
-                        x: 34
-                        y: 346
-                        width: 348
-                        height: 88
-                        radius: 8
-                        border.width: 1
-                        border.color: "#E0E3EE"
-                        Image {
-                            x:32
-                            y:34
-                            width: 20
-                            height: 20
-                            source: "qrc:/res/icon_tips.png"
-                        }
-                        TextBlack{
-                            x:58
-                            y:32
-                            text: "轻美妆与滤镜无法共用，如需编辑请先取消"
-                        }
-                    }
-                }
             }//---滤镜窗体
 
             //美体窗体
@@ -1777,10 +1734,10 @@ Window {
                         //如果是绿幕区域状态
                         if(i_gsSelectSaveArea >= 0){
                             i_gsSelectSaveArea = -1
-                            if(UIBridge.selectCategory === i_category_safeArea){
+                            if(UIBridge.selectCategory === 14){
                                 updataPropOption(1)
                             }else{
-                                UIBridge.selectCategory = i_category_safeArea
+                                UIBridge.selectCategory = 14
                             }
                             UIBridge.nonuseProps()
                         }
@@ -2312,7 +2269,7 @@ Window {
             width: 415
             height: 750
             radius: 8
-            visible: i_arSelectCategoryPoint.x == i_category_makeup && i_arSelectCategoryPoint.y == 0 && b_ARFunction
+            visible: i_arSelectCategoryPoint.x == 10 && i_arSelectCategoryPoint.y == 0 && b_ARFunction
             //自定义美妆标题 腮红 阴影 眉毛
             GridView{
                 id: m_gCustomMakeupTitle
@@ -2586,7 +2543,7 @@ Window {
             width: 415
             height: 750
             radius: 8
-            visible: i_arSelectCategoryPoint.x == i_category_avatar && i_arSelectCategoryPoint.y == 0
+            visible: i_arSelectCategoryPoint.x == 0 && i_arSelectCategoryPoint.y == 0
             Image {
                 x:10
                 y:300

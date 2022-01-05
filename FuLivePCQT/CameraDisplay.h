@@ -26,6 +26,9 @@ public:
     void initializeGL();
     void render(void) override;
 private:
+    QOpenGLBuffer *m_vbo, *m_ebo;
+    QOpenGLVertexArrayObject *m_vao;
+    QOpenGLShaderProgram *m_shader;
     QTime m_timeRender;
 };
 
