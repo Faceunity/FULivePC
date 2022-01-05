@@ -127,7 +127,8 @@ void GUISticker::ShowStickerList(Nama * nama, int tagIndex)
 		{
 			maxPeople = 1;
 		}
-
+		nama->UpdateFilter(UIBridge::m_curFilterIdx);
+		UIBridge::showLightMakeupTip = false;
 		bundle->mHasNotBinded = true;
 		//¼ÓÔØÐ¡ÐÜ
 		if (bundle->mBundleDirs.size() > 1) {
