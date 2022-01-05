@@ -14,6 +14,7 @@
 
 
 #define MAKEUP_CUSTOM_NAME ("demo_icon_customize.bundle")
+#define LIGHT_MAKEUP_NAME ("light_makeup.bundle")
 #define BGSEG_CUSTOM_NAME ("others/bg_segment.bundle")
 #define BGSEG_USERFILE_PIC ("bg_seg_shot.png")
 #define GSSAFEAREA_USERFILE_PIC ("gs_safearea_shot.png")
@@ -86,7 +87,8 @@ enum BundleCategory
 	BackgroundSegmentation,
 	GestureRecognition,
 	MagicMirror,
-	Makeup ,
+	Makeup,
+	LightMakeup,
 	BeautyHair,
 	BigHead,
 	GreenScreen,
@@ -149,6 +151,20 @@ typedef struct tagGreenScreenState
 
 }GreenScreenState;
 
+struct LightMakeupParam
+{
+	std::string blusherPath;
+	float blusher;
+	std::string eyeshadowPath;
+	float eyeshadow;
+	std::string eyebrowPath;
+	float eyebrow;
+	std::string lipColorPath;
+	float intensity;
+	std::string filterName;
+	float filterLevel;
+};
+
 class UIBridge
 {
 public:
@@ -167,7 +183,8 @@ public:
 	static int  showGreenScreen;
 	static bool showCustomMakeup;
 	static bool newMakeupType;
-
+	static bool showLightMakeupTip;
+	static LightMakeupParam m_lightMakeupParam;
 	static bool mNeedIpcWrite; 
 	static bool mNeedPlayMP3;
 	static bool mNeedStopMP3;
@@ -301,6 +318,7 @@ const string gBundlePath[] = {
 	g_assetDir + "items/" + "GestureRecognition",
 	g_assetDir + "items/" + "MagicMirror",
 	g_assetDir + "items/" + "Makeup",
+	g_assetDir + "items/" + "LightMakeup",
 	g_assetDir + "items/" + "BeautyHair",
 	g_assetDir + "items/" + "BigHead",
 	g_assetDir + "items/" + "GreenScreen"
