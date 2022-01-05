@@ -62,7 +62,7 @@
         <file>../res/demo_style_highlight_01.png</file>
         <file>../res/demo_style_highlight_02.png</file>
         <file>../res/demo_style_lip_01.png</file>
-		<file>../res/demo_style_lip_02.png</file>
+        <file>../res/demo_style_lip_02.png</file>
         <file>../res/demo_style_lip_03.png</file>
         <file>../res/demo_style_lip_04.png</file>
         <file>../res/demo_style_lip_05.png</file>
@@ -258,19 +258,19 @@
         <file>../res/list_icon_sharpen_open.png</file>
         <file>../res/list_iconsharpen_open@2x.png</file>
         <file>../res/list_image_bailiang1.png</file>
-        <file>../res/list_image_boyfriend.png</file>
-        <file>../res/list_image_clear.png</file>
+        <file>../res/light_makeup_boyfriend.png</file>
+        <file>../res/light_makeup_clear.png</file>
         <file>../res/list_image_danya.png</file>
         <file>../res/list_image_delta.png</file>
         <file>../res/list_image_fennen.png</file>
         <file>../res/list_image_fennen1.png</file>
-        <file>../res/list_image_grapefruit.png</file>
+        <file>../res/light_makeup_grapefruit.png</file>
         <file>../res/list_image_hongrun.png</file>
         <file>../res/list_image_lengsediao1.png</file>
         <file>../res/list_image_nuansediao1.png</file>
         <file>../res/list_image_origin.png</file>
         <file>../res/list_image_Originalmap.png</file>
-        <file>../res/list_image_peachblossom.png</file>
+        <file>../res/light_makeup_peachblossom.png</file>
         <file>../res/list_image_qingxin.png</file>
         <file>../res/list_image_slowlived.png</file>
         <file>../res/list_image_tokyo.png</file>
@@ -506,5 +506,7 @@
         <file>../res/makeup_icon_combination_1_mixed_race.png</file>
         <file>../res/list_icon_short_face_open.png</file>
         <file>../res/list_icon_short_face_close.png</file>
+        <file>../res/list_icon_lightmakeup_hover.png</file>
+        <file>../res/list_icon_lightmakeup_nor.png</file>
     </qresource>
 </RCC>

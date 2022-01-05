@@ -138,14 +138,14 @@ unsigned int FuController::RenderBundlesTexture(cv::Mat& bgraFrame, int & frameI
 {
     unsigned int glNamaRetTexture;
     fuRenderBundles(FU_FORMAT_RGBA_TEXTURE, (void*)(&glNamaRetTexture), FU_FORMAT_BGRA_BUFFER, (void*)(bgraFrame.data),
-        bgraFrame.cols, bgraFrame.rows, frameId++, m_vecRender.data(), m_vecRender.size());
+                    bgraFrame.cols, bgraFrame.rows, frameId++, m_vecRender.data(), m_vecRender.size());
     return glNamaRetTexture;
 }
 
 unsigned int FuController::RenderBundlesBuffer(uint8_t* out_buffer, cv::Mat& bgraFrame, int & frameId)
 {
     return fuRenderBundles(FU_FORMAT_RGBA_BUFFER, (void*)(out_buffer), FU_FORMAT_BGRA_BUFFER, (void*)(bgraFrame.data),
-        bgraFrame.cols, bgraFrame.rows, frameId++, m_vecRender.data(), m_vecRender.size());
+                           bgraFrame.cols, bgraFrame.rows, frameId++, m_vecRender.data(), m_vecRender.size());
 }
 
 int FuController::GetHumanStatus()
@@ -217,7 +217,7 @@ void FuController::CreateTexForItemchar(const char* path)
     int n = pic.type();
     cv::cvtColor(pic, pic, cv::COLOR_BGRA2RGBA);
     fuCreateTexForItem(m_nCtrlHandle, "picture_in_frame", pic.data,
-        pic.cols, pic.rows);
+                       pic.cols, pic.rows);
 }
 
 void FuController::setip_port(double *ip, int port)
@@ -290,3 +290,4 @@ double FuController::GetAnimPregress(int nHandle)
 
     return 0.0;
 }
+
