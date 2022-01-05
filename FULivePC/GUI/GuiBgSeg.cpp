@@ -245,10 +245,7 @@ void GUIBgSeg::ShowBgSegPannel(NamaExampleNameSpace::Nama* nama) {
 				UIBridge::showItemTipsWindow = false;
 				UIBridge::mNeedStopMP3 = true;
 			}
-			if (UIBridge::showLightMakeupTip) {
-				UIBridge::showLightMakeupTip = false;
-				nama->UpdateFilter(UIBridge::m_curFilterIdx);
-			}
+
 			if (itemName == MAKEUP_CUSTOM_NAME)
 			{
 				UIBridge::showCustomMakeup = true;
