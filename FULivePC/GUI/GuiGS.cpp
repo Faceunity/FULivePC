@@ -336,6 +336,7 @@ void GUIGS::ShowGSInputChoice(Nama * nama,bool canCancel)
 					
 					float videoWidth,videoHeight, dstW, dstH;
 					bool isSuccess = FuTool::getLocalVideoResolution(videoPath, &videoWidth, &videoHeight);
+					
 					switch (UIBridge::m_localVideoRotation) {
 						case 0:
 							break;
@@ -369,7 +370,15 @@ void GUIGS::ShowGSInputChoice(Nama * nama,bool canCancel)
 					
 					if (SetCameraFileInput(nama, videoPath.c_str()))
 					{
-						
+						if (videoWidth == 0) {
+							float imgWidth, imgHeight, dstW, dstH;
+							cv::Size imgSize = CCameraManage::getInstance()->getCameraDstResolution();
+							imgWidth = imgSize.width;
+							imgHeight = imgSize.height;
+							calculatePreViewForHalfScreen(imgWidth, imgHeight, &dstW, &dstH);
+							UIBridge::m_localVideoWidth = dstW;
+							UIBridge::m_localVideoHeight = dstH;
+						}
 					}
 				}else{
 					if (SetCameraFileInput(nama, videoPath.c_str()))

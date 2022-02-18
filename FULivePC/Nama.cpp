@@ -285,7 +285,6 @@ bool Nama::Init()
 		fuSetMaxFaces(4);
 
 		InitController();
-
 		mHasSetup = true;
 	}
 	else
@@ -586,7 +585,9 @@ void Nama::UpdateFilter(int index)
 	if (false == mNamaAppState.EnableNama || false == mIsBeautyOn || mBeautyHandles == 0)return;
 
 	fuItemSetParams(mBeautyHandles, "filter_name", &mFilters[index][0]);
+	fuItemSetParamd(mBeautyHandles, "filter_level", UIBridge::mFilterLevel[index] / 100.0f);
 }
+
 
 void Nama::UpdateBeauty()
 {
@@ -634,7 +635,9 @@ void Nama::UpdateBeauty()
 	map<int, int> blurType = { {0,2},{1,0},{2,1},{3,3} };
 	fuItemSetParamd(mBeautyHandles, "blur_type", blurType[UIBridge::mEnableHeayBlur]);
 	fuItemSetParamd(mBeautyHandles, "face_shape_level", 1);
-	fuItemSetParamd(mBeautyHandles, "filter_level", UIBridge::mFilterLevel[UIBridge::m_curFilterIdx] / 100.0f);
+	if (!(UIBridge::showLightMakeupTip && !UIBridge::showGreenScreen)) {
+		fuItemSetParamd(mBeautyHandles, "filter_level", UIBridge::mFilterLevel[UIBridge::m_curFilterIdx] / 100.0f);
+	}
 }
 
 #include "rapidjson.h"
@@ -813,7 +816,6 @@ void Nama::UpdateGSBg(cv::Mat & dataRGBA)
 
 	//DWORD time1 = GetTickCount();
 	fuCreateTexForItem(mGSHandle, "tex_bg", dataRGBA.data, dataRGBA.cols, dataRGBA.rows);
-
 	/*DWORD time2 = GetTickCount();
 
 	printf("liufei cost time:%d \r\n", time2 - time1);*/
@@ -1189,7 +1191,7 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 		}
 	}
 	
-	if (UIBridge::m_curRenderItem == bundleID)
+	if (UIBridge::m_curRenderItem == bundleID && UIBridge::bundleCategory != BundleCategory::LightMakeup)
 	{
 		
 		if (UIBridge::bundleCategory == BundleCategory::Makeup)
@@ -1202,7 +1204,7 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 	else
 	{
 		// 如果不是美妆，首先解除美妆效果
-		if (UIBridge::bundleCategory != BundleCategory::Makeup && mMakeUpHandle != -1)
+		if (UIBridge::bundleCategory != BundleCategory::Makeup && mMakeUpHandle != -1 && UIBridge::m_curRenderItem != -1)
 		{
 			fuUnbindItems(mMakeUpHandle, &UIBridge::m_curRenderItem, 1);
 			UIBridge::m_curBindedItem = -1;
@@ -1330,15 +1332,11 @@ void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
 		}else{
 			renderList.push_back(mBeautyHandles);
 			
-			if (UIBridge::newMakeupType)
-			{
+			if (UIBridge::m_curRenderItem != -1) {
 				renderList.push_back(UIBridge::m_curRenderItem);
 			}
-			else
+			if (!UIBridge::newMakeupType)
 			{
-				if (UIBridge::m_curRenderItem != -1) {
-					renderList.push_back(UIBridge::m_curRenderItem);
-				}
 				renderList.push_back(mMakeUpHandle);
 			}
 		}
@@ -1348,6 +1346,7 @@ void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
 		BgSegUpdate::instance().Update(this);
 
 		fuSetInputCameraBufferMatrix((TRANSFORM_MATRIX)rotType);
+		fuSetInputCameraTextureMatrix((TRANSFORM_MATRIX)rotType);
 
 		fuRender(FU_FORMAT_RGBA_BUFFER,
 			(int*)(picInput.data),
@@ -1376,6 +1375,7 @@ void Nama::RenderP2A(cv::Mat & picBg, int rotType)
 		return;
 
 	fuSetInputCameraBufferMatrix((TRANSFORM_MATRIX)rotType);
+	fuSetInputCameraTextureMatrix((TRANSFORM_MATRIX)rotType);
 	m_Controller->RenderBundlesBuffer(picBg.data, picBg, mFrameID);
 }
 
@@ -1409,6 +1409,7 @@ void Nama::RenderGS(cv::Mat & picInput, int rotType)
 		vecRender.push_back(mBeautyHandles);
         
 		fuSetInputCameraBufferMatrix((TRANSFORM_MATRIX)rotType);
+		fuSetInputCameraTextureMatrix((TRANSFORM_MATRIX)rotType);
 		fuRender(FU_FORMAT_RGBA_BUFFER,
 			(void*)(picInput.data),
 			FU_FORMAT_RGBA_BUFFER,
@@ -1432,7 +1433,6 @@ void Nama::RenderGS(cv::Mat & picInput, int rotType)
 
 void Nama::RenderItems(cv::Mat & picMat)
 {
-	
 	if (UIBridge::showGreenScreen)
 	{
 		TRANSFORM_MATRIX type = (CCameraManage::getInstance()->mCapture->getCaptureType() == CAPTURE_CAMERA) ? TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL: TRANSFORM_MATRIX::CCROT0;
@@ -1530,4 +1530,50 @@ void Nama::SetBodyTrackType(BodyTrackType type)
 	default:
 		break;
 	}
+}
+
+
+void NamaExampleNameSpace::Nama::setLightMakeupParam(LightMakeupParam param)
+{
+	fuItemSetParamd(UIBridge::m_curRenderItem, "is_makeup_on", 1.0);
+#if __APPLE__
+	// 这里macosx 为绝对路径，我们需要获取相对于图片的相对路径
+	param.blusherPath = UIBridge::GetFileFullPathFromResourceBundle(param.blusherPath.c_str());
+	param.eyeshadowPath = UIBridge::GetFileFullPathFromResourceBundle(param.eyeshadowPath.c_str());
+	param.eyebrowPath = UIBridge::GetFileFullPathFromResourceBundle(param.eyebrowPath.c_str());
+	param.lipColorPath = UIBridge::GetFileFullPathFromResourceBundle(param.lipColorPath.c_str());
+#endif
+	cv::Mat image0 = cv::imread(param.blusherPath, cv::IMREAD_UNCHANGED);
+	fuCreateTexForItem(UIBridge::m_curRenderItem, "tex_blusher", image0.data, image0.cols, image0.rows);
+	fuItemSetParamd(UIBridge::m_curRenderItem, "makeup_intensity_blusher", param.blusher);
+	cv::Mat image1 = cv::imread(param.eyeshadowPath, cv::IMREAD_UNCHANGED);
+	fuCreateTexForItem(UIBridge::m_curRenderItem, "tex_eye", image1.data, image1.cols, image1.rows);
+	fuItemSetParamd(UIBridge::m_curRenderItem, "makeup_intensity_eye", param.eyeshadow);
+	cv::Mat image2 = cv::imread(param.eyebrowPath, cv::IMREAD_UNCHANGED);
+	fuCreateTexForItem(UIBridge::m_curRenderItem, "tex_brow", image2.data, image2.cols, image2.rows);
+	fuItemSetParamd(UIBridge::m_curRenderItem, "makeup_intensity_eyeBrow", param.eyebrow);
+	ifstream in(param.lipColorPath.c_str());
+	if (!in.is_open()) {
+		fprintf(stderr, "fail to read json file: %s\n", param.lipColorPath.data());
+		return;
+	}
+	string json_content((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
+	in.close();
+	rapidjson::Document dom;
+	if (!dom.Parse(json_content.c_str()).HasParseError())
+	{
+		if (dom.HasMember("rgba") && dom["rgba"].IsArray())
+		{
+			const rapidjson::Value& arr = dom["rgba"];
+			std::vector<double> color;
+			for (int i = 0; i < arr.Size(); ++i) {
+				color.push_back(arr[i].GetDouble());
+			}
+			fuItemSetParamdv(UIBridge::m_curRenderItem, "makeup_lip_color", color.data(), color.size());
+		}
+	}
+
+	fuItemSetParamd(UIBridge::m_curRenderItem, "makeup_intensity", param.intensity);
+	fuItemSetParams(mBeautyHandles, "filter_name", param.filterName.c_str());
+	fuItemSetParamd(mBeautyHandles, "filter_level", param.filterLevel);
 }
