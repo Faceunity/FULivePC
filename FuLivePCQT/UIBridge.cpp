@@ -39,7 +39,7 @@ UIBridge::UIBridge()
                                      "Brighteye", "Beautifulteeth", "dark_circles", "wrinkle"});
     m_beautySkin.append(QStringList{ "skin_detect", "blur_type", "blur_level", "color_level", "red_level","sharpen", "eye_bright", "tooth_whiten",
                                      "remove_pouch_strength", "remove_nasolabial_folds_strength"});
-    m_defaultBeautySkin = QStringList{ "1", "3", "70", "30", "30", "20", "0", "0", "0", "0"};
+    m_defaultBeautySkin = QStringList{ "0", "0", "70", "30", "30", "20", "0", "0", "0", "0"};
     m_beautySkin.append(m_defaultBeautySkin);
     m_beautySkin.append(QStringList{ "","","","","","","","","",""});
     //美型
@@ -146,12 +146,6 @@ void UIBridge::readCategoryBundle()
         }else if(i == BundleCategory::Avatar){
             QStringList tempList;
             tempList<<"fakeman";
-            m_categoryBundles.append(tempList);
-            continue;
-        }else if(i == BundleCategory::LightMakeup){
-            //轻美妆加入桃花,西柚,清透,男友
-            QStringList tempList;
-            tempList<<"light_makeup_peachblossom"<<"light_makeup_grapefruit"<<"light_makeup_clear"<<"light_makeup_boyfriend";
             m_categoryBundles.append(tempList);
             continue;
         }
@@ -418,7 +412,6 @@ void UIBridge::setARFunction(bool ar){
         m_gsVideoMediaPlayer.stop();
         if(m_flagARBody){
             nama->changeRenderList(RENDER_BODY);
-            updataFilter();
         }else{
             nama->changeRenderList(RENDER_AR);
             if(nama->m_bundleCategory == BundleCategory::MusicFilter && nama->m_mp3 != nullptr)
@@ -430,22 +423,6 @@ void UIBridge::setARFunction(bool ar){
         m_frameSize = QString::number(MainClass::getInstance()->m_camera->m_FrameWidth) + "x" +
                 QString::number(MainClass::getInstance()->m_camera->m_FrameHeight);
         emit frameSizeChanged();
-        //重新设置轻美妆滤镜
-        if(m_selectCategory == BundleCategory::LightMakeup && !m_flagARBody){
-            if(m_selectCategoryIndex == 0){
-                nama->itemSetParams(nama->m_BeautyHandles, "filter_name", "fennen3");
-                nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", 1.0);
-            }else if(m_selectCategoryIndex == 1){
-                nama->itemSetParams(nama->m_BeautyHandles, "filter_name", "lengsediao4");
-                nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", 0.7);
-            }else if(m_selectCategoryIndex == 2){
-                nama->itemSetParams(nama->m_BeautyHandles, "filter_name", "xiaoqingxin1");
-                nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", 0.8);
-            }else if(m_selectCategoryIndex == 3){
-                nama->itemSetParams(nama->m_BeautyHandles, "filter_name", "xiaoqingxin3");
-                nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", 0.9);
-            }
-        }
     }
 }
 
@@ -637,17 +614,6 @@ void UIBridge::getCameraList()
     }
     if(m_cameraSet != 0){
         emit updataCameraSet(m_cameraSet);
-    }else{
-        for(int i = 0; i < camera->m_cameraSetList.length(); i++){
-            QString set = camera->m_cameraSetList.at(i);
-            int width = set.mid(0,set.indexOf("x")).toInt();
-            int height = set.mid(set.indexOf("x") + 1,set.indexOf(" ") - (set.indexOf("x") + 1)).toInt();
-            int fps = set.mid(set.indexOf(" ") + 1,set.indexOf("fps") - (set.indexOf(" ") + 1)).toInt();
-            //默认切换1280*720 20fps
-            if(width == 1280 && height == 720 && fps == 20){
-                emit updataCameraSet(i);
-            }
-        }
     }
 }
 
@@ -735,7 +701,8 @@ void UIBridge::updataUserConfig()
     for(int i = 0 ; i < m_greenScreen.at(0).toStringList().size(); i++){
         namaFuItemSetParamd(nama->m_GSHandle, m_greenScreen, i, false);
     }
-    updataFilter();
+    nama->itemSetParams(nama->m_BeautyHandles, "filter_name", m_filter.at(0).toStringList()[m_filterIndex].toStdString());
+    nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", m_filter.at(1).toStringList()[m_filterIndex].toDouble() / 100);
     nama->changeGSPreviewRect(m_gsStart.x(), m_gsStart.y(), m_gsStart.x() + m_gsSize.x(), m_gsStart.y() + m_gsSize.y());
     QString color = "#" + QString("%1").arg(m_gsColor[0],2,16,QChar('0')) +
             QString("%1").arg(m_gsColor[1],2,16,QChar('0')) +
@@ -743,7 +710,7 @@ void UIBridge::updataUserConfig()
     emit selectColorChanged(color);
     nama->m_bundleCategory = BundleCategory(m_selectCategory);
     //加载使用道具
-    if(m_selectCategory >= BundleCategory::GreenScreen){
+    if(m_selectCategory >= 13){
         if(!m_gsSelectCamera){
             gsSelectVideo(m_gsSelectVideoPath);
         }
@@ -757,7 +724,7 @@ void UIBridge::updataUserConfig()
         if(m_selectCategory >= 0 && m_selectCategoryIndex >= 0 ){
             if(m_selectCategory == BundleCategory::Avatar && m_selectCategoryIndex == 0){
                 updataBodyTrackType(int(m_bodyTrackType));
-            }else if(m_selectCategory == BundleCategory::ItemJingpin){
+            }else if(m_selectCategory == 3){
                 downloadSticker(m_selectCategoryIndex);
             }else{
                 useProps(m_selectCategoryIndex);
@@ -826,29 +793,19 @@ void UIBridge::useProps(int index)
     if(m_selectCategory != BundleCategory::Avatar){
         unLoadAvatar();
     }
-    updataFilter();
     if(m_arFunction){
         m_selectCategoryIndex = index;
         QString name = m_categoryBundles[m_selectCategory].toStringList()[m_selectCategoryIndex];
+        //使用自定义背景分割
         QString full_path;
-        bool b_light_makeup = false;
         if(name.compare("bg_seg_shot") == 0){
             name = "bg_segment";
         }
         if(name.compare("bg_segment") == 0){
-            //使用自定义背景分割
             bgsSelectVideo(m_begUserFilePath);
-            full_path = "others/bg_segment.bundle";
+            full_path = QString::fromStdString(g_assetDir) + "others/bg_segment.bundle";
         }else{
             full_path = gBundlePath[m_selectCategory] + "/" + name + ".bundle";
-        }
-        if(name.compare("light_makeup_peachblossom") == 0 ||
-                name.compare("light_makeup_grapefruit") == 0||
-                name.compare("light_makeup_clear") == 0||
-                name.compare("light_makeup_boyfriend") == 0){
-            //使用轻美妆
-            b_light_makeup = true;
-            full_path = "items/LightMakeup/light_makeup.bundle";
         }
         //qDebug()<<"使用道具"<<m_selectCategory<<m_selectCategoryIndex<<name;
         if(m_tipMap.find(name) != m_tipMap.end()){
@@ -860,20 +817,13 @@ void UIBridge::useProps(int index)
         if(name == "makeup_icon_combination_1_freezing_age" || name == "makeup_icon_combination_1_guo_feng" || name == "makeup_icon_combination_1_mixed_race" || name == "makeup_icon_combination_1_combination_rabbit"){
             m_bmakeupFlag = false;
         }
+        //自定义美妆不用加载bundle
         if(name != "demo_icon_customize"){
             nama->SelectBundle(g_assetDir + full_path.toStdString(), 4, m_bmakeupFlag);
         }else{
-            //自定义美妆不用加载bundle
             nama->DestroyAll();
             nama->LoadMakeup();
             nama->ChangeCleanFlag(false);
-        }
-        if(b_light_makeup){
-            //轻美妆设置参数
-            setLightMakeUpParam(name);
-            m_lightMakeUpName = name;
-        }else{
-            updataFilter();
         }
         if(m_flagARBody){
             nama->changeRenderList(RENDER_BODY);
@@ -915,7 +865,6 @@ void UIBridge::nonuseProps()
     if(m_arFunction){
         m_selectCategoryIndex = -1;
         nama->DestroyAll();
-        updataFilter();
         if(nama->m_mp3 != nullptr)
         {
             nama->m_mp3->Pause();
@@ -961,7 +910,6 @@ void UIBridge::updataItemParam(int item, int index, QString value)
         if(!m_flagARBody && value.toInt() > 0){
             m_flagARBody = true;
             nama->changeRenderList(RENDER_BODY);
-            updataFilter();
             m_tip = "AR功能跟美体模块无法共用";
             tipChanged();
             arBodyFlagChanged(m_flagARBody);
@@ -1415,7 +1363,6 @@ void UIBridge::useBoutique(int index)
     {
         nama->m_mp3->Pause();
     }
-    updataFilter();
     //小熊贴纸特有
     if(MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleDirs.size() > 1){
         unLoadAvatar();
@@ -1464,7 +1411,8 @@ void UIBridge::reloadItemParam()
     for(int i = 0 ; i < m_greenScreen.at(0).toStringList().size(); i++){
         namaFuItemSetParamd(nama->m_GSHandle, m_greenScreen, i, false);
     }
-    updataFilter();
+    nama->itemSetParams(nama->m_BeautyHandles, "filter_name", m_filter.at(0).toStringList()[m_filterIndex].toStdString());
+    nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", m_filter.at(1).toStringList()[m_filterIndex].toDouble() / 100);
     nama->changeGSPreviewRect(m_gsStart.x(), m_gsStart.y(), m_gsStart.x() + m_gsSize.x(), m_gsStart.y() + m_gsSize.y());
 }
 
@@ -1490,12 +1438,9 @@ void UIBridge::checkBodyParam()
         }
     }else{
         nama->changeRenderList(RENDER_AR, m_bmakeupFlag);
-        if(nama->m_bundleCategory == BundleCategory::MusicFilter && nama->m_bundleCurrent > 0)
+        if(nama->m_bundleCategory == BundleCategory::MusicFilter)
         {
             nama->m_mp3->Play();
-        }else if(nama->m_bundleCategory == BundleCategory::LightMakeup && nama->m_bundleCurrent > 0)
-        {
-            setLightMakeUpParam(m_lightMakeUpName);
         }
     }
 }
@@ -1636,95 +1581,4 @@ void UIBridge::changeCameraType(bool type)
         fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
         fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
     }
-}
-
-void UIBridge::setLightMakeUpParam(QString name)
-{
-    Nama *nama = MainClass::getInstance()->m_nama;
-    fuItemSetParamd(nama->m_bundleCurrent, "is_makeup_on", 1.0);
-    if(name.compare("light_makeup_peachblossom") == 0){
-        setLightMakeUpTex("tex_blusher", g_assetDir + "items/LightMakeup/blusher/mu_blush_01.png");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity_blusher", 0.9);
-        setLightMakeUpTex("tex_eye", g_assetDir + "items/LightMakeup/eyeshadow/mu_eyeshadow_01.png");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity_eye", 0.9);
-        setLightMakeUpTex("tex_brow", g_assetDir + "items/LightMakeup/eyebrow/mu_eyebrow_01.png");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity_eyeBrow", 0.5);
-        setLightMakeUpLipColor(g_assetDir + "items/LightMakeup/lipstick/mu_lip_01.json");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity", 0.9);
-        nama->itemSetParams(nama->m_BeautyHandles, "filter_name", "fennen3");
-        nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", 1.0);
-    }else if(name.compare("light_makeup_grapefruit") == 0){
-        setLightMakeUpTex("tex_blusher", g_assetDir + "items/LightMakeup/blusher/mu_blush_23.png");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity_blusher", 1.0);
-        setLightMakeUpTex("tex_eye", g_assetDir + "items/LightMakeup/eyeshadow/mu_eyeshadow_21.png");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity_eye", 0.75);
-        setLightMakeUpTex("tex_brow", g_assetDir + "items/LightMakeup/eyebrow/mu_eyebrow_19.png");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity_eyeBrow", 0.6);
-        setLightMakeUpLipColor(g_assetDir + "items/LightMakeup/lipstick/mu_lip_21.json");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity", 0.8);
-        nama->itemSetParams(nama->m_BeautyHandles, "filter_name", "lengsediao4");
-        nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", 0.7);
-    }else if(name.compare("light_makeup_clear") == 0){
-        setLightMakeUpTex("tex_blusher", g_assetDir + "items/LightMakeup/blusher/mu_blush_22.png");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity_blusher", 0.9);
-        setLightMakeUpTex("tex_eye", g_assetDir + "items/LightMakeup/eyeshadow/mu_eyeshadow_20.png");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity_eye", 0.65);
-        setLightMakeUpTex("tex_brow", g_assetDir + "items/LightMakeup/eyebrow/mu_eyebrow_18.png");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity_eyeBrow", 0.45);
-        setLightMakeUpLipColor(g_assetDir + "items/LightMakeup/lipstick/mu_lip_20.json");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity", 0.8);
-        nama->itemSetParams(nama->m_BeautyHandles, "filter_name", "xiaoqingxin1");
-        nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", 0.8);
-    }else if(name.compare("light_makeup_boyfriend") == 0){
-        setLightMakeUpTex("tex_blusher", g_assetDir + "items/LightMakeup/blusher/mu_blush_20.png");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity_blusher", 0.8);
-        setLightMakeUpTex("tex_eye", g_assetDir + "items/LightMakeup/eyeshadow/mu_eyeshadow_18.png");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity_eye", 0.9);
-        setLightMakeUpTex("tex_brow", g_assetDir + "items/LightMakeup/eyebrow/mu_eyebrow_16.png");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity_eyeBrow", 0.65);
-        setLightMakeUpLipColor(g_assetDir + "items/LightMakeup/lipstick/mu_lip_18.json");
-        fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity", 1.0);
-        nama->itemSetParams(nama->m_BeautyHandles, "filter_name", "xiaoqingxin3");
-        nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", 0.9);
-    }
-}
-
-void UIBridge::setLightMakeUpTex(string value, string imagepath)
-{
-    cv::Mat image = cv::imread(imagepath,cv::IMREAD_UNCHANGED);
-    fuCreateTexForItem(MainClass::getInstance()->m_nama->m_bundleCurrent, value.data(), image.data, image.cols, image.rows);
-}
-
-void UIBridge::setLightMakeUpLipColor(string colorpath)
-{
-    std::vector<double> color;
-    QFile *file = new QFile(QString::fromStdString(colorpath));
-    if(file->open(QFile::ReadOnly))
-    {
-        QString value = file->readAll();
-        QJsonParseError parseJsonErr;
-        QJsonDocument document = QJsonDocument::fromJson(value.toUtf8(),&parseJsonErr);
-        if(!(parseJsonErr.error == QJsonParseError::NoError))
-        {
-            qDebug()<<tr("解析json文件错误！");
-        }else{
-            QJsonObject jsonObject = document.object();
-            if(jsonObject.contains("rgba")){
-                QJsonArray jsonA = jsonObject["rgba"].toArray();
-                for(int i = 0; i < jsonA.size(); i++){
-                    color.push_back(jsonA.at(i).toDouble());
-                }
-            }
-        }
-        file->close();
-    }
-    fuItemSetParamdv(MainClass::getInstance()->m_nama->m_bundleCurrent, "makeup_lip_color", color.data(), color.size());
-
-}
-
-void UIBridge::updataFilter()
-{
-    Nama *nama = MainClass::getInstance()->m_nama;
-    nama->itemSetParams(nama->m_BeautyHandles, "filter_name", m_filter.at(0).toStringList()[m_filterIndex].toStdString());
-    nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", m_filter.at(1).toStringList()[m_filterIndex].toDouble() / 100);
 }
