@@ -21,8 +21,6 @@ public:
             QAbstractVideoBuffer::HandleType handleType = QAbstractVideoBuffer::NoHandle) const;
 
     bool present(const QVideoFrame &frame) override;
-    int convert_yuv_to_rgb_pixel(int y, int u, int v);
-    int convert_yuv_to_rgb_buffer(uchar *yuv, uchar *rgb, uint width,uint height);
     //true为绿幕背景视频,false为摄像头图像
     bool m_bVideo;
 signals:

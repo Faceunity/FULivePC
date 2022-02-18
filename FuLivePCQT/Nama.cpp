@@ -230,6 +230,7 @@ void Nama::InitNama()
 
         m_FxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
     }
+
     fuItemSetParamd(m_BodyShapeHandle,"Debug",0.0);
     float fValue = 0.5f;
     fuSetFaceTrackParam((void*)"mouth_expression_more_flexible", &fValue);
@@ -240,10 +241,10 @@ void Nama::InitNama()
 
     //设置输入相机矩阵
     fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+    fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
     //设置输出矩阵
     //    fuSetOutputMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
     m_EnableNama = true;
-
     changeRenderList(RENDER_AR);
 }
 
@@ -251,6 +252,9 @@ void Nama::changeRenderList(RenderType type,bool makeupFlag)
 {
     m_renderType = type;
     m_renderList.clear();
+    if(type == RENDER_PICKCOLOR){
+        return;
+    }
     if(type == RENDER_BODY){
         m_renderList.push_back(m_BodyShapeHandle);
         m_renderList.push_back(m_BeautyHandles);
@@ -352,6 +356,7 @@ void Nama::ReloadItems()
     m_bundleCurrent = 0;
     m_curMakeupItem = 0;
     fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+    fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
     {
         vector<char> propData;
         if (false == LoadBundle(g_assetDir + g_faceBeautification, propData))
@@ -448,6 +453,8 @@ void Nama::getPresentFrame(const cv::Mat &frame)
 void Nama::ClearAllCM()
 {
     ChangeCleanFlag(true);
+    //清楚咬唇设定
+    fuItemSetParamd(m_MakeUpHandle,"is_two_color", 0);
     if (m_MakeUpHandle > 0)
     {
         for (auto it = m_mapMakeUpItem.begin(); it != m_mapMakeUpItem.end(); it++)
@@ -625,12 +632,14 @@ void Nama::RenderBear()
     if(m_getNewFrame){
         cv::Mat result(m_frame.rows, m_frame.cols, CV_8UC4);
         fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0);
+        fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0);
         vector<int> renderList;
         renderList.push_back(m_BeautyHandles);
         fuRender(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(result.data), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(m_frame.data),
-                 m_frame.cols, m_frame.rows, m_FrameID++, renderList.data(),
+                 m_frame.cols, m_frame.rows, m_FrameID, renderList.data(),
                  renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
         fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+        fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
         if(m_bVirturalCamera){
             if (!m_bIsCreateVirturalCamera)
             {

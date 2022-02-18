@@ -228,7 +228,7 @@ public:
     //更新fps定时器
     QTimer *m_timer;
     //记录fps一秒render更新了几帧
-    int m_FrameIDFPS;
+    int m_FrameIDFPS = 0;
     //统计1秒render总用时
     int m_secondRenderTime = 0;
     //显示性能参数中图像长宽

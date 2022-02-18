@@ -68,15 +68,10 @@ bool QtCameraCapture::present(const QVideoFrame &frame)
         else{
             if(cloneFrame.pixelFormat() == QVideoFrame::Format_YUYV)//yuv422
             {
-                int nbytes = cloneFrame.mappedBytes();
-                char *rgb24 = new char[nbytes*2]();
-                convert_yuv_to_rgb_buffer((unsigned char*)cloneFrame.bits(), (unsigned char*)rgb24, cloneFrame.width(), cloneFrame.height());
-                cv::Mat mat = cv::Mat(cloneFrame.height(), cloneFrame.width(), CV_8UC3, rgb24, cloneFrame.width()*3);
-                //转换颜色通道
-                cv::cvtColor(mat, mat, cv::COLOR_RGB2BGRA);
-                emit presentFrame(mat);
-                delete[] rgb24;
-                return true;
+              cv::Mat mat = cv::Mat(cloneFrame.height(), cloneFrame.width(), CV_8UC2, (void*)cloneFrame.bits(), cloneFrame.bytesPerLine());
+              cv::cvtColor(mat, mat, cv::COLOR_YUV2BGRA_YUY2);
+              emit presentFrame(mat);
+              return true;
             }
             if(cloneFrame.pixelFormat() == QVideoFrame::Format_RGB32)//bgra
             {
@@ -103,61 +98,6 @@ bool QtCameraCapture::present(const QVideoFrame &frame)
         }
     }
     return false;
-}
-
-int QtCameraCapture::convert_yuv_to_rgb_pixel(int y, int u, int v)
-{
-    uint pixel32 = 0;
-    uchar *pixel = (uchar *)&pixel32;
-    int r, g, b;
-    r = y + (1.370705 * (v-128));
-    g = y - (0.698001 * (v-128)) - (0.337633 * (u-128));
-    b = y + (1.732446 * (u-128));
-    if(r > 255) r = 255;
-    if(g > 255) g = 255;
-    if(b > 255) b = 255;
-    if(r < 0) r = 0;
-    if(g < 0) g = 0;
-    if(b < 0) b = 0;
-    pixel[0] = r * 220 / 256;
-    pixel[1] = g * 220 / 256;
-    pixel[2] = b * 220 / 256;
-    return pixel32;
-}
-
-int QtCameraCapture::convert_yuv_to_rgb_buffer(uchar *yuv, uchar *rgb, uint width, uint height)
-{
-    uint in, out = 0;
-    uint pixel_16;
-    uchar pixel_24[3];
-    uint pixel32;
-    int y0, u, y1, v;
-    for(in = 0; in < width * height * 2; in += 4) {
-        pixel_16 =
-                yuv[in + 3] << 24 |
-                               yuv[in + 2] << 16 |
-                                              yuv[in + 1] <<  8 |
-                                                              yuv[in + 0];//YUV422每个像素2字节，每两个像素共用一个Cr,Cb值，即u和v，RGB24每个像素3个字节
-        y0 = (pixel_16 & 0x000000ff);
-        u  = (pixel_16 & 0x0000ff00) >>  8;
-        y1 = (pixel_16 & 0x00ff0000) >> 16;
-        v  = (pixel_16 & 0xff000000) >> 24;
-        pixel32 = convert_yuv_to_rgb_pixel(y0, u, v);
-        pixel_24[0] = (pixel32 & 0x000000ff);
-        pixel_24[1] = (pixel32 & 0x0000ff00) >> 8;
-        pixel_24[2] = (pixel32 & 0x00ff0000) >> 16;
-        rgb[out++] = pixel_24[0];
-        rgb[out++] = pixel_24[1];
-        rgb[out++] = pixel_24[2];//rgb的一个像素
-        pixel32 = convert_yuv_to_rgb_pixel(y1, u, v);
-        pixel_24[0] = (pixel32 & 0x000000ff);
-        pixel_24[1] = (pixel32 & 0x0000ff00) >> 8;
-        pixel_24[2] = (pixel32 & 0x00ff0000) >> 16;
-        rgb[out++] = pixel_24[0];
-        rgb[out++] = pixel_24[1];
-        rgb[out++] = pixel_24[2];
-    }
-    return 0;
 }
 
 Camera::Camera()

@@ -117,6 +117,30 @@ FUNAMA_API int fuUnbindItemsFromInstance(unsigned int handle_id, int* p_items,
 FUNAMA_API int fuEnableRender(unsigned int handle_id, int enable);
 
 /*
+ * ground reflection related api
+ */
+/**
+ \brief Enable or not render ground reflection for the target scene.
+ \param handle_id is the target scene handle
+ \param enable > 0 means render ground reflection, enable <= 0 means not render
+ ground reflection \return zero for failed, one for success
+*/
+FUNAMA_API int fuEnableGroundReflection(unsigned int handle_id, int enable);
+
+/*
+ * ground reflection related parameter
+ */
+/**
+ \brief set parameters to ground reflection.
+ \param handle_id is the target scene handle
+ \param maxTrans > 0 means the max transparency for flip scene;
+ \param maxDis > 0 means the distance flip scene to fade;
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetGroundReflectionPrameters(unsigned int handle_id,
+                                              float maxTrans, float maxDis);
+
+/*
  * dof related api
  */
 /**
@@ -152,6 +176,30 @@ FUNAMA_API int fuEnableDofDebug(unsigned int handle_id, int enable);
 FUNAMA_API int fuSetDofParamters(unsigned int handle_id, float focalLength,
                                  float focusDistance, float maxCoC,
                                  float aperture, int blurSize);
+
+/*
+ * bloom related api
+ */
+ /**
+  \brief set bloom parameters to postprocess.
+    \param enable > 0 means open dof, enable <= 0 means close bloom
+  \return zero for failed, one for success
+ */
+
+FUNAMA_API int fuEnableBloom(unsigned int handle_id, int enable);
+
+/*
+ * dof related api
+ */
+ /**
+  \brief set Bloom parameters to postprocess.
+  \param handle_id is the target scene handle
+  \param threshold_value is the height-light threshold value;
+  \param bloom_intensity control the effect of the high-light;
+  \return zero for failed, one for success
+ */
+
+FUNAMA_API int fuSetBloomParamters(unsigned int handle_id, float threshold_value, float bloom_intensity);
 
 /**
  \brief Enable or not render camera for the target scene.
@@ -333,6 +381,17 @@ FUNAMA_API int fuSetInstanceHeadRotationDeltaX(unsigned int handle_id,
                                                float value);
 
 /**
+ \brief Set instance head rotation Z Range of face processor.
+ \param handle_id is the target instance handle
+ \param min_angle default is -180
+ \parma max_angle default is 180
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceHeadRotationZRange(unsigned int handle_id,
+                                               float min_angle,
+                                               float max_angle);
+
+/**
  \brief Set instance eye rotation deltaX of face processor.
  \param handle_id is the target instance handle
  \param value is x delta rotation
@@ -351,12 +410,22 @@ FUNAMA_API int fuEnableInstanceFaceProcessorRotateHead(unsigned int handle_id,
                                                        int enable);
 
 /**
- \brief Open or close human processor for the target scene.
+ \brief Open or close the human anim driver for the target instance.
+ \param handle_id is the target instance handle
+ \param enable > 0 means open, enable <= 0 means close
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceEnableHumanAnimDriver(unsigned int handle_id,
+                                                  int enable);
+
+/**
+ \brief Open or close AI human processor for the target scene.
  \param handle_id is the target scene handle
  \param enable > 0 means open, enable <= 0 means close
  \return zero for failed, one for success
 */
 FUNAMA_API int fuEnableHumanProcessor(unsigned int handle_id, int enable);
+
 
 /**
  \brief set human processor 3D scene.
@@ -367,22 +436,13 @@ FUNAMA_API int fuEnableHumanProcessor(unsigned int handle_id, int enable);
 FUNAMA_API int fuHumanProcessorSet3DScene(unsigned int handle_id, int scene);
 
 /**
- \brief Enable use or not follow mode for the target scene.
+ \brief Open or close RiggingBVHInputProcessor for the target scene.
  \param handle_id is the target scene handle
- \param enable > 0 means use, enable <= 0 means not
+ \param enable > 0 means open, enable <= 0 means close
  \return zero for failed, one for success
 */
-FUNAMA_API int fuEnableHumanFollowMode(unsigned int handle_id, int enable);
-
-/**
- \brief set human processor translation scale in not follow mode.
- \param handle_id is the target scene handle
- \param scale
- \return zero for failed, one for success
-*/
-FUNAMA_API int fuSetHumanProcessorTranslationScale(unsigned int handle_id,
-                                                   float scale_x, float scale_y,
-                                                   float scale_z);
+FUNAMA_API int fuEnableRiggingBVHInputProcessor(unsigned int handle_id,
+                                                bool enable);
 
 /**
  \brief Open or close hand detetor for the target scene.
@@ -1073,8 +1133,6 @@ FUNAMA_API int fuSetOuterViewMatrix(unsigned int handle_id, const float* mat);
  \param x_offset is normalized offset , form -1.0 to 1.0
  \param is_foreground, is foreground or background
  \param mode, 0 is for stretch, 1 is for crop
- \param is_mask, if >0, will be used rendered to stencil, otherwise will be rendered to scene color 
- \param scissor_target, the handle of a background or sprite9 bundle to be scissored by this
  \return zero for failed, one for success
 */
 FUNAMA_API int fuSetBackgroundParams(unsigned int handle_id, int bg_handle,
@@ -1083,15 +1141,14 @@ FUNAMA_API int fuSetBackgroundParams(unsigned int handle_id, int bg_handle,
                                      int mode);
 
 /**
- \brief Set background usage, by default background is a normal 2d sprite, set is_mask>0 make this item to a 2d mask
+ \brief Set sprite usage, by default sprite is a normal 2d sprite
  \param handle_id is the target scene handle
  \param bg_handle is the target background item handle
- \param is_mask, if >0, will be used rendered to stencil, otherwise will be rendered to scene color 
- \param scissor_target, the handle of a background or sprite9 bundle to be scissored by this 
- \return zero for failed, one for success
+ \param is_mask, if usage==1, it's a 2d mask, if usage==2, it's a sprite clipped
+ by mask \return zero for failed, one for success
 */
-FUNAMA_API int fuSetBackgroundUsage(unsigned int handle_id, int bg_handle,
-                                    int is_mask, int scissor_target);
+FUNAMA_API int fuSetSpriteUsage(unsigned int handle_id, int bg_handle,
+                                int usage);
 
 /**
  \brief Update background texture with a rgba buffer
@@ -1109,24 +1166,23 @@ FUNAMA_API int fuUpdateBackgroundTexture(unsigned int handle_id, int bg_handle,
  \brief Set sprite9 params for the target scene.
  \param handle_id is the target scene handle
  \param bg_handle is the target background item handle
- \param src_offset_to_left_edge is the distance from source image left edge in pixel
- \param src_offset_to_right_edge is the distance from source image right edge in pixel
- \param src_offset_to_top_edge is the distance from source image top edge in pixel
- \param src_offset_to_bottom_edge is the distance from source image bottom edge in pixel
- \param x_size is normalized width of background, from 0.0 to 1.0
- \param y_size is normalized height of background, from 0.0 to 1.0
- \param x_offset is normalized offset , form -1.0 to 1.0
- \param x_offset is normalized offset , form -1.0 to 1.0
- \param is_foreground, is foreground or background
- \param is_mask, if >0, will be used rendered to stencil, otherwise will be rendered to scene color
- \param scissor_target, the handle of a background or sprite9 bundle to be scissored by this
- \return zero for failed, one for success
+ \param src_offset_to_left_edge is the distance from source image left edge in
+ pixel \param src_offset_to_right_edge is the distance from source image right
+ edge in pixel \param src_offset_to_top_edge is the distance from source image
+ top edge in pixel \param src_offset_to_bottom_edge is the distance from source
+ image bottom edge in pixel \param x_size is normalized width of background,
+ from 0.0 to 1.0 \param y_size is normalized height of background, from 0.0
+ to 1.0 \param x_offset is normalized offset , form -1.0 to 1.0 \param x_offset
+ is normalized offset , form -1.0 to 1.0 \param is_foreground, is foreground or
+ background \return zero for failed, one for success
 */
 FUNAMA_API int fuSetSprite9Params(unsigned int handle_id, int bg_handle,
-                                  int src_offset_to_left_edge, int src_offset_to_right_edge,
-                                  int src_offset_to_top_edge, int src_offset_to_bottom_edge,
-                                  float x_size, float y_size, float x_offset, float y_offset,
-                                  int is_foreground, int is_mask, int scissor_target);
+                                  int src_offset_to_left_edge,
+                                  int src_offset_to_right_edge,
+                                  int src_offset_to_top_edge,
+                                  int src_offset_to_bottom_edge, float x_size,
+                                  float y_size, float x_offset, float y_offset,
+                                  int is_foreground);
 
 /**
  \brief Update sprite9 texture with a rgba buffer
@@ -1138,7 +1194,7 @@ FUNAMA_API int fuSetSprite9Params(unsigned int handle_id, int bg_handle,
  \return zero for failure, non-zero for success
 */
 FUNAMA_API int fuUpdateSprite9Texture(unsigned int handle_id, int bg_handle,
-                                         void* value, int width, int height);
+                                      void* value, int width, int height);
 
 /**
  \brief Reset 2D background or foreground animation for the target scene.
@@ -1333,6 +1389,91 @@ FUNAMA_API float fuGetInstanceAnimationProgress(unsigned int handle_id,
  */
 FUNAMA_API float fuGetInstanceAnimationTransitionProgress(
     unsigned int handle_id, int anim_handle);
+
+/**
+ \brief Set the human processor type.
+ \param handle_id: the target instance handle
+ \param human_processor_type: 0 for AI fuai, 1 for the rigging_bvhinput_processor.
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceHumanProcessorType(unsigned int handle_id,
+                                               int human_processor_type);
+
+/**
+ \brief Set the rigging retargeter follow mode.
+ \param handle_id is the target instance handle
+ \param follow_mode: follow_mode, only support
+    FUAIHUMAN_FOLLOW_MODE_FIX: fix the root at it's bind position.
+    FUAIHUMAN_FOLLOW_MODE_ALIGN: align the avatar to the real
+ person, but scale the root translation by the avatar leg height(root to
+ ground).
+    FUAIHUMAN_FOLLOW_MODE_STAGE: make the avatar move from the origin(foot
+ from the origin).
+ \return zero for failed, one for scuess
+ */
+FUNAMA_API int fuSetInstanceRiggingRetargeterAvatarFollowMode(
+    unsigned int handle_id, FUAIHUMANFOLLOWMODE follow_mode);
+
+/**
+ \brief Set the rigging retargeter translation scale under FUAIHUMAN_FOLLOW_MODE_FIX mode.
+ \param handle_id is the target instance handle
+ \param scale_x: scale of root's x. >= 0
+ \param scale_y: scale of root's y. >= 0
+ \param scale_z: scale of root's z. >= 0
+ \return zero for failed, one for scuess
+ */
+FUNAMA_API int fuSetInstanceRiggingRetargeterAvatarFixModeTransScale(
+    unsigned int handle_id, float scale_x, float scale_y, float scale_z);
+
+/**
+ \brief Set the rigging retargeter target bonemap.
+ \param handle_id is the target instance handle
+ \param bonemap_buffer_ptr: json file description of skeleton hierarchy. ref to boneMap.json
+ \param bonemap_buffer_size, size of data in bytes.
+ \param bonemap_hashcode, bonemap's hashcode.
+ \return zero for failed, one for scuess
+ */
+FUNAMA_API int fuSetInstanceRiggingRetargeterAvatarBonemap(
+    unsigned int handle_id, const char* bonemap_buffer_ptr,
+    const int bonemap_buffer_size, const unsigned long long bonemap_hashcode);
+
+/**
+ \brief Set the rigging retargeter retarget mapping.
+ \param handle_id is the target instance handle
+ \param mapping_buffer_ptr: json file description of the retarget mapping.
+ \param mapping_buffer_size, size of data in bytes.
+ \return zero for failed, one for scuess
+ */
+FUNAMA_API int fuSetInstanceRiggingRetargeterRetargetMapping(
+    unsigned int handle_id, const char* mapping_buffer_ptr,
+    const int mapping_buffer_size);
+
+
+/**
+ \brief Set the rigging bvh input processor config.
+ \param handle_id is the target scene handle
+ \param bvh_buffer_ptr: bvh header buffer ptr.
+ \param bvh_buffer_size, bvh header buffer length.
+ \param mapping_buffer_ptr: json file description of the retarget mapping.
+ \param mapping_buffer_size, size of data in bytes.
+ \return zero for failed, one for scuess
+ */
+FUNAMA_API int fuRiggingBVHInputProcessorSetConfig(
+    unsigned int handle_id, const char* bvh_buffer_ptr,
+    const int bvh_buffer_size, const char* mapping_buffer_ptr,
+    const int mapping_buffer_size);
+
+/**
+ \brief Feed the rigging bvh input processor with one motion frame.
+ \param handle_id is the target scene handle
+ \param motion_frame_ptr: pointer to motion frame data(structure is defined by bvh header setted by fuRiggingBVHInputProcessorSetConfig).
+ \param motion_frame_len: length of the motion frame data.
+ \return zero for failed, one for scuess
+ */
+FUNAMA_API int fuRiggingBVHInputProcessorFeedMotionFrame(
+    unsigned int handle_id, const float* motion_frame_ptr,
+    const int motion_frame_len);
+
 
 #ifdef __cplusplus
 }

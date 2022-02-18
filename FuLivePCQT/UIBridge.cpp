@@ -393,6 +393,7 @@ void UIBridge::setARFunction(bool ar){
         useProps(m_gsSelectBgIndex);
         if(m_gsSelectCamera){
             fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+            fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
             main->m_camera->m_QCamera->start();
             m_gsVideoMediaPlayer.stop();
         }else{
@@ -411,6 +412,7 @@ void UIBridge::setARFunction(bool ar){
         nama->changeRenderList(RENDER_GREEN);
     }else{
         fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+        fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
         //停止绿幕背景,视频播放器
         m_gsMediaPlayer.stop();
         m_gsVideoMediaPlayer.stop();
@@ -1129,6 +1131,7 @@ void UIBridge::gsCameraConfirm()
     gsSelectCameraChanged();
     m_gsVideoMediaPlayer.stop();
     fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+    fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
     m_gsStart = QPointF(0.5,0.5);
     m_gsSize = QPointF(0.5,0.5);
     MainClass::getInstance()->m_nama->changeGSPreviewRect(0.5, 0.5, 1, 1);
@@ -1200,6 +1203,7 @@ void UIBridge::gsSelectVideo(QString path)
     MainClass::getInstance()->m_camera->m_QCamera->stop();
     //关闭摄像头输入
     fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0);
+    fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0);
     m_bgsSelectVideo = true;
     MainClass::getInstance()->m_nama->m_FrameID = 0;
     if(m_gsSelectVideoPath==path){
@@ -1624,11 +1628,13 @@ void UIBridge::changeCameraType(bool type)
         MainClass::getInstance()->m_camera->m_QCamera->stop();
         m_webcamMediaPlayer.play();
         fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0);
+        fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0);
     }
     else{
         MainClass::getInstance()->m_camera->m_QCamera->start();
         m_webcamMediaPlayer.stop();
         fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+        fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
     }
 }
 

@@ -93,7 +93,7 @@ void CameraDisplayRenderer::render()
     }
     uibridge->m_secondRenderTime += m_timeRender.elapsed();
     uibridge->m_FrameIDFPS++;
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(0, 0, 0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, nama->m_texID);
