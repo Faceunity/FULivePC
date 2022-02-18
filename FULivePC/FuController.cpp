@@ -34,6 +34,9 @@ void FuController::InitController(std::string strControllerPath, std::string str
 		mInstanceHandle = fuCreateInstance(mSceneHandle);
 
 		fuSetCurrentScene(mSceneHandle);
+		fuSetInstanceHumanProcessorType(mInstanceHandle, 0);
+		fuSetInstanceEnableHumanAnimDriver(mInstanceHandle, true);
+
 		fuEnableHumanProcessor(mSceneHandle, 1.0);
 		fuBindItemsToScene(mSceneHandle, &m_nCtrlCfgHandle, 1);
 	}
@@ -132,7 +135,7 @@ void FuController::EnableFaceProcessor(int enable)
 
 void FuController::EnableHumanFollowMode(int enable)
 {
-	fuEnableHumanFollowMode(mSceneHandle, enable);
+	fuSetInstanceRiggingRetargeterAvatarFollowMode(mSceneHandle, FUAIHUMAN_FOLLOW_MODE_ALIGN);
 }
 
 void FuController::SetAvatar3DScene(BodyTrackType scene)
@@ -142,17 +145,17 @@ void FuController::SetAvatar3DScene(BodyTrackType scene)
 
 void FuController::SetAvatarGlobalOffset(float offset_x, float offset_y, float offset_z)
 {
-	fuHumanProcessorSetAvatarGlobalOffset(offset_x, offset_y, offset_z);
+	fuSetInstanceRiggingRetargeterAvatarFixModeTransScale(mSceneHandle, offset_x, offset_y, offset_z);
 }
 
 void FuController::SetAvatarScale(float scale)
 {
-	fuHumanProcessorSetAvatarScale(scale);
+	//fuHumanProcessorSetAvatarScale(scale);
 }
 
 void FuController::UseRetargetRootScale(int enable, float scale)
 {
-	fuHumanProcessorSetAvatarUseRetargetRootScale(enable, scale);
+	//fuHumanProcessorSetAvatarUseRetargetRootScale(enable, scale);
 }
 
 void FuController::SetAvatarAnimFilterParams(int n_buffer_frames, float pos_w, float angle_w)
@@ -162,7 +165,7 @@ void FuController::SetAvatarAnimFilterParams(int n_buffer_frames, float pos_w, f
 
 void FuController::SetAvatarTranslationScale(float scale_x, float scale_y, float scale_z)
 {
-	fuSetHumanProcessorTranslationScale(mSceneHandle, scale_x, scale_y, scale_z);
+	fuSetInstanceRiggingRetargeterAvatarFixModeTransScale(mSceneHandle, scale_x, scale_y, scale_z);
 }
 
 void FuController::OpenFaceCapture(bool bOpen)

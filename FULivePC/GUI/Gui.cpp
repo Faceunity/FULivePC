@@ -1155,7 +1155,6 @@ static void ShowMainMenu(Nama* nama)
 				}
 				UIBridge::showItemSelectWindow = true;
 				Nama::mNamaAppState.EnableAvatar = false;
-
 				// 处理音乐滤镜,关闭音乐
 				if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3) {
 					nama->pauseCurrentMp3();

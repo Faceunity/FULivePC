@@ -635,7 +635,7 @@ void Nama::UpdateBeauty()
 	map<int, int> blurType = { {0,2},{1,0},{2,1},{3,3} };
 	fuItemSetParamd(mBeautyHandles, "blur_type", blurType[UIBridge::mEnableHeayBlur]);
 	fuItemSetParamd(mBeautyHandles, "face_shape_level", 1);
-	if (!UIBridge::showLightMakeupTip) {
+	if (!(UIBridge::showLightMakeupTip && !UIBridge::showGreenScreen)) {
 		fuItemSetParamd(mBeautyHandles, "filter_level", UIBridge::mFilterLevel[UIBridge::m_curFilterIdx] / 100.0f);
 	}
 }
@@ -816,7 +816,6 @@ void Nama::UpdateGSBg(cv::Mat & dataRGBA)
 
 	//DWORD time1 = GetTickCount();
 	fuCreateTexForItem(mGSHandle, "tex_bg", dataRGBA.data, dataRGBA.cols, dataRGBA.rows);
-
 	/*DWORD time2 = GetTickCount();
 
 	printf("liufei cost time:%d \r\n", time2 - time1);*/
@@ -1347,6 +1346,7 @@ void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
 		BgSegUpdate::instance().Update(this);
 
 		fuSetInputCameraBufferMatrix((TRANSFORM_MATRIX)rotType);
+		fuSetInputCameraTextureMatrix((TRANSFORM_MATRIX)rotType);
 
 		fuRender(FU_FORMAT_RGBA_BUFFER,
 			(int*)(picInput.data),
@@ -1375,6 +1375,7 @@ void Nama::RenderP2A(cv::Mat & picBg, int rotType)
 		return;
 
 	fuSetInputCameraBufferMatrix((TRANSFORM_MATRIX)rotType);
+	fuSetInputCameraTextureMatrix((TRANSFORM_MATRIX)rotType);
 	m_Controller->RenderBundlesBuffer(picBg.data, picBg, mFrameID);
 }
 
@@ -1408,6 +1409,7 @@ void Nama::RenderGS(cv::Mat & picInput, int rotType)
 		vecRender.push_back(mBeautyHandles);
         
 		fuSetInputCameraBufferMatrix((TRANSFORM_MATRIX)rotType);
+		fuSetInputCameraTextureMatrix((TRANSFORM_MATRIX)rotType);
 		fuRender(FU_FORMAT_RGBA_BUFFER,
 			(void*)(picInput.data),
 			FU_FORMAT_RGBA_BUFFER,
@@ -1431,7 +1433,6 @@ void Nama::RenderGS(cv::Mat & picInput, int rotType)
 
 void Nama::RenderItems(cv::Mat & picMat)
 {
-	
 	if (UIBridge::showGreenScreen)
 	{
 		TRANSFORM_MATRIX type = (CCameraManage::getInstance()->mCapture->getCaptureType() == CAPTURE_CAMERA) ? TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL: TRANSFORM_MATRIX::CCROT0;

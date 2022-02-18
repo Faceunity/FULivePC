@@ -811,8 +811,9 @@ cv::Mat CCameraManage::GetFrame()
 		auto srcType = mCapture->getCaptureType();
 		bool bNeedFlip = srcType != GS_INPUT_TYPE_FILE;
 
-		if (bNeedFlip)
+		if (bNeedFlip) {
 			cv::flip(frameMat, tmpMat, 1);
+		}
 		else {   // 本地视频文件
 			switch (UIBridge::m_localVideoRotation) {
 			case 0:
