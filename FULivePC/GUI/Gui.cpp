@@ -48,6 +48,8 @@ bool UIBridge::showFilterSlider = false;
 int UIBridge::showGreenScreen = false;
 bool UIBridge::showCustomMakeup = false;
 bool UIBridge::newMakeupType = false;
+bool UIBridge::showLightMakeupTip = false;
+LightMakeupParam UIBridge::m_lightMakeupParam;
 
 volatile uint32_t UIBridge::mFPS = 60;
 uint32_t UIBridge::mResolutionWidth = 1280;
@@ -305,6 +307,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama* nama)
 
 	// Tabs
 	ImGui::BeginTabBar("##tabs1", ImGuiTabBarFlags_NoAnim | ImGuiTabBarFlags_SizingPolicyEqual);
+	static int lastdoc_n = 0;
 	for (int doc_n = 0; doc_n < IM_ARRAYSIZE(GDocs); doc_n++)
 	{
 		MyDocument& doc = GDocs[doc_n];
@@ -326,7 +329,10 @@ static void ShowTabs(const char* title, bool* p_open, Nama* nama)
 		{
 			if (!nama->CheckModuleCodeSide(BeautifyFaceSkin))
 			{
-				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+				if (lastdoc_n != 0) {
+					lastdoc_n = 0;
+					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+				}
 				string tipStr = u8"美颜权限不足";
 				ShowTipLabel(tipStr);
 			}
@@ -337,7 +343,10 @@ static void ShowTabs(const char* title, bool* p_open, Nama* nama)
 		{
 			if (!nama->CheckModuleCodeSide(BeautifyFaceShape))
 			{
-				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+				if (lastdoc_n != 1) {
+					lastdoc_n = 1;
+					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+				}
 				string tipStr = u8"美颜权限不足";
 				ShowTipLabel(tipStr);
 			}
@@ -348,7 +357,10 @@ static void ShowTabs(const char* title, bool* p_open, Nama* nama)
 		{
 			if (!nama->CheckModuleCodeSide(BeautifyFilter))
 			{
-				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+				if (lastdoc_n != 2) {
+					lastdoc_n = 2;
+					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+				}
 				string tipStr = u8"滤镜权限不足";
 				ShowTipLabel(tipStr);
 			}
@@ -359,7 +371,10 @@ static void ShowTabs(const char* title, bool* p_open, Nama* nama)
 		{
 			if (!nama->CheckModuleCodeSide(BeautifyBody))
 			{
-				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+				if (lastdoc_n != 3) {
+					lastdoc_n = 3;
+					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+				}
 				string tipStr = u8"美体权限不足";
 				ShowTipLabel(tipStr);
 			}
@@ -737,6 +752,13 @@ static void ShowFloatMenuAR(Nama* nama)
 	}
 	else if (bundleCategory < BundleCategory::Count)
 	{
+		if (UIBridge::categoryBundles[BundleCategory::LightMakeup].size() == 0)
+		{
+			UIBridge::categoryBundles[BundleCategory::LightMakeup].push_back("light_makeup_peachblossom.");
+			UIBridge::categoryBundles[BundleCategory::LightMakeup].push_back("light_makeup_grapefruit.");
+			UIBridge::categoryBundles[BundleCategory::LightMakeup].push_back("light_makeup_clear.");
+			UIBridge::categoryBundles[BundleCategory::LightMakeup].push_back("light_makeup_boyfriend.");
+		}
 		for (int i = BundleCategory::Avatar + 1; i < BundleCategory::Count; i++)
 		{
 			if (UIBridge::categoryBundles[i].size() == 0)
@@ -748,7 +770,6 @@ static void ShowFloatMenuAR(Nama* nama)
 				UIBridge::FindAllBundle(gBundlePath[i], UIBridge::categoryBundles[i]);
 			}
 		}
-
 		for (int i = 0; i < UIBridge::categoryBundles[bundleCategory].size(); i++)
 		{
 			ImGui::PushID(i);
@@ -786,6 +807,12 @@ static void ShowFloatMenuAR(Nama* nama)
 					UIBridge::mNeedStopMP3 = true;
 				}
 
+				if (itemName == "light_makeup_peachblossom." || 
+					itemName == "light_makeup_grapefruit." ||
+					itemName == "light_makeup_clear." || 
+					itemName == "light_makeup_boyfriend.") {
+					itemName = LIGHT_MAKEUP_NAME;
+				}
 				if (itemName == MAKEUP_CUSTOM_NAME)
 				{
 					UIBridge::showCustomMakeup = true;
@@ -809,7 +836,68 @@ static void ShowFloatMenuAR(Nama* nama)
 						UIBridge::newMakeupType = false;
 						nama->SelectBundle(gBundlePath[bundleCategory] + "/" + itemName);
 					}
-
+				}
+				if (UIBridge::mCurRenderItemName!= "NONE" && 
+					(iconName.compare("light_makeup_peachblossom") == 0 ||
+					iconName.compare("light_makeup_grapefruit") == 0 || 
+					iconName.compare("light_makeup_clear") == 0 || 
+					iconName.compare("light_makeup_boyfriend") == 0)) {
+					UIBridge::showLightMakeupTip = true;
+					//设置轻美妆参数
+					if (iconName.compare("light_makeup_peachblossom") == 0) {
+						UIBridge::m_lightMakeupParam.blusherPath = g_assetDir + "items/LightMakeup/blusher/mu_blush_01.png";
+						UIBridge::m_lightMakeupParam.blusher = 0.9;
+						UIBridge::m_lightMakeupParam.eyeshadowPath = g_assetDir + "items/LightMakeup/eyeshadow/mu_eyeshadow_01.png";
+						UIBridge::m_lightMakeupParam.eyeshadow = 0.9;
+						UIBridge::m_lightMakeupParam.eyebrowPath = g_assetDir + "items/LightMakeup/eyebrow/mu_eyebrow_01.png";
+						UIBridge::m_lightMakeupParam.eyebrow = 0.5;
+						UIBridge::m_lightMakeupParam.lipColorPath = g_assetDir + "items/LightMakeup/lipstick/mu_lip_01.json";
+						UIBridge::m_lightMakeupParam.intensity = 0.9;
+						UIBridge::m_lightMakeupParam.filterName = "fennen3";
+						UIBridge::m_lightMakeupParam.filterLevel = 1.0;
+					}
+					else if (iconName.compare("light_makeup_grapefruit") == 0) {
+						UIBridge::m_lightMakeupParam.blusherPath = g_assetDir + "items/LightMakeup/blusher/mu_blush_23.png";
+						UIBridge::m_lightMakeupParam.blusher = 1.0;
+						UIBridge::m_lightMakeupParam.eyeshadowPath = g_assetDir + "items/LightMakeup/eyeshadow/mu_eyeshadow_21.png";
+						UIBridge::m_lightMakeupParam.eyeshadow = 0.75;
+						UIBridge::m_lightMakeupParam.eyebrowPath = g_assetDir + "items/LightMakeup/eyebrow/mu_eyebrow_19.png";
+						UIBridge::m_lightMakeupParam.eyebrow = 0.6;
+						UIBridge::m_lightMakeupParam.lipColorPath = g_assetDir + "items/LightMakeup/lipstick/mu_lip_21.json";
+						UIBridge::m_lightMakeupParam.intensity = 0.8;
+						UIBridge::m_lightMakeupParam.filterName = "lengsediao4";
+						UIBridge::m_lightMakeupParam.filterLevel = 0.7;
+					}
+					else if (iconName.compare("light_makeup_clear") == 0) {
+						UIBridge::m_lightMakeupParam.blusherPath = g_assetDir + "items/LightMakeup/blusher/mu_blush_22.png";
+						UIBridge::m_lightMakeupParam.blusher = 0.9;
+						UIBridge::m_lightMakeupParam.eyeshadowPath = g_assetDir + "items/LightMakeup/eyeshadow/mu_eyeshadow_20.png";
+						UIBridge::m_lightMakeupParam.eyeshadow = 0.65;
+						UIBridge::m_lightMakeupParam.eyebrowPath = g_assetDir + "items/LightMakeup/eyebrow/mu_eyebrow_18.png";
+						UIBridge::m_lightMakeupParam.eyebrow = 0.45;
+						UIBridge::m_lightMakeupParam.lipColorPath = g_assetDir + "items/LightMakeup/lipstick/mu_lip_20.json";
+						UIBridge::m_lightMakeupParam.intensity = 0.8;
+						UIBridge::m_lightMakeupParam.filterName = "xiaoqingxin1";
+						UIBridge::m_lightMakeupParam.filterLevel = 0.8;
+					}
+					else if (iconName.compare("light_makeup_boyfriend") == 0) {
+						UIBridge::m_lightMakeupParam.blusherPath = g_assetDir + "items/LightMakeup/blusher/mu_blush_20.png";
+						UIBridge::m_lightMakeupParam.blusher = 0.8;
+						UIBridge::m_lightMakeupParam.eyeshadowPath = g_assetDir + "items/LightMakeup/eyeshadow/mu_eyeshadow_18.png";
+						UIBridge::m_lightMakeupParam.eyeshadow = 0.9;
+						UIBridge::m_lightMakeupParam.eyebrowPath = g_assetDir + "items/LightMakeup/eyebrow/mu_eyebrow_16.png";
+						UIBridge::m_lightMakeupParam.eyebrow = 0.65;
+						UIBridge::m_lightMakeupParam.lipColorPath = g_assetDir + "items/LightMakeup/lipstick/mu_lip_18.json";
+						UIBridge::m_lightMakeupParam.intensity = 1.0;
+						UIBridge::m_lightMakeupParam.filterName = "xiaoqingxin3";
+						UIBridge::m_lightMakeupParam.filterLevel = 0.9;
+					}
+					nama->setLightMakeupParam(UIBridge::m_lightMakeupParam);
+				}
+				else {
+					//设置滤镜
+					UIBridge::showLightMakeupTip = false;
+					nama->UpdateFilter(UIBridge::m_curFilterIdx);
 				}
 			}
 			ImGui::SameLine(0.f, 22.f * scaleRatioW);
@@ -860,11 +948,11 @@ static void ShowArMenu(Nama* nama)
 	string* categoryNameArr = nullptr;
 	string allCategory[] = { "list_icon_avatar_nor","list_icon_annimoji_nor","list_icon_Propmap_nor","list_icon_Jinpin_nor","list_icon_AR_nor",
 		"list_icon_Expressionrecognition_nor",	"list_icon_Musicfilter_nor","list_icon_Bgsegmentation_nor",
-		"list_icon_gesturerecognition_nor","list_icon_Hahamirror_nor","list_icon_makeup_nor","list_icon_hairdressing_nor","list_icon_photo_sticker_nor",
+		"list_icon_gesturerecognition_nor","list_icon_Hahamirror_nor","list_icon_makeup_nor","list_icon_lightmakeup_nor","list_icon_hairdressing_nor","list_icon_photo_sticker_nor",
 		u8"Avatar","Animoji",u8"道具贴纸",u8"精品贴纸",u8"AR面具",
 		u8"表情识别",u8"音乐滤镜",u8"人像分割",
-		u8"手势识别",u8"哈哈镜",u8"美妆",u8"美发", u8"搞笑大头" };
-	int amount = 13;
+		u8"手势识别",u8"哈哈镜",u8"美妆",u8"轻美妆",u8"美发", u8"搞笑大头" };
+	int amount = 14;
 	categoryNameArr = allCategory;
 
 	/* 这是个例外逻辑,把Avatar放在最前面，这样后面加起来正常的就没啥问题 */
@@ -1061,6 +1149,7 @@ static void ShowMainMenu(Nama* nama)
 			if (UIBridge::showGreenScreen)
 			{
 				Nama::mNamaAppState = Nama::mNamaAppStateBackGS;
+				nama->UpdateFilter(UIBridge::m_curFilterIdx);
 				if (UIBridge::m_bSetGSInputSrc == false)
 				{
 					// 关闭默认相机输入源
@@ -1097,6 +1186,10 @@ static void ShowMainMenu(Nama* nama)
 				// 处理音乐滤镜，重新开启音乐
 				if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3 && !UIBridge::m_bShowingBodyBeauty) {
 					nama->resumeCurrentMp3();
+				}
+				//轻美妆重新设置轻美妆滤镜
+				if (UIBridge::bundleCategory == BundleCategory::LightMakeup && UIBridge::showLightMakeupTip && !UIBridge::m_bShowingBodyBeauty) {
+					nama->setLightMakeupParam(UIBridge::m_lightMakeupParam);
 				}
 			}
 
@@ -1696,7 +1789,11 @@ void Gui::render(Nama* nama)
 			ShowTipLabel(tipStr);
 
 		}
-		else if (!nama->CheckModuleCode(UIBridge::bundleCategory)) {
+		else if (!UIBridge::showGreenScreen && !nama->CheckModuleCode(UIBridge::bundleCategory)) {
+			string tipStr = u8"道具权限不足，请联系FaceUnity技术支持";
+			ShowTipStr(tipStr);
+		}
+		else if (UIBridge::showGreenScreen && !nama->CheckModuleCode(UIBridge::gsBundleCategory)) {
 			string tipStr = u8"道具权限不足，请联系FaceUnity技术支持";
 			ShowTipStr(tipStr);
 		}

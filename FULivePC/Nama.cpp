@@ -1271,7 +1271,6 @@ bool Nama::CheckModuleCode(int category)
 	{
 		return true;
 	}
-
 	int passCode = fuGetModuleCode(g_checkIndex[category]);
 	int needCode = g_checkID[category];
 	bool bOK = false;
@@ -1288,6 +1287,7 @@ bool Nama::CheckModuleCodeSide(int categorySide)
 	{
 		return true;
 	}
+
 	int passCode = fuGetModuleCode(g_checkSideIndex[categorySide]);
 	int needCode = g_checkSideID[categorySide];
 	bool bOK = false;

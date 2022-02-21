@@ -14,6 +14,7 @@
 
 
 #define MAKEUP_CUSTOM_NAME ("demo_icon_customize.bundle")
+#define LIGHT_MAKEUP_NAME ("light_makeup.bundle")
 #define BGSEG_CUSTOM_NAME ("others/bg_segment.bundle")
 #define BGSEG_USERFILE_PIC ("bg_seg_shot.png")
 #define GSSAFEAREA_USERFILE_PIC ("gs_safearea_shot.png")
@@ -39,7 +40,7 @@ enum CERTIFACITE_TYPE
 	DEFINE_P2A_Creative,
 	DEFINE_Portrait_Relighting,
 	DEFINE_Dynamic_Portrait,
-	DEFINE_Facewarp,
+	DEFINE_Distorting_mirror,
 	DEFINE_Music_filter,
 	DEFINE_Make_Up,
 	DEFINE_HAIR_COLOR,
@@ -56,6 +57,7 @@ static const int define_arr[DEFINE_SIZE] = { 0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80
 
 enum CERTIFACITE_TYPE_EXT
 {
+	DEFINE_P2A_FACE_INFO,
 	DEFINE_P2A_IMAGE,
 	DEFINE_P2A_VIDEO,
 	DEFINE_P2A_GIF,
@@ -66,12 +68,21 @@ enum CERTIFACITE_TYPE_EXT
 	DEFINE_BODY_TRACK,
 	DEFINE_BODY_TRACK_GESTURE,
 	DEFINE_GREEN_SCREEN_EDIT,
+	DEFINE_PUSH_STREAM,
+	DEFINE_GET_FACEINFO,
+	DEFINE_FACE_LANDMARKS,
+	DEFINE_EXPRESSION,
+	DEFINE_2D_BODY_LANDMARKS,
+	DEFINE_HEAD_SEGMENTATION,
+	DEFINE_MOTION_RECOGNITION,
+	DEFINE_BOUTIQUE_STICKER,
+	DEFINE_ITEAM_OFFLINE_SIGN,
 	DEFINE_PKGAME,
 
 	DEFINE_SIZE_EXT
 };
 static const int define_arr_ext[DEFINE_SIZE_EXT] = { 0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80,0x100,0x200,
-0x80000 };
+0x400,0x800,0x1000,0x2000,0x4000,0x8000,0x10000,0x20000,0x40000,0x80000 };
 
 
 enum BundleCategory 
@@ -86,7 +97,8 @@ enum BundleCategory
 	BackgroundSegmentation,
 	GestureRecognition,
 	MagicMirror,
-	Makeup ,
+	Makeup,
+	LightMakeup,
 	BeautyHair,
 	BigHead,
 	GreenScreen,
@@ -95,16 +107,16 @@ enum BundleCategory
 };
 
 static const int g_checkIndex[Count] = {
-	0,0,0,0,0,0,0,0,0,0,0,0,0,1
+	1,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1
 };
 
 static const int g_checkID[Count] = 
 { 
-	define_arr[DEFINE_Avatar], define_arr[DEFINE_3D_Sticker],define_arr[DEFINE_2D_Sticker],define_arr[DEFINE_2D_Sticker],
-	define_arr[DEFINE_AR_Mask],  define_arr[DEFINE_Expression_Recognition], define_arr[DEFINE_Music_filter],
-	define_arr[DEFINE_Background_Segmentation], define_arr[DEFINE_Gesture_Recognition], define_arr[DEFINE_Video_Filter],
-	define_arr[DEFINE_Make_Up], define_arr[DEFINE_HAIR_COLOR], define_arr[DEFINE_Expression_Recognition],
-	define_arr_ext[DEFINE_GREEN_SCREEN_EDIT]
+	define_arr_ext[DEFINE_BODY_TRACK], define_arr[DEFINE_Avatar],define_arr[DEFINE_2D_Sticker],define_arr_ext[DEFINE_BOUTIQUE_STICKER],define_arr[DEFINE_AR_Mask],
+    define_arr[DEFINE_Expression_Recognition], define_arr[DEFINE_Music_filter],
+	define_arr[DEFINE_Background_Segmentation], define_arr[DEFINE_Gesture_Recognition], define_arr[DEFINE_Distorting_mirror],
+	define_arr[DEFINE_Make_Up], define_arr_ext[DEFINE_LIGHT_MAKEUP], define_arr[DEFINE_HAIR_COLOR], define_arr_ext[DEFINE_HEAD_SEGMENTATION],
+	define_arr_ext[DEFINE_GREEN_SCREEN_EDIT], define_arr_ext[DEFINE_GREEN_SCREEN_EDIT]
 };
 
 enum SideCategory {
@@ -149,6 +161,20 @@ typedef struct tagGreenScreenState
 
 }GreenScreenState;
 
+struct LightMakeupParam
+{
+	std::string blusherPath;
+	float blusher;
+	std::string eyeshadowPath;
+	float eyeshadow;
+	std::string eyebrowPath;
+	float eyebrow;
+	std::string lipColorPath;
+	float intensity;
+	std::string filterName;
+	float filterLevel;
+};
+
 class UIBridge
 {
 public:
@@ -167,7 +193,8 @@ public:
 	static int  showGreenScreen;
 	static bool showCustomMakeup;
 	static bool newMakeupType;
-
+	static bool showLightMakeupTip;
+	static LightMakeupParam m_lightMakeupParam;
 	static bool mNeedIpcWrite; 
 	static bool mNeedPlayMP3;
 	static bool mNeedStopMP3;
@@ -301,6 +328,7 @@ const string gBundlePath[] = {
 	g_assetDir + "items/" + "GestureRecognition",
 	g_assetDir + "items/" + "MagicMirror",
 	g_assetDir + "items/" + "Makeup",
+	g_assetDir + "items/" + "LightMakeup",
 	g_assetDir + "items/" + "BeautyHair",
 	g_assetDir + "items/" + "BigHead",
 	g_assetDir + "items/" + "GreenScreen"
