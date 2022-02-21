@@ -57,7 +57,6 @@ public:
     int PlayOnceZhuanshen();
     int PlayOnceDance();
     bool IsPlayAnim();
-
     double GetAnimPregress(int nHandle);
 private:
     int m_nCtrlHandle = -1;

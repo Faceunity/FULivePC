@@ -20,15 +20,15 @@ Rectangle{
     height: 85
     function resetValue(ivalue) {
         i_Value = ivalue
-        m_lButton.currentIndex = i_Value
+        m_lButton.currentIndex = i_Button_Num - i_Value
     }
     //如果是精准美肤,选中关闭按钮时图标变灰,其他都是蓝
     function updataImage(ivalue){
         if(b_Type && m_text.text == "精准美肤"){
             if(ivalue == 0){
-                icon_Full = "qrc:/res/list_icon_"+ icon_Name + "_open.png"
-            }else{
                 icon_Full = "qrc:/res/list_icon_"+ icon_Name + "_close.png"
+            }else{
+                icon_Full = "qrc:/res/list_icon_"+ icon_Name + "_open.png"
             }
         }else if(b_Type && m_text.text !== "精准美肤"){
             icon_Full = "qrc:/res/list_icon_"+ icon_Name + "_open.png"
@@ -60,7 +60,7 @@ Rectangle{
                 i_Button_Num++
             }
             m_lmButton.append({"tText": str2})
-            m_lButton.currentIndex = i_Value
+            m_lButton.currentIndex = i_Button_Num - i_Value
         }
         updataImage(i_Value)
     }
@@ -134,7 +134,7 @@ Rectangle{
                     }
                     //按钮更改隐藏滑块值
                     onClicked: {
-                        i_Value = index
+                        i_Value = i_Button_Num - index
                         m_lButton.currentIndex = index
                     }
                 }
@@ -155,12 +155,7 @@ Rectangle{
             {
                 updataImage(value)
                 m_tslider.text = value
-                //如果是按钮,实际参数值相反
-                if(b_Type){
-                    iValueChanged(i_Button_Num - value)
-                }else{
-                    iValueChanged(value)
-                }
+                iValueChanged(value)
             }
             style: SliderStyle
             {
