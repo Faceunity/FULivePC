@@ -1964,6 +1964,39 @@ Window {
                         horizontalAlignment: Text.AlignLeft
                     }
                 }
+                FileDialog {
+                    id: m_fileDialogImport
+                    title: qsTr("选择视频/图片")
+                    nameFilters: ["选择视频 (*.mp4 *.avi *.wmv)", "选择图片 (*.jpg *.png *.gif *.bmp *.ico)", "*.*"]
+                    onAccepted: {
+                       m_tiCameraURL.text = m_fileDialogImport.fileUrl
+                    }
+                }
+                Rectangle{
+                    id:m_rWebCamImport
+                    x: 40
+                    y: 45
+                    width: 40
+                    height: 25
+                    color: "#E1E4EE"
+                    TextBlack{
+                        anchors.fill: parent
+                        text: "导入"
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: {
+                            m_rWebCamImport.color = "#98A5F5"
+                        }
+                        onExited: {
+                            m_rWebCamImport.color = "#E1E4EE"
+                        }
+                        onClicked: {
+                            m_fileDialogImport.open()
+                        }
+                    }
+                }
                 Rectangle{
                     id:m_rWebCamConfirm
                     x: 610

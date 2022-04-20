@@ -296,15 +296,16 @@ FUNAMA_API int fuEnableLowQualityLighting(unsigned int handle_id, int enable);
 */
 FUNAMA_API int fuEnableLowResolutionTexture(unsigned int handle_id, int enable);
 
+/**
+ \brief Enable HDR RGBA16F for the target scene.
+ \param handle_id is the target scene handle
+ \param enable > 0 means use HDR RGBA16F, enable <= 0 means use R11FG11FB10F
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuEnableHDRRGBA16F(unsigned int handle_id, int enable);
+
 /*
  * ai related api
- */
-
-/**
- \brief Open or close face processor for the target scene .
- \param handle_id is the target scene handle
- \param enable > 0 means open, enable <= 0 means close
- \return zero for failed, one for success
 */
 FUNAMA_API int fuEnableFaceProcessor(unsigned int handle_id, int enable);
 
@@ -890,6 +891,15 @@ FUNAMA_API int fuSetInstanceColorIntensity(unsigned int handle_id,
 FUNAMA_API int fuSetInstanceFacebeautyColor(unsigned int handle_id,
                                             int face_beauty_handle, int r,
                                             int g, int b);
+/**
+ \brief Enable instance self collision.
+ \param handle_id is the target instance handle
+ \param enable > 0 means turn on , enable <= 0 means turn off
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuEnableInstanceSelfCollision(unsigned int handle_id,
+                                             int enable);
+
 /*
  * animation releated api
  */
@@ -1364,6 +1374,25 @@ FUNAMA_API int fuGetInstanceBoundingBoxScreenCoordinate(unsigned int handle_id,
                                                         float* ret, int size);
 
 /**
+ \brief Get instance boundingBox screen coordinate, four dimensional, with aabb
+ offset 
+ \param handle_id is the target instance handle 
+ \param ret allocated memory space as container 
+ \param size is number of float allocated in ret
+ \param x_min_offset is offset of local aabb min x
+ \param y_min_offset is offset of local aabb min y
+ \param z_min_offset is offset of local aabb min z
+ \param x_max_offset is offset of local aabb max x
+ \param y_max_offset is offset of local aabb max y
+ \param z_max_offset is offset of local aabb max z
+ \return 1 means successful fetch, container filled with info 0 means failure
+ */
+FUNAMA_API int fuGetInstanceBoundingBoxScreenCoordinateWithOffset(
+    unsigned int handle_id, float* ret, int size, float x_min_offset,
+    float y_min_offset, float z_min_offset, float x_max_offset,
+    float y_max_offset, float z_max_offset);
+
+/**
  \brief Get instance target animation frame number.
  \param handle_id is the target instance handle
  \param anim_handle is target animation item handle
@@ -1447,6 +1476,59 @@ FUNAMA_API int fuSetInstanceRiggingRetargeterAvatarBonemap(
 FUNAMA_API int fuSetInstanceRiggingRetargeterRetargetMapping(
     unsigned int handle_id, const char* mapping_buffer_ptr,
     const int mapping_buffer_size);
+
+/**
+ \brief Set the rigging retargeter use collision or not.
+ \param handle_id is the target instance handle
+ \param use_collision: use collision or not.
+ \return zero for failed, one for scuess
+ */
+FUNAMA_API int fuSetInstanceRiggingRetargeterUseCollision(
+    unsigned int handle_id, bool use_collision);
+
+/**
+ \brief Set the rigging retargeter retarget collision config.
+ \param handle_id is the target instance handle
+ \param collision_config_ptr: json file description of the collision config.
+ \param collision_config_size, size of data in bytes.
+ \return zero for failed, one for scuess
+ */
+FUNAMA_API int fuSetInstanceRiggingRetargeterCollisionConfig(
+    unsigned int handle_id, const char* collision_config_ptr,
+    const int collision_config_size);
+
+/**
+ \brief Set the rigging retargeter use euler limits or not.
+ \param handle_id is the target instance handle
+ \param use_euler_limits: use euler limits or not.
+ \return zero for failed, one for scuess
+ */
+FUNAMA_API int fuSetInstanceRiggingRetargeterUseEulerLimits(
+    unsigned int handle_id, bool use_euler_limits);
+
+/**
+ \brief Set the rigging retargeter retarget euler limit config.
+ \param handle_id is the target instance handle
+ \param euler_limit_config_ptr: json file description of the euler limit config.
+ \param euler_limit_config_size, size of data in bytes.
+ \return zero for failed, one for scuess
+ */
+FUNAMA_API int fuSetInstanceRiggingRetargeterEulerLimitConfig(
+    unsigned int handle_id, const char* euler_limit_config_ptr,
+    const int euler_limit_config_size);
+
+/**
+ \brief Set the rigging retargeter retarget final mirror type.
+ \param handle_id is the target instance handle
+ \param final_mirror_type: final mirror type. Default FUAIHUMAN_MIRROR_NONE(3).
+                           0:left-right mirror
+                           1:top-bottom mirror
+                           2:both mirror(rotate 180 degree)
+                           3:no mirror.
+ \return zero for failed, one for scuess
+ */
+FUNAMA_API int fuSetInstanceRiggingRetargeterFinalMirrorType(
+    unsigned int handle_id, FUAIHUMANMIRRORTYPE final_mirror_type);
 
 
 /**
