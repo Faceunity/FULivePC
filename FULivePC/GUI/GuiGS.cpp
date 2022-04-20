@@ -638,7 +638,7 @@ static string GetUserIconPath() {
 /// @param itemName 视频名称
 void GUIGS::inputGreenScreenBg(string itemName){
 	UIBridge::mCurRenderGSItemName = itemName;
-	UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+	UIBridge::mLastTime = 0;
 	UIBridge::showItemTipsWindow = false;
 	string videoPath;
 #if _WIN32
@@ -802,7 +802,7 @@ void GUIGS::ShowFloatMenuGS(NamaExampleNameSpace::Nama * nama)
 					if (UIBridge::mCurRenderGSItemName != itemName)
 					{
 						UIBridge::mCurRenderGSItemName = itemName;
-						UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+						UIBridge::mLastTime = 0;
 						UIBridge::showItemTipsWindow = false;
 						string videoPath;
 #if _WIN32

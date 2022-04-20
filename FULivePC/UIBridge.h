@@ -31,7 +31,6 @@ enum CERTIFACITE_TYPE
 	DEFINE_Avatar,
 	DEFINE_AR_Mask,
 	DEFINE_AR_Mask_HD,
-	DEFINE_Face_Transfer,
 	DEFINE_Background_Segmentation,
 	DEFINE_Gesture_Recognition,
 	DEFINE_Video_Filter,
@@ -39,25 +38,27 @@ enum CERTIFACITE_TYPE
 	DEFINE_P2A_Prime,
 	DEFINE_P2A_Creative,
 	DEFINE_Portrait_Relighting,
-	DEFINE_Dynamic_Portrait,
-	DEFINE_Distorting_mirror,
-	DEFINE_Music_filter,
+	DEFINE_Facewarp,
+	DEFINE_Music_Filter,
+	DEFINE_Emotion_Recognition,
 	DEFINE_Make_Up,
-	DEFINE_HAIR_COLOR,
-	DEFINE_CARTOON_FILTER,
-	DEFINE_GESTURE_TRACKING,
-	DEFINE_FACE_FUSION,
-
-
+	DEFINE_Hair_Color,
+	DEFINE_Cartoon_Filter,
+	DEFINE_Face_Fusion,
+	DEFINE_Voice_Lite,
+	DEFINE_Voice,
+	DEFINE_P2A_Gen_Head,
+	DEFINE_P2A_Gen_Hair,
+	DEFINE_P2A_Knead_Face,
+	DEFINE_P2A_Get_Faceinfo,
 	DEFINE_SIZE
 };
-static const int define_arr[DEFINE_SIZE] = { 0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80,0x100,0x200,
-0x400,0x800,0x1000,0x2000,0x4000,0x8000,0x10000,0x20000,0x80000,
-0x100000,0x200000,0x400000,0x800000 };
+static const int define_arr[DEFINE_SIZE] = { 0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x100,0x200,
+0x400,0x800,0x1000,0x2000,0x4000,0x10000,0x20000,0x40000,0x80000,
+0x100000,0x200000,0x800000,0x2000000,0x4000000,0x8000000,0x10000000,0x20000000,0x40000000 };
 
 enum CERTIFACITE_TYPE_EXT
 {
-	DEFINE_P2A_FACE_INFO,
 	DEFINE_P2A_IMAGE,
 	DEFINE_P2A_VIDEO,
 	DEFINE_P2A_GIF,
@@ -70,19 +71,18 @@ enum CERTIFACITE_TYPE_EXT
 	DEFINE_GREEN_SCREEN_EDIT,
 	DEFINE_PUSH_STREAM,
 	DEFINE_GET_FACEINFO,
-	DEFINE_FACE_LANDMARKS,
+	DEFINE_FACE_LANDMARK,
 	DEFINE_EXPRESSION,
 	DEFINE_2D_BODY_LANDMARKS,
 	DEFINE_HEAD_SEGMENTATION,
 	DEFINE_MOTION_RECOGNITION,
 	DEFINE_BOUTIQUE_STICKER,
-	DEFINE_ITEAM_OFFLINE_SIGN,
-	DEFINE_PKGAME,
-
+	DEFINE_ITEM_OFFLINE_SIGN,
+	DEFINE_PK_GAME,
 	DEFINE_SIZE_EXT
 };
-static const int define_arr_ext[DEFINE_SIZE_EXT] = { 0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80,0x100,0x200,
-0x400,0x800,0x1000,0x2000,0x4000,0x8000,0x10000,0x20000,0x40000,0x80000 };
+static const int define_arr_ext[DEFINE_SIZE_EXT] = { 0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80,0x100,0x200,0x400,0x800,0x1000,0x2000,0x4000,0x8000,
+0x10000,0x20000,0x40000,0x80000};
 
 
 enum BundleCategory 
@@ -107,16 +107,16 @@ enum BundleCategory
 };
 
 static const int g_checkIndex[Count] = {
-	1,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1
+	1,0,0,1,0,0,0,0,0,0,0,1,0,1,1
 };
 
 static const int g_checkID[Count] = 
 { 
-	define_arr_ext[DEFINE_BODY_TRACK], define_arr[DEFINE_Avatar],define_arr[DEFINE_2D_Sticker],define_arr_ext[DEFINE_BOUTIQUE_STICKER],define_arr[DEFINE_AR_Mask],
-    define_arr[DEFINE_Expression_Recognition], define_arr[DEFINE_Music_filter],
-	define_arr[DEFINE_Background_Segmentation], define_arr[DEFINE_Gesture_Recognition], define_arr[DEFINE_Distorting_mirror],
-	define_arr[DEFINE_Make_Up], define_arr_ext[DEFINE_LIGHT_MAKEUP], define_arr[DEFINE_HAIR_COLOR], define_arr_ext[DEFINE_HEAD_SEGMENTATION],
-	define_arr_ext[DEFINE_GREEN_SCREEN_EDIT], define_arr_ext[DEFINE_GREEN_SCREEN_EDIT]
+	define_arr_ext[DEFINE_BODY_TRACK], define_arr[DEFINE_Avatar],define_arr[DEFINE_2D_Sticker],define_arr_ext[DEFINE_BOUTIQUE_STICKER],
+	define_arr[DEFINE_AR_Mask],  define_arr[DEFINE_Expression_Recognition], define_arr[DEFINE_Music_Filter],
+	define_arr[DEFINE_Background_Segmentation], define_arr[DEFINE_Gesture_Recognition], define_arr[DEFINE_Facewarp],
+	define_arr[DEFINE_Make_Up], define_arr_ext[DEFINE_LIGHT_MAKEUP], define_arr[DEFINE_Hair_Color], define_arr_ext[DEFINE_HEAD_SEGMENTATION],
+	define_arr_ext[DEFINE_GREEN_SCREEN_EDIT]
 };
 
 enum SideCategory {
@@ -275,10 +275,10 @@ protected:
 private:
 };
 
-const string g_faceBeautyParamName[MAX_BEAUTYFACEPARAMTER] = { "blur_level","color_level", "red_level","sharpen","eye_bright", "tooth_whiten" ,"remove_pouch_strength", "remove_nasolabial_folds_strength" };
+const string g_faceBeautyParamName[MAX_BEAUTYFACEPARAMTER] = { "blur_level","color_level_mode2", "red_level","sharpen","eye_bright", "tooth_whiten" ,"remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2" };
 
-const string g_faceShapeParamName[MAX_FACESHAPEPARAMTER] = { "cheek_thinning","eye_enlarging_v2","intensity_eye_circle", "intensity_chin", "intensity_forehead_v2", "intensity_nose_v2","intensity_mouth_v2",
-		"cheek_v","cheek_narrow_v2","cheek_short","cheek_small_v2","intensity_cheekbones","intensity_lower_jaw",
+const string g_faceShapeParamName[MAX_FACESHAPEPARAMTER] = { "cheek_thinning","eye_enlarging_mode3","intensity_eye_circle", "intensity_chin", "intensity_forehead_mode2", "intensity_nose_mode2","intensity_mouth_mode3",
+		"cheek_v","cheek_narrow_mode2","cheek_short","cheek_small_mode2","intensity_cheekbones","intensity_lower_jaw",
 	"intensity_canthus", "intensity_eye_space", "intensity_eye_rotate", "intensity_long_nose",
 	"intensity_philtrum", "intensity_smile" };
 

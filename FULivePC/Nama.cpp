@@ -1004,6 +1004,7 @@ int Nama::GetLastNamaError()
 	return fuGetSystemError();
 }
 
+
 void Nama::UnbindCurFixedMakeup()
 {
 	if (UIBridge::bundleCategory == BundleCategory::Makeup)
@@ -1271,6 +1272,7 @@ bool Nama::CheckModuleCode(int category)
 	{
 		return true;
 	}
+
 	int passCode = fuGetModuleCode(g_checkIndex[category]);
 	int needCode = g_checkID[category];
 	bool bOK = false;
@@ -1287,7 +1289,6 @@ bool Nama::CheckModuleCodeSide(int categorySide)
 	{
 		return true;
 	}
-
 	int passCode = fuGetModuleCode(g_checkSideIndex[categorySide]);
 	int needCode = g_checkSideID[categorySide];
 	bool bOK = false;
@@ -1532,6 +1533,12 @@ void Nama::SetBodyTrackType(BodyTrackType type)
 	}
 }
 
+void NamaExampleNameSpace::Nama::setLightMakeupTex(string path, string value)
+{
+	cv::Mat image = cv::imread(path, cv::IMREAD_UNCHANGED);
+	cv::cvtColor(image, image, cv::COLOR_BGRA2RGBA);
+	fuCreateTexForItem(UIBridge::m_curRenderItem, value.data(), image.data, image.cols, image.rows);
+}
 
 void NamaExampleNameSpace::Nama::setLightMakeupParam(LightMakeupParam param)
 {
@@ -1543,14 +1550,11 @@ void NamaExampleNameSpace::Nama::setLightMakeupParam(LightMakeupParam param)
 	param.eyebrowPath = UIBridge::GetFileFullPathFromResourceBundle(param.eyebrowPath.c_str());
 	param.lipColorPath = UIBridge::GetFileFullPathFromResourceBundle(param.lipColorPath.c_str());
 #endif
-	cv::Mat image0 = cv::imread(param.blusherPath, cv::IMREAD_UNCHANGED);
-	fuCreateTexForItem(UIBridge::m_curRenderItem, "tex_blusher", image0.data, image0.cols, image0.rows);
+	setLightMakeupTex(param.blusherPath, "tex_blusher");
 	fuItemSetParamd(UIBridge::m_curRenderItem, "makeup_intensity_blusher", param.blusher);
-	cv::Mat image1 = cv::imread(param.eyeshadowPath, cv::IMREAD_UNCHANGED);
-	fuCreateTexForItem(UIBridge::m_curRenderItem, "tex_eye", image1.data, image1.cols, image1.rows);
+	setLightMakeupTex(param.eyeshadowPath, "tex_eye");
 	fuItemSetParamd(UIBridge::m_curRenderItem, "makeup_intensity_eye", param.eyeshadow);
-	cv::Mat image2 = cv::imread(param.eyebrowPath, cv::IMREAD_UNCHANGED);
-	fuCreateTexForItem(UIBridge::m_curRenderItem, "tex_brow", image2.data, image2.cols, image2.rows);
+	setLightMakeupTex(param.eyebrowPath, "tex_brow");
 	fuItemSetParamd(UIBridge::m_curRenderItem, "makeup_intensity_eyeBrow", param.eyebrow);
 	ifstream in(param.lipColorPath.c_str());
 	if (!in.is_open()) {

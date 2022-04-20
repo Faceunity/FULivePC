@@ -823,10 +823,10 @@ cv::Mat CCameraManage::GetFrame()
 				cv::rotate(frameMat, tmpMat, cv::ROTATE_90_CLOCKWISE);
 				break;
 			case 180:
-				tmpMat = frameMat;
+				cv::rotate(frameMat, tmpMat, cv::ROTATE_180);
 				break;
 			case 270:
-				tmpMat = frameMat;
+				cv::rotate(frameMat, tmpMat, cv::ROTATE_90_COUNTERCLOCKWISE);
 				break;
 
 			default:

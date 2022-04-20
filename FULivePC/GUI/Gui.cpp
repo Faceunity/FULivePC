@@ -307,7 +307,6 @@ static void ShowTabs(const char* title, bool* p_open, Nama* nama)
 
 	// Tabs
 	ImGui::BeginTabBar("##tabs1", ImGuiTabBarFlags_NoAnim | ImGuiTabBarFlags_SizingPolicyEqual);
-	static int lastdoc_n = 0;
 	for (int doc_n = 0; doc_n < IM_ARRAYSIZE(GDocs); doc_n++)
 	{
 		MyDocument& doc = GDocs[doc_n];
@@ -329,10 +328,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama* nama)
 		{
 			if (!nama->CheckModuleCodeSide(BeautifyFaceSkin))
 			{
-				if (lastdoc_n != 0) {
-					lastdoc_n = 0;
-					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
-				}
+				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
 				string tipStr = u8"美颜权限不足";
 				ShowTipLabel(tipStr);
 			}
@@ -343,10 +339,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama* nama)
 		{
 			if (!nama->CheckModuleCodeSide(BeautifyFaceShape))
 			{
-				if (lastdoc_n != 1) {
-					lastdoc_n = 1;
-					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
-				}
+				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
 				string tipStr = u8"美颜权限不足";
 				ShowTipLabel(tipStr);
 			}
@@ -357,10 +350,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama* nama)
 		{
 			if (!nama->CheckModuleCodeSide(BeautifyFilter))
 			{
-				if (lastdoc_n != 2) {
-					lastdoc_n = 2;
-					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
-				}
+				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
 				string tipStr = u8"滤镜权限不足";
 				ShowTipLabel(tipStr);
 			}
@@ -371,10 +361,7 @@ static void ShowTabs(const char* title, bool* p_open, Nama* nama)
 		{
 			if (!nama->CheckModuleCodeSide(BeautifyBody))
 			{
-				if (lastdoc_n != 3) {
-					lastdoc_n = 3;
-					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
-				}
+				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
 				string tipStr = u8"美体权限不足";
 				ShowTipLabel(tipStr);
 			}
@@ -1789,11 +1776,11 @@ void Gui::render(Nama* nama)
 			ShowTipLabel(tipStr);
 
 		}
-		else if (!UIBridge::showGreenScreen && !nama->CheckModuleCode(UIBridge::bundleCategory)) {
+		else if (!nama->CheckModuleCode(UIBridge::bundleCategory) && !UIBridge::showGreenScreen) {
 			string tipStr = u8"道具权限不足，请联系FaceUnity技术支持";
 			ShowTipStr(tipStr);
 		}
-		else if (UIBridge::showGreenScreen && !nama->CheckModuleCode(UIBridge::gsBundleCategory)) {
+		else if (!nama->CheckModuleCode(UIBridge::gsBundleCategory) && UIBridge::showGreenScreen) {
 			string tipStr = u8"道具权限不足，请联系FaceUnity技术支持";
 			ShowTipStr(tipStr);
 		}
