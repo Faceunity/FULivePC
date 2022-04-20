@@ -135,6 +135,7 @@ namespace NamaExampleNameSpace
 
 		void DestroyAll();
 		int GetLastNamaError();
+		void setLightMakeupTex(string path, string value);
 		void setLightMakeupParam(LightMakeupParam param);
 	private:
 		
