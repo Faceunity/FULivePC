@@ -253,6 +253,8 @@ public:
     bool m_bmakeupFlag = true;
     //轻美妆道具名称
     QString m_lightMakeUpName;
+    //摄像头类型,true为网络摄像头,false为usbs摄像头
+    bool m_CameraType = false;
 signals:
     //qml界面相关
     void cameraSetListChanged();

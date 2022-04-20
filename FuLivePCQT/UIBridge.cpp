@@ -37,8 +37,8 @@ UIBridge::UIBridge()
     m_beautySkin.append(QStringList{"精准美肤 开启|关闭", "美肤模式 均匀磨皮|精细磨皮|朦胧磨皮|清晰磨皮", "磨皮", "美白", "红润", "锐化", "亮眼", "美牙", "去黑眼圈", "去法令纹"});
     m_beautySkin.append(QStringList{ "skinbeauty", "BeautyMode", "Grindingskin", "Skinwhitening", "Ruddy", "sharpen",
                                      "Brighteye", "Beautifulteeth", "dark_circles", "wrinkle"});
-    m_beautySkin.append(QStringList{ "skin_detect", "blur_type", "blur_level", "color_level", "red_level","sharpen", "eye_bright", "tooth_whiten",
-                                     "remove_pouch_strength", "remove_nasolabial_folds_strength"});
+    m_beautySkin.append(QStringList{ "skin_detect", "blur_type", "blur_level", "color_level_mode2", "red_level","sharpen", "eye_bright", "tooth_whiten",
+                                     "remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2"});
     m_defaultBeautySkin = QStringList{ "1", "3", "70", "30", "30", "20", "0", "0", "0", "0"};
     m_beautySkin.append(m_defaultBeautySkin);
     m_beautySkin.append(QStringList{ "","","","","","","","","",""});
@@ -48,8 +48,8 @@ UIBridge::UIBridge()
     m_beautyFace.append(QStringList{ "Thinface", "Bigeye", "round_eye", "chin", "forehead", "Thinnose", "Mouthtype", "v",
                                      "narrow_face", "short_face", "little_face", "cheekbones", "lower_jaw", "open_eyes", "eye_distance",
                                      "eye_angle", "proboscis", "shrinking", "smile_mouth"});
-    m_beautyFace.append(QStringList{ "cheek_thinning", "eye_enlarging_v2", "intensity_eye_circle", "intensity_chin", "intensity_forehead_v2",
-                                     "intensity_nose_v2", "intensity_mouth_v2", "cheek_v", "cheek_narrow_v2", "cheek_short", "cheek_small_v2", "intensity_cheekbones",
+    m_beautyFace.append(QStringList{ "cheek_thinning", "eye_enlarging_mode3", "intensity_eye_circle", "intensity_chin", "intensity_forehead_mode2",
+                                     "intensity_nose_mode2", "intensity_mouth_mode3", "cheek_v", "cheek_narrow_mode2", "cheek_short", "cheek_small_mode2", "intensity_cheekbones",
                                      "intensity_lower_jaw", "intensity_canthus", "intensity_eye_space", "intensity_eye_rotate",
                                      "intensity_long_nose", "intensity_philtrum", "intensity_smile" });
     m_defaultBeautyFace = QStringList{ "0", "0", "0", "-20", "-20", "50", "-10", "50", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"};
@@ -322,7 +322,11 @@ void UIBridge::getGSPresentFrame(const cv::Mat &frame)
     if(frame.channels() == 4){
         cv::cvtColor(frame, frame, cv::COLOR_RGBA2BGRA);
         if(m_bodyTrackType != BodyTrackType::None || m_bGSCameraImage){
-            m_ImageProvider->m_showImage = QImage(frame.data, frame.cols, frame.rows, frame.cols * 4, QImage::Format_ARGB32).mirrored(true, false);
+            if(m_CameraType){
+                m_ImageProvider->m_showImage = QImage(frame.data, frame.cols, frame.rows, frame.cols * 4, QImage::Format_ARGB32);
+            }else{
+                m_ImageProvider->m_showImage = QImage(frame.data, frame.cols, frame.rows, frame.cols * 4, QImage::Format_ARGB32).mirrored(true, false);
+            }
             emit callQmlRefeshImg();
         }
         MainClass::getInstance()->m_nama->getPresentFrame(frame.clone());
@@ -337,7 +341,11 @@ void UIBridge::getPresentFrame(const cv::Mat &frame)
 {
     MainClass::getInstance()->m_nama->getPresentFrame(frame);
     if(m_bodyTrackType != BodyTrackType::None || m_bGSCameraImage){
-        m_ImageProvider->m_showImage = QImage(frame.data, frame.cols, frame.rows, frame.cols * 4, QImage::Format_ARGB32).mirrored(true, false);
+        if(m_CameraType){
+            m_ImageProvider->m_showImage = QImage(frame.data, frame.cols, frame.rows, frame.cols * 4, QImage::Format_ARGB32);
+        }else{
+            m_ImageProvider->m_showImage = QImage(frame.data, frame.cols, frame.rows, frame.cols * 4, QImage::Format_ARGB32).mirrored(true, false);
+        }
         emit callQmlRefeshImg();
     }
 }
@@ -1624,6 +1632,7 @@ void UIBridge::stopStartWebCamera(bool flag)
 
 void UIBridge::changeCameraType(bool type)
 {
+     m_CameraType = type;
     if(type){
         MainClass::getInstance()->m_camera->m_QCamera->stop();
         m_webcamMediaPlayer.play();
@@ -1692,6 +1701,7 @@ void UIBridge::setLightMakeUpParam(QString name)
 void UIBridge::setLightMakeUpTex(string value, string imagepath)
 {
     cv::Mat image = cv::imread(imagepath,cv::IMREAD_UNCHANGED);
+    cv::cvtColor(image, image, cv::COLOR_BGRA2RGBA);
     fuCreateTexForItem(MainClass::getInstance()->m_nama->m_bundleCurrent, value.data(), image.data, image.cols, image.rows);
 }
 
