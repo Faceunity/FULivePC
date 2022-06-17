@@ -1091,7 +1091,7 @@ static void ShowMainMenu(Nama* nama)
 {
 	{
 		ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 156 * scaleRatioH), ImGuiCond_Always);
-		ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 664 * scaleRatioH), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 634 * scaleRatioH), ImGuiCond_Always);
 		ImGui::Begin("Window2##2", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		ImGui::Dummy(ImVec2(888 * scaleRatioW, 480 * scaleRatioH));
 		for (int i = 0; i < 7; i++)	ImGui::Spacing();
@@ -1117,8 +1117,11 @@ static void ShowMainMenu(Nama* nama)
 				ShowArMenu(nama);
 			}
 		}
+		ImGui::End();
 
-
+		ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 775 * scaleRatioH), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 45 * scaleRatioH), ImGuiCond_Always);
+		ImGui::Begin("Window3##3", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		ImGui::Dummy(ImVec2(1, 1));
 		ImGui::Dummy(ImVec2(321 * scaleRatioW, 1)); ImGui::SameLine();
 		ImGui::PushItemWidth(272 * scaleRatioW);
