@@ -643,98 +643,6 @@ static void ShowFloatMenuAR(Nama* nama)
 			ImGui::SameLine(0.f, 22.f * scaleRatioW);
 			ImGui::PopID();
 		}
-		//{
-		//	ImGui::PushID(1);
-		//	string itemName = "xiong";
-		//	string iconName = Texture::GetPicPathFromResFolder("xiong.png");
-		//	Texture::SharedPtr tex = Texture::createTextureFromFullPath(iconName, true);
-		//	if (!tex)
-		//		tex = Texture::createTextureFromFile("icon_Movebutton_nor.png", false);
-		//	bool buttonClick;
-		//	if (UIBridge::mCurRenderItemName == itemName)
-		//	{
-		//		buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Select);
-		//	}
-		//	else {
-		//		buttonClick = ImGui::ImageRoundButton(UIBridge::m_curRenderItemUIID, tex->getTextureID(), ImVec2(56 * scaleRatioW, 56 * scaleRatioH), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1), ImGui::ImGUI_Button_Operation_Type_Deselect);
-		//	}
-		//	if (buttonClick)
-		//	{
-		//		if (UIBridge::mCurRenderItemName != itemName)
-		//		{
-		//			UIBridge::mCurRenderItemName = itemName;
-		//			UIBridge::mLastTime = ImGui::GetTime() + 2.0;
-		//			UIBridge::showItemTipsWindow = false;
-
-		//			nama->UnLoadAvatar();
-		//			std::vector<std::string> mBundleDirs;
-		//			mBundleDirs.emplace_back(path + "xiong.bundle");
-		//			mBundleDirs.emplace_back(path + "xiong_light.bundle");
-		//			mBundleDirs.emplace_back(path + "xiong_weixiao_ani00.bundle");
-		//			nama->LoadAvatarBundles(mBundleDirs);
-
-		//			BodyTrackConfig c;
-		//			c.DefaultType = BodyTrackType::FullBody;
-
-		//			c.FullBody.EnableFaceProcessor = false;
-		//			//c.FullBody.EnableHumanFollowMode = true;
-		//			c.FullBody.UseRetargetRootScale = true;
-		//			c.FullBody.UseRetargetRootScaleValue = 0;
-		//			c.FullBody.AnimFilterParams_n_buffer_frames = 10;
-		//			c.FullBody.AnimFilterParams_pos_w = 0;
-		//			c.FullBody.AnimFilterParams_angle_w = 0;
-		//			c.FullBody.GlobalOffset_x = 0;
-		//			c.FullBody.GlobalOffset_y = 0;
-		//			c.FullBody.GlobalOffset_z = 0;
-		//			c.FullBody.Scale = 1.0f;
-		//			c.FullBody.Pos_x = 70;
-		//			c.FullBody.Pos_y = 50;
-		//			c.FullBody.Pos_z = -1100;
-		//			c.FullBody.TrackMoveRange_x = 0.9f;
-		//			c.FullBody.TrackMoveRange_y = 0.9f;
-		//			c.FullBody.TrackMoveRange_z = 0.1f;
-
-		//			c.HalfBody.EnableFaceProcessor = false;
-		//			//c.HalfBody.EnableHumanFollowMode = false;
-		//			c.HalfBody.UseRetargetRootScale = true;
-		//			c.HalfBody.UseRetargetRootScaleValue = 0;
-		//			c.HalfBody.AnimFilterParams_n_buffer_frames = 10;
-		//			c.HalfBody.AnimFilterParams_pos_w = 0;
-		//			c.HalfBody.AnimFilterParams_angle_w = 0;
-		//			c.HalfBody.GlobalOffset_x = 0;
-		//			c.HalfBody.GlobalOffset_y = 0;
-		//			c.HalfBody.GlobalOffset_z = 0;
-		//			c.HalfBody.Scale = 1.0f;
-		//			c.HalfBody.Pos_x = 0;
-		//			c.HalfBody.Pos_y = 60;
-		//			c.HalfBody.Pos_z = -300;
-		//			c.HalfBody.TrackMoveRange_x = 0.0f;
-		//			c.HalfBody.TrackMoveRange_y = 0.0f;
-		//			c.HalfBody.TrackMoveRange_z = 0.0f;
-
-		//			bodyTrackConfig = c;
-		//			nama->SetBodyTrackType(BodyTrackType::FullBody);
-		//			ApplyBodyTrackConfig(nama);
-
-		//			Gui::mIsOpenMiniWindow = false;
-		//			Gui::mIsEnableHumanFollowMode = false;
-		//			nama->m_Controller->EnableHumanFollowMode(Gui::mIsEnableHumanFollowMode);
-		//			Nama::mNamaAppState.EnableAvatarUI = false;
-		//		}
-		//		else
-		//		{
-		//			UIBridge::mCurRenderItemName = "NONE";
-		//			UIBridge::mLastTime = 0.0;
-		//			UIBridge::showItemTipsWindow = false;
-		//			UIBridge::mNeedStopMP3 = true;
-
-		//			nama->UnLoadAvatar();
-		//		}
-		//	}
-
-		//	ImGui::SameLine(0.f, 24.f * scaleRatioW);
-		//	ImGui::PopID();
-		//}
 
 	}
 	else if (bundleCategory < BundleCategory::Count)
@@ -1121,7 +1029,7 @@ static void ShowMainMenu(Nama* nama)
 
 		ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 775 * scaleRatioH), ImGuiCond_Always);
 		ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 45 * scaleRatioH), ImGuiCond_Always);
-		ImGui::Begin("Window3##3", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
+		ImGui::Begin("Window3##3", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoScrollbar);
 		ImGui::Dummy(ImVec2(1, 1));
 		ImGui::Dummy(ImVec2(321 * scaleRatioW, 1)); ImGui::SameLine();
 		ImGui::PushItemWidth(272 * scaleRatioW);
@@ -1156,6 +1064,7 @@ static void ShowMainMenu(Nama* nama)
 #endif 
 					GUIGS::ChangeGreenScreenBg(videoPath);
 				}
+				CCameraManage::getInstance()->SetNewFrame(false);
 				UIBridge::showItemSelectWindow = true;
 				Nama::mNamaAppState.EnableAvatar = false;
 				// 处理音乐滤镜,关闭音乐
@@ -1167,6 +1076,7 @@ static void ShowMainMenu(Nama* nama)
 			{
 				Nama::mNamaAppState = Nama::mNamaAppStateBackAR;
 				GUIGS::CloseGreenScreenBg();
+				CCameraManage::getInstance()->SetNewFrame(false);
 				UIBridge::showItemSelectWindow = !UIBridge::m_bShowingBodyBeauty && (UIBridge::bundleCategory != BUNDLE_CATEGORY_NOMEAN);
 				/*if (!nama->IsCameraPlaying() || nama->GetCameraCaptureType() == 2){
 					nama->setDefaultFrame();
@@ -1201,7 +1111,7 @@ static void ShowCameraChoice(Nama* nama)
 	{
 		ImGui::SetNextWindowPos(ImVec2(10 * scaleRatioW, 70 * scaleRatioH), ImGuiCond_Always);
 		ImGui::SetNextWindowSize(ImVec2(914 * scaleRatioW, 76 * scaleRatioH), ImGuiCond_Always);
-		ImGui::Begin("Window1##2", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+		ImGui::Begin("Window1##2", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
 		ImGui::Dummy(ImVec2(21 * scaleRatioW, 11 * scaleRatioH));
 		ImGui::Text(u8"选择摄像头:");
 
@@ -1425,75 +1335,79 @@ void Gui::ShowMainWindow(Nama* nama)
 
 void Gui::UpdateFrame(Nama* nama)
 {
-	cv::Mat frameMat = CCameraManage::getInstance()->GetFrame();
+	if (CCameraManage::getInstance()->GetNewFrame()) {
+		cv::Mat frameMat = CCameraManage::getInstance()->GetFrame();
 
-	if (frameMat.data)
-	{
-		m_processedFrame.release();
-		m_processedFrame = frameMat;
-
-		cv::cvtColor(frameMat, m_processedFrame, cv::COLOR_BGR2RGBA);
-
-		bool bNeedOri = (Nama::mNamaAppState.EnableAvatar && Nama::mNamaAppState.EnableAvatarUI && Gui::mIsOpenMiniWindow) || UIBridge::m_bSamplingColor;
-
-
-		if (bNeedOri)
+		if (frameMat.data)
 		{
-			UpdateFrame2Tex(m_processedFrame, m_texIDOrignal);
-		}
+			m_processedFrame.release();
+			m_processedFrame = frameMat;
 
-		//if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
-		{
+			cv::cvtColor(frameMat, m_processedFrame, cv::COLOR_BGR2RGBA);
+
+			bool bNeedOri = (Nama::mNamaAppState.EnableAvatar && Nama::mNamaAppState.EnableAvatarUI && Gui::mIsOpenMiniWindow) || UIBridge::m_bSamplingColor;
+
+
+			if (bNeedOri)
+			{
+				UpdateFrame2Tex(m_processedFrame, m_texIDOrignal);
+			}
+
+			//if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
+			{
 #ifdef _WIN32
-			HGLRC context = wglGetCurrentContext();
-			HWND wnd = (HWND)Gui::hOffscreenWindow;
-			wglMakeCurrent(GetDC(wnd), new_context);
+				HGLRC context = wglGetCurrentContext();
+				HWND wnd = (HWND)Gui::hOffscreenWindow;
+				wglMakeCurrent(GetDC(wnd), new_context);
 #else
-			void* curCtx = NaMaGetCurrentGLCtx();
-			NaMaMakeAsCurrentCtx(new_context);
+				void* curCtx = NaMaGetCurrentGLCtx();
+				NaMaMakeAsCurrentCtx(new_context);
 #endif
-			nama->RenderItems(m_processedFrame);
-			CCameraManage::getInstance()->SetNewFrame(false);
-			glFinish();
-#ifdef _WIN32
-			wglMakeCurrent(GetDC(wnd), context);
-#else
-			NaMaMakeAsCurrentCtx(curCtx);
-#endif
-		}
 
-		if (UIBridge::showGreenScreen && !UIBridge::m_bSetGSInputSrc)
-		{
-			m_processedFrame.setTo(150);
-		}
-		else {
-			cv::Mat bgra[4];
-			cv::split(m_processedFrame, bgra);
-			bgra[3] = 255.0;
-			cv::merge(bgra, 4, m_processedFrame);
-		}
-		UpdateFrame2Tex(m_processedFrame, m_texIDNamaProcess);
+				nama->RenderItems(m_processedFrame);
+				//CCameraManage::getInstance()->SetNewFrame(false);
+
+				glFinish();
+#ifdef _WIN32
+				wglMakeCurrent(GetDC(wnd), context);
+#else
+				NaMaMakeAsCurrentCtx(curCtx);
+#endif
+			}
+
+			if (UIBridge::showGreenScreen && !UIBridge::m_bSetGSInputSrc)
+			{
+				m_processedFrame.setTo(150);
+			}
+			else {
+				cv::Mat bgra[4];
+				cv::split(m_processedFrame, bgra);
+				bgra[3] = 255.0;
+				cv::merge(bgra, 4, m_processedFrame);
+			}
+			UpdateFrame2Tex(m_processedFrame, m_texIDNamaProcess);
 
 
 #ifndef PERFORMANCE_OPEN
-		//更新Texture操作需要同步，否则某些机器会出现撕裂
-		glFinish();
+			//更新Texture操作需要同步，否则某些机器会出现撕裂
+			glFinish();
 
 #endif
 
 #if _WIN32        
-		if (UIBridge::mNeedIpcWrite)
-		{
-			static bool is_create_vc = false;
-			if (!is_create_vc)
+			if (UIBridge::mNeedIpcWrite)
 			{
-				createVirturalCamera(0);
-				is_create_vc = true;
+				static bool is_create_vc = false;
+				if (!is_create_vc)
+				{
+					createVirturalCamera(0);
+					is_create_vc = true;
+				}
+				pushDataToVirturalCamera(m_processedFrame.data, m_processedFrame.cols, m_processedFrame.rows);
 			}
-			pushDataToVirturalCamera(m_processedFrame.data, m_processedFrame.cols, m_processedFrame.rows);
-		}
 #endif
 
+		}
 	}
 }
 static void ShowTipStr(string tipStr) {
@@ -1613,6 +1527,12 @@ void Gui::ProcessGSSampleClick(Nama* nama)
 					}
 
 					nama->SetGSKeyColor(colorNeed);
+					//绿幕设置颜色后设置绿幕参数
+					vector<int> colorV;
+					nama->GetGSParamd(colorV);
+					UIBridge::mGSParam[0] = colorV[0];
+					UIBridge::mGSParam[1] = colorV[1];
+					UIBridge::mGSParam[2] = colorV[2];
 					GUIGS::SetCurColorCircle(colorNeed);
 					UIBridge::m_bSamplingColor = false;
 				}

@@ -108,6 +108,7 @@ namespace NamaExampleNameSpace
 		void NonuseGSSA();
 		void UpdateGreenScreen();
 		void SetGSKeyColor(cv::Vec4b data);
+		void GetGSParamd(vector<int>& data);
 
 		std::vector<gui_tool::ColorBag> GetRencentColor();
 
