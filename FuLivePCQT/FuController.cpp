@@ -139,15 +139,27 @@ void FuController::SetParams(std::string strKey, double* pValue, int nCount)
 unsigned int FuController::RenderBundlesTexture(cv::Mat& bgraFrame, int & frameId)
 {
     unsigned int glNamaRetTexture;
-    fuRenderBundles(FU_FORMAT_RGBA_TEXTURE, (void*)(&glNamaRetTexture), FU_FORMAT_BGRA_BUFFER, (void*)(bgraFrame.data),
-                    bgraFrame.cols, bgraFrame.rows, frameId++, m_vecRender.data(), m_vecRender.size());
+    if(bgraFrame.channels() == 4){
+        fuRenderBundles(FU_FORMAT_RGBA_TEXTURE, (void*)(&glNamaRetTexture), FU_FORMAT_BGRA_BUFFER, (void*)(bgraFrame.data),
+                        bgraFrame.cols, bgraFrame.rows, frameId++, m_vecRender.data(), m_vecRender.size());
+    }else if(bgraFrame.channels() == 1){
+        fuRenderBundles(FU_FORMAT_RGBA_TEXTURE, (void*)(&glNamaRetTexture), FU_FORMAT_I420_BUFFER, (void*)(bgraFrame.data),
+                        bgraFrame.cols, bgraFrame.rows* 2 / 3, frameId++, m_vecRender.data(), m_vecRender.size());
+    }
     return glNamaRetTexture;
 }
 
 unsigned int FuController::RenderBundlesBuffer(uint8_t* out_buffer, cv::Mat& bgraFrame, int & frameId)
 {
-    return fuRenderBundles(FU_FORMAT_RGBA_BUFFER, (void*)(out_buffer), FU_FORMAT_BGRA_BUFFER, (void*)(bgraFrame.data),
-                           bgraFrame.cols, bgraFrame.rows, frameId++, m_vecRender.data(), m_vecRender.size());
+    unsigned int glNamaRetTexture;
+    if(bgraFrame.channels() == 4){
+        glNamaRetTexture = fuRenderBundles(FU_FORMAT_RGBA_BUFFER, (void*)(out_buffer), FU_FORMAT_BGRA_BUFFER, (void*)(bgraFrame.data),
+                                           bgraFrame.cols, bgraFrame.rows, frameId++, m_vecRender.data(), m_vecRender.size());
+    }else if(bgraFrame.channels() == 1){
+        glNamaRetTexture = fuRenderBundles(FU_FORMAT_RGBA_BUFFER, (void*)(out_buffer), FU_FORMAT_I420_BUFFER, (void*)(bgraFrame.data),
+                                           bgraFrame.cols, bgraFrame.rows* 2 / 3, frameId++, m_vecRender.data(), m_vecRender.size());
+    }
+    return glNamaRetTexture;
 }
 
 int FuController::GetHumanStatus()
@@ -162,8 +174,12 @@ void FuController::EnableFaceProcessor(int enable)
 
 void FuController::EnableHumanFollowMode(int enable)
 {
-    fuSetInstanceRiggingRetargeterAvatarFollowMode(mSceneHandle, FUAIHUMAN_FOLLOW_MODE_ALIGN);
-//    fuEnableHumanFollowMode(mSceneHandle, enable);
+    if(enable){
+        fuSetInstanceRiggingRetargeterAvatarFollowMode(mInstanceHandle, FUAIHUMAN_FOLLOW_MODE_ALIGN);
+    }else{
+        fuSetInstanceRiggingRetargeterAvatarFollowMode(mInstanceHandle, FUAIHUMAN_FOLLOW_MODE_FIX);
+    }
+    //    fuEnableHumanFollowMode(mSceneHandle, enable);
 }
 
 void FuController::SetAvatar3DScene(BodyTrackType scene)
@@ -174,17 +190,17 @@ void FuController::SetAvatar3DScene(BodyTrackType scene)
 void FuController::SetAvatarGlobalOffset(float offset_x, float offset_y, float offset_z)
 {
     fuSetInstanceRiggingRetargeterAvatarFixModeTransScale(mSceneHandle, offset_x, offset_y, offset_z);
-//    fuHumanProcessorSetAvatarGlobalOffset(offset_x, offset_y, offset_z);
+    //    fuHumanProcessorSetAvatarGlobalOffset(offset_x, offset_y, offset_z);
 }
 
 void FuController::SetAvatarScale(float scale)
 {
-//    fuHumanProcessorSetAvatarScale(scale);
+    //    fuHumanProcessorSetAvatarScale(scale);
 }
 
 void FuController::UseRetargetRootScale(int enable, float scale)
 {
-//    fuHumanProcessorSetAvatarUseRetargetRootScale(enable, scale);
+    //    fuHumanProcessorSetAvatarUseRetargetRootScale(enable, scale);
 }
 
 void FuController::SetAvatarAnimFilterParams(int n_buffer_frames, float pos_w, float angle_w)
@@ -195,7 +211,7 @@ void FuController::SetAvatarAnimFilterParams(int n_buffer_frames, float pos_w, f
 void FuController::SetAvatarTranslationScale(float scale_x, float scale_y, float scale_z)
 {
     fuSetInstanceRiggingRetargeterAvatarFixModeTransScale(mSceneHandle, scale_x, scale_y, scale_z);
-//    fuSetHumanProcessorTranslationScale(mSceneHandle, scale_x, scale_y, scale_z);
+    //    fuSetHumanProcessorTranslationScale(mSceneHandle, scale_x, scale_y, scale_z);
 }
 
 void FuController::OpenFaceCapture(bool bOpen)

@@ -70,26 +70,28 @@ void CameraDisplayRenderer::render()
     //这里长宽864/486对应qml中CameraDisplay的长宽
     int width = MainClass::getInstance()->m_UIBridge->m_cameraWidth;
     int height = MainClass::getInstance()->m_UIBridge->m_cameraHeight;
-    if(uibridge->b_needCreateTex){
-        nama->UpdateGreenScreenSafeArea(updataGreenSaveArea(uibridge->m_matSafeArea));
-        uibridge->b_needCreateTex = false;
-    }
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);//指定矩阵为投影矩阵
     glLoadIdentity();           //重置为单位矩阵
     glOrtho(0, width, 0, height, 0, 1000);//设置剪裁区域
     glDisable(GL_DEPTH_TEST);
     m_timeRender.start();
-    if(uibridge->m_bgsSelectVideo){
-        //切换ar不render
-    }else if(uibridge->m_flagARBody){
-        nama->RenderDefNama();
-    }else if(uibridge->m_bLoadBear){
-        nama->RenderBear();
-    }else if(uibridge->m_bodyTrackType != BodyTrackType::None){
-        nama->RenderP2A();
-    }else{
-        nama->RenderDefNama();
+    if(uibridge->m_newImage){
+        if(uibridge->m_bgsSelectVideo){
+            //切换ar不render
+        }else if(uibridge->m_flagARBody){
+            nama->RenderDefNama();
+        }else if(uibridge->m_bLoadBear){
+            nama->RenderBear();
+        }else if(uibridge->m_bodyTrackType != BodyTrackType::None){
+            nama->RenderP2A();
+        }else{
+            nama->RenderDefNama();
+        }
+    }
+    if(!uibridge->m_renderNewFrame && uibridge->m_newImage){
+        uibridge->m_renderNewFrame = true;
+        emit uibridge->switchARChanged(uibridge->m_arFunction);
     }
     uibridge->m_secondRenderTime += m_timeRender.elapsed();
     uibridge->m_FrameIDFPS++;

@@ -226,8 +226,7 @@ FUNAMA_API int fuEnableBackgroundColor(unsigned int handle_id, int enable);
  \param a is color of A channel, from 0 to 255
  \return zero for failed, one for success
 */
-FUNAMA_API int fuSetBackgroundColor(unsigned int handle_id, int r, int g, int b,
-                                    int a);
+FUNAMA_API int fuSetBackgroundColor(unsigned int handle_id, int r, int g, int b, int a);
 
 /**
  \brief Enable or not main light shadow for the target scene.
@@ -729,6 +728,15 @@ FUNAMA_API int fuSetInstanceExpressionWeight0(unsigned int handle_id,
 */
 FUNAMA_API int fuSetInstanceExpressionWeight1(unsigned int handle_id,
                                               float* value, int n);
+
+/**
+ \brief Set instance uv anim frame id array.
+ \param handle_id is the target instance handle
+ \param value points to an array of Ints
+ \param n specifies the number of elements in value
+ \return zero for failed, one for success
+*/
+FUNAMA_API int fuSetInstanceUVAnimArray(unsigned int handle_id, int* value, int n);
 
 /**
  \brief Enable instance focus eye to camera or not.

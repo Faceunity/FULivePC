@@ -44,17 +44,17 @@ UIBridge::UIBridge()
     m_beautySkin.append(QStringList{ "","","","","","","","","",""});
     //美型
     m_beautyFace.append(QStringList{ "瘦脸", "大眼", "圆眼", "下巴", "额头", "瘦鼻", "嘴型", "V脸", "窄脸", "短脸",
-                                     "小脸", "瘦颧骨", "瘦下颌骨", "开眼角", "眼距", "眼睛角度", "长鼻", "缩人中", "微笑嘴角"});
+                                     "小脸", "瘦颧骨", "瘦下颌骨", "开眼角", "眼距", "眼睛角度", "长鼻", "缩人中", "微笑嘴角", "眉毛上下", "眉间距"});
     m_beautyFace.append(QStringList{ "Thinface", "Bigeye", "round_eye", "chin", "forehead", "Thinnose", "Mouthtype", "v",
                                      "narrow_face", "short_face", "little_face", "cheekbones", "lower_jaw", "open_eyes", "eye_distance",
-                                     "eye_angle", "proboscis", "shrinking", "smile_mouth"});
-    m_beautyFace.append(QStringList{ "cheek_thinning", "eye_enlarging_mode3", "intensity_eye_circle", "intensity_chin", "intensity_forehead_mode2",
+                                     "eye_angle", "proboscis", "shrinking", "smile_mouth", "eyebrow_position", "eyebrow_spacing"});
+    m_beautyFace.append(QStringList{ "cheek_thinning_mode2", "eye_enlarging_mode3", "intensity_eye_circle", "intensity_chin", "intensity_forehead_mode2",
                                      "intensity_nose_mode2", "intensity_mouth_mode3", "cheek_v", "cheek_narrow_mode2", "cheek_short", "cheek_small_mode2", "intensity_cheekbones",
                                      "intensity_lower_jaw", "intensity_canthus", "intensity_eye_space", "intensity_eye_rotate",
-                                     "intensity_long_nose", "intensity_philtrum", "intensity_smile" });
-    m_defaultBeautyFace = QStringList{ "0", "0", "0", "-20", "-20", "50", "-10", "50", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"};
+                                     "intensity_long_nose", "intensity_philtrum", "intensity_smile", "intensity_brow_height", "intensity_brow_space"});
+    m_defaultBeautyFace = QStringList{ "0", "0", "0", "-20", "-20", "50", "-10", "50", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"};
     m_beautyFace.append(m_defaultBeautyFace);
-    m_beautyFace.append(QStringList{ "","","","1","1","","1","","","","","","","","1","1","1","1",""});
+    m_beautyFace.append(QStringList{ "","","","1","1","","1","","","","","","","","1","1","1","1","","1","1"});
     //美体
     m_beautyBody.append(QStringList{ "瘦身", "长腿", "瘦腰", "美肩", "美臀", "小头", "瘦腿"});
     m_beautyBody.append(QStringList{ "slimming", "stovepipe", "thin_waist", "shoulder", "hip", "little_head", "thin_leg"});
@@ -69,10 +69,10 @@ UIBridge::UIBridge()
     m_filter.append(QStringList{ "origin", "bailiang1", "fennen1", "xiaoqingxin1", "lengsediao1", "nuansediao1"});
     m_filter.append(QStringList{ "0", "40", "40", "40", "40", "40"});
     //绿幕
-    m_greenScreen.append(QStringList{"相似度", "平滑", "透明度"});
+    m_greenScreen.append(QStringList{"相似度", "平滑", "祛色度"});
     m_greenScreen.append(QStringList{"tolerance", "smooth", "transparency"});
     m_greenScreen.append(QStringList{"chroma_thres", "chroma_thres_T", "alpha_L"});
-    m_defaultGreenScreen = QStringList{ "45", "30", "20"};
+    m_defaultGreenScreen = QStringList{ "50", "30", "66"};
     m_greenScreen.append(m_defaultGreenScreen);
     m_greenScreen.append(QStringList{ "","",""});
 
@@ -225,9 +225,7 @@ void UIBridge::readCustomMakeup()
                 QStringList tempStr;
                 QJsonObject type = types.at(i).toObject();
                 QString typeIndex = "-1";
-                if(type.contains("brow_type")){
-                    typeIndex = QString::number(type["brow_type"].toInt());
-                }else if(type.contains("lip_type")){
+                if(type.contains("lip_type")){
                     typeIndex = QString::number(type["lip_type"].toInt());
                 }
                 tempStr<<type["name"].toString()<<typeIndex<<type["icon"].toString()<<bundle;
@@ -335,18 +333,30 @@ void UIBridge::getGSPresentFrame(const cv::Mat &frame)
         cv::cvtColor(frame, resultframe, cv::COLOR_BGR2BGRA);
         MainClass::getInstance()->m_nama->getPresentFrame(resultframe.clone());
     }
+    if(!m_newImage && !m_renderNewFrame && !m_arFunction){
+        m_newImage = true;
+    }
 }
 
 void UIBridge::getPresentFrame(const cv::Mat &frame)
 {
-    MainClass::getInstance()->m_nama->getPresentFrame(frame);
-    if(m_bodyTrackType != BodyTrackType::None || m_bGSCameraImage){
-        if(m_CameraType){
-            m_ImageProvider->m_showImage = QImage(frame.data, frame.cols, frame.rows, frame.cols * 4, QImage::Format_ARGB32);
+    if((!m_bLoadBear && m_bodyTrackType != BodyTrackType::None) || m_bGSCameraImage){
+        if(frame.channels() == 1){
+            cv::Mat mat;
+            cv::resize(frame,mat,cv::Size(frame.cols/4,frame.rows/4));
+            cv::cvtColor(mat, mat, cv::COLOR_YUV2BGRA_IYUV);
+            m_ImageProvider->m_showImage = QImage(mat.data, mat.cols, mat.rows, mat.cols * 4, QImage::Format_ARGB32).copy();
         }else{
-            m_ImageProvider->m_showImage = QImage(frame.data, frame.cols, frame.rows, frame.cols * 4, QImage::Format_ARGB32).mirrored(true, false);
+            m_ImageProvider->m_showImage = QImage(frame.data, frame.cols, frame.rows, frame.cols * 4, QImage::Format_ARGB32);
+        }
+        if(!m_CameraType){
+            m_ImageProvider->m_showImage = m_ImageProvider->m_showImage.mirrored(true, false);
         }
         emit callQmlRefeshImg();
+    }
+    MainClass::getInstance()->m_nama->getPresentFrame(frame);
+    if(!m_newImage && !m_renderNewFrame&& m_arFunction){
+        m_newImage = true;
     }
 }
 
@@ -398,7 +408,6 @@ void UIBridge::setARFunction(bool ar){
         }
         m_selectCategory = BundleCategory::GreenScreen;
         //默认打开背景视频
-        useProps(m_gsSelectBgIndex);
         if(m_gsSelectCamera){
             fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
             fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
@@ -414,16 +423,21 @@ void UIBridge::setARFunction(bool ar){
             namaFuItemSetParamd(nama->m_GSHandle, m_greenScreen, i, false);
         }
         if(m_gsSelectSafeArea >= 0){
+            QString fullpath = QString::fromStdString(g_assetDir) + "items/GreenScreenBg/" + m_greenScreenIcon[0].toStringList()[m_gsSelectBgIndex] + ".mp4";
+            gsPlayBGVideo(fullpath);
             m_selectCategory = BundleCategory::SafeArea;
             useProps(m_gsSelectSafeArea);
+        }else{
+            useProps(m_gsSelectBgIndex);
         }
         nama->changeRenderList(RENDER_GREEN);
     }else{
+        m_gsMediaPlayer.stop();
+        m_gsVideoMediaPlayer.stop();
+        main->m_camera->m_QCamera->start();
         fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
         fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
         //停止绿幕背景,视频播放器
-        m_gsMediaPlayer.stop();
-        m_gsVideoMediaPlayer.stop();
         if(m_flagARBody){
             nama->changeRenderList(RENDER_BODY);
             updataFilter();
@@ -434,7 +448,6 @@ void UIBridge::setARFunction(bool ar){
                 nama->m_mp3->Play();
             }
         }
-        main->m_camera->m_QCamera->start();
         m_frameSize = QString::number(MainClass::getInstance()->m_camera->m_FrameWidth) + "x" +
                 QString::number(MainClass::getInstance()->m_camera->m_FrameHeight);
         emit frameSizeChanged();
@@ -821,8 +834,10 @@ void UIBridge::useProps(int index)
     Nama *nama = MainClass::getInstance()->m_nama;
     std::unique_lock<std::mutex> lock(nama->m_frameMutex);
     m_bgsVideoMediaPlayer.stop();
-    if(m_selectCategoryLast == int(BundleCategory::ItemJingpin) &&
-            m_selectCategory != int(BundleCategory::ItemJingpin)){
+    if((m_selectCategoryLast == int(BundleCategory::ItemJingpin) &&
+        m_selectCategory != int(BundleCategory::ItemJingpin)) ||
+            (m_selectCategoryLast == int(BundleCategory::Makeup) &&
+             m_selectCategory != int(BundleCategory::Makeup))){
         nama->ReloadItems();
         reloadItemParam();
     }
@@ -906,11 +921,11 @@ void UIBridge::useProps(int index)
                 updataGSSafeArea(image);
             }else{
                 QString imagepath = gBundlePath[m_selectCategory] + "/" + name + ".jpg";
-                cv::Mat image = cv::imread(imagepath.toStdString(), cv::IMREAD_COLOR);
-                cv::resize(image,m_matSafeArea,cv::Size(1280, 720));
-                cv::cvtColor(m_matSafeArea, m_matSafeArea, cv::COLOR_BGR2RGBA);
+                cv::Mat image = cv::imread(imagepath.toStdString(), cv::IMREAD_REDUCED_COLOR_4);
+                //                cv::resize(image,m_matSafeArea,cv::Size(1280, 720));
+                cv::cvtColor(image, image, cv::COLOR_BGR2RGBA);
                 //                b_needCreateTex = true;
-                MainClass::getInstance()->m_nama->UpdateGreenScreenSafeArea(m_matSafeArea);
+                MainClass::getInstance()->m_nama->UpdateGreenScreenSafeArea(image);
             }
         }
     }
@@ -1051,13 +1066,10 @@ void UIBridge::setCustomMakeupIndex(int index, QString value)
     QString name = tempList.at(value.toInt() + 1).toStringList().at(3);
     QString bundleName = gBundlePath[m_selectCategory] + "/subs/" + name + ".bundle";
     int type = tempList.at(value.toInt() + 1).toStringList().at(1).toInt();
-    int form = 0;
     m_bmakeup_moisturized = false;
-    if(index == 2 || index == 9){
-        //眉毛和口红要加载道具还要设置类型
-        if(index == 9){
-            form = 1;
-        }
+    if(index == 9){
+        int form = 0;
+        //口红要加载道具还要设置类型
         if(name.compare("mu_style_lip_05") == 0){
             m_bmakeup_moisturized = true;
         }
@@ -1151,16 +1163,20 @@ void UIBridge::gsCameraConfirm()
 void UIBridge::selectColor(int mouseX, int mouseY)
 {
     MainClass *main = MainClass::getInstance();
-    double ratio = main->m_nama->m_frame.cols / double(main->m_UIBridge->m_cameraWidth);
-    cv::Mat frameMat = main->m_nama->m_frame;
+    cv::Mat frameMat = main->m_nama->m_frame.clone();
+    if(frameMat.channels() == 1){
+        cv::cvtColor(frameMat, frameMat, cv::COLOR_YUV2BGRA_IYUV);
+    }
+    double ratioX = frameMat.cols / double(main->m_UIBridge->m_cameraWidth);
+    double ratioY = frameMat.rows / double(main->m_UIBridge->m_cameraHeight);
     //绿幕选择相机,图像要水平翻转
     if(m_gsSelectCamera){
         cv::flip(frameMat, frameMat, 1);
     }
     if (frameMat.data)
     {
-        int posx = ratio * mouseX;
-        int posy = ratio * mouseY;
+        int posx = ratioX * mouseX;
+        int posy = ratioY * mouseY;
         auto dataBGR = frameMat.at<cv::Vec4b>(posy, posx);
         QString color = "#" + QString("%1").arg(dataBGR[2],2,16,QChar('0')) +
                 QString("%1").arg(dataBGR[1],2,16,QChar('0')) +
@@ -1173,6 +1189,13 @@ void UIBridge::gsColorChange(QString color)
 {
     m_gsColor = { uchar(color.mid(1,2).toInt(NULL,16)),uchar(color.mid(3,2).toInt(NULL,16)), uchar(color.mid(5,2).toInt(NULL,16)), 255 };
     MainClass::getInstance()->m_nama->SetGSKeyColor(m_gsColor);
+    int m_GSHandle = MainClass::getInstance()->m_nama->m_GSHandle;
+    //取色完成后更新绿幕参数
+    updataCategory(m_greenScreen, 3, 0, QString::number(fuItemGetParamd(m_GSHandle, "chroma_thres") * 100));
+    updataCategory(m_greenScreen, 3, 1, QString::number(fuItemGetParamd(m_GSHandle, "chroma_thres_T") * 100));
+    updataCategory(m_greenScreen, 3, 2, QString::number(int(fuItemGetParamd(m_GSHandle, "alpha_L") * 100)));
+    //qDebug()<< fuItemGetParamd(m_GSHandle, "chroma_thres") << fuItemGetParamd(m_GSHandle, "chroma_thres_T")  << fuItemGetParamd(m_GSHandle, "alpha_L");
+    emit updataGreenScreenParam();
 }
 
 void UIBridge::gsPlayBGVideo(QString videopath)
@@ -1186,7 +1209,7 @@ void UIBridge::gsPlayBGVideo(QString videopath)
     playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
     playlist->addMedia(QUrl::fromLocalFile(videopath));
     m_gsMediaPlayer.setPlaylist(playlist);
-    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(UpdateGreenScreenSegment(const cv::Mat &)), Qt::QueuedConnection);
+    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(UpdateGreenScreenSegment(const cv::Mat &)), Qt::AutoConnection);
     m_gsMediaPlayer.play();
 }
 
@@ -1231,7 +1254,7 @@ void UIBridge::gsSelectVideo(QString path)
     playlist->addMedia(QUrl(path));
     m_gsVideoMediaPlayer.setPlaylist(playlist);
     //第一帧改变绿幕起始位置,绿幕图像大小
-    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(getGSPresentFrame(const cv::Mat &)), Qt::QueuedConnection);
+    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(getGSPresentFrame(const cv::Mat &)), Qt::AutoConnection);
     m_gsVideoMediaPlayer.play();
 }
 
@@ -1267,7 +1290,7 @@ void UIBridge::bgsSelectVideo(QString path)
     playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
     playlist->addMedia(QUrl(path));
     m_bgsVideoMediaPlayer.setPlaylist(playlist);
-    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(UpdateBackgroundSegment(const cv::Mat &)), Qt::QueuedConnection);
+    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(UpdateBackgroundSegment(const cv::Mat &)), Qt::AutoConnection);
     m_bgsVideoMediaPlayer.play();
 }
 
@@ -1617,7 +1640,7 @@ void UIBridge::openWebCamera(QString path)
     playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
     playlist->addMedia(QUrl(path));
     m_webcamMediaPlayer.setPlaylist(playlist);
-    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(getGSPresentFrame(const cv::Mat &)), Qt::QueuedConnection);
+    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(getGSPresentFrame(const cv::Mat &)), Qt::AutoConnection);
     m_webcamMediaPlayer.play();
 }
 
@@ -1632,7 +1655,7 @@ void UIBridge::stopStartWebCamera(bool flag)
 
 void UIBridge::changeCameraType(bool type)
 {
-     m_CameraType = type;
+    m_CameraType = type;
     if(type){
         MainClass::getInstance()->m_camera->m_QCamera->stop();
         m_webcamMediaPlayer.play();

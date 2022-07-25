@@ -53,8 +53,7 @@ bool QtCameraCapture::present(const QVideoFrame &frame)
         cloneFrame.map(QAbstractVideoBuffer::ReadOnly);
         //处理绿幕视频
         if(m_bVideo){
-            cv::Mat mat;
-            mat = cv::Mat(cloneFrame.height(), cloneFrame.width(), CV_8UC4, (void*)cloneFrame.bits(), cloneFrame.bytesPerLine());
+            cv::Mat mat = cv::Mat(cloneFrame.height(), cloneFrame.width(), CV_8UC4, (void*)cloneFrame.bits(), cloneFrame.bytesPerLine());
             //将4通道设为255不透明,绿幕视频有透明
             cv::Mat bgra[4];
             cv::split(mat, bgra);
@@ -68,10 +67,10 @@ bool QtCameraCapture::present(const QVideoFrame &frame)
         else{
             if(cloneFrame.pixelFormat() == QVideoFrame::Format_YUYV)//yuv422
             {
-              cv::Mat mat = cv::Mat(cloneFrame.height(), cloneFrame.width(), CV_8UC2, (void*)cloneFrame.bits(), cloneFrame.bytesPerLine());
-              cv::cvtColor(mat, mat, cv::COLOR_YUV2BGRA_YUY2);
-              emit presentFrame(mat);
-              return true;
+                cv::Mat mat = cv::Mat(cloneFrame.height(), cloneFrame.width(), CV_8UC2, (void*)cloneFrame.bits(), cloneFrame.bytesPerLine());
+                cv::cvtColor(mat, mat, cv::COLOR_YUV2BGRA_YUY2);
+                emit presentFrame(mat);
+                return true;
             }
             if(cloneFrame.pixelFormat() == QVideoFrame::Format_RGB32)//bgra
             {
@@ -92,8 +91,8 @@ bool QtCameraCapture::present(const QVideoFrame &frame)
             if(cloneFrame.pixelFormat() == QVideoFrame::Format_YUV420P)
             {
                 cv::Mat mat = cv::Mat(cloneFrame.height() * 3 / 2, cloneFrame.width(), CV_8UC1, (void*)cloneFrame.bits(), cloneFrame.bytesPerLine());
-                cv::cvtColor(mat, mat, cv::COLOR_YUV2BGRA_IYUV);
-                emit presentFrame(mat);
+                //cv::cvtColor(mat, mat, cv::COLOR_YUV2BGRA_IYUV);
+                emit presentFrame(mat.clone());
             }
         }
     }
