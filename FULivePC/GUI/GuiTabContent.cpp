@@ -115,13 +115,13 @@ namespace gui_tab_content
 			"list_icon_round_eye_open","list_icon_chin_open", "list_icon_forehead_open", "list_icon_Thinnose_open","list_icon_Mouthtype_open",
 			"list_icon_v_open","list_icon_narrow_face_open","list_icon_short_face_open","list_icon_little_face_open",
 		"list_icon_cheekbones_open" ,"list_icon_lower_jaw_open" ,"list_icon_open_eyes_open" ,"list_icon_eye_distance_open" ,"list_icon_eye_angle_open" ,
-		"list_icon_proboscis_open" ,"list_icon_shrinking_open" ,"list_icon_smile_mouth_open" };
+		"list_icon_proboscis_open" ,"list_icon_shrinking_open" ,"list_icon_smile_mouth_open" ,"list_icon_eyebrow_position_open" ,"list_icon_eyebrow_spacing_open" };
 
 		//眼角、眼距、眼睛角度、长鼻、缩人中、微笑嘴角
 
 		std::string faceShapeNameArr[MAX_FACESHAPEPARAMTER] = { u8"   瘦脸" ,u8"   大眼" ,u8"   圆眼" ,u8"   下巴",u8"   额头" ,
-			u8"   瘦鼻",u8"   嘴型",u8"   V脸",u8"   窄脸",u8"   短脸" ,u8"   小脸" ,
-		 u8"  瘦颧骨", u8" 瘦下颌骨" ,u8"  开眼角", u8"   眼距", u8"眼睛角度", u8"   长鼻", u8"  缩人中", u8"微笑嘴角" };
+			u8"   瘦鼻",u8"   嘴型",u8"   V脸",u8"   窄脸",u8"   短脸" ,u8"   小脸" ,u8"  瘦颧骨", u8" 瘦下颌骨" ,
+			u8"  开眼角", u8"   眼距", u8"眼睛角度", u8"   长鼻", u8"  缩人中", u8"微笑嘴角" , u8"眉毛上下" , u8"眉间距" };
 
 
 		ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 1.f));

@@ -2,43 +2,119 @@
   "CMEyeBrow": [
     {
       "bundle": "mu_style_eyebrow_01",
-      "types": [
-        {
-          "brow_type": 0,
-          "icon": "demo_style_eyebrow_01.png",
-          "name": "柳叶眉"
-        },
-        {
-          "brow_type": 1,
-          "icon": "demo_style_eyebrow_02.png",
-          "name": "标准眉"
-        },
-        {
-          "brow_type": 2,
-          "icon": "demo_style_eyebrow_03.png",
-          "name": "小山眉"
-        },
-        {
-          "brow_type": 3,
-          "icon": "demo_style_eyebrow_04.png",
-          "name": "一字眉"
-        },
-        {
-          "brow_type": 4,
-          "icon": "demo_style_eyebrow_05.png",
-          "name": "扶形眉"
-        },
-        {
-          "brow_type": 5,
-          "icon": "demo_style_eyebrow_06.png",
-          "name": "日常风"
-        },
-        {
-          "brow_type": 6,
-          "icon": "demo_style_eyebrow_07.png",
-          "name": "日系风"
-        }
-      ],
+      "icon": "demo_style_eyebrow_01.png",
+      "name": "柳叶眉",
+      "colors": [
+        [
+          0.36,
+          0.10,
+          0.10,
+          1.0
+        ],
+        [
+          0.33,
+          0.09,
+          0.18,
+          1.0
+        ],
+        [
+          0.28,
+          0.16,
+          0.08,
+          1.0
+        ],
+        [
+          0.21,
+          0.05,
+          0.02,
+          1.0
+        ],
+        [
+          0.31,
+          0.17,
+          0.22,
+          1.0
+        ]
+      ]
+    },
+	{
+      "bundle": "mu_style_eyebrow_02",
+      "icon": "demo_style_eyebrow_02.png",
+      "name": "野生眉",
+      "colors": [
+        [
+          0.36,
+          0.10,
+          0.10,
+          1.0
+        ],
+        [
+          0.33,
+          0.09,
+          0.18,
+          1.0
+        ],
+        [
+          0.28,
+          0.16,
+          0.08,
+          1.0
+        ],
+        [
+          0.21,
+          0.05,
+          0.02,
+          1.0
+        ],
+        [
+          0.31,
+          0.17,
+          0.22,
+          1.0
+        ]
+      ]
+    },
+	{
+      "bundle": "mu_style_eyebrow_03",
+      "icon": "demo_style_eyebrow_03.png",
+      "name": "古典眉",
+      "colors": [
+        [
+          0.36,
+          0.10,
+          0.10,
+          1.0
+        ],
+        [
+          0.33,
+          0.09,
+          0.18,
+          1.0
+        ],
+        [
+          0.28,
+          0.16,
+          0.08,
+          1.0
+        ],
+        [
+          0.21,
+          0.05,
+          0.02,
+          1.0
+        ],
+        [
+          0.31,
+          0.17,
+          0.22,
+          1.0
+        ]
+      ]
+    },
+	{
+      "bundle": "mu_style_eyebrow_04",
+      "icon": "demo_style_eyebrow_04.png",
+      "name": "标准眉",
       "colors": [
         [
           0.36,

@@ -31,8 +31,7 @@
 
 const cv::Vec4b g_color1 = { 0, 255, 0, 255 };
 const cv::Vec4b g_color2 = { 0, 0, 255, 255 };
-const cv::Vec4b g_color3 = { 40, 0, 55,   255 };
-const cv::Vec4b g_color4 = { 0,  80,  95, 255 };
+const cv::Vec4b g_color3 = { 255, 255, 255, 255};
 
 namespace gui_tool
 {
