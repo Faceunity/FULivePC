@@ -126,6 +126,10 @@ public:
     int              m_cameraSet = 0;
     //底部ar功能/绿幕抠像,true为ar功能
     bool             m_arFunction = true;
+    //ar绿幕切换需要render新的一帧
+    bool             m_renderNewFrame = true;
+    //图像获得新的一帧
+    bool             m_newImage = true;
     //精品贴纸道具
     QList<QVariant>  m_stickerHolder;
     //精品道具标题
@@ -241,8 +245,6 @@ public:
     BodyTrackType m_bodyTrackType = BodyTrackType::None;
     //avator参数
     BodyTrackConfig m_bodyTrackConfig;
-    //绿幕安全区域
-    bool b_needCreateTex = false;
     //绿幕安全区域图
     cv::Mat m_matSafeArea;
     //自定义口红水润特有,makeup_lip_color_v2替换makeup_lip_color
@@ -272,6 +274,7 @@ signals:
     void cameraWidthChanged();
     void cameraHeightChanged();
     void selectColorChanged(QString);
+    void switchARChanged(bool);
     void virturalCameraChanged();
     void finishDownload(int);
     void gsSelectCameraChanged();
@@ -288,7 +291,8 @@ signals:
     void updataBodyTrackType(int type);
     void updataSelectCategory(int x, int y, int z);
     void updataGSSelectIndex(int x, int y);
-    //相机,视频播放器
+    //更新绿幕参数
+    void updataGreenScreenParam();
 public slots:
     //界面开启获取相机列表
     void getCameraList();
@@ -392,6 +396,7 @@ public slots:
     void setLightMakeUpLipColor(string colorpath);
     //更新滤镜
     void updataFilter();
+    void setRenderNewFrame(){m_renderNewFrame = false; m_newImage = false;}
 };
 
 #endif // UIBRIDGE_H

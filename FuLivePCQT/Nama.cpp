@@ -114,7 +114,6 @@ int Nama::extractIntFromPath(string path)
     return index;
 }
 
-
 void Nama::InitNama()
 {
     fuSetLogLevel(FU_LOG_LEVEL_ERROR);
@@ -164,6 +163,7 @@ void Nama::InitNama()
     {
         cout << "Error: fail load humanprocessor model" << g_ai_humanprocessor << endl;
     }
+    fuPreprocessAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
     fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
 
     vector<char> ai_gesture_model_data;
@@ -283,12 +283,9 @@ void Nama::changeRenderList(RenderType type,bool makeupFlag)
 
 void Nama::RenderDefNama()
 {
-    if (m_bundleCategory == BundleCategory::MusicFilter)
-    {
-        if(m_bundleCurrent !=0 && b_start_mp3){
-            fuItemSetParamd(m_bundleCurrent, "music_time", m_mp3->GetCurrentPosition() / 1e4);
-            m_mp3->CirculationPlayCheck();
-        }
+    if(m_bundleCurrent !=0 && b_start_mp3){
+        fuItemSetParamd(m_bundleCurrent, "music_time", m_mp3->GetCurrentPosition() / 1e4);
+        m_mp3->CirculationPlayCheck();
     }
 #ifdef SynchronizingCamera
     if(m_getNewFrame){
@@ -304,10 +301,22 @@ void Nama::RenderDefNama()
         //打开虚拟摄像头
         if(m_bVirturalCamera){
             if(m_getNewFrame){
-                cv::Mat result(m_frame.rows, m_frame.cols, CV_8UC4);
-                m_texID = fuRender(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(result.data), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(m_frame.data),
-                                   m_frame.cols, m_frame.rows, m_FrameID++, m_renderList.data(),
-                                   m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+                int height;
+                if(m_frame.channels() == 4){
+                    height = m_frame.rows;
+                }else if(m_frame.channels() == 1){
+                    height = m_frame.rows * 2 / 3;
+                }
+                cv::Mat result(height, m_frame.cols, CV_8UC4);
+                if(m_frame.channels() == 4){
+                    m_texID = fuRender(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(result.data), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(m_frame.data),
+                                       m_frame.cols, m_frame.rows, m_FrameID++, m_renderList.data(),
+                                       m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+                }else if(m_frame.channels() == 1){
+                    m_texID = fuRender(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(result.data), FU_FORMAT_I420_BUFFER, reinterpret_cast<int*>(m_frame.data),
+                                       m_frame.cols, m_frame.rows * 2 / 3, m_FrameID++, m_renderList.data(),
+                                       m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+                }
                 if (!m_bIsCreateVirturalCamera)
                 {
                     createVirturalCamera(0);
@@ -317,10 +326,16 @@ void Nama::RenderDefNama()
             }
         }else{
             //这里直接处理成纹理,opengl直接调用m_texID纹理id绘制,更快
-            //֧FU_FORMAT_BGRA_BUFFER  FU_FORMAT_NV21_BUFFER FU_FORMAT_I420_BUFFER FU_FORMAT_RGBA_BUFFER
-            fuRender(FU_FORMAT_RGBA_TEXTURE, &m_texID, FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(m_frame.data),
-                     m_frame.cols, m_frame.rows, m_FrameID++, m_renderList.data(),
-                     m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+            //FU_FORMAT_BGRA_BUFFER  FU_FORMAT_NV21_BUFFER FU_FORMAT_I420_BUFFER FU_FORMAT_RGBA_BUFFER
+            if(m_frame.channels() == 4){
+                fuRender(FU_FORMAT_RGBA_TEXTURE, &m_texID, FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(m_frame.data),
+                         m_frame.cols, m_frame.rows, m_FrameID++, m_renderList.data(),
+                         m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+            }else if(m_frame.channels() == 1){
+                fuRender(FU_FORMAT_RGBA_TEXTURE, &m_texID, FU_FORMAT_I420_BUFFER, reinterpret_cast<int*>(m_frame.data),
+                         m_frame.cols, m_frame.rows * 2 / 3, m_FrameID++, m_renderList.data(),
+                         m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+            }
         }
 #ifdef SynchronizingCamera
     }
@@ -608,7 +623,13 @@ void Nama::RenderP2A()
     //avator人物晃动厉害,把传入帧跟摄像头输入帧率相同
     if(m_getNewFrame){
         if(m_bVirturalCamera){
-            cv::Mat result(m_frame.rows, m_frame.cols, CV_8UC4);
+            int height;
+            if(m_frame.channels() == 4){
+                height = m_frame.rows;
+            }else if(m_frame.channels() == 1){
+                height = m_frame.rows * 2 / 3;
+            }
+            cv::Mat result(height, m_frame.cols, CV_8UC4);
             if (!m_bIsCreateVirturalCamera)
             {
                 createVirturalCamera(0);
@@ -630,14 +651,26 @@ void Nama::RenderBear()
         fuHumanProcessorReset();
     }
     if(m_getNewFrame){
-        cv::Mat result(m_frame.rows, m_frame.cols, CV_8UC4);
+        int height;
+        if(m_frame.channels() == 4){
+            height = m_frame.rows;
+        }else if(m_frame.channels() == 1){
+            height = m_frame.rows * 2 / 3;
+        }
+        cv::Mat result(height, m_frame.cols, CV_8UC4);
         fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0);
         fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0);
         vector<int> renderList;
         renderList.push_back(m_BeautyHandles);
-        fuRender(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(result.data), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(m_frame.data),
-                 m_frame.cols, m_frame.rows, m_FrameID, renderList.data(),
-                 renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+        if(m_frame.channels() == 4){
+            fuRender(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(result.data), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(m_frame.data),
+                     m_frame.cols, m_frame.rows, m_FrameID, m_renderList.data(),
+                     m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+        }else if(m_frame.channels() == 1){
+            fuRender(FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(result.data), FU_FORMAT_I420_BUFFER, reinterpret_cast<int*>(m_frame.data),
+                     m_frame.cols, m_frame.rows * 2 / 3, m_FrameID, m_renderList.data(),
+                     m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+        }
         fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
         fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
         if(m_bVirturalCamera){
@@ -819,32 +852,24 @@ void Nama::setMakeUpColor(string name, std::vector<double> color0, std::vector<d
 
 void Nama::appendMakeUpItems(string name, string item, int type, int form)
 {
+    //如果前面有绑定,先解绑前一个
+    if(m_mapMakeUpItem.find(name) != m_mapMakeUpItem.end()){
+        int bundleID = m_mapMakeUpItem.find(name)->second;
+        fuUnbindItems(m_MakeUpHandle, &bundleID, 1);
+        fuDestroyItem(bundleID);
+    }
+    bindMakeUp(name, item);
+    //口红相关
     if(form == 0){
-        //眉毛不用重复加载
-        if(m_mapMakeUpItem.find(name) == m_mapMakeUpItem.end()){
-            bindMakeUp(name, item);
-        }
-        fuItemSetParamd(m_MakeUpHandle, "brow_warp_type", type);
-    }else{
-        //如果前面有绑定,先解绑前一个
-        if(m_mapMakeUpItem.find(name) != m_mapMakeUpItem.end()){
-            int bundleID = m_mapMakeUpItem.find(name)->second;
-            fuUnbindItems(m_MakeUpHandle, &bundleID, 1);
-            fuDestroyItem(bundleID);
-        }
-        bindMakeUp(name, item);
-        //口红相关
-        if(form == 1){
-            //咬唇特例
-            if(type == 1){
-                fuItemSetParamd(m_MakeUpHandle, "lip_type", 0);
-                fuItemSetParamd(m_MakeUpHandle, "is_two_color", 1);
-                double zeroArray[4] = { 0.0,0.0,0.0,0.0 };
-                fuItemSetParamdv(m_MakeUpHandle, "makeup_lip_color2", zeroArray, 4);
-            }else{
-                fuItemSetParamd(m_MakeUpHandle, "lip_type", type);
-                fuItemSetParamd(m_MakeUpHandle, "is_two_color", 0);
-            }
+        //咬唇特例
+        if(type == 1){
+            fuItemSetParamd(m_MakeUpHandle, "lip_type", 0);
+            fuItemSetParamd(m_MakeUpHandle, "is_two_color", 1);
+            double zeroArray[4] = { 0.0,0.0,0.0,0.0 };
+            fuItemSetParamdv(m_MakeUpHandle, "makeup_lip_color2", zeroArray, 4);
+        }else{
+            fuItemSetParamd(m_MakeUpHandle, "lip_type", type);
+            fuItemSetParamd(m_MakeUpHandle, "is_two_color", 0);
         }
     }
 }

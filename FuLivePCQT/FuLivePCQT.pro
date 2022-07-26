@@ -111,6 +111,7 @@ NAMA_FILES = $$PWD/../ThirdParty/Windows/FaceUnity-SDK-PC/lib/win64/*.dll
 CURL_FILES = $$PWD/../ThirdParty/Windows/libcurl/lib/win64/*.dll
 OPENCV_FILES = $$PWD/../ThirdParty/Windows/opencv400/lib/win64/*.dll
 VIRTUAL_FILES = $$PWD/../ThirdParty/Windows/VirtualCamera/lib/win64/*.dll
+
 }
 
 LIBS += -lOpenGL32 -lole32 -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -loleaut32 -luuid -lcomdlg32 -ladvapi32

@@ -34,9 +34,6 @@
         <file>../res/demo_style_eyebrow_02.png</file>
         <file>../res/demo_style_eyebrow_03.png</file>
         <file>../res/demo_style_eyebrow_04.png</file>
-        <file>../res/demo_style_eyebrow_05.png</file>
-        <file>../res/demo_style_eyebrow_06.png</file>
-        <file>../res/demo_style_eyebrow_07.png</file>
         <file>../res/demo_style_eyelash_01.png</file>
         <file>../res/demo_style_eyelash_02.png</file>
         <file>../res/demo_style_eyelash_03.png</file>
@@ -508,5 +505,11 @@
         <file>../res/list_icon_short_face_close.png</file>
         <file>../res/list_icon_lightmakeup_hover.png</file>
         <file>../res/list_icon_lightmakeup_nor.png</file>
+        <file>../res/btn_video_zoom_nor.png</file>
+        <file>../res/btn_video_zoom_out_nor.png</file>
+        <file>../res/list_icon_eyebrow_position_close.png</file>
+        <file>../res/list_icon_eyebrow_position_open.png</file>
+        <file>../res/list_icon_eyebrow_spacing_close.png</file>
+        <file>../res/list_icon_eyebrow_spacing_open.png</file>
     </qresource>
 </RCC>

@@ -142,7 +142,7 @@ public:
     void changeGSPreviewRect(double startX, double startY, double endX, double endY);
     //美妆设置颜色 name道具名
     void setMakeUpColor(string name,std::vector<double> color0,std::vector<double> color1, std::vector<double> color2);
-    //美妆增加道具 name是道具种类名(腮红) item是道具名(mu_style_blush_01) type眉毛和口红特有,设置眉毛变形类型brow_warp_type,口红类型lip_type,form0眉毛,1口红
+    //美妆增加道具 name是道具种类名(腮红) item是道具名(mu_style_blush_01) type眉毛和口红特有,设置眉毛变形类型brow_warp_type(新接入方式后不需要设置，替换道具即可),口红类型lip_type,form0口红
     void appendMakeUpItems(string name, string item, int type = -1, int form = -1);
     //美妆绑定道具
     void bindMakeUp(string name, string item);
