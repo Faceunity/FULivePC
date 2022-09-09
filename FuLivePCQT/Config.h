@@ -18,8 +18,6 @@ const string g_tongue = "graphics/tongue.bundle";
 
 const string g_ai_faceprocessor = "model/ai_face_processor_pc.bundle";
 
-const string g_ai_landmark239 = "AI_model/ai_facelandmarks239.bundle";
-
 const string g_ai_bgseg_green = "model/ai_bgseg_green.bundle";
 
 const string g_ai_bgseg = "model/ai_bgseg.bundle";
@@ -38,21 +36,12 @@ const string g_control = "graphics/controller_cpp.bundle";
 
 const string g_control_cfg = "graphics/controller_config.bundle";
 
-const string g_fakeman = "others/fakeman.bundle";
-
-const string g_human3d = "model/human3d.bundle";
-
-const string g_fxaa_flipx = "graphics/fxaa_flipX.bundle";
-
-const string g_fxaa_flipy = "graphics/fxaa_flipY.bundle";
 #ifdef __APPLE__
 const string g_assetDir = "";
 #else
 const string g_assetDir = "../assets/";
 #endif
 const string g_pose_track_folder = "PoseTrack/";
-
-const string g_avatar_def_bg = "others/default_bg.bundle";
 
 const string g_greenscreen = "others/green_screen.bundle";
 

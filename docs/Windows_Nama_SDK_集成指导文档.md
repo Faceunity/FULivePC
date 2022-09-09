@@ -1,10 +1,14 @@
 ﻿# Windows Nama SDK 集成指导文档  
 
 级别：Public   
-更新日期：2022-07-25   
-SDK版本: 8.3.0
+更新日期：2022-09-09   
+SDK版本: 8.3.1
 
 ### 最新更新内容：
+**2022-09-09 v8.3.1:
+1、 适配Mac M系列平台,重新编译opencv,ffmpeg,glfw等demo三方库适配mac arm64架构。
+2、 Mac OC代码都包上autorelease,避免出现泄露
+
 **2022-07-25 v8.3.0:
 1.绿幕，人像，人像功能道具更新。美妆眉毛新增古典眉、野生眉，美妆道具更新。绿幕新增白幕，参数更新。
 2. fuPreprocessAIModelFromPackage预加载处理humanprocessor，人体使用gpu加速（ai_human_processor_pc_gpu.bundle）
