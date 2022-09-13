@@ -152,7 +152,7 @@ string FuTool::GetFileFullPathFromeSearchPath(const char * name,const char * InF
         fclose(fp);
         return name;
     }else{
-        return FuToolMac::GetFileFullPathFromResourceBundle(name);
+        return FuToolMac::GetFileFullPathFromResourceBundleNew(name);
     }
     
 #endif

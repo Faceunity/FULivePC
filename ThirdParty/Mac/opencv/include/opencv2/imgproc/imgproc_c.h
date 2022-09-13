@@ -1036,9 +1036,10 @@ CV_INLINE  void  cvEllipseBox( CvArr* img, CvBox2D box, CvScalar color,
                                int thickness CV_DEFAULT(1),
                                int line_type CV_DEFAULT(8), int shift CV_DEFAULT(0) )
 {
-    CvSize axes;
-    axes.width = cvRound(box.size.width*0.5);
-    axes.height = cvRound(box.size.height*0.5);
+    CvSize axes = cvSize(
+        cvRound(box.size.width*0.5),
+        cvRound(box.size.height*0.5)
+    );
 
     cvEllipse( img, cvPointFrom32f( box.center ), axes, box.angle,
                0, 360, color, thickness, line_type, shift );
@@ -1183,7 +1184,7 @@ CVAPI(CvScalar)  cvColorToScalar( double packed_color, int arrtype );
 /** @brief Returns the polygon points which make up the given ellipse.
 
 The ellipse is define by the box of size 'axes' rotated 'angle' around the 'center'. A partial
-sweep of the ellipse arc can be done by spcifying arc_start and arc_end to be something other than
+sweep of the ellipse arc can be done by specifying arc_start and arc_end to be something other than
 0 and 360, respectively. The input array 'pts' must be large enough to hold the result. The total
 number of points stored into 'pts' is returned by this function.
 @see cv::ellipse2Poly

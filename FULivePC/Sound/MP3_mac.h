@@ -55,7 +55,10 @@ private:
 	// Duration of the MP3.
 	__int64 duration;
 	std::string sMp3Path;
-	void * _audioPlayer;
+    
+private:
+    struct Imp;
+    Imp * mImp = nullptr;
 
 };
 

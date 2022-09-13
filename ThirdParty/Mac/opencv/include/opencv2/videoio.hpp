@@ -136,7 +136,8 @@ enum VideoCaptureProperties {
        CAP_PROP_FPS            =5, //!< Frame rate.
        CAP_PROP_FOURCC         =6, //!< 4-character code of codec. see VideoWriter::fourcc .
        CAP_PROP_FRAME_COUNT    =7, //!< Number of frames in the video file.
-       CAP_PROP_FORMAT         =8, //!< Format of the %Mat objects returned by VideoCapture::retrieve().
+       CAP_PROP_FORMAT         =8, //!< Format of the %Mat objects (see Mat::type()) returned by VideoCapture::retrieve().
+                                   //!< Set value -1 to fetch undecoded RAW video streams (as Mat 8UC1).
        CAP_PROP_MODE           =9, //!< Backend-specific value indicating the current capture mode.
        CAP_PROP_BRIGHTNESS    =10, //!< Brightness of the image (only for those cameras that support).
        CAP_PROP_CONTRAST      =11, //!< Contrast of the image (only for cameras).
@@ -144,7 +145,8 @@ enum VideoCaptureProperties {
        CAP_PROP_HUE           =13, //!< Hue of the image (only for cameras).
        CAP_PROP_GAIN          =14, //!< Gain of the image (only for those cameras that support).
        CAP_PROP_EXPOSURE      =15, //!< Exposure (only for those cameras that support).
-       CAP_PROP_CONVERT_RGB   =16, //!< Boolean flags indicating whether images should be converted to RGB.
+       CAP_PROP_CONVERT_RGB   =16, //!< Boolean flags indicating whether images should be converted to RGB. <br/>
+                                   //!< *GStreamer note*: The flag is ignored in case if custom pipeline is used. It's user responsibility to interpret pipeline output.
        CAP_PROP_WHITE_BALANCE_BLUE_U =17, //!< Currently unsupported.
        CAP_PROP_RECTIFICATION =18, //!< Rectification flag for stereo cameras (note: only supported by DC1394 v 2.x backend currently).
        CAP_PROP_MONOCHROME    =19,
@@ -169,6 +171,16 @@ enum VideoCaptureProperties {
        CAP_PROP_AUTOFOCUS     =39,
        CAP_PROP_SAR_NUM       =40, //!< Sample aspect ratio: num/den (num)
        CAP_PROP_SAR_DEN       =41, //!< Sample aspect ratio: num/den (den)
+       CAP_PROP_BACKEND       =42, //!< Current backend (enum VideoCaptureAPIs). Read-only property
+       CAP_PROP_CHANNEL       =43, //!< Video input or Channel Number (only for those cameras that support)
+       CAP_PROP_AUTO_WB       =44, //!< enable/ disable auto white-balance
+       CAP_PROP_WB_TEMPERATURE=45, //!< white-balance color temperature
+       CAP_PROP_CODEC_PIXEL_FORMAT =46,    //!< (read-only) codec's pixel format. 4-character code - see VideoWriter::fourcc . Subset of [AV_PIX_FMT_*](https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/raw.c) or -1 if unknown
+       CAP_PROP_BITRATE       =47, //!< (read-only) Video bitrate in kbits/s
+       CAP_PROP_ORIENTATION_META=48, //!< (read-only) Frame rotation defined by stream meta (applicable for FFmpeg back-end only)
+       CAP_PROP_ORIENTATION_AUTO=49, //!< if true - rotates output frames of CvCapture considering video file's metadata  (applicable for FFmpeg back-end only) (https://github.com/opencv/opencv/issues/15499)
+       CAP_PROP_OPEN_TIMEOUT_MSEC=53,
+       CAP_PROP_READ_TIMEOUT_MSEC=54,
 #ifndef CV_DOXYGEN
        CV__CAP_PROP_LATEST
 #endif
@@ -490,7 +502,6 @@ enum { CAP_PROP_XI_DOWNSAMPLING                                 = 400, //!< Chan
 //! @} XIMEA
 
 /** @name AVFoundation framework for iOS
-    OS X Lion will have the same API
     @{
 */
 
@@ -501,6 +512,9 @@ enum { CAP_PROP_IOS_DEVICE_FOCUS        = 9001,
        CAP_PROP_IOS_DEVICE_WHITEBALANCE = 9004,
        CAP_PROP_IOS_DEVICE_TORCH        = 9005
      };
+
+//! @} AVFoundation framework for iOS
+
 
 /** @name Smartek Giganetix GigEVisionSDK
     @{
@@ -616,7 +630,7 @@ public:
     CV_WRAP VideoCapture();
 
     /** @overload
-    @brief  Open video file or a capturing device or a IP video stream for video capturing
+    @brief  Open video file or image file sequence or a capturing device or a IP video stream for video capturing
 
     Same as VideoCapture(const String& filename, int apiPreference) but using default Capture API backends
     */
@@ -628,12 +642,14 @@ public:
     @param filename it can be:
     - name of video file (eg. `video.avi`)
     - or image sequence (eg. `img_%02d.jpg`, which will read samples like `img_00.jpg, img_01.jpg, img_02.jpg, ...`)
-    - or URL of video stream (eg. `protocol://host:port/script_name?script_params|auth`).
+    - or URL of video stream (eg. `protocol://host:port/script_name?script_params|auth`)
+    - or GStreamer pipeline string in gst-launch tool format in case if GStreamer is used as backend
       Note that each video stream or IP camera feed has its own URL scheme. Please refer to the
       documentation of source stream to know the right URL.
     @param apiPreference preferred Capture API backends to use. Can be used to enforce a specific reader
     implementation if multiple are available: e.g. cv::CAP_FFMPEG or cv::CAP_IMAGES or cv::CAP_DSHOW.
-    @sa The list of supported API backends cv::VideoCaptureAPIs
+
+    @sa cv::VideoCaptureAPIs
     */
     CV_WRAP VideoCapture(const String& filename, int apiPreference);
 
@@ -644,9 +660,21 @@ public:
     Use a `domain_offset` to enforce a specific reader implementation if multiple are available like cv::CAP_FFMPEG or cv::CAP_IMAGES or cv::CAP_DSHOW.
     e.g. to open Camera 1 using the MS Media Foundation API use `index = 1 + cv::CAP_MSMF`
 
-    @sa The list of supported API backends cv::VideoCaptureAPIs
+    @sa cv::VideoCaptureAPIs
     */
     CV_WRAP VideoCapture(int index);
+
+    /** @overload
+    @brief  Opens a camera for video capturing
+
+    @param index id of the video capturing device to open. To open default camera using default backend just pass 0.
+    (to backward compatibility usage of camera_id + domain_offset (CAP_*) is valid when apiPreference is CAP_ANY)
+    @param apiPreference preferred Capture API backends to use. Can be used to enforce a specific reader
+    implementation if multiple are available: e.g. cv::CAP_DSHOW or cv::CAP_MSMF or cv::CAP_V4L2.
+
+    @sa cv::VideoCaptureAPIs
+    */
+    CV_WRAP VideoCapture(int index, int apiPreference);
 
     /** @brief Default destructor
 
@@ -737,7 +765,7 @@ public:
 
     @note In @ref videoio_c "C API", functions cvRetrieveFrame() and cv.RetrieveFrame() return image stored inside the video
     capturing structure. It is not allowed to modify or release the image! You can copy the frame using
-    :ocvcvCloneImage and then do whatever you want with the copy.
+    cvCloneImage and then do whatever you want with the copy.
      */
     CV_WRAP virtual bool retrieve(OutputArray image, int flag = 0);
 
@@ -763,7 +791,7 @@ public:
 
     @note In @ref videoio_c "C API", functions cvRetrieveFrame() and cv.RetrieveFrame() return image stored inside the video
     capturing structure. It is not allowed to modify or release the image! You can copy the frame using
-    :ocvcvCloneImage and then do whatever you want with the copy.
+    cvCloneImage and then do whatever you want with the copy.
      */
     CV_WRAP virtual bool read(OutputArray image);
 
@@ -787,8 +815,8 @@ public:
 
     @note Reading / writing properties involves many layers. Some unexpected result might happens
     along this chain.
-    @code {.txt}
-    `VideoCapture -> API Backend -> Operating System -> Device Driver -> Device Hardware`
+    @code{.txt}
+    VideoCapture -> API Backend -> Operating System -> Device Driver -> Device Hardware
     @endcode
     The returned value might be different from what really used by the device or it could be encoded
     using device dependent rules (eg. steps or percentage). Effective behaviour depends from device
@@ -807,6 +835,12 @@ public:
     The method first calls VideoCapture::release to close the already opened file or camera.
     */
     CV_WRAP virtual bool open(const String& filename, int apiPreference);
+
+    /** @brief Returns used backend API name
+
+     @note Stream should be opened.
+     */
+    CV_WRAP String getBackendName() const;
 
 protected:
     Ptr<CvCapture> cap;
@@ -845,7 +879,7 @@ public:
     VideoWriter::fourcc('P','I','M','1') is a MPEG-1 codec, VideoWriter::fourcc('M','J','P','G') is a
     motion-jpeg codec etc. List of codes can be obtained at [Video Codecs by
     FOURCC](http://www.fourcc.org/codecs.php) page. FFMPEG backend with MP4 container natively uses
-    other values as fourcc code: see [ObjectType](http://www.mp4ra.org/codecs.html),
+    other values as fourcc code: see [ObjectType](http://mp4ra.org/#/codecs),
     so you may receive a warning message from OpenCV about fourcc code conversion.
     @param fps Framerate of the created video stream.
     @param frameSize Size of the video frames.
@@ -946,6 +980,12 @@ public:
      */
     CV_WRAP static int fourcc(char c1, char c2, char c3, char c4);
 
+    /** @brief Returns used backend API name
+
+     @note Stream should be opened.
+     */
+    CV_WRAP String getBackendName() const;
+
 protected:
     Ptr<CvVideoWriter> writer;
     Ptr<IVideoWriter> iwriter;
@@ -954,8 +994,10 @@ protected:
                                     Size frameSize, bool isColor = true);
 };
 
+//! @cond IGNORED
 template<> CV_EXPORTS void DefaultDeleter<CvCapture>::operator ()(CvCapture* obj) const;
 template<> CV_EXPORTS void DefaultDeleter<CvVideoWriter>::operator ()(CvVideoWriter* obj) const;
+//! @endcond IGNORED
 
 //! @} videoio
 

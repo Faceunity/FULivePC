@@ -360,6 +360,7 @@ void GUIBgSeg::SelectBgSegFile() {
 
 	const int iCount = 6;
 	const char* open_filename = nullptr;
+    std::string selectedPath = "";
 	char const* filter_patterns[iCount] = { "*.mp4","*.mov","*.png","*.jpeg","*.jpg","*.gif" };  // "*.png",
 #if _WIN32
 	open_filename = tinyfd_openFileDialog(
@@ -385,19 +386,20 @@ void GUIBgSeg::SelectBgSegFile() {
 
 			}
 		}
+        if (open_filename) selectedPath = open_filename;
 	}
 #elif __APPLE__
-	vector<const char*> _filePaths = {};
+	vector<std::string> _filePaths = {};
 	vector<const char*> types = { "mp4","mov","png","jpeg","jpg","gif" };
 	FuToolMac::importFilesInObjectC("~/Desktop", types, &_filePaths, false);
 	if (_filePaths.size() > 0) {
-		open_filename = *_filePaths.begin();
+        selectedPath = *_filePaths.begin();
 	}
 #endif
-	if (open_filename) {
-		mConfig.strFilePath = open_filename;
+	if (selectedPath.length() > 0) {
+		mConfig.strFilePath = selectedPath;
 		SaveUserConfig();
-		ConfigVideoInfo(open_filename);
+		ConfigVideoInfo(selectedPath);
 		BgSegUpdate::instance().SaveCurFrame2File(GetUserIconPath());
 		Texture::createTextureFromFullPath(GetUserIconPath(), true, true);
 		mIsSelectBgSegFileOK = true;

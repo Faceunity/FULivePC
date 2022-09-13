@@ -757,6 +757,7 @@ static void ShowFloatMenuAR(Nama* nama)
 				UIBridge::FindAllBundle(gBundlePath[i], UIBridge::categoryBundles[i]);
 			}
 		}
+        
 		for (int i = 0; i < UIBridge::categoryBundles[bundleCategory].size(); i++)
 		{
 			ImGui::PushID(i);
@@ -1677,7 +1678,6 @@ void Gui::render(Nama* nama)
 	int frameId = 0;
 	while (!glfwWindowShouldClose(window))
 	{
-
 		glfwMakeContextCurrent(window);
 
 		// Poll and handle events (inputs, window resize, etc.)

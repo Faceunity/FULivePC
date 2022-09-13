@@ -350,6 +350,7 @@ elseif(APPLE)
         XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--deep"
         XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.faceunity.FULiveMac"
         XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "35A6KD62ZJ"
+        XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC "YES"
         )
     
     set( MacOS_APP_Content "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/FULivePC.app/Contents")
@@ -365,20 +366,41 @@ elseif(APPLE)
         file(COPY ${CMAKE_CURRENT_LIST_DIR}/../res DESTINATION ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle)
     endif()
 
-    add_custom_command(TARGET ${target} PRE_BUILD
-        #需要先rm Resource.bundle 和 ResPic.bundle，否则删除时，无法刷新
-        COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
-        COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
-        COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_LIST_DIR}/../assets  ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../res/config.json    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/../res    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
-        COMMAND ${CMAKE_COMMAND} -E make_directory  ${MacOS_APP_Content}/Frameworks
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/glfw/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/FaceUnity-SDK-Mac/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libcurl/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/Framework/*.dylib  ${MacOS_APP_Content}/Frameworks
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libzip/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
-        )
+	if(${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "x86_64")	
+		add_custom_command(TARGET ${target} PRE_BUILD
+			#需要先rm Resource.bundle 和 ResPic.bundle，否则删除时，无法刷新
+			COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
+			COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
+			COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_LIST_DIR}/../assets  ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../res/config.json    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/../res    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
+			COMMAND ${CMAKE_COMMAND} -E make_directory  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/glfw/lib/x86_64/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/FaceUnity-SDK-Mac/lib/x86_64/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libcurl/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/Framework/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libzip/lib/x86_64/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/opencv/lib/x86_64/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/ffmpeg/lib/x86_64/*.dylib  ${MacOS_APP_Content}/Frameworks
+		)
+	else()
+		add_custom_command(TARGET ${target} PRE_BUILD
+			#需要先rm Resource.bundle 和 ResPic.bundle，否则删除时，无法刷新
+			COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
+			COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
+			COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_LIST_DIR}/../assets  ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../res/config.json    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/Resource.bundle
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/../res    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
+			COMMAND ${CMAKE_COMMAND} -E make_directory  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/glfw/lib/arm64/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/FaceUnity-SDK-Mac/lib/arm64/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libcurl/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/Framework/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libzip/lib/arm64/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/opencv/lib/arm64/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/ffmpeg/lib/arm64/*.dylib  ${MacOS_APP_Content}/Frameworks
+		)
+	endif()
 
 
     set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
