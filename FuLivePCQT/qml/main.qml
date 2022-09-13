@@ -1524,7 +1524,7 @@ Window {
                         }
                         onClickRestoreDefault: {
                             UIBridge.resetItemParam(1)
-                            var list = [0, 40, 0, -20, -20, 50, -10, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            var list = [0, 40, 0, -20, -20, 50, -10, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
                             for(var i = 0; i < m_lmBeautyFace.count - 1; i++){
                                 m_lBeautyFace.itemAtIndex(i).resetValue(list[i])
                             }

@@ -234,7 +234,6 @@ void Nama::InitNama()
     fuItemSetParamd(m_BodyShapeHandle,"Debug",0.0);
     float fValue = 0.5f;
     fuSetFaceTrackParam((void*)"mouth_expression_more_flexible", &fValue);
-
     fuSetMaxFaces(4);
 
     InitController();
@@ -274,6 +273,7 @@ void Nama::changeRenderList(RenderType type,bool makeupFlag)
         else{
             //不在取色状态
             if(type == RENDER_GREEN){
+                fuSetMaxFaces(4);
                 m_renderList.push_back(m_GSHandle);
             }
         }
@@ -790,6 +790,7 @@ void Nama::UpdateGreenScreenSegment(const cv::Mat & dataRGBA)
         return;
     }
     fuCreateTexForItem(m_GSHandle, "tex_bg", dataRGBA.data, dataRGBA.cols, dataRGBA.rows);
+
 }
 
 void Nama::UpdateBackgroundSegment(const cv::Mat &dataRGBA)

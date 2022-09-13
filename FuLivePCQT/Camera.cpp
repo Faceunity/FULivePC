@@ -91,7 +91,6 @@ bool QtCameraCapture::present(const QVideoFrame &frame)
             if(cloneFrame.pixelFormat() == QVideoFrame::Format_YUV420P)
             {
                 cv::Mat mat = cv::Mat(cloneFrame.height() * 3 / 2, cloneFrame.width(), CV_8UC1, (void*)cloneFrame.bits(), cloneFrame.bytesPerLine());
-                //cv::cvtColor(mat, mat, cv::COLOR_YUV2BGRA_IYUV);
                 emit presentFrame(mat.clone());
             }
         }
