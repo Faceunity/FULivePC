@@ -112,7 +112,7 @@ Here is an example of setting a threshold for the Eigenfaces method, when creati
 int num_components = 10;
 double threshold = 10.0;
 // Then if you want to have a cv::FaceRecognizer with a confidence threshold,
-// create the concrete implementation with the appropiate parameters:
+// create the concrete implementation with the appropriate parameters:
 Ptr<FaceRecognizer> model = EigenFaceRecognizer::create(num_components, threshold);
 @endcode
 
@@ -162,7 +162,7 @@ public:
     @param src The training images, that means the faces you want to learn. The data has to be
     given as a vector\<Mat\>.
     @param labels The labels corresponding to the images have to be given either as a vector\<int\>
-    or a
+    or a Mat of type CV_32SC1.
 
     The following source code snippet shows you how to learn a Fisherfaces model on a given set of
     images. The images are read with imread and pushed into a std::vector\<Mat\>. The labels of each
@@ -175,6 +175,8 @@ public:
     // holds images and labels
     vector<Mat> images;
     vector<int> labels;
+    // using Mat of type CV_32SC1
+    // Mat labels(number_of_samples, 1, CV_32SC1);
     // images for first person
     images.push_back(imread("person0/0.jpg", CV_LOAD_IMAGE_GRAYSCALE)); labels.push_back(0);
     images.push_back(imread("person0/1.jpg", CV_LOAD_IMAGE_GRAYSCALE)); labels.push_back(0);
@@ -211,7 +213,7 @@ public:
     @param src The training images, that means the faces you want to learn. The data has to be given
     as a vector\<Mat\>.
     @param labels The labels corresponding to the images have to be given either as a vector\<int\> or
-    a
+    a Mat of type CV_32SC1.
 
     This method updates a (probably trained) FaceRecognizer, but only if the algorithm supports it. The
     Local Binary Patterns Histograms (LBPH) recognizer (see createLBPHFaceRecognizer) can be updated.

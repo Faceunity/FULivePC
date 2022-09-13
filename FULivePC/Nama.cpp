@@ -1,4 +1,4 @@
-﻿#include "Camera.h"
+#include "Camera.h"
 #include "FuController.h"
 #include "Nama.h"
 #include "Config.h"	
@@ -15,6 +15,7 @@
 using namespace NamaExampleNameSpace;
 
 bool Nama::mHasSetup = false;
+
 
 NamaState Nama::mNamaAppState;
 NamaState Nama::mNamaAppStateBackAR;
@@ -1420,7 +1421,7 @@ void Nama::RenderGS(cv::Mat & picInput, int rotType)
 {
 	if (mGSHandle != -1)
 	{
-
+		fuSetMaxFaces(4);
 		vector<int> vecRender;
 		vecRender.push_back(mGSHandle);
 		vecRender.push_back(mBeautyHandles);

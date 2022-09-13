@@ -286,6 +286,7 @@ void GUIGS::ShowGSInputChoice(Nama * nama,bool canCancel)
 	{
 		const int iCount = 6;
 		const char* open_filename = nullptr;
+        string videoPath;
 		char const* filter_patterns[iCount] = { "*.mp4","*.mov","*.png","*.jpeg","*.jpg","*.gif" };  // "*.png",
 #if _WIN32
 		open_filename = tinyfd_openFileDialog(
@@ -312,19 +313,19 @@ void GUIGS::ShowGSInputChoice(Nama * nama,bool canCancel)
 				}
 			}
 		}
+        if (open_filename) videoPath = open_filename;
 #elif __APPLE__
-		vector<const char *> _filePaths = {};
+		vector<std::string> _filePaths = {};
 		vector<const char*> types = { "mp4","mov","png","jpeg","jpg","gif"};
 		FuToolMac::importFilesInObjectC("~/Desktop", types, &_filePaths,false);
 		if (_filePaths.size() > 0) {
-			open_filename = *_filePaths.begin();
+            videoPath = *_filePaths.begin();
 		}
 #endif
-		if (open_filename){
-			string videoPath = open_filename;
+		{
 			if (videoPath.length() > 0)
 			{
-				if (regex_match(open_filename, regex("(.*)\\.(mp4|MP4|mov|MOV)"))) {
+				if (regex_match(videoPath.data(), regex("(.*)\\.(mp4|MP4|mov|MOV)"))) {
 					UIBridge::m_localVideoType = true;
 				}else{
 					UIBridge::m_localVideoType = false;
@@ -1235,29 +1236,32 @@ void GUIGS::SelectGSSafeAreaFile() {
 
 	const int iCount = 3;
 	const char* open_filename = nullptr;
+    std::string filePath = "";
 	char const* filter_patterns[iCount] = { "*.png","*.jpeg","*.jpg" };  // "*.png",
 #if _WIN32
-	open_filename = tinyfd_openFileDialog(
+    open_filename = tinyfd_openFileDialog(
 		"Load Pic",
 		"",
 		iCount,
 		filter_patterns,
 		nullptr,
 		0);
+    
+    if(open_filename) filePath = open_filename;
 #elif __APPLE__
-	vector<const char*> _filePaths = {};
+	vector<std::string> _filePaths = {};
 	vector<const char*> types = { "png","jpeg","jpg" };
 	FuToolMac::importFilesInObjectC("~/Desktop", types, &_filePaths, false);
 	if (_filePaths.size() > 0) {
-		open_filename = *_filePaths.begin();
+        filePath = *_filePaths.begin();
 	}
 #endif
-	if (open_filename) {
-		mConfig.strFilePath = open_filename;
+	if (filePath.length() > 0) {
+		mConfig.strFilePath = filePath;
 #if _WIN32
-		cv::Mat mat = cv::imread(open_filename, cv::IMREAD_REDUCED_COLOR_4);
+		cv::Mat mat = cv::imread(filePath, cv::IMREAD_REDUCED_COLOR_4);
 #elif __APPLE__
-		cv::Mat mat = cv::imread(open_filename);
+		cv::Mat mat = cv::imread(filePath);
 #endif
 		cv::imwrite(GetUserIconPath(), mat);
         SaveUserConfig();

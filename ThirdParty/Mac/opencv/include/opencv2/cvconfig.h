@@ -13,9 +13,6 @@
 /* Compile for 'real' NVIDIA GPU architectures */
 #define CUDA_ARCH_BIN ""
 
-/* Create PTX or BIN for 1.0 compute capability */
-/* #undef CUDA_ARCH_BIN_OR_PTX_10 */
-
 /* NVIDIA GPU features are used */
 #define CUDA_ARCH_FEATURES ""
 
@@ -102,12 +99,10 @@
 /* #undef HAVE_INTELPERC */
 
 /* Intel Integrated Performance Primitives */
-#define HAVE_IPP
-#define HAVE_IPP_ICV
-#define HAVE_IPP_IW
-
-/* Intel IPP Async */
-/* #undef HAVE_IPP_A */
+/* #undef HAVE_IPP */
+/* #undef HAVE_IPP_ICV */
+/* #undef HAVE_IPP_IW */
+/* #undef HAVE_IPP_IW_LL */
 
 /* JPEG-2000 codec */
 /* #undef HAVE_JASPER */
@@ -129,6 +124,8 @@
 
 /* NVIDIA Video Decoding API*/
 /* #undef HAVE_NVCUVID */
+/* #undef HAVE_NVCUVID_HEADER */
+/* #undef HAVE_DYNLINK_NVCUVID_HEADER */
 
 /* NVIDIA Video Encoding API*/
 /* #undef HAVE_NVCUVENC */
@@ -137,6 +134,9 @@
 #define HAVE_OPENCL
 #define HAVE_OPENCL_STATIC
 /* #undef HAVE_OPENCL_SVM */
+
+/* NVIDIA OpenCL D3D Extensions support */
+/* #undef HAVE_OPENCL_D3D11_NV */
 
 /* OpenEXR codec */
 #define HAVE_OPENEXR
@@ -244,5 +244,7 @@
 /* OpenCV trace utilities */
 #define OPENCV_TRACE
 
+/* Library QR-code decoding */
+#define HAVE_QUIRC
 
 #endif // OPENCV_CVCONFIG_H_INCLUDED

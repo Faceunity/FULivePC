@@ -19,23 +19,28 @@ static bool isNotInSubs(NSString *filename)
  */
 void UIBridge::FindAllBundle(string folder,vector<string> &files)
 {
-    string fullFolder = FuTool::GetFileFullPathFromeSearchPath(folder.c_str());
-    NSFileManager *manager = [NSFileManager defaultManager];
+    @autoreleasepool {
+        string fullFolder = FuTool::GetFileFullPathFromeSearchPath(folder.c_str());
+        
+        NSFileManager *manager = [NSFileManager defaultManager];
 
-    NSString *home = [NSString stringWithUTF8String:fullFolder.data()]; //see if UTF8
+        NSString *home = [NSString stringWithUTF8String:fullFolder.data()]; //see if UTF8
 
-    NSDirectoryEnumerator *direnum = [manager enumeratorAtPath:home];
-    NSString *filename;
-    while (filename = [direnum nextObject]) {
-        if ([[filename pathExtension] isEqualTo:@"bundle"]) {
-            //NSString *path = [NSString stringWithFormat:@"%@%@%@",home,@"/",filename];
-            if(isNotInSubs(filename)){
-                files.push_back([filename UTF8String]);
+        NSDirectoryEnumerator *direnum = [manager enumeratorAtPath:home];
+        NSString *filename;
+        while (filename = [direnum nextObject]) {
+            if ([[filename pathExtension] isEqualTo:@"bundle"]) {
+                //NSString *path = [NSString stringWithFormat:@"%@%@%@",home,@"/",filename];
+                if(isNotInSubs(filename)){
+                    files.push_back([filename UTF8String]);
+                }
+
             }
-            
         }
+
+        sort(files.begin(), files.end());
     }
-	sort(files.begin(), files.end());
+    
 }
 
 void UIBridge::FindAllCommonPIC(string folder, vector<string> &files)

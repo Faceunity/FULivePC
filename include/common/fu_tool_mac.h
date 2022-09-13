@@ -25,8 +25,9 @@ public:
     static Bitmap * getBitmapFromAsset(string name);
     
     static string GetFileFullPathFromResourceBundle(const char * path);
+    static string GetFileFullPathFromResourceBundleNew(const char * path);
 	static string GetRelativePathDependResourceBundle(const char * fullpath);
-	static bool importFilesInObjectC(const char *dirPath,vector<const char *> types,vector<const char *> *seletedFilesPathsPtr,bool allowsMultipleSelection);
+	static bool importFilesInObjectC(const char *dirPath,vector<const char *> types,vector<std::string> *seletedFilesPathsPtr,bool allowsMultipleSelection);
     static float culculatorTextWidth(const char *string,float fontSize);
     static string Convert2utf8(const char * path);
     
