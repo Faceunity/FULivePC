@@ -17,7 +17,6 @@
 #include <iostream>
 extern "C" {
 #include "libavformat/avformat.h"
-#include "libavcodec/avcodec.h"
 }
 
 
@@ -526,15 +525,15 @@ bool FuTool::getLocalVideoResolution(string& videoPath,float* videoWidth,float* 
 	AVDictionaryEntry *tag = NULL;
 	
 	int ret;
-	//av_register_all();
+	av_register_all();
 	int videoStream = -1;
 	bool isSuccess = false;
 	if ((ret = avformat_open_input(&fmt_ctx, videoPath.c_str(), NULL, NULL)))
 		rotation = 0;
 	if (fmt_ctx) {
 		for (int i = 0; i < fmt_ctx->nb_streams; i++) {
-			printf("fmt_ctx->streams[i]->codec->codec_type------------::%d\n", fmt_ctx->streams[i]->codecpar->codec_type);
-			if (fmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO && videoStream < 0) {
+			printf("fmt_ctx->streams[i]->codec->codec_type------------::%d\n", fmt_ctx->streams[i]->codec->codec_type);
+			if (fmt_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && videoStream < 0) {
 				videoStream = i;
 				AVDictionary* streamsMetadata = (AVDictionary*)fmt_ctx->streams[i]->metadata;
 				while ((tag = av_dict_get(streamsMetadata, "", tag, AV_DICT_IGNORE_SUFFIX))) {
@@ -564,8 +563,7 @@ bool FuTool::getLocalVideoResolution(string& videoPath,float* videoWidth,float* 
 		if (videoStream >= 0) {
 
 			// Get a pointer to the codec context for the video stream
-			const AVCodec*  pCodec = avcodec_find_decoder(fmt_ctx->streams[videoStream]->codecpar->codec_id);//通过解码器编号来遍历codec_list[]数组,来找到AVCodec
-			AVCodecContext*  pCodecCtx = avcodec_alloc_context3(pCodec);
+			AVCodecContext* pCodecCtx = fmt_ctx->streams[videoStream]->codec;
 
 			printf("\n");
 			printf("Width: %d\n", pCodecCtx->width);
@@ -583,13 +581,13 @@ int FuTool::getLocalVideoRotation(string& videoPath){
 	AVFormatContext *fmt_ctx = NULL;
 	AVDictionaryEntry *tag = NULL;
 	int ret;
-	//av_register_all();
+	av_register_all();
 	int videoStream = -1;
 	if ((ret = avformat_open_input(&fmt_ctx, videoPath.c_str(), NULL, NULL)))
 		rotation = 0;
 	if (fmt_ctx) {
 		for (int i = 0; i < fmt_ctx->nb_streams; i++) {
-			if (fmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO && videoStream < 0) {
+			if (fmt_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && videoStream < 0) {
 				videoStream = i;
 				AVDictionary* streamsMetadata = (AVDictionary*)fmt_ctx->streams[i]->metadata;
 				while ((tag = av_dict_get(streamsMetadata, "", tag, AV_DICT_IGNORE_SUFFIX))) {

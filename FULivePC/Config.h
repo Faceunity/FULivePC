@@ -26,7 +26,7 @@ const string g_ai_bgseg = "model/ai_bgseg.bundle";
 
 const string g_ai_hairseg = "model/ai_hairseg.bundle";
 
-const string g_ai_humanprocessor = "model/ai_human_processor_pc_gpu.bundle";
+const string g_ai_humanprocessor = "model/ai_human_processor_pc.bundle";
 
 //const string g_ai_gesture = "model/ai_gesture.bundle";
 

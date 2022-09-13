@@ -610,11 +610,7 @@ void GUIGS::ChangeGreenScreenBg(string strFilePath)
 
 void GUIGS::ChangeGreenScreenSA(string strFilePath, NamaExampleNameSpace::Nama* nama)
 {
-#if _WIN32
-	cv::Mat mat = cv::imread(strFilePath, cv::IMREAD_REDUCED_COLOR_4);
-#elif __APPLE__
 	cv::Mat mat = cv::imread(strFilePath);
-#endif
 	cv::cvtColor(mat, mat, cv::COLOR_BGR2RGBA);
 	nama->UpdateGSSA(mat);
 }
@@ -869,9 +865,9 @@ void GUIGS::UpdateGreenScreenBg(NamaExampleNameSpace::Nama * nama)
 
 void GUIGS::ResetDefParam()
 {
-	UIBridge::mGSParam[0] = 50;
+	UIBridge::mGSParam[0] = 45;
 	UIBridge::mGSParam[1] = 30;
-	UIBridge::mGSParam[2] = 66;
+	UIBridge::mGSParam[2] = 20;
 }
 
 void GUIGS::InitColorVec()
@@ -883,7 +879,6 @@ void GUIGS::InitColorVec()
 
 	m_vecColorTex.emplace_back(g_color1);
 	m_vecColorTex.emplace_back(g_color2);
-	m_vecColorTex.emplace_back(g_color3);
 
 }
 
@@ -899,9 +894,7 @@ void GUIGS::ShowColorChoiceWin(NamaExampleNameSpace::Nama * nama)
 	ImGui::BeginChild("ColorChoice",ImVec2(200 * scaleRatioW, 160 * scaleRatioH),true, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
 
 	ImGui::Text(u8"可选颜色:");
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(230.f / 255.f, 230.f / 255.f, 230.f / 255.f, 255.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive , ImVec4(130.f / 255.f, 145.f / 255.f, 235.f / 255.f, 255.0f));
-	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
+
 	auto funLoopColor = [&](vector<ColorBag> & vec, ImGuiID & guiID) {
 
 		int iLoopIndex = 0;
@@ -912,16 +905,10 @@ void GUIGS::ShowColorChoiceWin(NamaExampleNameSpace::Nama * nama)
 			{
 				ImGui::PushID(&colorBag);
 
-				if (ImGui::ImageButton(colorBag.pTex->getTextureID(), ImVec2(20, 20)))
+				if (ImGui::ImageRoundButton(guiID, colorBag.pTex->getTextureID(), ImVec2(20, 20)))
 				{
 					nama->SetGSKeyColor(colorBag.vecColorRGBA[0]);
 					m_curColor.setColor(colorBag.vecColorRGBA[0]);
-					//绿幕设置颜色后设置绿幕参数
-					vector<int> colorV;
-					nama->GetGSParamd(colorV);
-					UIBridge::mGSParam[0] = colorV[0];
-					UIBridge::mGSParam[1] = colorV[1];
-					UIBridge::mGSParam[2] = colorV[2];
 				}
 
 				ImGui::PopID();
@@ -941,8 +928,7 @@ void GUIGS::ShowColorChoiceWin(NamaExampleNameSpace::Nama * nama)
 	};
 
 	funLoopColor(m_vecColorTex, UIBridge::m_curRenderItemUIIDSec);
-	ImGui::PopStyleColor(2); 
-	ImGui::PopStyleVar(1);
+	
 	ImGui::Dummy(ImVec2(2,2));
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
@@ -1112,7 +1098,7 @@ void GUIGS::ShowGSParamRight(NamaExampleNameSpace::Nama * nama)
 	string sliderIconNameArr[MAX_GREEN_SCREEN_PARAM] = { "list_icon_tolerance_open", "list_icon_smooth_open",
 		"list_icon_transparency_open" };
 
-	string sliderNameArr[MAX_GREEN_SCREEN_PARAM] = { u8"  相似度",u8"   平滑" ,u8"  祛色度" };
+	string sliderNameArr[MAX_GREEN_SCREEN_PARAM] = { u8"  相似度",u8"   平滑" ,u8"  透明度" };
 
 	for (int i = 0; i < MAX_GREEN_SCREEN_PARAM; i++)
 	{
@@ -1230,7 +1216,6 @@ void GUIGS::LoadResource()
 }
 
 
-
 void GUIGS::SelectGSSafeAreaFile() {
 
 	const int iCount = 3;
@@ -1254,11 +1239,7 @@ void GUIGS::SelectGSSafeAreaFile() {
 #endif
 	if (open_filename) {
 		mConfig.strFilePath = open_filename;
-#if _WIN32
-		cv::Mat mat = cv::imread(open_filename, cv::IMREAD_REDUCED_COLOR_4);
-#elif __APPLE__
 		cv::Mat mat = cv::imread(open_filename);
-#endif
 		cv::imwrite(GetUserIconPath(), mat);
         SaveUserConfig();
 		Texture::createTextureFromFullPath(GetUserIconPath(), true, true);

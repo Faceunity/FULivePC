@@ -50,20 +50,6 @@ typedef enum FuImageBeautyProcessMode {
   FU_IMAGE_BEAUTY_MODE_BODY_SLIM = 1 << 2,
   FU_IMAGE_BEAUTY_MODE_AUTO = 1 << 3,
   FU_IMAGE_BEAUTY_MODE_UPLOAD = 1 << 4,
-  FU_IMAGE_BEAUTY_MODE_FACE_BEAUTY_PREPROCESS = 1 << 5,
-  FU_IMAGE_BEAUTY_MODE_BLUR = 1 << 6,
-  FU_IMAGE_BEAUTY_MODE_ACENCANCEL= 1 << 7,
-  FU_IMAGE_BEAUTY_MODE_AVER= 1 << 8,
-  FU_IMAGE_BEAUTY_MODE_WRINKLE= 1 << 9,
-  FU_IMAGE_BEAUTY_MODE_WHITEBLACK= 1 << 10,
-  FU_IMAGE_BEAUTY_MODE_WARMCOLD= 1 << 11,
-  FU_IMAGE_BEAUTY_MODE_RED= 1 << 12,
-  FU_IMAGE_BEAUTY_MODE_LIGHTEYE= 1 << 13,
-  FU_IMAGE_BEAUTY_MODE_SHARPENBROWN= 1 << 14,
-  FU_IMAGE_BEAUTY_MODE_THREED= 1 << 15,
-  FU_IMAGE_BEAUTY_MODE_JILI= 1 << 16,
-  FU_IMAGE_BEAUTY_MODE_DARKCIRCLE= 1 << 17,
-  FU_IMAGE_BEAUTY_MODE_DECREEPATTERN= 1 << 18,
 } FuImageBeautyProcessMode;
 
 typedef enum FuImageUndoRedoMode {
@@ -121,8 +107,7 @@ FUNAMA_API FuImageBeautyStatus fuImageBeautyPreview(unsigned int* result_texid,
 */
 FUNAMA_API FuImageBeautyStatus fuImageBeautyGetResult(FuImageView* output,
                                                       const int* p_items,
-                                                      int n_items,
-                                                      bool clear_mem = false);
+                                                      int n_items);
 
 /**
  \brief image beauty get final buffer result and save rgba or yuv raw buffer to
@@ -133,8 +118,7 @@ FUNAMA_API FuImageBeautyStatus fuImageBeautyGetResult(FuImageView* output,
  \return status, refer to FuImageBeautyStatus.
 */
 FUNAMA_API FuImageBeautyStatus fuImageBeautySaveResultToPath(
-    FuImageView* output, const char* path, const int* p_items, int n_items,
-    bool clear_mem = false);
+    FuImageView* output, const char* path, const int* p_items, int n_items);
 
 /**
  \brief tool func convert RGBA buffer to Nv21 buffer
@@ -150,7 +134,9 @@ fuImageBeautyConvertRGBA2NV21(FuImageView* input, FuImageView* output);
  \param n_items is the number of items
  \return status, refer to FuImageBeautyStatus.
 */
-FUNAMA_API FuImageBeautyStatus fuImageBeautySetCacheDir(const char* dir);
+FUNAMA_API FuImageBeautyStatus fuImageBeautySetCacheDir(const char* dir,
+                                                        const int* p_items,
+                                                        int n_items);
 
 /**
  \brief save cache to sdcard, used when going into background.
@@ -200,12 +186,6 @@ FUNAMA_API FuImageBeautyStatus fuImageBeautySetUndoRedoMode(
 
 FUNAMA_API FuImageBeautyStatus fuImageBeautyCreateTextureCoverPreview(
     const FuImageView* input, float scale, int* result_texture);
-
-FUNAMA_API void
-fuImageBeautyPreProcessForImageInfo(const FuImageView* input, float scale);
-
-FUNAMA_API FuImageBeautyStatus fuImageBeautyClearMemory(const int* p_items,
-                                                      int n_items);
 #ifdef __cplusplus
 }
 #endif

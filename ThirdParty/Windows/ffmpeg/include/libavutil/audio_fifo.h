@@ -28,6 +28,7 @@
 #define AVUTIL_AUDIO_FIFO_H
 
 #include "avutil.h"
+#include "fifo.h"
 #include "samplefmt.h"
 
 /**

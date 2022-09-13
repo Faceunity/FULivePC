@@ -83,35 +83,14 @@ protected:
 	float m_fIntensity = 100.0f;
 };
 
-
-typedef std::function<bool(std::shared_ptr<ColorBag> choicebag, void* pUserData)>  FunCBShowUI;
-
-class CMNormalNode
-{
-public:
-
-	CMNormalNode();
-	virtual ~CMNormalNode();
-
-	virtual void ShowUINormal(FunCBShowUI funCB, Nama* pNama, void* pUserData);
-	virtual void ResetNormal();
-
-protected:
-
-	std::vector< std::shared_ptr<CMNormalConfig> > m_vecData;
-	std::shared_ptr<CMNormalConfig> m_curConfig = nullptr;
-	std::shared_ptr<ColorBag> m_curBag = nullptr;
-
-};
-
-class CMEyeBrow :public CMBasePage, public CMNormalNode
+class CMEyeBrow:public CMBasePage
 {
 	Declare_FUObject(CMEyeBrow, CMBasePage);
 public:
 	CMEyeBrow();
 	~CMEyeBrow();
 
-	virtual bool InitFrom(const rapidjson::Value& json) override;
+	virtual bool InitFrom(const rapidjson::Value & json) override;
 	virtual void ShowUI() override;
 	virtual std::string GetDescName() const override
 	{
@@ -123,6 +102,28 @@ public:
 	virtual void SetIntensity() override;
 
 private:
+	std::vector<std::shared_ptr<CMEyeBrowConfig> > m_vecData;
+	int m_iCurType = -1;
+	std::shared_ptr<ColorBag> m_curBag = nullptr;
+};
+
+typedef std::function<bool(std::shared_ptr<ColorBag> choicebag, void * pUserData)>  FunCBShowUI;
+
+class CMNormalNode
+{
+public:
+
+	CMNormalNode();
+	virtual ~CMNormalNode();
+
+	virtual void ShowUINormal(FunCBShowUI funCB, Nama * pNama, void * pUserData);
+	virtual void ResetNormal();
+
+protected:
+
+	std::vector< std::shared_ptr<CMNormalConfig> > m_vecData;
+	std::shared_ptr<CMNormalConfig> m_curConfig = nullptr;
+	std::shared_ptr<ColorBag> m_curBag = nullptr;
 
 };
 
