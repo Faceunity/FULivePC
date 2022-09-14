@@ -203,8 +203,8 @@ bool Nama::Init()
 			cout << "Error: fail load humanprocessor model" << g_ai_humanprocessor << endl;
 			return false;
 		}
+		fuPreprocessAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
 		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
-
 		vector<char> ai_gesture_model_data;
 		if (false == FuTool::LoadBundle(g_ai_hand_processor, ai_gesture_model_data))
 		{
@@ -277,7 +277,7 @@ bool Nama::Init()
 
 			mFxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
 		}
-
+		
 		fuItemSetParamd(mBodyShapeHandle, "Debug", 0.0);
 		//fuSetDefaultOrientation(0);
 		float fValue = 0.5f;
@@ -788,6 +788,13 @@ void Nama::SetGSKeyColor(cv::Vec4b data)
 	fuItemSetParamdv(mGSHandle, "key_color", key_color, 3);
 }
 
+void NamaExampleNameSpace::Nama::GetGSParamd(vector<int>& data)
+{
+	data.push_back(fuItemGetParamd(mGSHandle, "chroma_thres") * 100);
+	data.push_back(fuItemGetParamd(mGSHandle, "chroma_thres_T") * 100);
+	data.push_back(fuItemGetParamd(mGSHandle, "alpha_L") * 100);
+}
+
 void Nama::UpdateGreenScreen()
 {
 	if (mGSHandle == -1)
@@ -1039,8 +1046,10 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 	{
 		return false;
 	}
-	if (UIBridge::bundleCategoryLast == BundleCategory::ItemJingpin &&
-		UIBridge::bundleCategory != BundleCategory::ItemJingpin) {
+	if ((UIBridge::bundleCategoryLast == BundleCategory::ItemJingpin &&
+		UIBridge::bundleCategory != BundleCategory::ItemJingpin) ||
+		UIBridge::bundleCategoryLast == BundleCategory::Makeup &&
+		UIBridge::bundleCategory != BundleCategory::Makeup) {
 		ReloadItems();
 		UpdateFilter(UIBridge::m_curFilterIdx);
 		UpdateBeauty();
@@ -1048,15 +1057,26 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 		SetGSKeyColor(GUIGS::GetCurColorCircle());
 		changeGSPreviewRect(gsPreviewRect);
 		if (UIBridge::mCurRenderGSSAItemName != "NONE") {
-			string imagePath;
+			if (UIBridge::mCurRenderGSSAItemName == GSSAFEAREA_USERFILE_PIC) {
 #if _WIN32
-			imagePath = gGSSAPic + "/" + UIBridge::mCurRenderGSSAItemName;
+				cv::Mat mat = cv::imread(UIBridge::mCurRenderGSSAItemName, cv::IMREAD_REDUCED_COLOR_4);
 #elif __APPLE__
-			imagePath = UIBridge::GetFileFullPathFromResourceBundle((gGSSAPic + "/" + UIBridge::mCurRenderGSSAItemName + ".jpg").c_str());
+				cv::Mat mat = cv::imread(FuToolMac::GetDocumentPath() + "/" + GSSAFEAREA_USERFILE_PIC);
+#endif
+				cv::cvtColor(mat, mat, cv::COLOR_BGR2RGBA);
+				UpdateGSSA(mat);
+			}
+			else {
+				string imagePath;
+#if _WIN32
+				imagePath = gGSSAPic + "/" + UIBridge::mCurRenderGSSAItemName;
+#elif __APPLE__
+				imagePath = UIBridge::GetFileFullPathFromResourceBundle((gGSSAPic + "/" + UIBridge::mCurRenderGSSAItemName + ".jpg").c_str());
 #endif 
-			cv::Mat mat = cv::imread(imagePath);
-			cv::cvtColor(mat, mat, cv::COLOR_BGR2RGBA);
-			UpdateGSSA(mat);
+				cv::Mat mat = cv::imread(imagePath);
+				cv::cvtColor(mat, mat, cv::COLOR_BGR2RGBA);
+				UpdateGSSA(mat);
+			}
 		}
 	}
 	UIBridge::bundleCategoryLast = UIBridge::bundleCategory;
@@ -1073,10 +1093,8 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 		UIBridge::m_curPlayingMusicItem = -1;
 		UIBridge::mNeedPlayMP3 = false; 
 	}
-	
 	if (0 == mBundlesMap[bundleName])
 	{
-		
 		/*if (!CheckModuleCode(UIBridge::bundleCategory))
 		{
 			cout << "no right to use." << endl;
@@ -1104,8 +1122,6 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 		}*/
 		DestroyAll();
 
-
-		
 		bundleID = fuCreateItemFromPackage(&propData[0], propData.size());
 		mBundlesMap[bundleName] = bundleID;
 		

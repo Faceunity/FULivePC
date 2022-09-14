@@ -285,12 +285,17 @@ if(WIN32)
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFileFFmpeg}     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFolder}/opencv_world400.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 
-        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avutil-56.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avformat-58.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avcodec-58.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/swresample-3.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avcodec-59.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avdevice-59.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avfilter-8.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avformat-59.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+		COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avutil-57.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+	    COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/swresample-4.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+		COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/swscale-6.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/libwinpthread-1.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+		
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcVirtualDLLFolder}/VirtualCamera.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+		
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcCurlDLLFolder}/libcurl.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcCurlDLLFolder}/libcrypto.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcCurlDLLFolder}/libssl.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
@@ -304,13 +309,17 @@ if(WIN32)
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFileFFmpeg}     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcOpenCVDLLFolder}/opencv_world400d.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
 
-        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avutil-56.dll 	${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
-        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avformat-58.dll		${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
-        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avcodec-58.dll		${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
-        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/swresample-3.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avcodec-59.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avdevice-59.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avfilter-8.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+        COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avformat-59.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+		COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/avutil-57.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+	    COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/swresample-4.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+		COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/swscale-6.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcFfmpegDLLFolder}/libwinpthread-1.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+		
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcVirtualDLLFolder}/VirtualCamera.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
-
+		
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcCurlDLLFolder}/libcurl.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcCurlDLLFolder}/libcrypto.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
         COMMAND ${CMAKE_COMMAND} -E  copy_if_different ${SrcCurlDLLFolder}/libssl.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
