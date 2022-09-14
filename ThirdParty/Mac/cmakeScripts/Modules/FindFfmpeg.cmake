@@ -6,10 +6,10 @@ function(FindFfmpeg package)
 	
   if(${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "x86_64")
 	    set(${package}_LIBRARIES
-    	${${package}_HOME}/lib/x86_64/libswresample.a
-		${${package}_HOME}/lib/x86_64/libavutil.a
-    	${${package}_HOME}/lib/x86_64/libavcodec.a
-    	${${package}_HOME}/lib/x86_64/libavformat.a
+    	${${package}_HOME}/lib/x86_64/libswresample.4.dylib
+		${${package}_HOME}/lib/x86_64/libavutil.57.dylib
+    	${${package}_HOME}/lib/x86_64/libavcodec.59.dylib
+    	${${package}_HOME}/lib/x86_64/libavformat.59.dylib
     PARENT_SCOPE)
 	else()
 		set(${package}_LIBRARIES
