@@ -64,10 +64,10 @@ namespace gui_tab_content
 		//ImGui::PopStyleColor();
 
 		std::string sliderIconNameArr[MAX_BEAUTYFACEPARAMTER] = { "list_icon_Grindingskin_open","list_icon_Skinwhitening_open", "list_icon_Ruddy_open","list_iconsharpen_open",
-			"list_icon_Brighteye_open","list_iconBeautifulteeth_open",
+			"list_icon_stereoscopic_open", "list_icon_Brighteye_open", "list_iconBeautifulteeth_open",
 			"list_icon_dark_circles_open","list_icon_wrinkle_open" };
 
-		std::string sliderNameArr[MAX_BEAUTYFACEPARAMTER] = { u8"   磨皮", u8"   美白",u8"   红润",u8"   锐化", u8"   亮眼", u8"   美牙" ,u8"去黑眼圈", u8"去法令纹" };
+		std::string sliderNameArr[MAX_BEAUTYFACEPARAMTER] = { u8"   磨皮", u8"   美白",u8"   红润",u8"   锐化", u8"五官立体",u8"   亮眼", u8"   美牙" ,u8"去黑眼圈", u8"去法令纹" };
 
 		for (int i = 0; i < MAX_BEAUTYFACEPARAMTER; i++)
 		{
@@ -112,16 +112,16 @@ namespace gui_tab_content
 		nama->SetCurrentShape(4);
 
 		std::string faceShapeIconNameArr[MAX_FACESHAPEPARAMTER] = { "list_icon_Thinface_open", "list_icon_Bigeye_open",
-			"list_icon_round_eye_open","list_icon_chin_open", "list_icon_forehead_open", "list_icon_Thinnose_open","list_icon_Mouthtype_open",
+			"list_icon_round_eye_open","list_icon_chin_open", "list_icon_forehead_open", "list_icon_Thinnose_open","list_icon_Mouthtype_open","list_icon_mouth_thickness_open",
 			"list_icon_v_open","list_icon_narrow_face_open","list_icon_short_face_open","list_icon_little_face_open",
-		"list_icon_cheekbones_open" ,"list_icon_lower_jaw_open" ,"list_icon_open_eyes_open" ,"list_icon_eye_distance_open" ,"list_icon_eye_angle_open" ,
-		"list_icon_proboscis_open" ,"list_icon_shrinking_open" ,"list_icon_smile_mouth_open" ,"list_icon_eyebrow_position_open" ,"list_icon_eyebrow_spacing_open" };
+		"list_icon_cheekbones_open" ,"list_icon_lower_jaw_open" ,"list_icon_eye_position_open", "list_icon_open_eyes_open" ,"list_icon_eyelid_down_open" ,"list_icon_eye_distance_open" ,"list_icon_eye_angle_open" ,
+		"list_icon_proboscis_open" ,"list_icon_shrinking_open" ,"list_icon_smile_mouth_open" ,"list_icon_eyebrow_position_open" ,"list_icon_eyebrow_spacing_open" ,"list_icon_eyebrow_thickness_open" };
 
 		//眼角、眼距、眼睛角度、长鼻、缩人中、微笑嘴角
 
 		std::string faceShapeNameArr[MAX_FACESHAPEPARAMTER] = { u8"   瘦脸" ,u8"   大眼" ,u8"   圆眼" ,u8"   下巴",u8"   额头" ,
-			u8"   瘦鼻",u8"   嘴型",u8"   V脸",u8"   窄脸",u8"   短脸" ,u8"   小脸" ,u8"  瘦颧骨", u8" 瘦下颌骨" ,
-			u8"  开眼角", u8"   眼距", u8"眼睛角度", u8"   长鼻", u8"  缩人中", u8"微笑嘴角" , u8"眉毛上下" , u8"眉间距" };
+			u8"   瘦鼻",u8"   嘴型", u8"嘴唇厚度",u8"   V脸",u8"   窄脸",u8"   短脸" ,u8"   小脸" ,u8" 瘦颧骨", u8"瘦下颌骨" , u8"眼睛位置",
+			u8" 开眼角", u8"眼睑下至", u8"   眼距", u8"眼睛角度", u8"   长鼻", u8" 缩人中", u8"微笑嘴角" , u8"眉毛上下" , u8" 眉间距" , u8"眉毛粗细" };
 
 
 		ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 1.f));

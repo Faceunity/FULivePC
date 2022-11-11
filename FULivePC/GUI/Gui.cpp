@@ -39,6 +39,7 @@ int UIBridge::bundleCategory = BUNDLE_CATEGORY_NOMEAN;
 int UIBridge::bundleCategoryLast = BUNDLE_CATEGORY_NOMEAN;
 int UIBridge::renderBundleCategory = -1;
 vector<string> UIBridge::categoryBundles[BundleCategory::Count];
+int UIBridge::lastMaxFace = 4;
 int UIBridge::faceType = 0;
 
 bool UIBridge::showItemSelectWindow = false;
@@ -68,6 +69,7 @@ int UIBridge::mEnableSkinDect = 1;
 int UIBridge::mEnableHeayBlur = 3;
 int UIBridge::mEnableExBlur = 0;
 int UIBridge::mSelectedCamera = 0;
+bool UIBridge::mSelectedBsType = false;
 float UIBridge::mFaceBeautyLevel[MAX_BEAUTYFACEPARAMTER] = { 0.0f };
 
 float UIBridge::mFaceShapeLevel[MAX_FACESHAPEPARAMTER] = { 0.0f };
@@ -635,7 +637,6 @@ static void ShowFloatMenuAR(Nama* nama)
 					UIBridge::mLastTime = 0.0;
 					UIBridge::showItemTipsWindow = false;
 					UIBridge::mNeedStopMP3 = true;
-
 					nama->UnLoadAvatar();
 				}
 			}
@@ -822,7 +823,12 @@ static void ShowFloatMenu(Nama* nama)
 
 		case BundleCategory::BackgroundSegmentation:
 		{
-			GUIBgSeg::ShowBgSegPannel(nama);
+			if (UIBridge::mSelectedBsType) {
+				GUIBgSeg::ShowBgSegPannel(nama);
+			}
+			else {
+				GUIBgSeg::ShowBgSegOption(nama);
+			}
 		}
 		break;
 
@@ -867,7 +873,7 @@ static void ShowArMenu(Nama* nama)
 				auto funSetUnSelectd = [&](int index) {
 					UIBridge::bundleCategory = BUNDLE_CATEGORY_NOMEAN;
 					UIBridge::showItemSelectWindow = false;
-
+					UIBridge::mSelectedBsType = false;
 					if (BundleCategory::Avatar == index)
 					{
 						Nama::mNamaAppState.EnableAvatar = false;
@@ -889,12 +895,14 @@ static void ShowArMenu(Nama* nama)
 						UIBridge::bundleCategory = index;
 						UIBridge::showItemSelectWindow = true;
 						Nama::mNamaAppState.EnableAvatar = true;
+						UIBridge::mSelectedBsType = false;
 					}
 					else
 					{
 						UIBridge::bundleCategory = index;
 						UIBridge::showItemSelectWindow = true;
 						Nama::mNamaAppState.EnableAvatar = false;
+						UIBridge::mSelectedBsType = false;
 					}
 
 				};
@@ -1077,12 +1085,13 @@ static void ShowMainMenu(Nama* nama)
 			{
 				Nama::mNamaAppState = Nama::mNamaAppStateBackAR;
 				GUIGS::CloseGreenScreenBg();
-				CCameraManage::getInstance()->SetNewFrame(false);
+				CCameraManage* ccManage = CCameraManage::getInstance();
+				ccManage->SetNewFrame(false);
 				UIBridge::showItemSelectWindow = !UIBridge::m_bShowingBodyBeauty && (UIBridge::bundleCategory != BUNDLE_CATEGORY_NOMEAN);
-				/*if (!nama->IsCameraPlaying() || nama->GetCameraCaptureType() == 2){
-					nama->setDefaultFrame();
-					nama->ReOpenCamera(UIBridge::mSelectedCamera);
-				}*/
+				if (!ccManage->IsCameraPlaying() || ccManage->GetCameraCaptureType() == 2) {
+					ccManage->setDefaultFrame();
+					ccManage->ReOpenCamera(UIBridge::mSelectedCamera);
+				}
 
 				// 处理音乐滤镜，重新开启音乐
 				if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3 && !UIBridge::m_bShowingBodyBeauty) {
@@ -1091,6 +1100,11 @@ static void ShowMainMenu(Nama* nama)
 				//轻美妆重新设置轻美妆滤镜
 				if (UIBridge::bundleCategory == BundleCategory::LightMakeup && UIBridge::showLightMakeupTip && !UIBridge::m_bShowingBodyBeauty) {
 					nama->setLightMakeupParam(UIBridge::m_lightMakeupParam);
+				}
+				if (UIBridge::m_curRenderItem == -1) {
+					nama->setMaxFaces(4);
+				}else{
+					nama->setMaxFaces(UIBridge::lastMaxFace);
 				}
 			}
 

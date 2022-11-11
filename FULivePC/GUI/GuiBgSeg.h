@@ -29,6 +29,8 @@ public:
 
 	static void LoadResource();
 
+	static void ShowBgSegOption(NamaExampleNameSpace::Nama* nama);
+
 	static void ShowBgSegPannel(NamaExampleNameSpace::Nama * nama);
 
 	static void SelectBgSegFile();

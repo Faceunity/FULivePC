@@ -7,8 +7,8 @@
 #include "imgui/imgui.h"
 
 #define MAX_PATH_LENGTH 1024  
-#define MAX_BEAUTYFACEPARAMTER 8
-#define MAX_FACESHAPEPARAMTER 21
+#define MAX_BEAUTYFACEPARAMTER 9
+#define MAX_FACESHAPEPARAMTER 25
 #define MAX_BODY_SHAPE_PARAM  7
 #define MAX_GREEN_SCREEN_PARAM 3
 
@@ -181,6 +181,7 @@ public:
 
 	static int bundleCategory;
 	static int bundleCategoryLast;
+	static int lastMaxFace;
 	// 用于绿幕
 	static int gsBundleCategory;
 	static int renderBundleCategory;
@@ -255,6 +256,7 @@ public:
 	static float mGSParam[MAX_GREEN_SCREEN_PARAM];
 		
 	static int mSelectedCamera;
+	static bool mSelectedBsType;
 	static double mLastTime;
 	static string mCurRenderItemName;
 	// 专用于绿幕
@@ -275,20 +277,23 @@ protected:
 private:
 };
 
-const string g_faceBeautyParamName[MAX_BEAUTYFACEPARAMTER] = { "blur_level","color_level_mode2", "red_level","sharpen","eye_bright", "tooth_whiten" ,"remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2" };
+const string g_faceBeautyParamName[MAX_BEAUTYFACEPARAMTER] = { "blur_level","color_level_mode2", "red_level","sharpen", "face_threed", "eye_bright", "tooth_whiten" ,"remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2" };
 
-const string g_faceShapeParamName[MAX_FACESHAPEPARAMTER] = { "cheek_thinning_mode2","eye_enlarging_mode3","intensity_eye_circle", "intensity_chin", "intensity_forehead_mode2", "intensity_nose_mode2","intensity_mouth_mode3",
+const string g_faceShapeParamName[MAX_FACESHAPEPARAMTER] = { "cheek_thinning_mode2","eye_enlarging_mode3","intensity_eye_circle", "intensity_chin_mode2", 
+			"intensity_forehead_mode2", "intensity_nose_mode2","intensity_mouth_mode3", "intensity_lip_thick",
 		"cheek_v","cheek_narrow_mode2","cheek_short","cheek_small_mode2","intensity_cheekbones","intensity_lower_jaw",
-	"intensity_canthus", "intensity_eye_space", "intensity_eye_rotate", "intensity_long_nose",
-	"intensity_philtrum", "intensity_smile" ,"intensity_brow_height" ,"intensity_brow_space" };
+	"intensity_eye_height","intensity_canthus", "intensity_eye_lid", "intensity_eye_space", "intensity_eye_rotate", "intensity_long_nose",
+	"intensity_philtrum", "intensity_smile" ,"intensity_brow_height" , "intensity_brow_space", "intensity_brow_thick" };
 
 //区分是否从中间值开始突变的Flag 0:变化从0->1 1:0->0.5 0.5->1
 #define FACE_SHAPE_SHOW_FLAG_NORMAL (0)
 #define FACE_SHAPE_SHOW_FLAG_MIDDLE (1)
 
-const int g_faceShapeParamShowFlag[MAX_FACESHAPEPARAMTER] = { 0,0,0,1,1,0,
-1,0,0,0,0,0,0,0,
-1,1,1,1,0,1,1 };
+const int g_faceShapeParamShowFlag[MAX_FACESHAPEPARAMTER] = { 0,0,0,1,1,
+0,1,1,0,0,
+0,0,0,0,1,
+0,0,1,1,1,
+1,0,1,1,1 };
 
 /////////////////////////////////////////////////////////////
 
