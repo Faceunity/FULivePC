@@ -34,12 +34,6 @@
 #    define AV_GCC_VERSION_AT_MOST(x,y)  0
 #endif
 
-#ifdef __has_builtin
-#    define AV_HAS_BUILTIN(x) __has_builtin(x)
-#else
-#    define AV_HAS_BUILTIN(x) 0
-#endif
-
 #ifndef av_always_inline
 #if AV_GCC_VERSION_AT_LEAST(3,1)
 #    define av_always_inline __attribute__((always_inline)) inline
@@ -72,19 +66,19 @@
 #    define av_noinline
 #endif
 
-#if AV_GCC_VERSION_AT_LEAST(3,1) || defined(__clang__)
+#if AV_GCC_VERSION_AT_LEAST(3,1)
 #    define av_pure __attribute__((pure))
 #else
 #    define av_pure
 #endif
 
-#if AV_GCC_VERSION_AT_LEAST(2,6) || defined(__clang__)
+#if AV_GCC_VERSION_AT_LEAST(2,6)
 #    define av_const __attribute__((const))
 #else
 #    define av_const
 #endif
 
-#if AV_GCC_VERSION_AT_LEAST(4,3) || defined(__clang__)
+#if AV_GCC_VERSION_AT_LEAST(4,3)
 #    define av_cold __attribute__((cold))
 #else
 #    define av_cold
@@ -110,7 +104,7 @@
  * scheduled for removal.
  */
 #ifndef AV_NOWARN_DEPRECATED
-#if AV_GCC_VERSION_AT_LEAST(4,6) || defined(__clang__)
+#if AV_GCC_VERSION_AT_LEAST(4,6)
 #    define AV_NOWARN_DEPRECATED(code) \
         _Pragma("GCC diagnostic push") \
         _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") \
@@ -144,19 +138,19 @@
 #    define av_used
 #endif
 
-#if AV_GCC_VERSION_AT_LEAST(3,3) || defined(__clang__)
+#if AV_GCC_VERSION_AT_LEAST(3,3)
 #   define av_alias __attribute__((may_alias))
 #else
 #   define av_alias
 #endif
 
-#if (defined(__GNUC__) || defined(__clang__)) && !defined(__INTEL_COMPILER)
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__clang__)
 #    define av_uninit(x) x=x
 #else
 #    define av_uninit(x) x
 #endif
 
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef __GNUC__
 #    define av_builtin_constant_p __builtin_constant_p
 #    define av_printf_format(fmtpos, attrpos) __attribute__((__format__(__printf__, fmtpos, attrpos)))
 #else
@@ -164,7 +158,7 @@
 #    define av_printf_format(fmtpos, attrpos)
 #endif
 
-#if AV_GCC_VERSION_AT_LEAST(2,5) || defined(__clang__)
+#if AV_GCC_VERSION_AT_LEAST(2,5)
 #    define av_noreturn __attribute__((noreturn))
 #else
 #    define av_noreturn
