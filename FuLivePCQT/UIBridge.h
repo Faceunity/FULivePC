@@ -64,6 +64,7 @@ class UIBridge:public QObject{
     Q_PROPERTY(bool gsSelectCamera READ gsSelectCamera NOTIFY gsSelectCameraChanged)
     Q_PROPERTY(int selectCameraSet READ selectCameraSet NOTIFY selectCameraSetChanged)
     Q_PROPERTY(bool gsCameraImage WRITE setGSCameraImage)
+    Q_PROPERTY(bool gsCameraPlay WRITE setGSCameraPlay)
 public:
     //qml访问函数
     QStringList cameraSetList();
@@ -93,6 +94,7 @@ public:
     bool gsSelectCamera(){return m_gsSelectCamera;}
     int selectCameraSet(){return m_selectCameraSet;}
     void setGSCameraImage(bool flag);
+    void setGSCameraPlay(bool flag);
 public:
     UIBridge();
     ~UIBridge();
@@ -257,6 +259,8 @@ public:
     QString m_lightMakeUpName;
     //摄像头类型,true为网络摄像头,false为usbs摄像头
     bool m_CameraType = false;
+    //绿幕选择摄像头小窗口播放
+    bool m_gsCameraPlay = false;
 signals:
     //qml界面相关
     void cameraSetListChanged();
@@ -384,6 +388,12 @@ public slots:
     void saveUserConfig();
     //更新用户操作配置,界面参数到nama中
     void updataUserConfig();
+    //选择绿幕输入重新视频播放
+    void startMediaPlayer(){
+        if(m_gsSelectCamera == false){
+            m_gsVideoMediaPlayer.play();
+        }
+    }
     //选择绿幕输入暂停视频播放
     void stopMediaPlayer(){
         m_gsVideoMediaPlayer.stop();
@@ -397,6 +407,8 @@ public slots:
     //更新滤镜
     void updataFilter();
     void setRenderNewFrame(){m_renderNewFrame = false; m_newImage = false;}
+    //设置背景分割会议版 0|通用版 1
+    void setBackgroundSegType(int type);
 };
 
 #endif // UIBRIDGE_H

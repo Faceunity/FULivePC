@@ -116,7 +116,7 @@ int Nama::extractIntFromPath(string path)
 
 void Nama::InitNama()
 {
-    fuSetLogLevel(FU_LOG_LEVEL_ERROR);
+    fuSetLogLevel(FU_LOG_LEVEL_DEBUG);
     //初始化系统环境，加载系统数据，并进行网络鉴权。必须在调用SDK其他接口前执行，否则会引发崩溃。
     //*authdata [in]*： 内存指针，指向鉴权数据的内容。如果是用包含 authpack.h 的方法在编译时提供鉴权数据，则这里可以写为 ```g_auth_package``` 。
     //*sz_authdata [in]*：鉴权数据的长度，以字节为单位。如果鉴权数据提供的是 authpack.h 中的 ```g_auth_package```，这里可写作 ```sizeof(g_auth_package)```
@@ -263,6 +263,7 @@ void Nama::changeRenderList(RenderType type,bool makeupFlag)
         if(type == RENDER_AR){
             if (m_bundleCategory == BundleCategory::Makeup && makeupFlag)
             {
+                fuSetMaxFaces(4);
                 m_renderList.push_back(m_MakeUpHandle);
             }
             if(m_bundleCurrent != 0){
@@ -300,30 +301,28 @@ void Nama::RenderDefNama()
         }
         //打开虚拟摄像头
         if(m_bVirturalCamera){
-            if(m_getNewFrame){
-                int height;
-                if(m_frame.channels() == 4){
-                    height = m_frame.rows;
-                }else if(m_frame.channels() == 1){
-                    height = m_frame.rows * 2 / 3;
-                }
-                cv::Mat result(height, m_frame.cols, CV_8UC4);
-                if(m_frame.channels() == 4){
-                    m_texID = fuRender(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(result.data), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(m_frame.data),
-                                       m_frame.cols, m_frame.rows, m_FrameID++, m_renderList.data(),
-                                       m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
-                }else if(m_frame.channels() == 1){
-                    m_texID = fuRender(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(result.data), FU_FORMAT_I420_BUFFER, reinterpret_cast<int*>(m_frame.data),
-                                       m_frame.cols, m_frame.rows * 2 / 3, m_FrameID++, m_renderList.data(),
-                                       m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
-                }
-                if (!m_bIsCreateVirturalCamera)
-                {
-                    createVirturalCamera(0);
-                    m_bIsCreateVirturalCamera = true;
-                }
-                pushDataToVirturalCamera(result.data, result.cols, result.rows);
+            int height;
+            if(m_frame.channels() == 4){
+                height = m_frame.rows;
+            }else if(m_frame.channels() == 1){
+                height = m_frame.rows * 2 / 3;
             }
+            cv::Mat result(height, m_frame.cols, CV_8UC4);
+            if(m_frame.channels() == 4){
+                m_texID = fuRender(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(result.data), FU_FORMAT_BGRA_BUFFER, reinterpret_cast<int*>(m_frame.data),
+                                   m_frame.cols, m_frame.rows, m_FrameID++, m_renderList.data(),
+                                   m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+            }else if(m_frame.channels() == 1){
+                m_texID = fuRender(FU_FORMAT_RGBA_BUFFER, reinterpret_cast<int*>(result.data), FU_FORMAT_I420_BUFFER, reinterpret_cast<int*>(m_frame.data),
+                                   m_frame.cols, m_frame.rows * 2 / 3, m_FrameID++, m_renderList.data(),
+                                   m_renderList.size(), NAMA_RENDER_FEATURE_FULL, NULL);
+            }
+            if (!m_bIsCreateVirturalCamera)
+            {
+                createVirturalCamera(0);
+                m_bIsCreateVirturalCamera = true;
+            }
+            pushDataToVirturalCamera(result.data, result.cols, result.rows);
         }else{
             //这里直接处理成纹理,opengl直接调用m_texID纹理id绘制,更快
             //FU_FORMAT_BGRA_BUFFER  FU_FORMAT_NV21_BUFFER FU_FORMAT_I420_BUFFER FU_FORMAT_RGBA_BUFFER
@@ -370,6 +369,7 @@ void Nama::ReloadItems()
     fuOnDeviceLost();
     m_bundleCurrent = 0;
     m_curMakeupItem = 0;
+    m_MakeUpHandle = 0;
     fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
     fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
     {
@@ -381,17 +381,6 @@ void Nama::ReloadItems()
         cout << "load face beautification data." << endl;
         //加载道具包，使其可以在主运行接口中被执行。一个道具包可能是一个功能模块或者多个功能模块的集合，加载道具包可以在流水线中激活对应的功能模块，在同一套SDK调用逻辑中实现即插即用。
         m_BeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
-    }
-    {
-        vector<char> propData;
-        if (false == LoadBundle(g_assetDir + g_Makeup, propData))
-        {
-            cout << "load face makeup data failed." << endl;
-        }
-        cout << "load face makeup data." << endl;
-
-        m_MakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
-        //fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1);
     }
 
     {
