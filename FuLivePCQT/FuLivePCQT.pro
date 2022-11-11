@@ -66,7 +66,6 @@ INCLUDEPATH += $$PWD/../include \
                $$PWD/../ThirdParty/Windows/GL/include \
                $$PWD/../ThirdParty/Windows/opencv400/include \
                $$PWD/../ThirdParty/Windows/VirtualCamera/include \
-               $$PWD/../ThirdParty/Windows/VirtualCamera/include \
                $$PWD/../ThirdParty/Windows/ffmpeg/include \
                $$PWD/../ThirdParty/Windows/FaceUnity-SDK-PC/include \
                $$PWD/../ThirdParty/Windows/libcurl/include

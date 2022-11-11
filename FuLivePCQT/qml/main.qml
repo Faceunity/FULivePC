@@ -118,8 +118,8 @@ Window {
         }
         onUpdataGSSelectIndex:{
             b_setGreenScreen = true
-            UIBridge.arFunction = false
             switchARFunction(false)
+            UIBridge.arFunction = false
             i_gsSelectVideo = x
             updataPropOption(0)
             i_gsSelectSaveArea = y
@@ -167,6 +167,7 @@ Window {
         updataProp()
         m_rpropOption.visible = false
         m_rPropShadow.visible = false
+        m_rPropOptionBackgroundSeg.visible = false
         m_rBoutiqueSticker.visible = false
         showGreenScreenList(false)
         if(!arfun){
@@ -209,7 +210,6 @@ Window {
                     showAvator(true)
                 }else if(i_arSelectCategoryPoint.x == i_category_jingpin){
                     showBoutiqueSticker(true)
-                    UIBridge.downloadSticker(i_arSelectCategoryPoint.y)
                 }
             }
             m_rSelectGreenScreen.visible = false
@@ -738,12 +738,12 @@ Window {
                             function onButtonClick(){
                                 m_greenScreenSelectCamera.visible = true
                                 m_cCamera.visible = true
-                                m_cCamera.x = 270
-                                m_cCamera.y = 195
                                 UIBridge.gsCameraImage = true
+                                UIBridge.gsCameraPlay = true
                             }
                         }
                         FileDialog {
+
                             id: m_fileDialog
                             title: qsTr("选择视频/图片")
                             nameFilters: ["选择视频 (*.mp4 *.avi *.wmv)", "选择图片 (*.jpg *.png *.gif *.bmp *.ico)", "*.*"]
@@ -757,8 +757,10 @@ Window {
                                 if(b_setGreenScreen == true){
                                     m_rGreenScreen.visible = false
                                     m_rPropShadow.visible = false
+                                    UIBridge.startMediaPlayer();
                                 }
                             }
+
                         }
                         RectangleButtonGreenScreen{
                             x: 140
@@ -775,6 +777,7 @@ Window {
                             visible: b_setGreenScreen
                             function onButtonClick(){
                                 m_rGreenScreen.visible = false
+                                UIBridge.startMediaPlayer();
                             }
                         }
                     }
@@ -930,12 +933,17 @@ Window {
                                 if(model.icon === selectName){
                                     model.selected = !model.selected;
                                     m_rpropOption.visible = false
+                                    m_rPropOptionBackgroundSeg.visible = false
                                     if(i === i_category_jingpin && b_ARFunction){
                                         //更新精品贴纸
                                         i_selectCategory = i_category_jingpin
                                         UIBridge.selectCategory = i_category_jingpin
                                         showBoutiqueSticker(selected)
                                     }else if(b_ARFunction){
+                                        if(i === i_category_backgroundSegmentation && b_ARFunction){
+                                            //更新人像分割会议选项
+                                            m_rPropOptionBackgroundSeg.visible = model.selected
+                                        }
                                         m_rpropOption.visible = model.selected
                                         updataPropOption(i)
                                         UIBridge.selectCategory = i
@@ -953,7 +961,6 @@ Window {
                                     }
                                 }else{
                                     model.selected = false;
-
                                 }
                             }
                         }
@@ -1079,6 +1086,78 @@ Window {
                         }
                     }
                 }//---弹出道具选择列表
+                //用于人像分割选择列表
+                Rectangle{
+                    id: m_rPropOptionBackgroundSeg
+                    x: 10
+                    y: 420
+                    width: 864
+                    height: 80
+                    color: "#C8FFFFFF"
+                    visible: false
+                    MouseArea{
+                        anchors.fill: parent
+                        hoverEnabled: true
+                    }
+                    Rectangle{
+                        property var b_hover: false
+                        x: 250
+                        y: 20
+                        width: 180
+                        height: 40
+                        color: b_hover ? "#7888E6" : "#FFFFFF"
+                        border.color: "#E1E1E1"
+                        radius: 90
+                        TextBlack{
+                            text: "通用分割版"
+                            font {family: "微软雅黑"; pixelSize: 18;}
+                            anchors.fill: parent
+                        }
+                        MouseArea{
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: {
+                                UIBridge.setBackgroundSegType(1)
+                                m_rPropOptionBackgroundSeg.visible = false
+                            }
+                            onEntered: {
+                                parent.b_hover = true
+                            }
+                            onExited: {
+                                parent.b_hover = false
+                            }
+                        }
+                    }
+                    Rectangle{
+                        property var b_hover: false
+                        x: 480
+                        y: 20
+                        width: 180
+                        height: 40
+                        color: b_hover ? "#7888E6" :"#FFFFFF"
+                        border.color: "#E1E1E1"
+                        radius: 90
+                        TextBlack{
+                            text: "视频会议版"
+                            font {family: "微软雅黑"; pixelSize: 18;}
+                            anchors.fill: parent
+                        }
+                        MouseArea{
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: {
+                                UIBridge.setBackgroundSegType(0)
+                                m_rPropOptionBackgroundSeg.visible = false
+                            }
+                            onEntered: {
+                                parent.b_hover = true
+                            }
+                            onExited: {
+                                parent.b_hover = false
+                            }
+                        }
+                    }
+                }
                 //下方道具滑块
                 ScrollBar  {
                     id: hbarpropOption
@@ -1329,16 +1408,17 @@ Window {
                                     UIBridge.setRenderNewFrame()
                                     UIBridge.arFunction = false
                                 }else{
-                                    UIBridge.arFunction = false
                                     switchARFunction(false)
+                                    UIBridge.arFunction = false
                                 }
                             }else if(!UIBridge.arFunction && mouseX < 135){
                                 if(!UIBridge.gsSelectCamera){
                                     UIBridge.setRenderNewFrame()
+                                    UIBridge.selectCategory = i_arSelectCategoryPoint.x
                                     UIBridge.arFunction = true
                                 }else{
-                                    UIBridge.arFunction = true
                                     switchARFunction(true)
+                                    UIBridge.arFunction = true
                                 }
                             }
                         }
@@ -1466,7 +1546,7 @@ Window {
                         //恢复默认
                         onClickRestoreDefault: {
                             UIBridge.resetItemParam(0)
-                            var list = [1, 3, 70, 30, 30, 20, 0, 0, 0, 0]
+                            var list = [1, 3, 70, 30, 30, 20, 0, 0, 0, 0, 0]
                             for(var i = 0; i < m_lmBeautySkin.count - 1; i++){
                                 m_lBeautySkin.itemAtIndex(i).resetValue(list[i])
                             }
@@ -1509,7 +1589,7 @@ Window {
                     clip: true
                     visible: false
                     //此属性确定委托是否保留在视图的可见区域之外,解决下滑后恢复默认失效问题
-                    cacheBuffer: 1000
+                    cacheBuffer: 10000
                     model: ListModel
                     {
                         id: m_lmBeautyFace
@@ -1524,7 +1604,7 @@ Window {
                         }
                         onClickRestoreDefault: {
                             UIBridge.resetItemParam(1)
-                            var list = [0, 40, 0, -20, -20, 50, -10, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            var list = [0, 0, 0, -20, -20, 50, -10, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
                             for(var i = 0; i < m_lmBeautyFace.count - 1; i++){
                                 m_lBeautyFace.itemAtIndex(i).resetValue(list[i])
                             }
@@ -1952,9 +2032,8 @@ Window {
                     border.width: 2
                     t_Text: "确定"
                     function onButtonClick(){
-                        m_cCamera.x = 90
-                        m_cCamera.y = 25
                         UIBridge.gsCameraImage = false
+                        UIBridge.gsCameraPlay = true
                         UIBridge.gsCameraConfirm()
                         b_setGreenScreen = true
                         m_greenScreenSelectCamera.visible = false
@@ -1970,8 +2049,8 @@ Window {
                     border.width: 2
                     t_Text: "关闭"
                     function onButtonClick(){
-                        m_cCamera.x = 90
-                        m_cCamera.y = 25
+                        UIBridge.gsCameraImage = false
+                        UIBridge.gsCameraPlay = false
                         m_greenScreenSelectCamera.visible = false
                     }
                 }
@@ -2124,8 +2203,8 @@ Window {
                     //摄像头下拉框,与绿幕选择摄像头共用
                     ComboBox {
                         id: m_cCamera
-                        x: 90
-                        y: 25
+                        x: m_greenScreenSelectCamera.visible ? 270 : 90
+                        y: m_greenScreenSelectCamera.visible ? 195 : 25
                         width: 245
                         height: 25
                         editable: false

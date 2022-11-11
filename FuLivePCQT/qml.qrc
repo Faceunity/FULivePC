@@ -511,5 +511,15 @@
         <file>../res/list_icon_eyebrow_position_open.png</file>
         <file>../res/list_icon_eyebrow_spacing_close.png</file>
         <file>../res/list_icon_eyebrow_spacing_open.png</file>
+        <file>../res/list_icon_eye_position_close.png</file>
+        <file>../res/list_icon_eye_position_open.png</file>
+        <file>../res/list_icon_eyebrow_thickness_close.png</file>
+        <file>../res/list_icon_eyebrow_thickness_open.png</file>
+        <file>../res/list_icon_eyelid_down_close.png</file>
+        <file>../res/list_icon_eyelid_down_open.png</file>
+        <file>../res/list_icon_mouth_thickness_close.png</file>
+        <file>../res/list_icon_mouth_thickness_open.png</file>
+        <file>../res/list_icon_stereoscopic_close.png</file>
+        <file>../res/list_icon_stereoscopic_open.png</file>
     </qresource>
 </RCC>

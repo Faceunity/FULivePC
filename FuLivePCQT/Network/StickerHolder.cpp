@@ -80,10 +80,12 @@ void StikcerHolder::RequestTags()
     {
         rapidjson::Document doc;
         doc.Parse(strResp.c_str());
-        const rapidjson::Value& dataObj = doc["data"];
-        for (int i = 0; i < dataObj.Size(); i++)
-        {
-            mTags.push_back(dataObj[i].GetString());
+        if (doc.HasMember("data")){
+            const rapidjson::Value& dataObj = doc["data"];
+            for (int i = 0; i < dataObj.Size(); i++)
+            {
+                mTags.push_back(dataObj[i].GetString());
+            }
         }
     }
 }
