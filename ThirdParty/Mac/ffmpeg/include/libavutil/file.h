@@ -19,10 +19,9 @@
 #ifndef AVUTIL_FILE_H
 #define AVUTIL_FILE_H
 
-#include <stddef.h>
 #include <stdint.h>
 
-#include "attributes.h"
+#include "avutil.h"
 
 /**
  * @file
@@ -34,8 +33,6 @@
  * allocated buffer or map it with mmap() when available.
  * In case of success set *bufptr to the read or mmapped buffer, and
  * *size to the size in bytes of the buffer in *bufptr.
- * Unlike mmap this function succeeds with zero sized files, in this
- * case *bufptr will be set to NULL and *size will be set to 0.
  * The returned buffer must be released with av_file_unmap().
  *
  * @param log_offset loglevel offset used for logging
