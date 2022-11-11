@@ -342,21 +342,21 @@ namespace gui_tool
 		UIBridge::mFaceBeautyLevel[5] = 0;
 		UIBridge::mFaceBeautyLevel[6] = 0;
 		UIBridge::mFaceBeautyLevel[7] = 0;
+		UIBridge::mFaceBeautyLevel[8] = 0;
 	}
 
 	void resetShapeParam()
 	{
 		UIBridge::faceType = 0;
 		UIBridge::mFaceShapeLevel[0] = 0;
-		UIBridge::mFaceShapeLevel[1] = 40;
+		UIBridge::mFaceShapeLevel[1] = 0;
 		UIBridge::mFaceShapeLevel[2] = 0;
 		UIBridge::mFaceShapeLevel[3] = -20;
 		UIBridge::mFaceShapeLevel[4] = -20;
 		UIBridge::mFaceShapeLevel[5] = 50;
 		UIBridge::mFaceShapeLevel[6] = -10;
-
-		UIBridge::mFaceShapeLevel[7] = 50;
-		UIBridge::mFaceShapeLevel[8] = 0;
+		UIBridge::mFaceShapeLevel[7] = 0;
+		UIBridge::mFaceShapeLevel[8] = 50;
 		UIBridge::mFaceShapeLevel[9] = 0;
 		UIBridge::mFaceShapeLevel[10] = 0;
 		UIBridge::mFaceShapeLevel[11] = 0;
@@ -367,6 +367,12 @@ namespace gui_tool
 		UIBridge::mFaceShapeLevel[16] = 0;
 		UIBridge::mFaceShapeLevel[17] = 0;
 		UIBridge::mFaceShapeLevel[18] = 0;
+		UIBridge::mFaceShapeLevel[19] = 0;
+		UIBridge::mFaceShapeLevel[20] = 0;
+		UIBridge::mFaceShapeLevel[21] = 0;
+		UIBridge::mFaceShapeLevel[22] = 0;
+		UIBridge::mFaceShapeLevel[23] = 0;
+		UIBridge::mFaceShapeLevel[24] = 0;
 	}
 
 	void resetBodyShapeParam()

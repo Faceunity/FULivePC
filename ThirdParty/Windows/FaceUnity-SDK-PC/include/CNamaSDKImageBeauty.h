@@ -206,6 +206,9 @@ fuImageBeautyPreProcessForImageInfo(const FuImageView* input, float scale);
 
 FUNAMA_API FuImageBeautyStatus fuImageBeautyClearMemory(const int* p_items,
                                                       int n_items);
+
+FUNAMA_API int fuImageBeautyGetInfo(int face_id, const char* name, void* pret,
+                                    int num);
 #ifdef __cplusplus
 }
 #endif

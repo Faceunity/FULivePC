@@ -1,4 +1,4 @@
-#if _WIN32
+Ôªø#if _WIN32
 #include "Windows.h"
 #elif __APPLE__
 #include "fu_tool_mac.h"
@@ -139,6 +139,34 @@ static string GetUserIconPath() {
 
 }
 
+void GUIBgSeg::ShowBgSegOption(NamaExampleNameSpace::Nama* nama)
+{
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(250.f / 255.f, 250.f / 255.f, 250.f / 255.f, 255.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(120.f / 255.f, 136.f / 255.f, 230.f / 255.f, 255.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 90.0f);
+	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 580 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(876 * scaleRatioW, 95 * scaleRatioH), ImGuiCond_Always);
+
+	ImGui::Begin("itemSelect##1563", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+	
+	if (LayoutButton(ImVec2(244, 10), ImVec2(176, 40), u8"ÈÄöÁî®ÂàÜÂâ≤Áâà"))
+	{
+		UIBridge::mSelectedBsType = true;
+		nama->setHumanSegScene(1);
+	}
+	ImGui::SameLine(0.f, 48.f * scaleRatioW);
+	if (LayoutButton(ImVec2(0, 10), ImVec2(176, 40), u8"ËßÜÈ¢ë‰ºöËÆÆÁâà"))
+	{
+		UIBridge::mSelectedBsType = true;
+		nama->setHumanSegScene(0);
+	}
+
+	ImGui::End();
+	ImGui::PopStyleVar(1);
+	ImGui::PopStyleColor(3);
+}
+
 void GUIBgSeg::ShowBgSegPannel(NamaExampleNameSpace::Nama* nama) {
 
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
@@ -167,7 +195,7 @@ void GUIBgSeg::ShowBgSegPannel(NamaExampleNameSpace::Nama* nama) {
 		Texture::SharedPtr tex = nullptr;
 		string itemPath = "";
 
-		/* º”∫≈ */
+		/* Âä†Âè∑ */
 		if (i == 0)
 		{
 			tex = Texture::createTextureFromFile(BGSEG_ADD_ICON, false);
@@ -184,7 +212,7 @@ void GUIBgSeg::ShowBgSegPannel(NamaExampleNameSpace::Nama* nama) {
 
 			continue;
 		}
-		else if (i == 1 && mIsUserConfigOK) /* ”√ªßÀÿ≤ƒΩÿÕº */
+		else if (i == 1 && mIsUserConfigOK) /* Áî®Êà∑Á¥†ÊùêÊà™Âõæ */
 		{
 			itemName = BGSEG_CUSTOM_NAME;
 			itemPath = g_assetDir + BGSEG_CUSTOM_NAME;
@@ -202,7 +230,7 @@ void GUIBgSeg::ShowBgSegPannel(NamaExampleNameSpace::Nama* nama) {
 			tex = Texture::createTextureFromFile(iconName + ".png", false);
 		}
 
-		//’“≤ªµΩÕº±Í
+		//Êâæ‰∏çÂà∞ÂõæÊ†á
 		if (!tex)
 		{
 			tex = Texture::createTextureFromFile("icon_Movebutton_nor.png", false);
@@ -311,7 +339,7 @@ void GUIBgSeg::ConfigVideoInfo(string videoPath) {
 				break;
 			case 90:
 			{
-				// ΩªªªøÌ∏ﬂ
+				// ‰∫§Êç¢ÂÆΩÈ´ò
 				float tmp = videoWidth;
 				videoWidth = videoHeight;
 				videoHeight = tmp;
@@ -375,11 +403,11 @@ void GUIBgSeg::SelectBgSegFile() {
 		std::set<char> delims{ '\\' };
 		std::vector<std::string> paths = FuTool::splitpath(open_filename, delims);
 		cout << paths.back() << endl;
-		string open_filename_lastPath = paths.back(); //π˛π˛.png
+		string open_filename_lastPath = paths.back(); //ÂìàÂìà.png
 		if (regex_match(open_filename_lastPath, regex("(.*)\.(png|PNG|gif|GIF|jpeg|JPEG)"))) {
 			if (regex_match(open_filename_lastPath, regex("(.*[^0-9]+.*)\.(png|PNG|gif|GIF|jpeg|JPEG)")))
 			{
-				UIBridge::m_openLocalFileTip = u8"µ±«∞¿‡–ÕŒƒº˛√˚≥∆÷ªƒ‹∞¸∫¨ ˝◊÷◊÷∑˚£¨«Î–ﬁ∏ƒ£°";
+				UIBridge::m_openLocalFileTip = u8"ÂΩìÂâçÁ±ªÂûãÊñá‰ª∂ÂêçÁß∞Âè™ËÉΩÂåÖÂê´Êï∞Â≠óÂ≠óÁ¨¶ÔºåËØ∑‰øÆÊîπÔºÅ";
 				open_filename = nullptr;
 				UIBridge::m_bLoadWrongNamePNGFile = true;
 				UIBridge::mLastTime = ImGui::GetTime() + 8.0;

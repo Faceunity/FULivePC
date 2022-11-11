@@ -52,7 +52,7 @@ Nama::Nama()
 	mFrameID = 0;
 	mIsBeautyOn = true;
 	mBeautyHandles = 0;
-	mMakeUpHandle = 0;
+	mMakeUpHandle = -1;
 }
 
 bool Nama::Release() {
@@ -156,7 +156,7 @@ bool Nama::Init()
 	{
 		CheckGLContext();
 
-		fuSetLogLevel(FU_LOG_LEVEL_DEBUG);
+		fuSetLogLevel(FU_LOG_LEVEL_ERROR);
 
 		fuSetup(nullptr, 0, nullptr, g_auth_package, sizeof(g_auth_package));
 		// setup without license, only render 1000 frames.
@@ -350,7 +350,7 @@ void Nama::UnLoadAvatar()
 
 void Nama::UnLoadMakeup() 
 {
-	if (UIBridge::bundleCategory != BundleCategory::Makeup)
+	if (UIBridge::bundleCategory != BundleCategory::Makeup && mMakeUpHandle != -1)
 	{
 		fuUnbindItems(mMakeUpHandle, &UIBridge::m_curRenderItem, 1);
 		UIBridge::m_curBindedItem = -1;
@@ -371,6 +371,7 @@ void Nama::ReloadItems() {
 	DestroyAll();
 	fuDestroyAllItems();
 	fuOnDeviceLost();
+	mMakeUpHandle = -1;
 	UIBridge::m_curRenderItem = -1;
 	UIBridge::m_curPlayingMusicItem = -1;
 	m_CMakeupMap.clear();
@@ -384,17 +385,6 @@ void Nama::ReloadItems() {
 		}
 		cout << "load face beautification data." << endl;
 		mBeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
-	}
-	{
-		vector<char> propData;
-		if (false == FuTool::LoadBundle(g_assetDir + g_Makeup, propData))
-		{
-			cout << "load face makeup data failed." << endl;
-		}
-		cout << "load face makeup data." << endl;
-
-		mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
-		//fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1);
 	}
 
 	{
@@ -466,7 +456,7 @@ int Nama::CreateMakeupBundle(string bundleName)
 {
 	int fakeBundleID = 0;
 
-	if (false == mNamaAppState.EnableNama || false == mIsBeautyOn || mMakeUpHandle == 0)return 0;
+	if (false == mNamaAppState.EnableNama || false == mIsBeautyOn || mMakeUpHandle == -1)return 0;
 	using namespace std;
 	using namespace rapidjson;
 
@@ -934,7 +924,7 @@ int Nama::SelectCustomMakeupBundle(string bundleName, string strType)
 	}
 
 	ChangeCleanFlag(false);
-
+	fuSetMaxFaces(4);
 	int bundleID = -1;
 
 	if (0 == m_CMakeupMap[bundleName])
@@ -991,7 +981,7 @@ void Nama::DestroyAll()
 {
 	ClearAllCM();
 
-	if (UIBridge::bundleCategory == BundleCategory::Makeup && UIBridge::m_curBindedItem != -1 && mMakeUpHandle > 0)
+	if (UIBridge::bundleCategory == BundleCategory::Makeup && UIBridge::m_curBindedItem != -1 && mMakeUpHandle != -1)
 	{
 		fuUnbindItems(mMakeUpHandle, &UIBridge::m_curBindedItem, 1);
 	}
@@ -1275,13 +1265,20 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 		fuItemSetParamd(UIBridge::m_curRenderItem, "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 0);
 	}
 
-	fuSetMaxFaces(maxFace);
+	UIBridge::lastMaxFace = maxFace;
+	if (UIBridge::m_curRenderItem == -1) {
+		fuSetMaxFaces(4);
+	}
+	else {
+		fuSetMaxFaces(maxFace);
+	}
 
 	Nama::mNamaAppState.RenderAvatar = false;
 	Nama::mNamaAppState.RenderAvatarBear = false;
 
 	return true;
 }
+
 
 bool Nama::CheckModuleCode(int category)
 {
@@ -1597,4 +1594,14 @@ void NamaExampleNameSpace::Nama::setLightMakeupParam(LightMakeupParam param)
 	fuItemSetParamd(UIBridge::m_curRenderItem, "makeup_intensity", param.intensity);
 	fuItemSetParams(mBeautyHandles, "filter_name", param.filterName.c_str());
 	fuItemSetParamd(mBeautyHandles, "filter_level", param.filterLevel);
+}
+
+void NamaExampleNameSpace::Nama::setHumanSegScene(int type)
+{
+	fuSetHumanSegScene(FUAIHUMANSEGSCENETYPE(type));
+}
+
+void NamaExampleNameSpace::Nama::setMaxFaces(int face)
+{
+	fuSetMaxFaces(face);
 }

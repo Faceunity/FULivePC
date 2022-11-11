@@ -138,6 +138,8 @@ namespace NamaExampleNameSpace
 		int GetLastNamaError();
 		void setLightMakeupTex(string path, string value);
 		void setLightMakeupParam(LightMakeupParam param);
+		void setHumanSegScene(int type);
+		void setMaxFaces(int face);
 	private:
 		
 		void RenderGS(cv::Mat & picInput, int rotType);
