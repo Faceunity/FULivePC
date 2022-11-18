@@ -376,7 +376,6 @@ void Nama::ReloadItems() {
 	UIBridge::m_curPlayingMusicItem = -1;
 	m_CMakeupMap.clear();
 	m_CMakeupTypeMap.clear();
-	mBundlesMap.clear();
 	{
 		vector<char> propData;
 		if (false == FuTool::LoadBundle(g_assetDir + g_faceBeautification, propData))
@@ -427,6 +426,39 @@ void Nama::ReloadItems() {
 
 	m_Controller->InitController(g_assetDir + g_control, g_assetDir + g_control_cfg);
 	m_Controller->InitFXAA(g_assetDir + g_fxaa);
+
+	UpdateFilter(UIBridge::m_curFilterIdx);
+	UpdateBeauty();
+	UpdateGreenScreen();
+	SetGSKeyColor(GUIGS::GetCurColorCircle());
+	changeGSPreviewRect(gsPreviewRect);
+	if (UIBridge::mCurRenderGSSAItemName != "NONE") {
+		if (UIBridge::mCurRenderGSSAItemName == GSSAFEAREA_USERFILE_PIC) {
+#if _WIN32
+			cv::Mat mat = cv::imread(UIBridge::mCurRenderGSSAItemName, cv::IMREAD_REDUCED_COLOR_4);
+#elif __APPLE__
+			cv::Mat mat = cv::imread(FuToolMac::GetDocumentPath() + "/" + GSSAFEAREA_USERFILE_PIC);
+#endif
+			cv::cvtColor(mat, mat, cv::COLOR_BGR2RGBA);
+			UpdateGSSA(mat);
+		}
+		else {
+			string imagePath;
+#if _WIN32
+			imagePath = gGSSAPic + "/" + UIBridge::mCurRenderGSSAItemName;
+#elif __APPLE__
+			imagePath = UIBridge::GetFileFullPathFromResourceBundle((gGSSAPic + "/" + UIBridge::mCurRenderGSSAItemName + ".jpg").c_str());
+#endif 
+			cv::Mat mat = cv::imread(imagePath);
+			cv::cvtColor(mat, mat, cv::COLOR_BGR2RGBA);
+			UpdateGSSA(mat);
+		}
+	}
+#ifdef _WIN32
+	wglMakeCurrent(GetDC(wnd), context);
+#else
+	NaMaMakeAsCurrentCtx(curCtx);
+#endif
 }
 
 int Nama::IsTracking()
@@ -956,7 +988,8 @@ int Nama::SelectCustomMakeupBundle(string bundleName, string strType)
 		m_CMakeupMap[bundleName] = bundleID;
 	}
 
-	if (UIBridge::bundleCategory == BundleCategory::Makeup && m_CMakeupMap[bundleName] > 0)
+	if (UIBridge::bundleCategory == BundleCategory::Makeup && 
+		m_CMakeupMap[bundleName] > 0)
 	{
 		auto itor = m_CMakeupTypeMap.find(strType);
 		int ret = -1;
@@ -1005,6 +1038,9 @@ int Nama::GetLastNamaError()
 
 void Nama::UnbindCurFixedMakeup()
 {
+	if (UIBridge::bundleCategoryLast == BundleCategory::ItemJingpin) {
+		ReloadItems();
+	}
 	if (UIBridge::bundleCategory == BundleCategory::Makeup)
 	{
 		DestroyAll();
@@ -1041,33 +1077,6 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 		UIBridge::bundleCategoryLast == BundleCategory::Makeup &&
 		UIBridge::bundleCategory != BundleCategory::Makeup) {
 		ReloadItems();
-		UpdateFilter(UIBridge::m_curFilterIdx);
-		UpdateBeauty();
-		UpdateGreenScreen();
-		SetGSKeyColor(GUIGS::GetCurColorCircle());
-		changeGSPreviewRect(gsPreviewRect);
-		if (UIBridge::mCurRenderGSSAItemName != "NONE") {
-			if (UIBridge::mCurRenderGSSAItemName == GSSAFEAREA_USERFILE_PIC) {
-#if _WIN32
-				cv::Mat mat = cv::imread(UIBridge::mCurRenderGSSAItemName, cv::IMREAD_REDUCED_COLOR_4);
-#elif __APPLE__
-				cv::Mat mat = cv::imread(FuToolMac::GetDocumentPath() + "/" + GSSAFEAREA_USERFILE_PIC);
-#endif
-				cv::cvtColor(mat, mat, cv::COLOR_BGR2RGBA);
-				UpdateGSSA(mat);
-			}
-			else {
-				string imagePath;
-#if _WIN32
-				imagePath = gGSSAPic + "/" + UIBridge::mCurRenderGSSAItemName;
-#elif __APPLE__
-				imagePath = UIBridge::GetFileFullPathFromResourceBundle((gGSSAPic + "/" + UIBridge::mCurRenderGSSAItemName + ".jpg").c_str());
-#endif 
-				cv::Mat mat = cv::imread(imagePath);
-				cv::cvtColor(mat, mat, cv::COLOR_BGR2RGBA);
-				UpdateGSSA(mat);
-			}
-		}
 	}
 	UIBridge::bundleCategoryLast = UIBridge::bundleCategory;
 	ChangeCleanFlag(true);
