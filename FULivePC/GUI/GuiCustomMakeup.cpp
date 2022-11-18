@@ -916,10 +916,14 @@ void CMLip::ShowUI()
 				m_pNama->SetCMDouble("lip_type", config->vecType[i].iType);
 				m_pNama->SetCMDouble("is_two_color", 0);
 			}
-			
 			SetIntensity();
 			m_curBag = nullptr;
 			m_iCurType = config->vecType[i].iType;
+			if (m_iCurType == SHUI_RUN)
+			{
+				std::vector<double> colors0 = GetDoubles(config->vecColor[0]->vecColorRGBA[0]);
+				m_pNama->SetCMDoubles("makeup_lip_color_v2", colors0.data(), colors0.size());
+			}
 		}
 
 		ImGui::PopStyleColor();

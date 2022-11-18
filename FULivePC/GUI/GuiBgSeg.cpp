@@ -265,6 +265,7 @@ void GUIBgSeg::ShowBgSegPannel(NamaExampleNameSpace::Nama* nama) {
 				UIBridge::mCurRenderItemName = itemName;
 				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
 				UIBridge::showItemTipsWindow = false;
+				nama->SelectBundle(itemPath);
 			}
 			else
 			{
@@ -277,21 +278,11 @@ void GUIBgSeg::ShowBgSegPannel(NamaExampleNameSpace::Nama* nama) {
 				UIBridge::showLightMakeupTip = false;
 				nama->UpdateFilter(UIBridge::m_curFilterIdx);
 			}
-			if (itemName == MAKEUP_CUSTOM_NAME)
+			if (UIBridge::showCustomMakeup)
 			{
-				UIBridge::showCustomMakeup = true;
-				nama->UnbindCurFixedMakeup();
-			}
-			else
-			{
-				if (UIBridge::showCustomMakeup)
-				{
-					GUICustomMakeup::Reset(nama);
-					nama->DestroyAll();
-				}
-
+				GUICustomMakeup::Reset(nama);
+				nama->DestroyAll();
 				UIBridge::showCustomMakeup = false;
-				nama->SelectBundle(itemPath);
 			}
 		}
 		ImGui::SameLine(0.f, 22.f * scaleRatioW);
