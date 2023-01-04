@@ -232,6 +232,8 @@ void Nama::InitNama()
     }
 
     fuItemSetParamd(m_BodyShapeHandle,"Debug",0.0);
+
+    fuItemSetParamd(m_MakeUpHandle, "machine_level", 1.0);
     float fValue = 0.5f;
     fuSetFaceTrackParam((void*)"mouth_expression_more_flexible", &fValue);
     fuSetMaxFaces(4);
@@ -241,6 +243,7 @@ void Nama::InitNama()
     //设置输入相机矩阵
     fuSetInputCameraBufferMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
     fuSetInputCameraTextureMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+
     //设置输出矩阵
     //    fuSetOutputMatrix(TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
     m_EnableNama = true;
@@ -436,6 +439,7 @@ void Nama::LoadMakeup()
         }
         cout << "load face makeup data." << endl;
         m_MakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+        fuItemSetParamd(m_MakeUpHandle, "machine_level", 1.0);
     }
 }
 
@@ -530,11 +534,20 @@ bool Nama::SelectBundle(string bundleName, int person, bool bindFlag)
         fuItemSetParamd(m_bundleCurrent, "Index", index);
     }
     //自定义美妆要绑定道具
-    if (m_bundleCategory == BundleCategory::Makeup && bindFlag)
+    if (m_bundleCategory == BundleCategory::Makeup)
     {
-        LoadMakeup();
-        m_curMakeupItem = m_bundleCurrent;
-        fuBindItems(m_MakeUpHandle, &m_bundleCurrent, 1);
+        if(bindFlag){
+            LoadMakeup();
+            m_curMakeupItem = m_bundleCurrent;
+            fuBindItems(m_MakeUpHandle, &m_bundleCurrent, 1);
+        }else{
+            fuItemSetParamd(m_bundleCurrent, "machine_level", 1.0);
+        }
+    }
+    //风格推荐和组合妆开启全脸分割
+    if (m_bundleCategory == BundleCategory::StyleRecommendation)
+    {
+        fuItemSetParamd(m_bundleCurrent, "machine_level", 1.0);
     }
     //如果前面有打开过音乐滤镜,先关闭音乐
     b_start_mp3 = false;
@@ -817,10 +830,6 @@ void Nama::ApplyBodyTrackConfig(BodyTrackParam params)
     m_Controller->SetAvatarTranslationScale(params.TrackMoveRange_x, params.TrackMoveRange_y, params.TrackMoveRange_z);
 }
 
-void Nama::CameraChange(){
-    fuOnCameraChange();
-}
-
 void Nama::changeGSPreviewRect(double startX, double startY, double endX, double endY)
 {
     fuItemSetParamd(m_GSHandle, "start_x", startX);
@@ -888,5 +897,7 @@ void Nama::itemJingpinClick()
     }
 }
 
-
+void Nama::CameraChange(){
+    fuOnCameraChange();
+}
 

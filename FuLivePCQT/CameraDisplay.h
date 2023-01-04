@@ -21,7 +21,7 @@ public:
     ~CameraDisplayRenderer();
     GLuint m_texId = 0;
     //绿幕安全区域
-    int updataGreenSaveArea(cv::Mat &frameData);
+    int updateGreenSaveArea(cv::Mat &frameData);
 public:
     void initializeGL();
     void render(void) override;

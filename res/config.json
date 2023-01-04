@@ -31,5 +31,16 @@
 	"makeup_icon_combination_1_freezing_age.bundle": "冻龄妆",
 	"makeup_icon_combination_1_guo_feng.bundle": "国风妆",
 	"makeup_icon_combination_1_mixed_race.bundle": "混血妆",
-	"big_head_smiling.bundle": "微笑触发"
+	"big_head_smiling.bundle": "微笑触发",
+	"style_icon_01_qizhi.bundle": "气质",
+	"style_icon_02_xuejie.bundle": "学姐",
+	"style_icon_03_zhiya.bundle": "智雅",
+	"style_icon_04_danyan.bundle": "淡颜",
+	"style_icon_05_zhigan.bundle": "质感",
+	"style_icon_06_hanguoxuemei.bundle": "学妹",
+	"style_icon_07_ailing.bundle": "爱凌",
+	"style_icon_08_yuansheng.bundle": "原生",
+	"style_icon_09_jingdian.bundle": "经典",
+	"style_icon_10_nvshen.bundle": "女神",
+	"style_icon_11_nanshen.bundle": "男神"
 }

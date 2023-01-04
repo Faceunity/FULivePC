@@ -39,7 +39,7 @@ CameraDisplayRenderer::CameraDisplayRenderer()
 {
     initializeGL();
     MainClass::getInstance()->m_nama->InitNama();
-    emit MainClass::getInstance()->m_UIBridge->updataConfig();
+    emit MainClass::getInstance()->m_UIBridge->updateConfig();
 }
 
 CameraDisplayRenderer::~CameraDisplayRenderer()
@@ -47,7 +47,7 @@ CameraDisplayRenderer::~CameraDisplayRenderer()
 
 }
 
-int CameraDisplayRenderer::updataGreenSaveArea(cv::Mat &frameData)
+int CameraDisplayRenderer::updateGreenSaveArea(cv::Mat &frameData)
 {
     glGenTextures(1, &m_texId);
     glBindTexture(GL_TEXTURE_2D, m_texId);
@@ -79,14 +79,20 @@ void CameraDisplayRenderer::render()
     if(uibridge->m_newImage){
         if(uibridge->m_bgsSelectVideo){
             //切换ar不render
-        }else if(uibridge->m_flagARBody){
+        }else if(uibridge->m_flagARBody && uibridge->m_arFunction){
             nama->RenderDefNama();
+            uibridge->detectionBodyTip();
         }else if(uibridge->m_bLoadBear){
             nama->RenderBear();
+            uibridge->detectionBodyTip();
         }else if(uibridge->m_bodyTrackType != BodyTrackType::None){
             nama->RenderP2A();
+            uibridge->detectionBodyTip();
         }else{
             nama->RenderDefNama();
+            if(!uibridge->m_bSelectColor){
+                uibridge->detectionTip();
+            }
         }
     }
     if(!uibridge->m_renderNewFrame && uibridge->m_newImage){

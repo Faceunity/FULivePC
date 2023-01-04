@@ -9,13 +9,13 @@ Rectangle{
     property var b_GreenScreen: false
     signal selectedChange(var id);
     id: m_tab
-    width: b_GreenScreen ? 131 : 98
+    width: b_GreenScreen ? 140 : 105
     height: 30
-    color: b_inMouse ? "#67ABFB" : (b_Selected ? "#FFFFFF" : "#32305C")
+    color: b_Selected ? "#FFFFFF" : "#2D2956"
     TextBlack{
         id: m_text
         anchors.fill: parent
-        color: b_Selected ? "#000000" : "#FFFFFF"
+        color: b_Selected ? "#2F3658" : b_inMouse ? "#FFFFFF" : "#B3FFFFFF"
     }
     MouseArea{
         anchors.fill: parent

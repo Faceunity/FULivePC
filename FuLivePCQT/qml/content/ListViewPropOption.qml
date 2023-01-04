@@ -54,13 +54,16 @@ Rectangle{
             anchors.fill: parent
             hoverEnabled: true
             onEntered: {
-                m_background.visible = true
+                if(!b_Selected){
+                    m_background.visible = true
+                }
             }
             onExited: {
                 m_background.visible = false
             }
             onClicked: {
                 emit: selectedChange(icon_Name) //触发事件
+                m_background.visible = false
             }
         }
     }

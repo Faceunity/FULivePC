@@ -463,7 +463,6 @@
         <file>qml/content/ListViewPropOption.qml</file>
         <file>qml/content/ListViewSide.qml</file>
         <file>qml/content/RectangleTabContent.qml</file>
-        <file>qml/content/RectangleButtonGreenScreen.qml</file>
         <file>qml/content/CustomSlider.qml</file>
         <file>../assets/items/Makeup/subs_setup.json</file>
         <file>../res/fa_kaola.png</file>
@@ -521,5 +520,61 @@
         <file>../res/list_icon_mouth_thickness_open.png</file>
         <file>../res/list_icon_stereoscopic_close.png</file>
         <file>../res/list_icon_stereoscopic_open.png</file>
+        <file>../res/window_Controls_1_hover.png</file>
+        <file>../res/window_Controls_1_nor.png</file>
+        <file>../res/window_Controls_2_hover.png</file>
+        <file>../res/window_Controls_2_nor.png</file>
+        <file>../res/window_Controls_3_hover.png</file>
+        <file>../res/window_Controls_3_nor.png</file>
+        <file>../res/icon_notes_nor.png</file>
+        <file>../res/icon_notes_hover.png</file>
+        <file>../res/list_image_filter_selected.png</file>
+        <file>../res/list_image_filter_hover.png</file>
+        <file>../res/list_image_filter_nor.png</file>
+        <file>../res/icon_lbutton.png</file>
+        <file>../res/icon_rbutton.png</file>
+        <file>../res/icon_lbutton_nor.png</file>
+        <file>../res/icon_rbutton_nor.png</file>
+        <file>qml/content/RectangleButtonSolid.qml</file>
+        <file>../res/icon_take_color.png</file>
+        <file>qml/content/RectangleButtonText.qml</file>
+        <file>qml/content/RectangleButtonImage.qml</file>
+        <file>../res/icon_straw_nor.png</file>
+        <file>../res/icon_straw_sel.png</file>
+        <file>../res/iconn_colour_picker.png</file>
+        <file>qml/content/ColorCircle.qml</file>
+        <file>../res/list_icon_style_recommendation_hover.png</file>
+        <file>../res/list_icon_style_recommendation_nor.png</file>
+        <file>../res/style_icon_01_qizhi.png</file>
+        <file>../res/style_icon_02_xuejie.png</file>
+        <file>../res/style_icon_03_zhiya.png</file>
+        <file>../res/style_icon_04_danyan.png</file>
+        <file>../res/style_icon_05_zhigan.png</file>
+        <file>../res/style_icon_06_hanguoxuemei.png</file>
+        <file>../res/style_icon_07_ailing.png</file>
+        <file>../res/style_icon_08_yuansheng.png</file>
+        <file>../res/style_icon_09_jingdian.png</file>
+        <file>../res/style_icon_10_nvshen.png</file>
+        <file>../res/style_icon_11_nanshen.png</file>
+        <file>../res/btn_paly.png</file>
+        <file>../res/list_icon_Jinpin_dis.png</file>
+        <file>../res/list_icon_AR_dis.png</file>
+        <file>../res/list_icon_safe_area_dis.png</file>
+        <file>../res/list_icon_green_screen_cutout_dis.png</file>
+        <file>../res/list_icon_lightmakeup_dis.png</file>
+        <file>../res/list_icon_style_recommendation_dis.png</file>
+        <file>../res/list_icon_hairdressing_dis.png</file>
+        <file>../res/list_icon_photo_sticker_dis.png</file>
+        <file>../res/list_icon_makeup_dis.png</file>
+        <file>../res/list_icon_portraitdrive_dis.png</file>
+        <file>../res/list_icon_Hahamirror_dis.png</file>
+        <file>../res/list_icon_gesturerecognition_dis.png</file>
+        <file>../res/list_icon_Bgsegmentation_dis.png</file>
+        <file>../res/list_icon_Expressionrecognition_dis.png</file>
+        <file>../res/list_icon_Musicfilter_dis.png</file>
+        <file>../res/list_icon_changeface_dis.png</file>
+        <file>../res/list_icon_Propmap_dis.png</file>
+        <file>../res/list_icon_annimoji_dis.png</file>
+        <file>../res/list_icon_avatar_dis.png</file>
     </qresource>
 </RCC>

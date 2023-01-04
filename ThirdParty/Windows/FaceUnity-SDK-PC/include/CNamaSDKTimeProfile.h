@@ -88,6 +88,8 @@ FUNAMA_API void fuStackTimeProfileStart(const char* lable);
 */
 FUNAMA_API void fuStackTimeProfileStop(const char* lable);
 
+FUNAMA_API void fuFrameTimeProfileRelaseMemory();
+
 #ifdef __cplusplus
 }
 #endif
