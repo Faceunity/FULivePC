@@ -1,36 +1,35 @@
-﻿# Nama C API 参考文档
+# Nama C API 参考文档
 <!--每次更新文档，更新时间-->
 
 级别：Public   
-更新日期：2022-09-09   
-SDK版本: 8.3.1  
+更新日期：2022-11-14   
+SDK版本: 8.4.0  
 
 ------
 ### 最新更新内容：
 
 <!--这个小节写每次最新以及次新的更新记录，时间，更新内容。新增函数，函数接口定义更新-->
 
-**2022-09-09 v8.3.1:
-1、适配Mac M系列平台
-2、鉴权模块升级
-3、新增表情系数映射接口、人脸检测频率接口fuSetFaceProcessorDetectEveryNFramesWhenNoFace
-3、修复一些bug
+2022-11-14 v8.4.0:
 
-2022-07-25 v8.3.0:
-1.优化人像分割效果(移动端、pc端模型采用gpu模型，优化分割整体精度)
-2.优化美颜效果(优化瘦脸，新增眉毛上下、眉间距)
-3.优化美妆效果(更新4款眉毛（子妆容），更新18款组合妆眉毛效果对应，Demo侧下架眉毛变形功能)
-4.优化绿幕分割效果（解决绿幕抠像边缘泛绿、锯齿、抖动问题；改善白幕抠像背景闪烁、身体轮廓不干净、人体区域抠穿问题，效果优于竞品；）
-5.优化手势识别效果（优化手势识别检出率，针对客诉问题的误检优化）
+1. 新增美颜眉毛粗细、眼睛位置、眼睑下至、嘴唇厚度、五官立体功能，优化瘦脸、下巴功能  
+2. 新增美妆嘴唇遮挡分割算法，实现口红遮挡不穿帮  
+3. 新增人像分割会议场景专用模式  
+4. 优化人脸关键点位稳定性  
+5. 优化人体检测，提升全平台模型检出率  
+6、优化手势识别， 优化全平台模型检出率及误检率  
 
-2022-06-17 v8.2.1:
-1.将新增的嘴型mode3参数调节逻辑与旧参数对齐
-2.改进祛黑眼圈祛法令纹mode1 mode2强绑定导致的参数被重置问题
-3.视频第10秒处，带口罩切换到闪电侠的时候切换速度很慢，安卓端在renderkit增加回调
-4.算法侧优化PC模型，修复人脸在视频区内，快速上下移动，会有人脸识别不到的问题
-5.解决fuauth_start_xiaomi_check，signal 9相关问题
+2022-08-19 v8.3.0:  
+
+1. 优化人像分割效果：全面提升人像分割效果，优化了分割精度、迟滞感、边缘细腻度  
+2. 优化绿幕分割效果：全面提升绿幕、白幕分割效果，优化了绿幕场景下边缘泛绿、锯齿、抖动的问题；白幕场景下背景闪烁、轮廓不干净的问题  
+3. 优化手势识别效果：优化手势识别检出率，并针对性地解决一些误检问题  
+4. 优化美颜效果：优化瘦脸效果，新增眉毛上下、眉间距2个功能  
+5. 优化美妆效果：更新4款眉毛效果  
+6. 解决部分已知bug   
 
 2022-04-19 v8.2.0:
+
 1. 优化美颜祛黑眼圈功能，更好保留卧蚕，优化祛黑效果，默认在高性能设备上开启。  
 2. 优化美颜祛法令纹功能，改善涂抹感，提升纹理细节，默认在高性能设备上开启。  
 3. 优化美型嘴型/大眼功能，近似等比例效果，默认在高性能设备上开启。  
@@ -43,15 +42,6 @@ SDK版本: 8.3.1
 1. 新增小脸检测支持接口fuFaceProcessorSetDetectSmallFace，默认在高性能设备上开启。  
 2. 修复一系列问题，美妆切换偶现crash，背景道具黑屏问题。  
 3. 修复快速上下动，人脸跟踪丢失问题。  
-
-2021-10-25 v8.0.0:
-1.美颜磨皮新增均匀磨皮类型，可用于高端机，五官保护更加清晰，磨皮更加均匀。  
-2.美型原有功能优化，及新增小脸功能。  
-3.优化祛黑眼圈法令纹效果。  
-4.优化美妆口红、眉毛、睫毛、美瞳等功能。  
-5.优化人脸检测，提高检出率。  
-6.优化PC端背景分割效果，分割更加准确  
-
 
 2021-07-08 v7.4.1:
 1. 优化高分辨美颜磨皮效果，相同尺度上对齐低分辨率  
@@ -246,7 +236,7 @@ SDK版本: 8.3.1
 
 本文是相芯人脸跟踪及视频特效开发包（以下简称 Nama SDK）的底层接口文档。该文档中的 Nama API 为底层 native 接口，可以直接用于 iOS/Android NDK/Windows/Linux/Mac 上的开发。其中，iOS和Android平台上的开发可以利用SDK的应用层接口（Objective-C/Java），相比本文中的底层接口会更贴近平台相关的开发经验。
 
-SDK相关的所有调用要求在同一个线程中顺序执行，不支持多线程。少数接口可以异步调用（如道具加载），会在备注中特别注明。SDK所有主线程调用的接口需要保持 OpenGL context 一致，否则会引发纹理数据异常。如果需要用到SDK的绘制功能，则主线程的所有调用需要预先初始化OpenGL环境，没有初始化或初始化不正确会导致崩溃。我们对移动平台OpenGL的环境要求为 GLES 2.0 以上，PC、MAC端为Opengl 3.2 core profile及以上版本。具体调用方式，可以参考各平台 demo。
+SDK相关的所有调用要求在同一个线程中顺序执行，不支持多线程。少数接口可以异步调用（如道具加载），会在备注中特别注明。SDK所有主线程调用的接口需要保持 OpenGL context 一致，否则会引发纹理数据异常。如果需要用到SDK的绘制功能，则主线程的所有调用需要预先初始化OpenGL环境，没有初始化或初始化不正确会导致崩溃。我们对移动平台OpenGL的环境要求为 GLES 2.0 以上，PC为Opengl 3.2 compact profile及以上版本，PC为Opengl compact profile版本。具体调用方式，可以参考各平台 demo。
 
 底层接口根据作用逻辑归为六类：初始化、加载道具、主运行接口、销毁、功能接口、P2A相关接口。
 
@@ -323,6 +313,55 @@ __备注:__
 需要在有GL Context的地方进行初始化。  
 
 第一次需要联网鉴权，鉴权成功后，保存新的证书，后面不要联网。  
+
+------
+##### fuSetupInternalCheck 函数
+初始化系统环境，加载系统数据，并进行离线鉴权。必须在调用SDK其他接口前执行，否则会引发崩溃。
+
+```C
+/**
+ \brief Initialize and authenticate your SDK instance with internal check,
+ must be called exactly once before all other functions. The buffers should
+ NEVER be freed while the other functions are still being called. You can call
+ this function multiple times to "switch pointers".
+ \param v3data should point to contents of the "v3.bin" we provide
+ \param sz_v3data should point to num-of-bytes of the "v3.bin" we provide
+ \param ardata should be NULL
+ \param authdata is the pointer to the authentication data pack we provide. You
+ must avoid storing the data in a file. Normally you can just `#include
+ "authpack.h"` and put `g_auth_package` here.
+ \param sz_authdata is the authentication data size, we use plain int to avoid
+ cross-language compilation issues. Normally you can just `#include
+ "authpack.h"` and put `sizeof(g_auth_package)` here.
+ \return non-zero for success, zero for failure
+*/
+FUNAMA_API int fuSetupInternalCheck(float* v3data, int sz_v3data,
+                                    float* ardata, void* authdata,
+                                    int sz_authdata);
+
+```
+
+__参数:__
+
+*v3data [in]*： 已废弃，传nullptr。内存指针，指向SDK提供的 v3.bundle 文件内容
+
+*sz_v3data [in]*: 已废弃，传入0。v3.bundle文件字节数
+
+*ardata [in]*： 已废弃
+
+*authdata [in]*： 内存指针，指向鉴权数据的内容。如果是用包含 authpack.h 的方法在编译时提供鉴权数据，则这里可以写为 ```g_auth_package``` 。
+
+*sz_authdata [in]*：鉴权数据的长度，以字节为单位。如果鉴权数据提供的是 authpack.h 中的 ```g_auth_package```，这里可写作 ```sizeof(g_auth_package)```
+
+
+__返回值:__
+
+返回非0值代表成功，返回0代表失败。如初始化失败，可以通过 ```fuGetSystemError``` 获取错误代码。
+
+
+__备注:__  
+
+证书需要带离线权限。根据应用需求，鉴权数据也可以运行时提供（如网络下载），不过要注意证书泄露风险，防止证书被滥用。  
 
 ##### FUAITYPE 算法能力类型
 算法能力类型，可用于fuSetTrackFaceAItype等接口
@@ -1300,7 +1339,7 @@ __备注:__
 
 ------
 ##### fuSetOutputMatrix 函数
-设置由`fuSetInputCameraBufferMatrix`设置的TransformMatrix是否生效。
+当使用`fuSetInputCameraTextureMatrix`,`fuSetInputCameraBufferMatrix`设置TransformMatrix后，如需要再调整输出图像buffer，可以`fuSetOutputMatrix`进一步调整输出方向。  
 ```C
 /**
  \brief add optional transform for final result, when use
@@ -1325,7 +1364,7 @@ __返回值:__
 无。  
 
 __备注:__  
-当使用`fuSetInputCameraTextureMatrix`,`fuSetInputCameraBufferMatrix`设置TransformMatrix后，如需要再调整输出图像buffer，可以`fuSetOutputMatrix`进一步调整输出方向。
+
 
 ------
 ##### fuSetOutputMatrixState 函数
@@ -2040,6 +2079,23 @@ __返回值:__
 1为成功，0为失败。
 
 ------
+##### fuFaceProcessorSetDetectSmallFace 函数
+fuFaceProcessorSetDetectSmallFace 设置人脸检测模块检测小脸。默认关闭。  
+```C
+/**
+ \brief set ai model FaceProcessor's detector mode.
+ \param use , 0 for disable detect small face, 1 for enable detect small face
+ quality. 0 by default.
+ */
+FUNAMA_API void fuFaceProcessorSetDetectSmallFace(int use);
+```
+__参数:__  
+*use [in]*：0为关闭，1为打开。 
+
+__返回值:__  
+
+
+------
 
 #### 2.6 功能接口-效果
 
@@ -2509,15 +2565,15 @@ typedef enum FUAIGESTURETYPE {
   FUAIGESTURE_TWO = 7,
   FUAIGESTURE_OK = 8,
   FUAIGESTURE_ROCK = 9,
-  FUAIGESTURE_CROSS = 10,
+  FUAIGESTURE_CROSS = 10,	//预留手势，不会检出
   FUAIGESTURE_HOLD = 11,
   FUAIGESTURE_GREET = 12,
   FUAIGESTURE_PHOTO = 13,
   FUAIGESTURE_HEART = 14,
   FUAIGESTURE_MERGE = 15,
-  FUAIGESTURE_EIGHT = 16,
-  FUAIGESTURE_HALFFIST = 17,
-  FUAIGESTURE_GUN = 18,
+  FUAIGESTURE_EIGHT = 16,	//预留手势，不会检出
+  FUAIGESTURE_HALFFIST = 17,//预留手势，不会检出
+  FUAIGESTURE_GUN = 18,		//预留手势，不会检出
 } FUAIGESTURETYPE;
 ```
 
@@ -3199,5 +3255,4 @@ __输入输出支持:__
 ### 4. 常见问题 
 
 如有使用问题，请联系技术支持。
-
 

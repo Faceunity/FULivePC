@@ -9,7 +9,104 @@
 #include "ImageProvider.h"
 #include "Nama.h"
 #include <QMediaPlayer>
+#include <QVector3D>
 using namespace std;
+
+//鉴权证书页1
+enum CERTIFACITE_TYPE
+{
+    DEFINE_Face_Beautify,
+    DEFINE_2D_Sticker,
+    DEFINE_3D_Sticker,
+    DEFINE_Skeletal_animation,
+    DEFINE_Avatar,
+    DEFINE_AR_Mask,
+    DEFINE_AR_Mask_HD,
+    DEFINE_Background_Segmentation,
+    DEFINE_Gesture_Recognition,
+    DEFINE_Video_Filter,
+    DEFINE_Expression_Recognition,
+    DEFINE_P2A_Prime,
+    DEFINE_P2A_Creative,
+    DEFINE_Portrait_Relighting,
+    DEFINE_Facewarp,
+    DEFINE_Music_Filter,
+    DEFINE_Emotion_Recognition,
+    DEFINE_Make_Up,
+    DEFINE_Hair_Color,
+    DEFINE_Cartoon_Filter,
+    DEFINE_Face_Fusion,
+    DEFINE_Voice_Lite,
+    DEFINE_Voice,
+    DEFINE_P2A_Gen_Head,
+    DEFINE_P2A_Gen_Hair,
+    DEFINE_P2A_Knead_Face,
+    DEFINE_P2A_Get_Faceinfo,
+    DEFINE_SIZE
+};
+static const int define_arr[DEFINE_SIZE] = { 0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x100,0x200,
+0x400,0x800,0x1000,0x2000,0x4000,0x10000,0x20000,0x40000,0x80000,
+0x100000,0x200000,0x800000,0x2000000,0x4000000,0x8000000,0x10000000,0x20000000,0x40000000 };
+
+//鉴权证书页2
+enum CERTIFACITE_TYPE_EXT
+{
+    DEFINE_P2A_IMAGE,
+    DEFINE_P2A_VIDEO,
+    DEFINE_P2A_GIF,
+    DEFINE_LIGHT_MAKEUP,
+    DEFINE_NAMA_KNEAD_FACE,
+    DEFINE_BODY_SHAPE,
+    DEFINE_RENDER,
+    DEFINE_BODY_TRACK,
+    DEFINE_BODY_TRACK_GESTURE,
+    DEFINE_GREEN_SCREEN_EDIT,
+    DEFINE_PUSH_STREAM,
+    DEFINE_GET_FACEINFO,
+    DEFINE_FACE_LANDMARK,
+    DEFINE_EXPRESSION,
+    DEFINE_2D_BODY_LANDMARKS,
+    DEFINE_HEAD_SEGMENTATION,
+    DEFINE_MOTION_RECOGNITION,
+    DEFINE_BOUTIQUE_STICKER,
+    DEFINE_ITEM_OFFLINE_SIGN,
+    DEFINE_PK_GAME,
+    DEFINE_STYLE_RECOMMENDATION,
+    DEFINE_SIZE_EXT
+};
+static const int define_arr_ext[DEFINE_SIZE_EXT] = { 0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80,0x100,0x200,0x400,0x800,0x1000,0x2000,0x4000,0x8000,
+0x10000,0x20000,0x40000,0x80000, 0x100000};
+
+static const int g_checkIndex[Count] = {
+    1,0,1,0,1,0,0,0,0,1,0,0,0,0,1,1
+};
+
+static const int g_checkID[Count] =
+{
+    define_arr_ext[DEFINE_BOUTIQUE_STICKER],define_arr[DEFINE_2D_Sticker],define_arr_ext[DEFINE_STYLE_RECOMMENDATION],
+    define_arr[DEFINE_Make_Up], define_arr_ext[DEFINE_LIGHT_MAKEUP],define_arr[DEFINE_Background_Segmentation],
+    define_arr[DEFINE_Gesture_Recognition],define_arr[DEFINE_Expression_Recognition],define_arr[DEFINE_Avatar],
+    define_arr_ext[DEFINE_BODY_TRACK],define_arr[DEFINE_Hair_Color], define_arr[DEFINE_AR_Mask], define_arr[DEFINE_Music_Filter],
+    define_arr[DEFINE_Facewarp],define_arr_ext[DEFINE_HEAD_SEGMENTATION], define_arr_ext[DEFINE_GREEN_SCREEN_EDIT]
+};
+
+enum SideCategory {
+    BeautifyFaceSkin,
+    BeautifyFaceShape,
+    BeautifyFilter,
+    BeautifyBody,
+    SideCount
+};
+
+static const int g_checkSideIndex[SideCount] = {
+    0,0,0,1
+};
+
+static const int g_checkSideID[Count] =
+{
+    define_arr[DEFINE_Face_Beautify], define_arr[DEFINE_Face_Beautify],define_arr[DEFINE_Face_Beautify],
+    define_arr_ext[DEFINE_BODY_SHAPE]
+};
 
 enum ItemParam{
     BeautySkin,             //美肤
@@ -20,22 +117,33 @@ enum ItemParam{
 
 extern const string g_assetDir;
 const QString gBundlePath[] = {
-    QString::fromStdString(g_assetDir) + "Avatars/",
-    QString::fromStdString(g_assetDir) + "items/" + "Animoji",
-    QString::fromStdString(g_assetDir) + "items/" + "ItemSticker",
     QString::fromStdString(g_assetDir) + "items/" + "ItemJingpin", //精品贴纸联网下载,路径不可用
-    QString::fromStdString(g_assetDir) + "items/" + "ARMask",
-    QString::fromStdString(g_assetDir) + "items/" + "ExpressionRecognition",
-    QString::fromStdString(g_assetDir) + "items/" + "MusicFilter",
-    QString::fromStdString(g_assetDir) + "items/" + "BackgroundSegmentation",
-    QString::fromStdString(g_assetDir) + "items/" + "GestureRecognition",
-    QString::fromStdString(g_assetDir) + "items/" + "MagicMirror",
+    QString::fromStdString(g_assetDir) + "items/" + "ItemSticker",
+    QString::fromStdString(g_assetDir) + "items/" + "StyleRecommendation",
     QString::fromStdString(g_assetDir) + "items/" + "Makeup",
     QString::fromStdString(g_assetDir) + "items/" + "LightMakeup",
+    QString::fromStdString(g_assetDir) + "items/" + "BackgroundSegmentation",
+    QString::fromStdString(g_assetDir) + "items/" + "GestureRecognition",
+    QString::fromStdString(g_assetDir) + "items/" + "ExpressionRecognition",
+    QString::fromStdString(g_assetDir) + "items/" + "Animoji",
+    QString::fromStdString(g_assetDir) + "Avatars/",
     QString::fromStdString(g_assetDir) + "items/" + "BeautyHair",
+    QString::fromStdString(g_assetDir) + "items/" + "ARMask",
+    QString::fromStdString(g_assetDir) + "items/" + "MusicFilter",
+    QString::fromStdString(g_assetDir) + "items/" + "MagicMirror",
     QString::fromStdString(g_assetDir) + "items/" + "BigHead",
     QString::fromStdString(g_assetDir) + "items/" + "GreenScreen",
     QString::fromStdString(g_assetDir) + "items/" + "SafeArea"
+};
+
+struct StyleRecommendationParam{
+    QStringList mNameList;              //风格推荐名称列表,按名称排序,ailing第一个
+    QList<QVariant> mBeautySkinDefault; //美肤默认参数列表
+    QList<QVariant> mBeautyFaceDefault; //美型默认参数列表
+    QList<QVariant> mBeautySkin;        //美肤用户参数列表
+    QList<QVariant> mBeautyFace;        //美型用户参数列表
+    QList<int> mFilterLevel;            //滤镜强度
+    QList<int> mMakeUpIntensity;        //美妆强度
 };
 
 class UIBridge:public QObject{
@@ -49,6 +157,8 @@ class UIBridge:public QObject{
     Q_PROPERTY(QList<QVariant> beautyFace READ beautyFace)
     Q_PROPERTY(QList<QVariant> beautyBody READ beautyBody)
     Q_PROPERTY(QList<QVariant> filter READ filter)
+    Q_PROPERTY(QVariant gsKeyColor READ gsKeyColor)
+    Q_PROPERTY(QVariant checkModule READ checkModule)
     Q_PROPERTY(bool arFunction READ arFunction WRITE setARFunction NOTIFY arFunctionChanged)
     Q_PROPERTY(QStringList cameraList READ cameraList NOTIFY cameraListChanged)
     Q_PROPERTY(int selectCategory READ selectCategory WRITE setSelectCategory)
@@ -56,6 +166,7 @@ class UIBridge:public QObject{
     Q_PROPERTY(QString frameSize READ frameSize NOTIFY frameSizeChanged)
     Q_PROPERTY(int renderTime READ renderTime NOTIFY renderTimeChanged)
     Q_PROPERTY(QString tip READ tip NOTIFY tipChanged)
+    Q_PROPERTY(QString tipExtra READ tipExtra NOTIFY tipExtraChanged)
     Q_PROPERTY(int bodyTrackType READ bodyTrackType WRITE setBodyTrackType NOTIFY bodyTrackTypeChanged)
     Q_PROPERTY(int cameraWidth WRITE setCameraWidth NOTIFY cameraWidthChanged)
     Q_PROPERTY(int cameraHeight WRITE setCameraHeight NOTIFY cameraHeightChanged)
@@ -76,6 +187,8 @@ public:
     QList<QVariant> beautyFace(){ return m_beautyFace; }
     QList<QVariant> beautyBody(){ return m_beautyBody; }
     QList<QVariant> filter(){ return m_filter; }
+    QVariant gsKeyColor(){ return m_gsKeyColor; }
+    QVariant checkModule(){ return m_checkMode; }
     QStringList cameraList();
     bool arFunction() { return m_arFunction; }
     int selectCategory(){ return  m_selectCategory;}
@@ -85,6 +198,7 @@ public:
     QString frameSize(){return m_frameSize;}
     int renderTime(){return m_renderTime;}
     QString tip(){return m_tip;}
+    QString tipExtra(){return m_tipExtra;}
     int bodyTrackType(){return int(m_bodyTrackType);}
     void setBodyTrackType(int type);
     void setCameraWidth(int width){ m_cameraWidth = width;}
@@ -103,9 +217,11 @@ public:
     //读取道具模型
     void readCategoryBundle();
     //更新道具参数,place为QList<QVariant>的下标,index为替换字符下标,value替换字符值
-    void updataCategory(QList<QVariant> &lv, int place, int index, QString value);
+    void updateCategory(QList<QVariant> &lv, int place, int index, QString value);
     //从配置文件中导入自定义美妆列表
     void readCustomMakeup();
+    //从配置文件中导入风格推荐
+    void readStyleRecommendation();
     //创建nama默认图,显示摄像头未连接
     void creatdefaultFrame();
     //初始化avator配置参数
@@ -113,7 +229,7 @@ public:
     //解绑avatar
     void unLoadAvatar();
     //更新绿幕安全区域
-    void updataGSSafeArea(QImage &image);
+    void updateGSSafeArea(QImage &image);
     //读取json配置
     void readUserConfig();
     //使用精品道具
@@ -162,7 +278,16 @@ public:
     QStringList      m_userCustomMakeup;
     //右侧滤镜
     QList<QVariant>  m_filter;
-    //
+    //鉴权列表
+    QVariant m_checkMode;
+    //风格推荐参数
+    StyleRecommendationParam m_styleRecommendationParam;
+    //风格推荐选中第几个
+    int m_styleRecommendationIndex = -1;
+    //风格推荐名称排序列表,按展示排序,xuejie第一个
+    QStringList m_styleRecommendationName;
+    //绿幕最近使用颜色
+    QVariant m_gsKeyColor;
     //临时美妆列表,最终存到m_customMakeup每个的第一条
     QList<QVariant>  m_tempCustomMakeup;
     //自定义美妆
@@ -185,6 +310,7 @@ public:
     QMap<QString,QString> m_tipMap;
     //qml显示提示文字
     QString          m_tip = "";
+    QString          m_tipExtra = "";
     //显示AR功能跟美体模块无法共用 flag
     bool             m_flagARBody = false;
     //qml中显示avator或者绿幕图像
@@ -210,6 +336,8 @@ public:
     QString m_begUserFilePath = "";
     //自定义绿幕安全区域所用图片路径
     QString m_gsSafeUserFilePath = "";
+    //绿幕最近使用颜色
+    QList<QVector3D> m_gsKeyColorList;
     //绿幕图像初始位置
     QPointF m_gsStart = QPointF(0.5,0.5);
     QPointF m_gsSize = QPointF(0.5,0.5);
@@ -261,6 +389,8 @@ public:
     bool m_CameraType = false;
     //绿幕选择摄像头小窗口播放
     bool m_gsCameraPlay = false;
+    //风格推荐保存flag,更新参数时不保存
+    bool m_bSaveStyleRecommendation = false;
 signals:
     //qml界面相关
     void cameraSetListChanged();
@@ -269,7 +399,8 @@ signals:
     void frameSizeChanged();
     void fpsChanged();
     void renderTimeChanged();
-    void tipChanged();
+    void tipChanged(int time = 2);
+    void tipExtraChanged(int time = 2);
     void arBodyFlagChanged(bool arBody);
     void showAvatorChanged();
     void bodyTrackTypeChanged();
@@ -284,19 +415,29 @@ signals:
     void gsSelectCameraChanged();
     void selectCameraSetChanged();
     //通知qml刷新自定义背景分割图片
-    void updataBsgPic();
+    void updateBsgPic();
     //通知qml刷新自定义绿幕安全区域图片
-    void updataGSSafePic();
+    void updateGSSafePic();
     //通知主线程更新配置
-    void updataConfig();
+    void updateConfig();
     //qml更新选中相机
-    void updataCameraIndex(int index);
-    void updataCameraSet(int index);
-    void updataBodyTrackType(int type);
-    void updataSelectCategory(int x, int y, int z);
-    void updataGSSelectIndex(int x, int y);
+    void updateCameraIndex(int index);
+    void updateCameraSet(int index);
+    void updateBodyTrackType(int type);
+    void updateSelectCategory(int x, int y, int z);
+    void updateGSSelectIndex(int x, int y);
+    //更新绿幕实际图位置区域
+    void updateGSPreviewRect(float startx, float starty, float endx, float endy);
+    //更新美肤参数
+    void updateBeautySkinParam();
+    //更新美型参数
+    void updateBeautyFaceParam();
     //更新绿幕参数
-    void updataGreenScreenParam();
+    void updateGreenScreenParam();
+    //更新绿幕重播按钮状态
+    void updateReplayButton(bool flag);
+    //更新ui鉴权
+    void updateCheckModule();
 public slots:
     //界面开启获取相机列表
     void getCameraList();
@@ -305,15 +446,15 @@ public slots:
     //从绿幕视频从读取到一帧
     void getGSPresentFrame(const cv::Mat &frame);
     //更新绿幕背景
-    void UpdateGreenScreenSegment(const cv::Mat & dataRGBA);
+    void updateGreenScreenSegment(const cv::Mat & dataRGBA);
     //更新背景分割背景
-    void UpdateBackgroundSegment(const cv::Mat & dataRGBA);
+    void updateBackgroundSegment(const cv::Mat & dataRGBA);
     //qml调用使用道具
     void useProps(int index);
     //qml调用不使用当前道具
     void nonuseProps();
     //qml中调用更改参数 美肤,美型,美体,绿幕通用
-    void updataItemParam(int item, int index, QString value);
+    void updateItemParam(int item, int index, QString value);
     //qml中调用重置参数
     void resetItemParam(int item);
     //调用nama函数
@@ -342,6 +483,8 @@ public slots:
     void gsCameraConfirm();
     //取色点击
     void selectColor(int mouseX, int mouseY);
+    //绿幕保存最近使用颜色
+    void saveGSKeyColor(QVector3D color3d);
     //qml中绿幕颜色圈颜色变化
     void gsColorChange(QString color);
     //绿幕获取移动后位置
@@ -351,7 +494,7 @@ public slots:
     //绿幕窗口放大缩小,true放大
     void gsZoom(bool zoom);
     //绿幕松开鼠标更新初始位置
-    void gsUpdatalocation(double moveX, double moveY);
+    void gsUpdatelocation(double moveX, double moveY);
     //绿幕播放背景视频
     void gsPlayBGVideo(QString videopath);
     //设置绿幕取色状态
@@ -384,10 +527,10 @@ public slots:
     void stopStartWebCamera(bool flag);
     //改变摄像头类型,true为网络摄像头,false为usbs摄像头
     void changeCameraType(bool type);
-    //保存用户操作配置
-    void saveUserConfig();
+    //保存用户操作配置,默认只保存自定义背景图、绿幕安全图、绿幕最近使用颜色,true全保存
+    void saveUserConfig(bool flag = false);
     //更新用户操作配置,界面参数到nama中
-    void updataUserConfig();
+    void updateUserConfig();
     //选择绿幕输入重新视频播放
     void startMediaPlayer(){
         if(m_gsSelectCamera == false){
@@ -405,10 +548,28 @@ public slots:
     //轻美妆设置口红颜色
     void setLightMakeUpLipColor(string colorpath);
     //更新滤镜
-    void updataFilter();
+    void updateFilter();
+    //更新风格推荐参数
+    void updateStyleRecommendation(int index = -1);
+    //保存风格推荐
+    void saveStyleRecommendation();
+    //绿幕切换卡一帧
     void setRenderNewFrame(){m_renderNewFrame = false; m_newImage = false;}
     //设置背景分割会议版 0|通用版 1
     void setBackgroundSegType(int type);
+    //绿幕视频播放状态改变
+    void changedStatus(QMediaPlayer::MediaStatus);
+    //绿幕视频重新播放
+    void gsVideoMediaReplay(){ m_gsVideoMediaPlayer.play(); }
+    //鉴权验证
+    bool checkModuleCode(int category);
+    bool checkModuleCodeSide(int side);
+    //显示检测不到人脸提示
+    void detectionTip();
+    //显示检测不到人体提示
+    void detectionBodyTip();
+    //右侧美肤,美型切换
+    void updateTapContent(int index);
 };
 
 #endif // UIBRIDGE_H

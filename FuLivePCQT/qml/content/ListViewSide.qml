@@ -1,4 +1,4 @@
-﻿import QtQuick 2.0
+﻿import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 
@@ -12,18 +12,20 @@ Rectangle{
     property var i_Value: 0      //滑动条值或者选择第几个按钮
     property var b_RestoreDefault: false //恢复默认
     property var b_Middle: false //滑动条是否从中间开始,true中间[-50,50],false[0,100]
+    property bool b_TextEdit: false //避免循环修改文本滑块
     signal iValueChanged(var value)
-    signal clickRestoreDefault()
     x: 0
     y: 0
-    width: 415
+    width: 420
     height: 85
     function resetValue(ivalue) {
         i_Value = ivalue
         m_lButton.currentIndex = i_Button_Num - i_Value
     }
+    function defaultClick(){
+    }
     //如果是精准美肤,选中关闭按钮时图标变灰,其他都是蓝
-    function updataImage(ivalue){
+    function updateImage(ivalue){
         if(b_Type && m_text.text == "精准美肤"){
             if(ivalue == 0){
                 icon_Full = "qrc:/res/list_icon_"+ icon_Name + "_close.png"
@@ -62,35 +64,17 @@ Rectangle{
             m_lmButton.append({"tText": str2})
             m_lButton.currentIndex = i_Button_Num - i_Value
         }
-        updataImage(i_Value)
+        updateImage(i_Value)
     }
     //显示恢复默认
-    Rectangle{
+    RectangleButtonText{
         visible: b_RestoreDefault
         id: m_rDefault
-        anchors.centerIn: parent
-        width: 130
-        height: 40
-        border.color: "#969DB4"
-        border.width: 2
-        color:"#FFFFFF"
-        radius: 8
-        TextBlack{
-            anchors.fill: parent
-            text:"恢复默认"
-        }
-        MouseArea{
-            anchors.fill: parent
-            hoverEnabled: true
-            onEntered: {
-                m_rDefault.color = "#98A5F5"
-            }
-            onExited: {
-                m_rDefault.color = "#FFFFFF"
-            }
-            onClicked: {
-                clickRestoreDefault()
-            }
+        x: 145
+        y: 40
+        t_Text: "恢复默认"
+        function onButtonClick() {
+            defaultClick()
         }
     }
     //显示按钮组或者滑块
@@ -100,10 +84,10 @@ Rectangle{
             id: m_lButton
             x: 115
             y: 15
-            width: 280
+            width: 290
             height: 35
             visible: b_Type
-            spacing: 15
+            spacing: 8
             orientation: ListView.Horizontal
             model: ListModel
             {
@@ -111,26 +95,28 @@ Rectangle{
             }
             delegate: Rectangle{
                 //鼠标是否处在此范围内
-                property var b_inMouse: false
+                property var b_hover: false
                 id: m_rButton
-                width: (280 - (m_lmButton.count - 1) * 15) / m_lmButton.count
+                width: m_lmButton.count == 2 ? 100 : (290 - (m_lmButton.count - 1) * 8) / m_lmButton.count
                 height: 35
-                radius: 8
-                color: b_inMouse ? "#7FB8FC" : (m_lButton.currentIndex == index ? "#7888EA" : "#E0E3EE")
+                radius: 5
+                color: m_lButton.currentIndex == index ? "#7787E9" : "#FFFFFF"
+                border.color: m_lButton.currentIndex == index ? "#FFFFFF" : b_hover ?"#7787E9" : "#959CB4"
+                border.width: 1
                 TextBlack {
                     id: m_tButton
                     anchors.fill: parent
                     text: tText
-                    color:  m_lButton.currentIndex == index ? "#FFFFFF" : "#000000"
+                    color:  m_lButton.currentIndex == index ? "#FFFFFF" : b_hover ?"#7787E9" : "#959CB4"
                 }
                 MouseArea{
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered: {
-                        b_inMouse = true
+                        b_hover = true
                     }
                     onExited: {
-                        b_inMouse = false
+                        b_hover = false
                     }
                     //按钮更改隐藏滑块值
                     onClicked: {
@@ -142,10 +128,11 @@ Rectangle{
         }
         Slider{
             id: m_slider
-            x: 125
-            y: 25
-            width: 255
-            height: 20
+            wheelEnabled :false
+            x: 105
+            y: 17
+            width: 250
+            height: 24
             maximumValue: b_Middle ? 50 : 100
             minimumValue: b_Middle ? -50 : 0
             stepSize: 1.0
@@ -153,42 +140,90 @@ Rectangle{
             visible: !b_Type
             onValueChanged:
             {
-                updataImage(value)
-                m_tslider.text = value
+                updateImage(value)
+                if(!b_TextEdit){
+                    m_tslider.text = value
+                }
                 iValueChanged(value)
             }
             style: SliderStyle
             {
-                //增加一段留白
-                handle: Rectangle
+                handle:Rectangle
                 {
-                    width: 20;
-                    height: 16;
-                    color:"#00FFFFFF"
-                    Rectangle
-                    {
-                        anchors.centerIn: parent;
-                        color: control.pressed ? "#4296FA":"#FFFFFF";
-                        x:5
-                        y:2
-                        width: 10;
-                        height: 16;
-                    }
+                    id: m_ssh
+                    anchors.centerIn: parent
+                    color: "#FFFFFF"//control.pressed ? "#4296FA":"#FFFFFF"
+                    border.color: "#46437133"
+                    border.width: 1
+                    radius: 90
+                    width: 24
+                    height: 24
                 }
+
                 groove:Rectangle
                 {
-                    color: control.pressed ? "#7FB8FC" : "#E0E3EE"
-                    radius:8
-                    implicitWidth: 255
-                    implicitHeight: 20
+                    implicitWidth: 250
+                    implicitHeight: 8
+                    color: "#FFFFFF"
+                    Rectangle{
+                        x: 10
+                        y: 0
+                        width: 230
+                        height: 8
+                        color: "#E0E3EE" //control.pressed ? "#7FB8FC" : "#E0E3EE"
+                        radius: 5
+                        Rectangle{
+                            x: b_Middle ? (m_slider.value > 0) ? 115 : 115 + 2.3 * m_slider.value : 0
+                            y: 0
+                            width: b_Middle ? 2.3 * Math.abs(m_slider.value) : 2.3 * m_slider.value
+                            height: 8
+                            color: "#7787E9"
+                            radius: 5
+                        }
+                    }
                 }
             }
         }
-        TextBlack{
-            id: m_tslider
-            anchors.centerIn: m_slider
+
+        Rectangle{
+            id: m_editR
+            x: 365
+            y: 17
+            width: 32
+            height: 28
+            border.color: "#E0E3EE"
+            border.width: 1
+            radius: 5
             visible: !b_Type
-            text: "0"
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: {
+                    m_editR.border.color = "#7787E9"
+                }
+                onExited: {
+                    if(!m_tslider.activeFocus){
+                        m_editR.border.color = "#E0E3EE"
+                    }
+                }
+            }
+            TextInput{
+                id: m_tslider
+                text: "0"
+                anchors.fill: parent
+                color: "#5C6071"
+                font {family: "微软雅黑"; pixelSize: 14;}
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                validator: IntValidator{bottom: b_Middle ? -50 : 0; top: b_Middle ? 50 : 100;}
+                onEditingFinished:{
+                    m_tslider.focus = false
+                    b_TextEdit = true
+                    i_Value = text
+                    b_TextEdit = false
+                    m_editR.border.color = "#E0E3EE"
+                }
+            }
         }
         Image {
             id: m_image
@@ -207,4 +242,5 @@ Rectangle{
             text: t_Text
         }
     }
+
 }

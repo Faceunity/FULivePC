@@ -10,19 +10,20 @@ using namespace std;
 
 enum BundleCategory
 {
-    Avatar,                 //虚拟人
-    Animoji,                //动物
-    ItemSticker,            //道具贴图
     ItemJingpin,            //精品
-    ARMask,                 //AR面具
-    ExpressionRecognition,  //表情识别
-    MusicFilter,            //音乐滤镜
-    BackgroundSegmentation, //人像分割
-    GestureRecognition,     //手势识别
-    MagicMirror,            //哈哈镜
+    ItemSticker,            //道具贴图
+    StyleRecommendation,    //风格推荐
     Makeup,                 //美妆
     LightMakeup,            //轻美妆
+    BackgroundSegmentation, //人像分割
+    GestureRecognition,     //手势识别
+    ExpressionRecognition,  //表情识别
+    Animoji,                //动物
+    Avatar,                 //虚拟人
     BeautyHair,             //美发
+    ARMask,                 //AR面具
+    MusicFilter,            //音乐滤镜
+    MagicMirror,            //哈哈镜
     BigHead,                //搞笑大头
     GreenScreen,            //绿幕
     SafeArea,               //绿幕安全区域
@@ -72,7 +73,7 @@ public:
     //当前调用道具bundle
     int m_bundleCurrent = 0;
     //道具Bundle列表,道具名,道具nama中id
-//    std::map<std::string, int> m_BundlesMap;
+    //    std::map<std::string, int> m_BundlesMap;
     //播放音乐
     Mp3 *m_mp3 = nullptr;
     //开始播放音乐
@@ -161,6 +162,7 @@ public:
     void NonuseGreenScreenSafeArea();
     //更新avator参数
     void ApplyBodyTrackConfig(BodyTrackParam params);
+    //改变摄像头
     void CameraChange();
 };
 

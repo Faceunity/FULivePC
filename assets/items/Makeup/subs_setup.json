@@ -1,4 +1,4 @@
-{
+﻿{
   "CMEyeBrow": [
     {
       "bundle": "mu_style_eyebrow_01",
@@ -1304,7 +1304,7 @@
 	{
       "bundle": "mu_style_lip_03",
       "icon": "demo_style_lip_03.png",
-      "name": "润泽I",
+      "name": "润泽",
 	  "type": 2,
       "colors": [
         [
@@ -1342,7 +1342,7 @@
 	{
       "bundle": "mu_style_lip_05",
       "icon": "demo_style_lip_05.png",
-      "name": "润泽II",
+      "name": "水润",
 	  "type": 7,
       "colors": [
         [
@@ -1458,7 +1458,7 @@
     {
       "bundle": "mu_style_eyepupil_01",
       "icon": "demo_style_eyepupil_01.png",
-	  "name": "蜜糖",
+      "name": "蜜糖",
       "colors": [
         [
           0.33,
@@ -1495,49 +1495,49 @@
     {
       "bundle": "mu_style_eyepupil_03",
       "icon": "mu_style_eyepupil_03.png",
-	  "name": "奶茶",
+      "name": "奶茶",
       "colors": [
       ]
     },
     {
       "bundle": "mu_style_eyepupil_04",
       "icon": "mu_style_eyepupil_04.png",
-	  "name": "水波",
+      "name": "水波",
       "colors": [
       ]
     },
     {
       "bundle": "mu_style_eyepupil_05",
       "icon": "mu_style_eyepupil_05.png",
-	  "name": "鎏金",
+      "name": "鎏金",
       "colors": [
       ]
     },
     {
       "bundle": "mu_style_eyepupil_06",
       "icon": "mu_style_eyepupil_06.png",
-	  "name": "孔雀",
+      "name": "孔雀",
       "colors": [
       ]
     },
     {
       "bundle": "mu_style_eyepupil_07",
       "icon": "mu_style_eyepupil_07.png",
-	  "name": "星河",
+      "name": "星河",
       "colors": [
       ]
     },
     {
       "bundle": "mu_style_eyepupil_08",
       "icon": "mu_style_eyepupil_08.png",
-	  "name": "落目",
+      "name": "落目",
       "colors": [
       ]
     },
     {
       "bundle": "mu_style_eyepupil_09",
       "icon": "mu_style_eyepupil_09.png",
-	  "name": "极光",
+      "name": "极光",
       "colors": [
       ]
     }
