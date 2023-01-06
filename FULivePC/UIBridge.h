@@ -4,14 +4,15 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include "imgui/imgui.h"
 
 #define MAX_PATH_LENGTH 1024  
-#define MAX_BEAUTYFACEPARAMTER 9
+#define MAX_BEAUTYFACEPARAMTER 11
 #define MAX_FACESHAPEPARAMTER 25
 #define MAX_BODY_SHAPE_PARAM  7
 #define MAX_GREEN_SCREEN_PARAM 3
-
+#define MAX_STYLE_RECOMMENDATION_PARAM 2 //13
 
 #define MAKEUP_CUSTOM_NAME ("demo_icon_customize.bundle")
 #define LIGHT_MAKEUP_NAME ("light_makeup.bundle")
@@ -79,27 +80,29 @@ enum CERTIFACITE_TYPE_EXT
 	DEFINE_BOUTIQUE_STICKER,
 	DEFINE_ITEM_OFFLINE_SIGN,
 	DEFINE_PK_GAME,
+	DEFINE_STYLE_RECOMMENDATION,
 	DEFINE_SIZE_EXT
 };
 static const int define_arr_ext[DEFINE_SIZE_EXT] = { 0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80,0x100,0x200,0x400,0x800,0x1000,0x2000,0x4000,0x8000,
-0x10000,0x20000,0x40000,0x80000};
+0x10000,0x20000,0x40000,0x80000, 0x100000};
 
 
 enum BundleCategory 
 {
-	Avatar,
-	Animoji,
-	ItemSticker,
 	ItemJingpin,
-	ARMask,
-	ExpressionRecognition,
-	MusicFilter,
-	BackgroundSegmentation,
-	GestureRecognition,
-	MagicMirror,
+	ItemSticker,
+	StyleRecommendation,
 	Makeup,
 	LightMakeup,
+	BackgroundSegmentation,
+	GestureRecognition,
+	ExpressionRecognition,
+	Animoji,
+	Avatar,
 	BeautyHair,
+	ARMask,
+	MusicFilter,
+	MagicMirror,
 	BigHead,
 	GreenScreen,
 	SafeArea,
@@ -107,16 +110,16 @@ enum BundleCategory
 };
 
 static const int g_checkIndex[Count] = {
-	1,0,0,1,0,0,0,0,0,0,0,1,0,1,1
+	1,0,1,0,1,0,0,0,0,1,0,0,0,0,1,1
 };
 
 static const int g_checkID[Count] = 
 { 
-	define_arr_ext[DEFINE_BODY_TRACK], define_arr[DEFINE_Avatar],define_arr[DEFINE_2D_Sticker],define_arr_ext[DEFINE_BOUTIQUE_STICKER],
-	define_arr[DEFINE_AR_Mask],  define_arr[DEFINE_Expression_Recognition], define_arr[DEFINE_Music_Filter],
-	define_arr[DEFINE_Background_Segmentation], define_arr[DEFINE_Gesture_Recognition], define_arr[DEFINE_Facewarp],
-	define_arr[DEFINE_Make_Up], define_arr_ext[DEFINE_LIGHT_MAKEUP], define_arr[DEFINE_Hair_Color], define_arr_ext[DEFINE_HEAD_SEGMENTATION],
-	define_arr_ext[DEFINE_GREEN_SCREEN_EDIT]
+	define_arr_ext[DEFINE_BOUTIQUE_STICKER],define_arr[DEFINE_2D_Sticker],define_arr_ext[DEFINE_STYLE_RECOMMENDATION],
+	define_arr[DEFINE_Make_Up], define_arr_ext[DEFINE_LIGHT_MAKEUP],define_arr[DEFINE_Background_Segmentation], 
+	define_arr[DEFINE_Gesture_Recognition],define_arr[DEFINE_Expression_Recognition],define_arr[DEFINE_Avatar],
+	define_arr_ext[DEFINE_BODY_TRACK],define_arr[DEFINE_Hair_Color], define_arr[DEFINE_AR_Mask], define_arr[DEFINE_Music_Filter],
+	define_arr[DEFINE_Facewarp],define_arr_ext[DEFINE_HEAD_SEGMENTATION], define_arr_ext[DEFINE_GREEN_SCREEN_EDIT]
 };
 
 enum SideCategory {
@@ -161,6 +164,16 @@ typedef struct tagGreenScreenState
 
 }GreenScreenState;
 
+struct StyleRecommendationParam {
+	string styleName;
+	float mFaceBeautyLevelDefault[MAX_BEAUTYFACEPARAMTER];
+	float mFaceShapeLevelDefault[MAX_FACESHAPEPARAMTER];
+	float mFaceBeautyLevel[MAX_BEAUTYFACEPARAMTER];
+	float mFaceShapeLevel[MAX_FACESHAPEPARAMTER];
+	int mMakeUpIntensity;
+	int mFilterLevel;
+};
+
 struct LightMakeupParam
 {
 	std::string blusherPath;
@@ -181,6 +194,10 @@ public:
 
 	static int bundleCategory;
 	static int bundleCategoryLast;
+	static int bundleCategoryPage;
+	static int categoryPage;
+	static int customMakeupIndex;
+	static int rightTabIndex;
 	static int lastMaxFace;
 	// 用于绿幕
 	static int gsBundleCategory;
@@ -189,6 +206,7 @@ public:
 	
 	static bool showItemSelectWindow;
 	static bool showItemTipsWindow;
+	static bool showItemTipsWindowExtra;
 	static bool showDegubInfoWindow;
 	static bool showFilterSlider; 
 	static int  showGreenScreen;
@@ -245,23 +263,25 @@ public:
 	static float m_localBgSegVideoWidth;
 	static float m_localBgSegVideoHeight;
 	
-	static int mEnableSkinDect;
-	static int mEnableHeayBlur;
-	static int mEnableExBlur;
 	static float mFaceBeautyLevel[MAX_BEAUTYFACEPARAMTER];
 	static float mFaceShapeLevel[MAX_FACESHAPEPARAMTER];
 	static float mFilterLevel[10];
 	static float mMakeupLevel[10];
 	static float mBodyShapeLevel[MAX_BODY_SHAPE_PARAM];
 	static float mGSParam[MAX_GREEN_SCREEN_PARAM];
-		
+	static vector<StyleRecommendationParam> mStyleParamList;
+	static int mStyleRecommendationIndex;
+	static int mStyleRecommendationIndexLast;
 	static int mSelectedCamera;
 	static bool mSelectedBsType;
 	static double mLastTime;
+	static double mLastTimeExtra;
 	static string mCurRenderItemName;
 	// 专用于绿幕
 	static string mCurRenderGSItemName;
 	static string mCurRenderGSSAItemName;
+	static string mCurCameraName;
+
 	static vector<string> categoryBundles[BundleCategory::Count];
 
     static void FindAllBundle(string folder,vector<string> &files);
@@ -273,11 +293,13 @@ public:
 	static void FindAllCommonPICNameFromResourceBundle(string folder, vector<string> &names);
  
 	static string GetFileFullPathFromResourceBundle(const char * path);
+
 protected:
 private:
 };
+const string g_styleRecommendationName[MAX_STYLE_RECOMMENDATION_PARAM] = { "BeautyParam", "SeniorSister" };
 
-const string g_faceBeautyParamName[MAX_BEAUTYFACEPARAMTER] = { "blur_level","color_level_mode2", "red_level","sharpen", "face_threed", "eye_bright", "tooth_whiten" ,"remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2" };
+const string g_faceBeautyParamName[MAX_BEAUTYFACEPARAMTER] = { "skin_detect", "blur_type","blur_level","color_level_mode2", "red_level","sharpen", "face_threed", "eye_bright", "tooth_whiten" ,"remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2" };
 
 const string g_faceShapeParamName[MAX_FACESHAPEPARAMTER] = { "cheek_thinning_mode2","eye_enlarging_mode3","intensity_eye_circle", "intensity_chin_mode2", 
 			"intensity_forehead_mode2", "intensity_nose_mode2","intensity_mouth_mode3", "intensity_lip_thick",
@@ -322,19 +344,20 @@ const string g_assetDir = "assets/";
 #endif
 
 const string gBundlePath[] = {
-	g_assetDir + "Avatars/",
-	g_assetDir + "items/" + "Animoji",
-	g_assetDir + "items/" + "ItemSticker",
 	g_assetDir + "items/" + "JINPINHOLDER",
-	g_assetDir + "items/" + "ARMask",
-	g_assetDir + "items/" + "ExpressionRecognition",
-	g_assetDir + "items/" + "MusicFilter",
-	g_assetDir + "items/" + "BackgroundSegmentation",
-	g_assetDir + "items/" + "GestureRecognition",
-	g_assetDir + "items/" + "MagicMirror",
+	g_assetDir + "items/" + "ItemSticker",
+	g_assetDir + "items/" + "StyleRecommendation",
 	g_assetDir + "items/" + "Makeup",
 	g_assetDir + "items/" + "LightMakeup",
+	g_assetDir + "items/" + "BackgroundSegmentation",
+	g_assetDir + "items/" + "GestureRecognition",
+	g_assetDir + "items/" + "ExpressionRecognition",
+	g_assetDir + "items/" + "Animoji",
+	g_assetDir + "Avatars/",
 	g_assetDir + "items/" + "BeautyHair",
+	g_assetDir + "items/" + "ARMask",
+	g_assetDir + "items/" + "MusicFilter",
+	g_assetDir + "items/" + "MagicMirror",
 	g_assetDir + "items/" + "BigHead",
 	g_assetDir + "items/" + "GreenScreen"
 };
@@ -348,6 +371,8 @@ const string gGSSAPic = g_assetDir + "items/" + "SafeArea";
 const string gGSColorConfig = g_assetDir + "colorConfig.json";
 
 const string gCustomCMConfig = g_assetDir + "items/Makeup/subs_setup.json";
+
+const string gCustomStyleConfig = g_assetDir + "items/StyleRecommendation/style_setup.json";
 
 const string gUserConfig = "UserConfig.json";
 

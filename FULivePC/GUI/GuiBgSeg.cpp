@@ -87,20 +87,62 @@ bool GUIBgSeg::LoadUserConfig() {
 
 void GUIBgSeg::SaveUserConfig() {
 
+	string pathSaveArea, pathBgSeg;
+	ifstream in(GetCongfigPath().c_str());
+	if (!in.is_open()) {
+		fprintf(stderr, "fail to read json file: %s\n", gUserConfig.data());
+		return;
+	}
+
+	string json_content((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
+	in.close();
+	rapidjson::Document dom;
+	rapidjson::Document::AllocatorType& allocator = dom.GetAllocator();
+	vector<cv::Vec4b> m_vecColorRecent;
+	if (!dom.Parse(json_content.c_str()).HasParseError())
+	{
+		if (dom.HasMember("GSSaveAreaFilePath") && dom["GSSaveAreaFilePath"].IsString())
+		{
+			pathSaveArea = dom["GSSaveAreaFilePath"].GetString();
+		}
+		if (dom.HasMember("GSKeyColors") && dom["GSKeyColors"].IsArray())
+		{
+			const auto& array = dom["GSKeyColors"];
+			int size = array.Size();
+			for (int j = 0; j < array.Size(); j++)
+			{
+				if (array[j].IsArray() && array[j].Size() >= 4)
+				{
+					cv::Vec4b colorItem;
+					for (int k = 0; k < array[j].Size(); k++)
+					{
+						colorItem[k] = array[j][k].GetFloat();
+					}
+					m_vecColorRecent.push_back(colorItem);
+				}
+			}
+		}
+	}
+
 	rapidjson::StringBuffer buf;
 	//rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
 	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buf); // it can word wrap
-
 	writer.StartObject();
-
+	writer.Key("GSSaveAreaFilePath");
+	writer.String(pathSaveArea.data());
 	writer.Key("BgSegFilePath");
-
 	writer.String(mConfig.strFilePath.data());
-
+	writer.Key("GSKeyColors");
+	writer.StartArray();
+	for (int i = 0; i < m_vecColorRecent.size(); i++) {
+		writer.StartArray();
+		for (int j = 0; j < 4; j++) {
+			writer.Double(m_vecColorRecent[i][j]);
+		}
+		writer.EndArray();
+	}
+	writer.EndArray();
 	writer.EndObject();
-
-
-	const char* json_content = buf.GetString();
 
 	ofstream outfile;
 	outfile.open(GetCongfigPath().data());
@@ -108,7 +150,7 @@ void GUIBgSeg::SaveUserConfig() {
 		fprintf(stderr, "fail to open file to write: %s\n", gUserConfig.data());
 	}
 
-	outfile << json_content << endl;
+	outfile << buf.GetString() << endl;
 	outfile.close();
 
 }
@@ -141,40 +183,49 @@ static string GetUserIconPath() {
 
 void GUIBgSeg::ShowBgSegOption(NamaExampleNameSpace::Nama* nama)
 {
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(250.f / 255.f, 250.f / 255.f, 250.f / 255.f, 255.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(120.f / 255.f, 136.f / 255.f, 230.f / 255.f, 255.0f));
-	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 90.0f);
-	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 580 * scaleRatioH), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(876 * scaleRatioW, 95 * scaleRatioH), ImGuiCond_Always);
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 0.88f));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(250.f / 255.f, 250.f / 255.f, 250.f / 255.f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(120.f / 255.f, 136.f / 255.f, 230.f / 255.f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(250.f / 255.f, 250.f / 255.f, 250.f / 255.f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(92.f / 255.f, 96.f / 255.f, 113.f / 255.f, 1.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 20.0f);
+	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 570 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(876 * scaleRatioW, 85 * scaleRatioH), ImGuiCond_Always);
 
 	ImGui::Begin("itemSelect##1563", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
-	
-	if (LayoutButton(ImVec2(244, 10), ImVec2(176, 40), u8"通用分割版"))
+	if (UIBridge::m_bShowingBodyBeauty) {
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+	}
+	if (LayoutButton2(ImVec2(244, 10), ImVec2(176, 40), u8"通用分割版"))
 	{
 		UIBridge::mSelectedBsType = true;
 		nama->setHumanSegScene(1);
 	}
 	ImGui::SameLine(0.f, 48.f * scaleRatioW);
-	if (LayoutButton(ImVec2(0, 10), ImVec2(176, 40), u8"视频会议版"))
+	if (LayoutButton2(ImVec2(0, 10), ImVec2(176, 40), u8"视频会议版"))
 	{
 		UIBridge::mSelectedBsType = true;
 		nama->setHumanSegScene(0);
 	}
-
+	if (UIBridge::m_bShowingBodyBeauty) {
+		ImGui::PopItemFlag();
+	}
 	ImGui::End();
-	ImGui::PopStyleVar(1);
-	ImGui::PopStyleColor(3);
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor(5);
 }
 
 void GUIBgSeg::ShowBgSegPannel(NamaExampleNameSpace::Nama* nama) {
-
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .0f));
-	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 580 * scaleRatioH), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(876 * scaleRatioW, 95 * scaleRatioH), ImGuiCond_Always);
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 0.88f));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.0f));
+	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 570 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(876 * scaleRatioW, 85 * scaleRatioH), ImGuiCond_Always);
 	ImGui::Begin("itemSelect##1563", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
-
+	if (UIBridge::m_bShowingBodyBeauty) {
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+	}
 	int loopCnt = 0;
 
 	if (mIsUserConfigOK)
@@ -242,6 +293,9 @@ void GUIBgSeg::ShowBgSegPannel(NamaExampleNameSpace::Nama* nama) {
 			mIsSelectBgSegFileOK = false;
 			UIBridge::m_curRenderItem = -1;
 			UIBridge::mCurRenderItemName = "NONE";
+			UIBridge::mStyleRecommendationIndex = 0;
+			loadStyleParam();
+			nama->UpdateBeauty();
 			buttonClick = true;
 		}
 		else {
@@ -260,20 +314,6 @@ void GUIBgSeg::ShowBgSegPannel(NamaExampleNameSpace::Nama* nama) {
 
 		if (buttonClick)
 		{
-			if (UIBridge::mCurRenderItemName != itemName)
-			{
-				UIBridge::mCurRenderItemName = itemName;
-				UIBridge::mLastTime = ImGui::GetTime() + 2.0;
-				UIBridge::showItemTipsWindow = false;
-				nama->SelectBundle(itemPath);
-			}
-			else
-			{
-				UIBridge::mCurRenderItemName = "NONE";
-				UIBridge::mLastTime = 0.0;
-				UIBridge::showItemTipsWindow = false;
-				UIBridge::mNeedStopMP3 = true;
-			}
 			if (UIBridge::showLightMakeupTip) {
 				UIBridge::showLightMakeupTip = false;
 				nama->UpdateFilter(UIBridge::m_curFilterIdx);
@@ -284,15 +324,35 @@ void GUIBgSeg::ShowBgSegPannel(NamaExampleNameSpace::Nama* nama) {
 				nama->DestroyAll();
 				UIBridge::showCustomMakeup = false;
 			}
+			if (UIBridge::mCurRenderItemName != itemName)
+			{
+				UIBridge::mCurRenderItemName = itemName;
+				UIBridge::mStyleRecommendationIndex = 0;
+				loadStyleParam();
+				nama->UpdateBeauty();
+				if (!UIBridge::m_bLoadWrongNamePNGFile) {
+					UIBridge::mLastTimeExtra = ImGui::GetTime() + 2.0;
+					UIBridge::showItemTipsWindowExtra = false;
+				}
+				nama->SelectBundle(itemPath);
+			}
+			else
+			{
+				UIBridge::mCurRenderItemName = "NONE";
+				UIBridge::mLastTime = 0.0;
+				UIBridge::showItemTipsWindow = false;
+				UIBridge::mNeedStopMP3 = true;
+			}
 		}
 		ImGui::SameLine(0.f, 22.f * scaleRatioW);
 
 		ImGui::PopID();
 	}
-
+	if (UIBridge::m_bShowingBodyBeauty) {
+		ImGui::PopItemFlag();
+	}
 	ImGui::End();
-	ImGui::PopStyleColor();
-	ImGui::PopStyleColor();
+	ImGui::PopStyleColor(4);
 
 }
 
@@ -401,7 +461,7 @@ void GUIBgSeg::SelectBgSegFile() {
 				UIBridge::m_openLocalFileTip = u8"当前类型文件名称只能包含数字字符，请修改！";
 				open_filename = nullptr;
 				UIBridge::m_bLoadWrongNamePNGFile = true;
-				UIBridge::mLastTime = ImGui::GetTime() + 8.0;
+				UIBridge::mLastTimeExtra = ImGui::GetTime() + 8.0;
 
 			}
 		}

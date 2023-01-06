@@ -41,6 +41,8 @@ public:
 	void callback(FURect rect);
 	void changeRect(FURect rect);
 	bool isSelected(ImVec2* pos);
+	float isMouseWheel();
+	void ReSetOrigin();
 private:
 	ImGuiIO& io=ImGui::GetIO();
 	
@@ -50,6 +52,7 @@ private:
 	bool isMouseClicked();
 	bool isMouseDoubleClicked();
 	bool isMouseReleased();
+
 	
 };
 #endif

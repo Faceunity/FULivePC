@@ -196,15 +196,54 @@ static ImU32   TabGetColorU32(int idx)
 }
 
 // FIXME: flags can be removed once we move border to style
-static void RenderTabBackground(ImDrawList* draw_list, const ImRect& bb, ImU32 col)
+static void RenderTabBackground(ImDrawList* draw_list, const ImRect& bb, ImU32 col, int flagAngle)
 {
     ImGuiContext& g = *GImGui;
     //const float rounding = ImMin(g.FontSize * 0.35f, bb.GetWidth() * 0.5f);
-	const float rounding = 0.f;
-    draw_list->PathLineTo(ImVec2(bb.Min.x, bb.Max.y));
-    draw_list->PathArcToFast(ImVec2(bb.Min.x + rounding, bb.Min.y + rounding), rounding, 6, 9);
-    draw_list->PathArcToFast(ImVec2(bb.Max.x - rounding, bb.Min.y + rounding), rounding, 9, 12);
-    draw_list->PathLineTo(ImVec2(bb.Max.x, bb.Max.y));
+	const float rounding = 5.f;
+    //×óÉÏ¡¢ÓÒÉÏÕÛ½Ç
+    if (flagAngle == 0) {
+        draw_list->PathLineTo(ImVec2(bb.Min.x, bb.Max.y));
+        draw_list->PathArcToFast(ImVec2(bb.Min.x + rounding, bb.Min.y + rounding), rounding, 6, 9);
+        draw_list->PathArcToFast(ImVec2(bb.Max.x - rounding, bb.Min.y + rounding), rounding, 9, 12);
+        draw_list->PathLineTo(ImVec2(bb.Max.x, bb.Max.y));
+    }
+    //×óÉÏÕÛ½Ç
+    else if (flagAngle == 1) {
+        draw_list->PathLineTo(ImVec2(bb.Min.x, bb.Max.y));
+        draw_list->PathArcToFast(ImVec2(bb.Min.x + rounding, bb.Min.y + rounding), rounding, 6, 9);
+        //draw_list->PathArcToFast(ImVec2(bb.Max.x - rounding, bb.Min.y + rounding), rounding, 9, 12);
+        draw_list->PathLineTo(ImVec2(bb.Max.x, bb.Min.y));
+        draw_list->PathLineTo(ImVec2(bb.Max.x, bb.Max.y));
+    }
+    //×óÉÏ¡¢ÓÒÏÂÕÛ½Ç
+    else if (flagAngle == 2) {
+        draw_list->PathLineTo(ImVec2(bb.Min.x, bb.Max.y));
+        draw_list->PathArcToFast(ImVec2(bb.Min.x + rounding, bb.Min.y + rounding), rounding, 6, 9);
+        draw_list->PathLineTo(ImVec2(bb.Max.x, bb.Min.y));
+        draw_list->PathArcToFast(ImVec2(bb.Max.x - rounding, bb.Max.y - rounding), rounding, 0, 3);
+    }
+    //ÓÒÏÂÕÛ½Ç
+    else if(flagAngle == 3){
+        draw_list->PathLineTo(ImVec2(bb.Min.x, bb.Min.y));
+        draw_list->PathLineTo(ImVec2(bb.Max.x, bb.Min.y));
+        draw_list->PathArcToFast(ImVec2(bb.Max.x - rounding, bb.Max.y - rounding), rounding, 0, 3);
+        draw_list->PathLineTo(ImVec2(bb.Min.x, bb.Max.y));
+    }
+    //ÓÒÉÏÕÛ½Ç
+    else if (flagAngle == 4) {
+        draw_list->PathLineTo(ImVec2(bb.Min.x, bb.Min.y));
+        draw_list->PathArcToFast(ImVec2(bb.Max.x - rounding, bb.Min.y + rounding), rounding, 9, 12);
+        draw_list->PathLineTo(ImVec2(bb.Max.x, bb.Max.y));
+        draw_list->PathLineTo(ImVec2(bb.Min.x, bb.Max.y));
+    }  
+    //Ã»ÓÐÕÛ½Ç
+    else {
+        draw_list->PathLineTo(ImVec2(bb.Min.x, bb.Max.y));
+        draw_list->PathLineTo(ImVec2(bb.Max.x, bb.Max.y));
+        draw_list->PathLineTo(ImVec2(bb.Max.x, bb.Min.y));
+        draw_list->PathLineTo(ImVec2(bb.Min.x, bb.Min.y));
+    }
     draw_list->AddConvexPolyFilled(draw_list->_Path.Data, draw_list->_Path.Size, col);
     if (g.Style.FrameBorderSize > 0.0f)
         draw_list->AddPolyline(draw_list->_Path.Data, draw_list->_Path.Size, ImGui::GetColorU32(ImGuiCol_Border), false, g.Style.FrameBorderSize);
@@ -244,8 +283,8 @@ void    ImGui::BeginTabBar(const char* str_id, ImGuiTabBarFlags flags)
     ItemSize(tab_bar->BarRect);
     ItemAdd(tab_bar->BarRect, 0);
     window->DC.LastItemId = id; // We don't want Nav but for drag and drop we need an item id
-    tab_bar->ContentsRect = ImRect(window->DC.CursorPos, window->DC.CursorPos + GetContentRegionAvail());
-
+    //tab_bar->ContentsRect = ImRect(window->DC.CursorPos, window->DC.CursorPos + GetContentRegionAvail());
+    tab_bar->ContentsRect = ImRect(ImVec2(0,0), window->DC.CursorPos + GetContentRegionAvail());
     // Draw separator
 #if 1
     bool unfocused = !g.NavWindow || g.NavWindow->RootWindowForTitleBarHighlight != window->RootWindow;
@@ -505,7 +544,7 @@ void    ImGui::SetTabItemClosed(const char* label)
     }
 }
 
-bool    ImGui::TabItem(ImVec2 size, const char* label, bool* p_open, ImGuiTabItemFlags flags)
+bool    ImGui::TabItem(ImVec2 size, const char* label, bool* p_open, ImGuiTabItemFlags flags, int flagAngle)
 {
     // Acquire tab bar data
     ImGuiTabsContext& ctx = GTabs;
@@ -685,12 +724,13 @@ bool    ImGui::TabItem(ImVec2 size, const char* label, bool* p_open, ImGuiTabIte
 #else
         bool unfocused = false;
 #endif
-		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(50.f / 255.f, 48.f / 255.f, 92.f / 255.f, 1.f));
-		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(1.f, 1.f, 1.f, 1.f));
+		//ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(50.f / 255.f, 48.f / 255.f, 92.f / 255.f, 1.f));
+		//ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(1.f, 1.f, 1.f, 1.f));
         // Render tab shape
-        const ImU32 col = TabGetColorU32((hovered && held) ? ImGuiCol_TabActive : hovered ? ImGuiCol_TabHovered : tab_selected ? (unfocused ? ImGuiCol_TabUnfocused : ImGuiCol_TabActive) : ImGuiCol_Tab);
-        RenderTabBackground(draw_list, bb, col);
-		ImGui::PopStyleColor(2);
+        //const ImU32 col = TabGetColorU32((hovered && held) ? ImGuiCol_TabActive : hovered ? ImGuiCol_TabHovered : tab_selected ?  ImGuiCol_TabActive : ImGuiCol_Tab);
+        const ImU32 col = TabGetColorU32(tab_selected ? ImGuiCol_TabActive : ImGuiCol_Tab);
+        RenderTabBackground(draw_list, bb, col, flagAngle);
+		//ImGui::PopStyleColor(2);
 
         // Render text label (with clipping + alpha gradient) + unsaved marker
         const char* TAB_UNSAVED_MARKER = "*";
@@ -745,9 +785,16 @@ bool    ImGui::TabItem(ImVec2 size, const char* label, bool* p_open, ImGuiTabIte
         int vert_start_idx = draw_list->_VtxCurrentIdx;
 		if (!tab_selected)
 		{
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 1.f, 1.f));
+            if(hovered){
+                ImVec4 colorText = GImGui->Style.Colors[ImGuiCol_TextDisabled];
+                colorText.w =1.f;
+                PushStyleColor(ImGuiCol_Text, colorText);
+            }
+            else {
+                PushStyleColor(ImGuiCol_Text, GImGui->Style.Colors[ImGuiCol_TextDisabled]);
+            }
 			RenderTextClipped(text_clip_bb.Min, text_clip_bb.Max, label, NULL, &label_size, ImVec2(0.5f, 0.0f));
-			ImGui::PopStyleColor();
+            PopStyleColor();
 		}
 		else
 		{
@@ -1106,9 +1153,32 @@ bool ImGui::SliderString(const char* label, char* text0,char* text1, int* v, int
 	if (value_changed)
 		MarkItemValueChanged(id);
 
+    if (hovered && *v) {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f));
+    }
+    else if (!*v) {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 1.f, 1.f));
+    }
 	RenderTextClipped(frame_bb.Min, frame_bb.Max, text0, text0 + strlen(text0), NULL, ImVec2(0.2f, 0.5f));
+    if (hovered && *v) {
+        ImGui::PopStyleColor();
+    }
+    else if (!*v) {
+        ImGui::PopStyleColor();
+    }
+    if (hovered && !*v) {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f));
+    }
+    else if (*v) {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 1.f, 1.f));
+    }
 	RenderTextClipped(frame_bb.Min, frame_bb.Max, text1, text1 + strlen(text1), NULL, ImVec2(0.8f, 0.5f));
-
+    if (hovered && !*v) {
+        ImGui::PopStyleColor();
+    }
+    else if (*v) {
+        ImGui::PopStyleColor();
+    }
 	if (label_size.x > 0.0f)
 		RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
 

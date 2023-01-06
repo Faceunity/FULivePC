@@ -8,7 +8,6 @@
 #endif
 #include "glfw3native.h"
 
-#include "GuiTool.h"
 #include "Texture.h"
 
 #include <stdio.h>
@@ -35,7 +34,7 @@ public:
     
     void tipToGrantCameraAcess(Nama * nama);
 	void ShowMainWindow(Nama * nama);
-	
+	void ShowTitle();	
 	void onWindowResize(uint32_t width, uint32_t height);
 
 	void ProcessGSSampleClick(Nama * nama);
@@ -56,9 +55,14 @@ public:
 protected:
 private:
 	Gui() = default;
+	cv::Mat mTransparentMat;
 	MouseControl* m_mouseControl;
 	MouseControl* m_mouseControlSec;
+	MouseControl* m_mouseControlWindow;
 	cv::Mat  m_processedFrame;
 	GLuint m_texIDNamaProcess = -1;
 	GLuint m_texIDOrignal = -1;
+	int WindowPosX = 280;
+    int WindowPosY = 105;
+	int gsSelectColorWHTpye = 0;//0长宽各按比例,1图像长放大按宽比例算取色点，2按长比例算取色点
 };

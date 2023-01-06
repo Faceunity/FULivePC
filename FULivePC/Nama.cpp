@@ -1,4 +1,4 @@
-#include "Camera.h"
+﻿#include "Camera.h"
 #include "FuController.h"
 #include "Nama.h"
 #include "Config.h"	
@@ -279,6 +279,8 @@ bool Nama::Init()
 		}
 		
 		fuItemSetParamd(mBodyShapeHandle, "Debug", 0.0);
+
+		fuItemSetParamd(mMakeUpHandle, "machine_level", 1.0);
 		//fuSetDefaultOrientation(0);
 		float fValue = 0.5f;
 		fuSetFaceTrackParam((void*)"mouth_expression_more_flexible", &fValue);
@@ -426,7 +428,6 @@ void Nama::ReloadItems() {
 
 	m_Controller->InitController(g_assetDir + g_control, g_assetDir + g_control_cfg);
 	m_Controller->InitFXAA(g_assetDir + g_fxaa);
-
 	UpdateFilter(UIBridge::m_curFilterIdx);
 	UpdateBeauty();
 	UpdateGreenScreen();
@@ -619,10 +620,9 @@ void Nama::UpdateBeauty()
 		return;
 	}
 	if (false == mIsBeautyOn)return;
-
-	for (int i = 0; i < MAX_BEAUTYFACEPARAMTER; i++)
+	for (int i = 2; i < MAX_BEAUTYFACEPARAMTER; i++)
 	{
-		if (i == 0)
+		if (i == 2)
 		{
 			fuItemSetParamd(mBeautyHandles, const_cast<char*>(g_faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i] * 6.0 / 100.f);
 		}
@@ -654,9 +654,9 @@ void Nama::UpdateBeauty()
 			UIBridge::mFaceShapeLevel[i] -= 50;
 		}
 	}
-	fuItemSetParamd(mBeautyHandles, "skin_detect", UIBridge::mEnableSkinDect);
+	fuItemSetParamd(mBeautyHandles, "skin_detect", UIBridge::mFaceBeautyLevel[0]);
 	map<int, int> blurType = { {0,2},{1,0},{2,1},{3,3} };
-	fuItemSetParamd(mBeautyHandles, "blur_type", blurType[UIBridge::mEnableHeayBlur]);
+	fuItemSetParamd(mBeautyHandles, "blur_type", blurType[UIBridge::mFaceBeautyLevel[1]]);
 	fuItemSetParamd(mBeautyHandles, "face_shape_level", 1);
 	if (!(UIBridge::showLightMakeupTip && !UIBridge::showGreenScreen)) {
 		fuItemSetParamd(mBeautyHandles, "filter_level", UIBridge::mFilterLevel[UIBridge::m_curFilterIdx] / 100.0f);
@@ -988,7 +988,7 @@ int Nama::SelectCustomMakeupBundle(string bundleName, string strType)
 		m_CMakeupMap[bundleName] = bundleID;
 	}
 
-	if (UIBridge::bundleCategory == BundleCategory::Makeup && 
+	if (UIBridge::bundleCategory == BundleCategory::Makeup &&
 		m_CMakeupMap[bundleName] > 0)
 	{
 		auto itor = m_CMakeupTypeMap.find(strType);
@@ -1041,6 +1041,11 @@ void Nama::UnbindCurFixedMakeup()
 	if (UIBridge::bundleCategoryLast == BundleCategory::ItemJingpin) {
 		ReloadItems();
 	}
+	if (UIBridge::bundleCategoryLast == BundleCategory::StyleRecommendation) {
+		UIBridge::mStyleRecommendationIndex = 0;
+		gui_tool::loadStyleParam();
+		UpdateBeauty();
+	}
 	if (UIBridge::bundleCategory == BundleCategory::Makeup)
 	{
 		DestroyAll();
@@ -1053,6 +1058,7 @@ void Nama::UnbindCurFixedMakeup()
 			}
 			cout << "load face makeup data." << endl;
 			mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+			fuItemSetParamd(mMakeUpHandle, "machine_level", 1.0);
 		}
 	}
 }
@@ -1077,6 +1083,12 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 		UIBridge::bundleCategoryLast == BundleCategory::Makeup &&
 		UIBridge::bundleCategory != BundleCategory::Makeup) {
 		ReloadItems();
+	}
+	if ((UIBridge::bundleCategoryLast == BundleCategory::StyleRecommendation &&
+		UIBridge::bundleCategory != BundleCategory::StyleRecommendation)) {
+		UIBridge::mStyleRecommendationIndex = 0;
+		gui_tool::loadStyleParam();
+		UpdateBeauty();
 	}
 	UIBridge::bundleCategoryLast = UIBridge::bundleCategory;
 	ChangeCleanFlag(true);
@@ -1142,6 +1154,7 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 					}
 					cout << "load face makeup data." << endl;
 					mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+					fuItemSetParamd(mMakeUpHandle, "machine_level", 1.0);
 				}
 				fuBindItems(mMakeUpHandle, &bundleID, 1);
 				UIBridge::m_curBindedItem = bundleID;
@@ -1151,11 +1164,8 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 					fuDestroyItem(mMakeUpHandle);
 					mMakeUpHandle = -1;
 				}
+				fuItemSetParamd(bundleID, "machine_level", 1.0);
 			}
-		}
-		else
-		{
-			//		fuItemSetParamd(mMakeUpHandle, "is_makeup_on", 0);
 		}
 		// 处理 美发
 		if (UIBridge::bundleCategory == BundleCategory::BeautyHair) {
@@ -1182,7 +1192,12 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 			UIBridge::m_curPlayingMusicItem = bundleID;
 			UIBridge::mNeedPlayMP3 = true;
 		}
-
+		if (UIBridge::bundleCategory == BundleCategory::StyleRecommendation) {
+			StyleRecommendationParam tempSRP = UIBridge::mStyleParamList.at(UIBridge::mStyleRecommendationIndex);
+			fuItemSetParamd(bundleID, "machine_level", 1.0);
+			fuItemSetParamd(bundleID, "filter_level", float(tempSRP.mFilterLevel) / 100);
+			fuItemSetParamd(bundleID, "makeup_intensity", float(tempSRP.mMakeUpIntensity) / 100);
+		}
 	}
 	else
 	{
@@ -1198,6 +1213,9 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 				fuBindItems(mMakeUpHandle, &bundleID, 1);
 				UIBridge::m_curBindedItem = bundleID;
 			}
+			else {
+				fuItemSetParamd(bundleID, "machine_level", 1.0);
+			}
 		}
 		
 		if (UIBridge::bundleCategory == BundleCategory::MusicFilter)
@@ -1207,7 +1225,7 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 			UIBridge::mNeedPlayMP3 = true;
 		}
 	}
-	
+
 	if (UIBridge::m_curRenderItem == bundleID && UIBridge::bundleCategory != BundleCategory::LightMakeup)
 	{
 		
@@ -1288,6 +1306,33 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 	return true;
 }
 
+bool Nama::CheckModuleFaceInfo() {
+	if (!IsInited())
+	{
+		return false;
+	}
+	int passCode = fuGetModuleCode(1);
+	int needCode = define_arr_ext[DEFINE_GET_FACEINFO];
+	bool bOK = false;
+	if ((passCode & needCode) == needCode) {
+		bOK = true;
+	}
+	return bOK;
+}
+
+bool Nama::CheckModuleBodyInfo() {
+	if (!IsInited())
+	{
+		return false;
+	}
+	int passCode = fuGetModuleCode(1);
+	int needCode = define_arr_ext[DEFINE_BODY_TRACK];
+	bool bOK = false;
+	if ((passCode & needCode) == needCode) {
+		bOK = true;
+	}
+	return bOK;
+}
 
 bool Nama::CheckModuleCode(int category)
 {
@@ -1355,13 +1400,17 @@ void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
 			renderList.push_back(mBeautyHandles);
 		}else{
 			renderList.push_back(mBeautyHandles);
-			
-			if (UIBridge::m_curRenderItem != -1) {
-				renderList.push_back(UIBridge::m_curRenderItem);
-			}
-			if (!UIBridge::newMakeupType)
+			if (UIBridge::renderBundleCategory == BundleCategory::Makeup)
 			{
-				renderList.push_back(mMakeUpHandle);
+				renderList.push_back(UIBridge::m_curRenderItem);
+				if (!UIBridge::newMakeupType)
+				{
+					renderList.push_back(mMakeUpHandle);
+				}
+			}
+			else
+			{
+				renderList.push_back(UIBridge::m_curRenderItem);
 			}
 		}
 
@@ -1383,6 +1432,31 @@ void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
 			(int32_t)renderList.size(),
 			NAMA_RENDER_FEATURE_FULL,
 			NULL);
+
+		if (UIBridge::bundleCategory == BundleCategory::GestureRecognition) {
+			if (fuHandDetectorGetResultNumHands() == 0) {
+				UIBridge::m_openLocalFileTip = u8"未检测到手势";
+				UIBridge::m_bLoadWrongNamePNGFile = true;
+				UIBridge::mLastTimeExtra = ImGui::GetTime() + 1.0;
+			}
+		}
+		else {
+			if (CheckModuleFaceInfo()) {
+				if (fuFaceProcessorGetNumResults() == 0) {
+					UIBridge::m_openLocalFileTip = u8"未检测到人脸";
+					UIBridge::m_bLoadWrongNamePNGFile = true;
+					UIBridge::mLastTimeExtra = ImGui::GetTime() + 1.0;
+				}
+			}
+			else {
+				static bool once = false;
+				if (!once) {
+					UIBridge::m_openLocalFileTip = u8"没有获取人脸信息权限";
+					UIBridge::m_bLoadWrongNamePNGFile = true;
+					UIBridge::mLastTimeExtra = ImGui::GetTime() + 10.0;
+				}
+			}
+		}
 	}
 
 	if (fuGetSystemError())
@@ -1401,6 +1475,21 @@ void Nama::RenderP2A(cv::Mat & picBg, int rotType)
 	fuSetInputCameraBufferMatrix((TRANSFORM_MATRIX)rotType);
 	fuSetInputCameraTextureMatrix((TRANSFORM_MATRIX)rotType);
 	m_Controller->RenderBundlesBuffer(picBg.data, picBg, mFrameID);
+	if (CheckModuleBodyInfo()) {
+		if (fuHumanProcessorGetNumResults() == 0) {
+			UIBridge::m_openLocalFileTip = u8"未检测到人体";
+			UIBridge::m_bLoadWrongNamePNGFile = true;
+			UIBridge::mLastTimeExtra = ImGui::GetTime() + 1.0;
+		}
+	}
+	else {
+		static bool once = false;
+		if (!once) {
+			UIBridge::m_openLocalFileTip = u8"没有获取人体信息权限";
+			UIBridge::m_bLoadWrongNamePNGFile = true;
+			UIBridge::mLastTimeExtra = ImGui::GetTime() + 10.0;
+		}
+	}
 }
 
 void Nama::changeGSPreviewRect(FURect rect)

@@ -18,6 +18,7 @@ std::thread GDownloadBundleThread;
 std::atomic_bool GIsDownloading;
 
 int GUISticker::mSelectTip = 0;
+
 bool GUISticker::mSelectSticker = false;
 
 GUISticker::GUISticker()
@@ -55,16 +56,21 @@ void GUISticker::ShowStickerPannel(Nama * nama)
 	if (UIBridge::m_curRenderItem == -1) {
 		GUISticker::mSelectTip = 0;
 	}
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
-	ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.6f));
-	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 0.6f));
-	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(150.f / 255.f, 157.f / 255.f, 181.f / 255.f, 0.0f));
-	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .60f));
-
-	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 544 * scaleRatioH), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(876 * scaleRatioW, 130 * scaleRatioH), ImGuiCond_Always);
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 0.88f));
+	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(238.f / 255.f, 240.f / 255.f, 246.f / 255.f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 0.88f));
+	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 0.88f));
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(47.f / 255.f, 54.f / 255.f, 92.f / 255.f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(47.f / 255.f, 54.f / 255.f, 92.f / 255.f, 0.4f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0);
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 535 * scaleRatioH), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(876 * scaleRatioW, 120 * scaleRatioH), ImGuiCond_Always);
 	ImGui::Begin("itemSelectSticker##1563", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
-	
+	if (UIBridge::m_bShowingBodyBeauty) {
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+	}
 	// Tabs
 	ImGui::BeginTabBar("##tabsSticker1", ImGuiTabBarFlags_NoAnim);
 
@@ -73,13 +79,15 @@ void GUISticker::ShowStickerPannel(Nama * nama)
 		MyDocument& doc = GDocs[doc_n];
 
 		ImGui::PushID(&doc);
+		string str = doc.Name;
+		str= str.substr(0, 6);
 
 		bool selected = false;
 		if (mSelectSticker && mSelectTip == doc_n) {
 			mSelectSticker = false;
-			selected = ImGui::TabItem(ImVec2(100 * scaleRatioW, 26 * scaleRatioH), doc.Name, &doc.Open, 2);
+			selected = ImGui::TabItem(ImVec2(100 * scaleRatioW, 26 * scaleRatioH), str.data(), &doc.Open, 2, 5);
 		}else{
-			selected = ImGui::TabItem(ImVec2(100 * scaleRatioW, 26 * scaleRatioH), doc.Name, &doc.Open, 0);
+			selected = ImGui::TabItem(ImVec2(100 * scaleRatioW, 26 * scaleRatioH), str.data(), &doc.Open, 0, 5);
 		}
 		
 		if (!selected)
@@ -92,19 +100,36 @@ void GUISticker::ShowStickerPannel(Nama * nama)
 
 		ImGui::PopID();
 	}
+	ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+	bool flag = false;
+	ImGui::TabItem(ImVec2((875 - mNetHolder->mTags.size() * 100) * scaleRatioW, 26 * scaleRatioH), "", &flag, 0, 5);
+	ImGui::PopItemFlag();
 	ImGui::EndTabBar();
-
+	if (UIBridge::m_bShowingBodyBeauty) {
+		ImGui::PopItemFlag();
+	}
 	ImGui::End();
-	ImGui::PopStyleColor(5);
+	ImGui::PopStyleVar(3);
+	ImGui::PopStyleColor(6);
 }
 
 void GUISticker::ShowStickerList(Nama * nama, int tagIndex)
 {
+	static int lastIndex = 0;
+	if (tagIndex != lastIndex) {
+		lastIndex = tagIndex;
+		UIBridge::bundleCategoryPage = 0;
+	}
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .70f));
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .0f));
-	//ImGui::SetNextWindowPos(ImVec2(19 * scaleRatioW, 584 * scaleRatioH), ImGuiCond_Always);
-	//ImGui::SetNextWindowSize(ImVec2(888 * scaleRatioW, 90 * scaleRatioH), ImGuiCond_Always);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.0f));
+
 	ImGui::BeginChild("##tabsSticker2", ImVec2(860 * scaleRatioW, 91 * scaleRatioH), false, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
+	ImGui::Dummy(ImVec2(0, 1));
+	ImGui::Dummy(ImVec2(0, 1));
+	ImGui::SameLine();
 	auto funSelect = [&](std::weak_ptr<BundleRes> res) {
 
 		if (res.expired())
@@ -180,10 +205,46 @@ void GUISticker::ShowStickerList(Nama * nama, int tagIndex)
 		}
 
 	};
-
 	if (tagIndex < mNetHolder->mTagBundleList.size())
 	{
-		for (int i = 0; i < mNetHolder->mTagBundleList[tagIndex].size(); i++)
+		int bundlesSize = mNetHolder->mTagBundleList[tagIndex].size();
+		int pageSize = 0;
+		if (bundlesSize > 10) {
+			if (bundlesSize % 9 == 0) {
+				pageSize = bundlesSize / 9;
+			}
+			else {
+				pageSize = bundlesSize / 9 + 1;
+			}
+		}
+		ImGui::SameLine(0.f, 10.f * scaleRatioW);
+		bool buttonClick;
+		if (bundlesSize > 10) {
+			if (UIBridge::bundleCategoryPage > 0) {
+				ImGui::BeginGroup();
+				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 18 * scaleRatioH);
+				buttonClick = ImGui::ImageButton(Texture::createTextureFromFile("icon_lbutton.png", false)->getTextureID(), ImVec2(24 * scaleRatioW, 24 * scaleRatioH));
+				if (buttonClick)
+				{
+					UIBridge::bundleCategoryPage--;
+				}
+				ImGui::EndGroup();
+				ImGui::SameLine(0.f, 25.f * scaleRatioW);
+			}
+			else {
+				ImGui::SameLine(0.f, 63.f * scaleRatioW);
+			}
+		}else {
+			ImGui::SameLine(0, (10 - bundlesSize) * 38.5 * scaleRatioW + 22 * scaleRatioW);
+		}
+		int end = bundlesSize;
+		if (bundlesSize > 10) {
+			end = 9 * (UIBridge::bundleCategoryPage + 1);
+			if (end > bundlesSize) {
+				end = bundlesSize;
+			}
+		}
+		for (int i = 9 * UIBridge::bundleCategoryPage; i < end; i++)
 		{
 			ImGui::PushID(i);
 
@@ -233,6 +294,9 @@ void GUISticker::ShowStickerList(Nama * nama, int tagIndex)
 				if (UIBridge::mCurRenderItemName != itemName)
 				{
 					UIBridge::mCurRenderItemName = itemName;
+					UIBridge::mStyleRecommendationIndex = 0;
+					loadStyleParam();
+					nama->UpdateBeauty();
 					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
 					UIBridge::showItemTipsWindow = false;
 				}
@@ -284,14 +348,26 @@ void GUISticker::ShowStickerList(Nama * nama, int tagIndex)
 					mSelectTip = tagIndex;
 				}
 			}
-			ImGui::SameLine(0.f, 24.f * scaleRatioW);
+			ImGui::SameLine(0.f, 21.f * scaleRatioW);
 
 			ImGui::PopID();
 		}
-	}
+		if (bundlesSize > 10) {
+			if (UIBridge::bundleCategoryPage != pageSize - 1 ) {
+				ImGui::BeginGroup();
+				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 18 * scaleRatioH);
+				buttonClick = ImGui::ImageButton(Texture::createTextureFromFile(UIBridge::bundleCategoryPage < pageSize - 1 ?
+					"icon_rbutton.png" : "icon_rbutton_nor.png", false)->getTextureID(), ImVec2(24 * scaleRatioW, 24 * scaleRatioH));
+				if (buttonClick && UIBridge::bundleCategoryPage < pageSize - 1)
+				{
+					UIBridge::bundleCategoryPage++;
+				}
+				ImGui::EndGroup();
+			}
+		}
+}
 
 	ImGui::EndChild();
-	ImGui::PopStyleColor();
-	ImGui::PopStyleColor();
+	ImGui::PopStyleColor(5);
 
 }

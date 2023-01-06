@@ -12,9 +12,14 @@ namespace gui_tab_content
 {
 	void ShowTabBeautySkin(Nama * nama)
 	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(92.f / 255.f, 96.f / 255.f, 113.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f));
 		ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
-		if (UIBridge::mEnableSkinDect)
+		if (UIBridge::mFaceBeautyLevel[0])
 		{
 			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_skinbeauty_open.png", false)->getTextureID(), u8"精准美肤");
 		}
@@ -22,56 +27,60 @@ namespace gui_tab_content
 		{
 			LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_skinbeauty_close.png", false)->getTextureID(), u8"精准美肤");
 		}
+
 		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
-		if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"开启", UIBridge::mEnableSkinDect == 1))
+
+		if (LayoutSelectable(ImVec2(22, 11), ImVec2(80, 30), u8"开启", UIBridge::mFaceBeautyLevel[0] == 1))
 		{
-			UIBridge::mEnableSkinDect = 1;
+			UIBridge::mFaceBeautyLevel[0] = 1;
 			nama->UpdateBeauty();
+			saveStyleConfig();
 		}
 		ImGui::SameLine();
-		if (LayoutSelectable(ImVec2(22, 11), ImVec2(118, 30), u8"关闭", UIBridge::mEnableSkinDect == 0))
+		if (LayoutSelectable(ImVec2(0, 11), ImVec2(80, 30), u8"关闭", UIBridge::mFaceBeautyLevel[0] == 0))
 		{
-			UIBridge::mEnableSkinDect = 0;
+			UIBridge::mFaceBeautyLevel[0] = 0;
 			nama->UpdateBeauty();
+			saveStyleConfig();
 		}
 		LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_BeautyMode_open.png", false)->getTextureID(), u8"美肤模式");
 		ImGui::SameLine();
-		if (LayoutSelectable(ImVec2(22, 11), ImVec2(51, 30), u8"均匀磨皮##3", UIBridge::mEnableHeayBlur == 3))
+		if (LayoutSelectable(ImVec2(22, 11), ImVec2(57, 30), u8"均匀磨皮##3", UIBridge::mFaceBeautyLevel[1] == 3))
 		{
-			UIBridge::mEnableHeayBlur = 3;
+			UIBridge::mFaceBeautyLevel[1] = 3;
+			nama->UpdateBeauty();
+			saveStyleConfig();
+		}
+		ImGui::SameLine();
+		if (LayoutSelectable(ImVec2(0, 11), ImVec2(57, 30), u8"精细磨皮##2", UIBridge::mFaceBeautyLevel[1] == 0))
+		{
+			UIBridge::mFaceBeautyLevel[1] = 0;
+			nama->UpdateBeauty();
+			saveStyleConfig();
+		}
+		ImGui::SameLine();
+		if (LayoutSelectable(ImVec2(0, 11), ImVec2(57, 30), u8"清晰磨皮##2", UIBridge::mFaceBeautyLevel[1] == 1))
+		{
+			UIBridge::mFaceBeautyLevel[1] = 1;
 			nama->UpdateBeauty();
 		}
 		ImGui::SameLine();
-		if (LayoutSelectable(ImVec2(5, 11), ImVec2(51, 30), u8"精细磨皮##2", UIBridge::mEnableHeayBlur == 0))
+		if (LayoutSelectable(ImVec2(0, 11), ImVec2(57, 30), u8"朦胧磨皮##2", UIBridge::mFaceBeautyLevel[1] == 2))
 		{
-			UIBridge::mEnableHeayBlur = 0;
+			UIBridge::mFaceBeautyLevel[1] = 2;
 			nama->UpdateBeauty();
+			saveStyleConfig();
 		}
-		ImGui::SameLine();
-		if (LayoutSelectable(ImVec2(5, 11), ImVec2(51, 30), u8"清晰磨皮##2", UIBridge::mEnableHeayBlur == 1))
-		{
-			UIBridge::mEnableHeayBlur = 1;
-			nama->UpdateBeauty();
-		}
-		ImGui::SameLine();
-		if (LayoutSelectable(ImVec2(5, 11), ImVec2(51, 30), u8"朦胧磨皮##2", UIBridge::mEnableHeayBlur == 2))
-		{
-			UIBridge::mEnableHeayBlur = 2;
-			nama->UpdateBeauty();
-		}
-		ImGui::PopStyleColor();
-		//ImGui::PopStyleColor();
-
+		ImGui::PopStyleVar();
 		std::string sliderIconNameArr[MAX_BEAUTYFACEPARAMTER] = { "list_icon_Grindingskin_open","list_icon_Skinwhitening_open", "list_icon_Ruddy_open","list_iconsharpen_open",
 			"list_icon_stereoscopic_open", "list_icon_Brighteye_open", "list_iconBeautifulteeth_open",
 			"list_icon_dark_circles_open","list_icon_wrinkle_open" };
 
 		std::string sliderNameArr[MAX_BEAUTYFACEPARAMTER] = { u8"   磨皮", u8"   美白",u8"   红润",u8"   锐化", u8"五官立体",u8"   亮眼", u8"   美牙" ,u8"去黑眼圈", u8"去法令纹" };
 
-		for (int i = 0; i < MAX_BEAUTYFACEPARAMTER; i++)
+		for (int i = 0; i < MAX_BEAUTYFACEPARAMTER - 2; i++)
 		{
-			if (UIBridge::mFaceBeautyLevel[i] == 0)
+			if (UIBridge::mFaceBeautyLevel[i + 2] == 0)
 			{
 				std::string closeIconFile = sliderIconNameArr[i].substr(0, sliderIconNameArr[i].find_last_of('_')) + "_close";
 				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(closeIconFile + ".png", false)->getTextureID(), sliderNameArr[i].c_str());
@@ -83,30 +92,39 @@ namespace gui_tab_content
 			ImGui::SameLine();
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
 
-			if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + std::to_string(i)).c_str(), &UIBridge::mFaceBeautyLevel[i], 0, 100))
+			if (LayoutSlider(ImVec2(22, 22), ImVec2(232, 10), ("##slider221" + std::to_string(i)).c_str(), ("##slidertext221" + std::to_string(i)).c_str(), &UIBridge::mFaceBeautyLevel[i + 2], 0, 100))
 			{
 				nama->UpdateBeauty();
+				saveStyleConfig();
 			}
 			ImGui::PopStyleVar();
 		}
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-		if (LayoutButton(ImVec2(145, 38), ImVec2(126, 40), u8"恢复默认"))
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
+		ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(246.f / 255.f, 246.f / 255.f, 250.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 1.f, 1.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+		if (LayoutButton(ImVec2(145, 38), ImVec2(126, 32), u8"恢复默认"))
 		{
 			resetBeautyParam();
 			nama->UpdateBeauty();
+			saveStyleConfig();
 		}
-		ImGui::PopStyleVar();
-		ImGui::PopStyleVar();
 
-		ImGui::PopStyleColor();
+		ImGui::NewLine();
+		ImGui::PopStyleVar(2);
+
+		ImGui::PopStyleColor(9);
 	}
 
 	void ShowTabFaceBeauty(Nama * nama)
 	{
 		ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));
-		//ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(92.f / 255.f, 96.f / 255.f, 113.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f));
 
 		UIBridge::faceType = 0;
 		nama->SetCurrentShape(4);
@@ -125,8 +143,6 @@ namespace gui_tab_content
 
 
 		ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 1.f));
-		ImGui::BeginChild("faceShape##2223", ImVec2(400 * scaleRatioW, 550 * scaleRatioH));
-		ImGui::PopStyleColor();
 		for (int i = 0; i < MAX_FACESHAPEPARAMTER; i++)
 		{
 			if (UIBridge::faceType != 0 && i > 1)
@@ -146,36 +162,42 @@ namespace gui_tab_content
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
 			if (g_faceShapeParamShowFlag[i] == FACE_SHAPE_SHOW_FLAG_MIDDLE)
 			{
-				if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), (std::string("##slider23") + std::to_string(i)).c_str(), &UIBridge::mFaceShapeLevel[i], -50, 50))
+				if (LayoutSlider(ImVec2(22, 22), ImVec2(232, 10), (std::string("##slider23") + std::to_string(i)).c_str(), (std::string("##slidertext23") + std::to_string(i)).c_str(), &UIBridge::mFaceShapeLevel[i], -50, 50))
 				{
 					nama->UpdateBeauty();
+					saveStyleConfig();
 				}
 			}
 			else if (g_faceShapeParamShowFlag[i] == FACE_SHAPE_SHOW_FLAG_NORMAL)
 			{
-				if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), (std::string("##slider2") + std::to_string(i)).c_str(), &UIBridge::mFaceShapeLevel[i], 0, 100))
+				if (LayoutSlider(ImVec2(22, 22), ImVec2(232, 10), (std::string("##slider2") + std::to_string(i)).c_str(), (std::string("##slidertext2") + std::to_string(i)).c_str(), &UIBridge::mFaceShapeLevel[i], 0, 100))
 				{
 					nama->UpdateBeauty();
+					saveStyleConfig();
 				}
 			}
 			ImGui::PopStyleVar();
 		}
 
-		ImGui::EndChild();
-
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-		if (LayoutButton(ImVec2(145, 15), ImVec2(126, 40), u8"恢复默认"))
+		//ImGui::EndChild();
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
+		ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(246.f / 255.f, 246.f / 255.f, 250.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 1.f, 1.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+		if (LayoutButton(ImVec2(145, 15), ImVec2(126, 32), u8"恢复默认"))
 		{
 			resetShapeParam();
 			nama->UpdateBeauty();
+			saveStyleConfig();
 			nama->SetCurrentShape(4);
 		}
-		ImGui::PopStyleVar();
-		ImGui::PopStyleVar();
+		ImGui::NewLine();
+		ImGui::PopStyleVar(2);
 
-
-		ImGui::PopStyleColor();
+		ImGui::PopStyleColor(10);
 	}
 
 	void ShowTabFilter(Nama* nama)
@@ -184,11 +206,22 @@ namespace gui_tab_content
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.3f);
 		}
-		ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 1.f));
+		ImGui::Dummy(ImVec2(1 * scaleRatioW, 10 * scaleRatioH));
+		ImGui::Dummy(ImVec2(12 * scaleRatioW, 1));
+		ImGui::SameLine();
 		std::string filterNameArr[6] = { "list_image_origin", "list_image_bailiang1", "list_image_fennen1", "list_image_xiaoqingxin1", "list_image_lengsediao1", "list_image_nuansediao1" };
+		std::string filterTextArr[6] = { u8"   原图",  u8"   白亮",  u8"   粉嫩",  u8"  小清新",  u8"  冷色调",  u8"  暖色调" };
+
 		for (int i = 0; i < 6; i++)
 		{
-			if (ImGui::ImageButton(Texture::createTextureFromFile(filterNameArr[i] + ".png", false)->getTextureID(), ImVec2(106 * scaleRatioW, 106 * scaleRatioH)))
+			if (LayoutImageButtonWithTextFilter(ImVec2(0.f, 0.f), ImVec2(106 * scaleRatioW, 106 * scaleRatioH), 
+				Texture::createTextureFromFile(filterNameArr[i] + ".png", false)->getTextureID(), 
+				Texture::createTextureFromFile("list_image_filter_hover.png", false)->getTextureID(),
+				Texture::createTextureFromFile("list_image_filter_nor.png", false)->getTextureID(),
+				Texture::createTextureFromFile("list_image_filter_selected.png", false)->getTextureID(),
+				filterTextArr[i].data(), UIBridge::m_curFilterIdx == i))
 			{
 				nama->UpdateFilter(i);
 
@@ -207,7 +240,12 @@ namespace gui_tab_content
 			{
 				ImGui::SameLine(0.f, 27.f);
 			}
+			if (i == 2) {
+				ImGui::Dummy(ImVec2(12 * scaleRatioW, 1));
+				ImGui::SameLine();
+			}
 		}
+		ImGui::PopStyleColor(2);
 		if (UIBridge::showLightMakeupTip && !UIBridge::showGreenScreen) {
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
@@ -216,11 +254,42 @@ namespace gui_tab_content
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.3f);
 		}
 		if (UIBridge::showFilterSlider) {
-			if (LayoutSlider(ImVec2(54, 200), ImVec2(252, 10), "##slider36", &UIBridge::mFilterLevel[UIBridge::m_curFilterIdx], 0, 100))
+			ImGui::Dummy(ImVec2(1, 180 * scaleRatioH));
+			if (LayoutSlider(ImVec2(20, 200), ImVec2(320, 10), "##slider36", "##slidertext36", &UIBridge::mFilterLevel[UIBridge::m_curFilterIdx], 0, 100))
 			{
 				nama->UpdateBeauty();
 			}
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+			if (UIBridge::mFilterLevel[UIBridge::m_curFilterIdx] == 40.0f) {
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(246.f / 255.f, 246.f / 255.f, 250.f / 255.f, 1.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(246.f / 255.f, 246.f / 255.f, 250.f / 255.f, 1.f));
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.3f));
+				ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(127.f / 255.f, 134.f / 255.f, 152.f / 255.f, 0.3f));
+				ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.3f));
+				if (LayoutButton(ImVec2(135, 18), ImVec2(126, 32), u8"恢复默认"))
+				{
+					UIBridge::mFilterLevel[UIBridge::m_curFilterIdx] = 40.0f;
+					nama->UpdateBeauty();
+				}
+				ImGui::PopStyleColor(5);
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(246.f / 255.f, 246.f / 255.f, 250.f / 255.f, 1.f));
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 1.f, 1.f, 1.f));
+				ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+				if (LayoutButton(ImVec2(135, 18), ImVec2(126, 32), u8"恢复默认"))
+				{
+					UIBridge::mFilterLevel[UIBridge::m_curFilterIdx] = 40.f;
+					nama->UpdateBeauty();
+				}
+				ImGui::PopStyleColor(5);
+			}
+			ImGui::PopStyleVar(2);
 		}
+
 		if (UIBridge::showLightMakeupTip && !UIBridge::showGreenScreen) {
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
@@ -232,6 +301,8 @@ namespace gui_tab_content
 	*/
 	void ShowTabBodyBeauty(Nama * nama)
 	{
+		ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(92.f / 255.f, 96.f / 255.f, 113.f / 255.f, 1.f));
 		std::string sliderIconNameArr[MAX_BODY_SHAPE_PARAM] = { "list_icon_slimming_open","list_icon_stovepipe_open", "list_icon_thin_waist_open",
 			"list_icon_shoulder_open","list_icon_hip_open",
 			"list_icon_little_head_open","list_icon_thin_leg_open" };
@@ -253,7 +324,7 @@ namespace gui_tab_content
 
 			if (g_bodyShapeParamShowFlag[i] == BODY_SHAPE_SHOW_FLAG_MIDDLE)
 			{
-				if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + std::to_string(i)).c_str(), &UIBridge::mBodyShapeLevel[i], -50, 50))
+				if (LayoutSlider(ImVec2(22, 22), ImVec2(232, 10), ("##slider221" + std::to_string(i)).c_str(), ("##slidertext221" + std::to_string(i)).c_str(), &UIBridge::mBodyShapeLevel[i], -50, 50))
 				{
 					
 					// 添加2s时间，用于显示”AR功能跟美体模块无法共用“的提示
@@ -270,13 +341,13 @@ namespace gui_tab_content
 					}
 					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
 					UIBridge::m_bShowingBodyBeauty = true;
-					UIBridge::showItemSelectWindow = false;
+					//UIBridge::showItemSelectWindow = false;
 					nama->UpdateBodyShape();
 				}
 			}
 			else
 			{
-				if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + std::to_string(i)).c_str(), &UIBridge::mBodyShapeLevel[i], 0, 100))
+				if (LayoutSlider(ImVec2(22, 22), ImVec2(232, 10), ("##slider221" + std::to_string(i)).c_str(), ("##slidertext221" + std::to_string(i)).c_str(), &UIBridge::mBodyShapeLevel[i], 0, 100))
 				{
 					// 添加2s时间，用于显示”AR功能跟美体模块无法共用“的提示
 					if(!UIBridge::m_bShowingBodyBeauty){
@@ -291,7 +362,7 @@ namespace gui_tab_content
 						UIBridge::showLightMakeupTip = false;
 					}
 					UIBridge::m_bShowingBodyBeauty = true;
-					UIBridge::showItemSelectWindow = false;
+					//UIBridge::showItemSelectWindow = false;
 					nama->UpdateBodyShape();
 				}
 			}
@@ -300,8 +371,7 @@ namespace gui_tab_content
 
 			ImGui::PopStyleVar();
 		}
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
 
 		auto funIsAllClosed = []() {
 			
@@ -332,8 +402,13 @@ namespace gui_tab_content
 			}
 			UIBridge::showItemSelectWindow = (UIBridge::bundleCategory != BUNDLE_CATEGORY_NOMEAN);
 		}
-
-		if (LayoutButton(ImVec2(145, 38), ImVec2(126, 40), u8"恢复默认"))
+		ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(246.f / 255.f, 246.f / 255.f, 250.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 1.f, 1.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+		if (LayoutButton(ImVec2(145, 0), ImVec2(126, 32), u8"恢复默认"))
 		{
 			UIBridge::m_bShowingBodyBeauty = false;
 			// 处理音乐滤镜，重新开启音乐
@@ -348,7 +423,7 @@ namespace gui_tab_content
 			resetBodyShapeParam();
 			nama->UpdateBodyShape();
 		}
-		ImGui::PopStyleVar();
-		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor(6);
 	}
 }

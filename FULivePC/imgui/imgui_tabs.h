@@ -9,7 +9,7 @@ namespace ImGui
 IMGUI_API void          BeginTabBar(const char* str_id, ImGuiTabBarFlags flags = 0);
 IMGUI_API void          EndTabBar();
 //IMGUI_API bool          TabItem(const char* label, bool* p_open = NULL, ImGuiTabItemFlags = 0);
-IMGUI_API bool          TabItem(ImVec2 size,const char* label, bool* p_open = NULL, ImGuiTabItemFlags = 0);
+IMGUI_API bool          TabItem(ImVec2 size,const char* label, bool* p_open = NULL, ImGuiTabItemFlags = 0, int flagAngle = 0);
 
 // FIXME-WIP: Obsolete API
 IMGUI_API void          SetTabItemClosed(const char* label);

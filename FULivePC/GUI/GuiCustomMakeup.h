@@ -78,9 +78,10 @@ public:
 	virtual void ShowIntensityUI() = 0;
 	virtual void SetIntensity() = 0;
 
+	float m_fIntensity = 0.0f;
 protected:
 	Nama * m_pNama = nullptr;
-	float m_fIntensity = 100.0f;
+
 };
 
 

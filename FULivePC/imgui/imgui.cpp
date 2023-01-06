@@ -3886,8 +3886,9 @@ void ImGui::NewFrame()
 
     // Create implicit window - we will only render it if the user has added something to it.
     // We don't use "Debug" to avoid colliding with user trying to create a "Debug" window with custom flags.
-    SetNextWindowSize(ImVec2(400,400), ImGuiCond_FirstUseEver);
-    Begin("Debug##Default");
+    SetNextWindowPos(ImVec2(-1, -1));
+    SetNextWindowSize(ImVec2(1,1), ImGuiCond_Once);
+    Begin("Debug##Default", NULL, ImGuiWindowFlags_NoBringToFrontOnFocus);
 }
 
 static void* SettingsHandlerWindow_ReadOpen(ImGuiContext*, ImGuiSettingsHandler*, const char* name)
@@ -4643,7 +4644,7 @@ void ImGui::RenderArrow(ImVec2 p_min, ImGuiDir dir, float scale)
     ImGuiWindow* window = g.CurrentWindow;
 
     const float h = g.FontSize * 1.00f;
-    float r = h * 0.40f * scale;
+    float r = h * 0.25f * scale;
     ImVec2 center = p_min + ImVec2(h * 0.50f, h * 0.50f * scale);
 
     ImVec2 a, b, c;
@@ -4671,7 +4672,7 @@ void ImGui::RenderArrow(ImVec2 p_min, ImGuiDir dir, float scale)
         break;
     }
 
-    window->DrawList->AddTriangleFilled(center + a, center + b, center + c, GetColorU32(ImGuiCol_Text));
+    window->DrawList->AddTriangleFilled(center + a, center + b, center + c, GetColorU32(ImVec4(1.0f,1.0f,1.0f,1.0f)));
 }
 
 void ImGui::RenderBullet(ImVec2 pos)
@@ -8094,13 +8095,25 @@ bool ImGui::ButtonEx(const char* label, const ImVec2& size_arg, ImGuiButtonFlags
     bool pressed = ButtonBehavior(bb, id, &hovered, &held, flags);
     if (pressed)
         MarkItemValueChanged(id);
-
+    ImU32 col;
     // Render
-    const ImU32 col = GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+    if (flags == ImGuiButtonFlags_Disabled) {
+        col = GetColorU32( ImGuiCol_Button);
+        PushStyleColor(ImGuiCol_Text, g.Style.Colors[ImGuiCol_Text]);
+        PushStyleColor(ImGuiCol_Border, g.Style.Colors[ImGuiCol_Border]);
+    }
+    else {
+        col = GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : ImGuiCol_Button);
+        PushStyleColor(ImGuiCol_Text, hovered ? g.Style.Colors[ImGuiCol_TextDisabled] : g.Style.Colors[ImGuiCol_Text]);
+        PushStyleColor(ImGuiCol_Border, hovered ? g.Style.Colors[ImGuiCol_TextDisabled] : g.Style.Colors[ImGuiCol_Border]);
+    }
     RenderNavHighlight(bb, id);
+
     RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
+
     RenderTextClipped(bb.Min + style.FramePadding, bb.Max - style.FramePadding, label, NULL, &label_size, style.ButtonTextAlign, &bb);
 
+    PopStyleColor(2);
     // Automatically close popups
     //if (pressed && !(flags & ImGuiButtonFlags_DontClosePopups) && (window->Flags & ImGuiWindowFlags_Popup))
     //    CloseCurrentPopup();
@@ -8108,9 +8121,58 @@ bool ImGui::ButtonEx(const char* label, const ImVec2& size_arg, ImGuiButtonFlags
     return pressed;
 }
 
-bool ImGui::Button(const char* label, const ImVec2& size_arg)
+bool ImGui::ButtonEx2(const char* label, const ImVec2& size_arg, ImGuiButtonFlags flags)
 {
-    return ButtonEx(label, size_arg, 0);
+    ImGuiWindow* window = GetCurrentWindow();
+    if (window->SkipItems)
+        return false;
+
+    ImGuiContext& g = *GImGui;
+    const ImGuiStyle& style = g.Style;
+    const ImGuiID id = window->GetID(label);
+    const ImVec2 label_size = CalcTextSize(label, NULL, true);
+
+    ImVec2 pos = window->DC.CursorPos;
+    if ((flags & ImGuiButtonFlags_AlignTextBaseLine) && style.FramePadding.y < window->DC.CurrentLineTextBaseOffset) // Try to vertically align buttons that are smaller/have no padding so that text baseline matches (bit hacky, since it shouldn't be a flag)
+        pos.y += window->DC.CurrentLineTextBaseOffset - style.FramePadding.y;
+    ImVec2 size = CalcItemSize(size_arg, label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
+
+    const ImRect bb(pos, pos + size);
+    ItemSize(bb, style.FramePadding.y);
+    if (!ItemAdd(bb, id))
+        return false;
+
+    if (window->DC.ItemFlags & ImGuiItemFlags_ButtonRepeat)
+        flags |= ImGuiButtonFlags_Repeat;
+    bool hovered, held;
+    bool pressed = ButtonBehavior(bb, id, &hovered, &held, flags);
+    if (pressed)
+        MarkItemValueChanged(id);
+
+    // Render
+    const ImU32 col = GetColorU32(hovered ? ImGuiCol_ButtonActive : ImGuiCol_Button);
+    PushStyleColor(ImGuiCol_Text, hovered ? g.Style.Colors[ImGuiCol_Text] : g.Style.Colors[ImGuiCol_TextDisabled]);
+
+    RenderNavHighlight(bb, id);
+    RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
+    RenderTextClipped(bb.Min + style.FramePadding, bb.Max - style.FramePadding, label, NULL, &label_size, style.ButtonTextAlign, &bb);
+   
+    PopStyleColor();
+    // Automatically close popups
+    //if (pressed && !(flags & ImGuiButtonFlags_DontClosePopups) && (window->Flags & ImGuiWindowFlags_Popup))
+    //    CloseCurrentPopup();
+
+    return pressed;
+}
+
+bool ImGui::Button(const char* label, const ImVec2& size_arg, int flag)
+{
+    return ButtonEx(label, size_arg, flag);
+}
+
+bool ImGui::Button2(const char* label, const ImVec2& size_arg)
+{
+    return ButtonEx2(label, size_arg, 0);
 }
 
 // Small buttons fits within text without additional vertical spacing.
@@ -8234,11 +8296,7 @@ void ImGui::Image(ImTextureID user_texture_id, const ImVec2& size, const ImVec2&
     }
 }
 
-// frame_padding < 0: uses FramePadding from style (default)
-// frame_padding = 0: no framing
-// frame_padding > 0: set framing size
-// The color used are the button colors.
-bool ImGui::ImageButton(ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, int frame_padding, const ImVec4& bg_col, const ImVec4& tint_col)
+bool ImGui::ImageButtonHover(ImTextureID user_texture_id, ImTextureID user_texture_id2, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, int frame_padding, const ImVec4& bg_col, const ImVec4& tint_col)
 {
     ImGuiWindow* window = GetCurrentWindow();
     if (window->SkipItems)
@@ -8254,8 +8312,54 @@ bool ImGui::ImageButton(ImTextureID user_texture_id, const ImVec2& size, const I
     PopID();
 
     const ImVec2 padding = (frame_padding >= 0) ? ImVec2((float)frame_padding, (float)frame_padding) : style.FramePadding;
-    const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size + padding*2);
-    const ImRect image_bb(window->DC.CursorPos + padding, window->DC.CursorPos + padding + size);
+    const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size + padding * 1);
+    const ImRect bbHighlight(window->DC.CursorPos - padding * 0.75, window->DC.CursorPos + size + padding * 1.75);
+    const ImRect image_bb(window->DC.CursorPos + padding * 0.5, window->DC.CursorPos + padding * 0.5 + size);
+    ItemSize(bb);
+    if (!ItemAdd(bb, id))
+        return false;
+
+    bool hovered, held;
+    bool pressed = ButtonBehavior(bb, id, &hovered, &held);
+
+
+    //const ImU32 col = GetColorU32(ImGuiCol_Button);
+    //const ImU32 col2 = GetColorU32(ImGuiCol_ButtonActive);
+
+    //RenderNavHighlight(bb, id);
+    //RenderFrame(bbHighlight.Min, bbHighlight.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
+    //RenderFrame(bb.Min, bb.Max, col2, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
+    if (bg_col.w > 0.0f)
+        window->DrawList->AddRectFilled(image_bb.Min, image_bb.Max, GetColorU32(bg_col));
+    if (hovered) {
+        window->DrawList->AddImage(user_texture_id2, image_bb.Min, image_bb.Max, uv0, uv1, GetColorU32(tint_col));
+    }
+    else {
+        window->DrawList->AddImage(user_texture_id, image_bb.Min, image_bb.Max, uv0, uv1, GetColorU32(tint_col));
+    }
+
+    return pressed;
+}
+
+bool ImGui::ImageButton(ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, int frame_padding, const ImVec4& bg_col, const ImVec4& tint_col)
+{
+    ImGuiWindow* window = GetCurrentWindow();
+    if (window->SkipItems)
+        return false;
+
+    ImGuiContext& g = *GImGui;
+    const ImGuiStyle& style = g.Style;
+
+    // Default to using texture ID as ID. User can still push string/integer prefixes.
+    // We could hash the size/uv to create a unique ID but that would prevent the user from animating UV.
+    PushID((void*)user_texture_id);
+    const ImGuiID id = window->GetID("#image");
+    PopID();
+
+    const ImVec2 padding = (frame_padding >= 0) ? ImVec2((float)frame_padding, (float)frame_padding) : style.FramePadding;
+    const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size + padding * 1);
+    const ImRect bbHighlight(window->DC.CursorPos - padding * 0.75, window->DC.CursorPos + size + padding * 1.75);
+    const ImRect image_bb(window->DC.CursorPos + padding * 0.5, window->DC.CursorPos + padding * 0.5 + size);
     ItemSize(bb);
     if (!ItemAdd(bb, id))
         return false;
@@ -8264,9 +8368,13 @@ bool ImGui::ImageButton(ImTextureID user_texture_id, const ImVec2& size, const I
     bool pressed = ButtonBehavior(bb, id, &hovered, &held);
 
     // Render
-    const ImU32 col = GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+    //const ImU32 col = GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+    const ImU32 col = GetColorU32(ImGuiCol_Button);
+    const ImU32 col2 = GetColorU32(ImGuiCol_ButtonActive);
+
     RenderNavHighlight(bb, id);
-    RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
+    RenderFrame(bbHighlight.Min, bbHighlight.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
+    RenderFrame(bb.Min, bb.Max, col2, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
     if (bg_col.w > 0.0f)
         window->DrawList->AddRectFilled(image_bb.Min, image_bb.Max, GetColorU32(bg_col));
     window->DrawList->AddImage(user_texture_id, image_bb.Min, image_bb.Max, uv0, uv1, GetColorU32(tint_col));
@@ -8305,10 +8413,8 @@ bool ImGui::ImageRoundButton(ImGuiID& gui_id, ImTextureID user_texture_id, const
 	bool pressed = ButtonBehavior(bb, id, &hovered, &held);
 
 	// Render
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(252.f / 255.f, 253.f / 255.f, 255.f / 255.f, .82f));
-	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.0f));
-	const ImU32 col = GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
-
+	//const ImU32 col = GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+    const ImU32 col = GetColorU32(ImGuiCol_ButtonHovered);
 	RenderNavHighlight(bb, id);
 
 	//printf("w: %f h: %f\n", bb.GetWidth(), bb.GetHeight());
@@ -8316,18 +8422,21 @@ bool ImGui::ImageRoundButton(ImGuiID& gui_id, ImTextureID user_texture_id, const
 	float rounding = bb.GetWidth() / 2.f;
 	int circleSeg = 64;
 	{		
-		window->DrawList->AddCircleFilled(bb.GetCenter(), bb.GetWidth()/2.f, col, circleSeg);
-		const float border_size = 3.f;
-		if (gui_id == id && border_size > 0.0f)
+        if (button_operation_type != ImGUI_Button_Operation_Type_Select && hovered) {
+            window->DrawList->AddCircleFilled(bb.GetCenter(), bb.GetWidth() / 2.f, col, circleSeg);
+        }
+		const float border_size = 2.f;
+        //gui_id == id && border_size > 0.0f &&
+		if ( button_operation_type == ImGUI_Button_Operation_Type_Select)
 		{
-			window->DrawList->AddCircle(bb.GetCenter() + ImVec2(1, 1), bb.GetWidth() / 2.f, GetColorU32(ImGuiCol_BorderShadow), circleSeg, border_size);
-			window->DrawList->AddCircle(bb.GetCenter(), bb.GetWidth() / 2.f, GetColorU32(ImGuiCol_Border), circleSeg, border_size);
-		}else if (button_operation_type == ImGUI_Button_Operation_Type_Select){
-			window->DrawList->AddCircle(bb.GetCenter() + ImVec2(1, 1), bb.GetWidth() / 2.f, GetColorU32(ImGuiCol_BorderShadow), circleSeg, border_size);
-			window->DrawList->AddCircle(bb.GetCenter(), bb.GetWidth() / 2.f, GetColorU32(ImGuiCol_Border), circleSeg, border_size);
+			//window->DrawList->AddCircle(bb.GetCenter(), bb.GetWidth() / 2.f + 1, GetColorU32(ImGuiCol_BorderShadow), circleSeg, border_size);
+			window->DrawList->AddCircle(bb.GetCenter(), bb.GetWidth() / 2.f + 1, GetColorU32(ImGuiCol_Border), circleSeg, border_size);
+		}else if (button_operation_type == ImGUI_Button_Operation_Type_Reset){
+			window->DrawList->AddCircle(bb.GetCenter(), bb.GetWidth() / 2.f + 1, GetColorU32(ImGuiCol_BorderShadow), circleSeg, border_size);
+			//window->DrawList->AddCircle(bb.GetCenter(), bb.GetWidth() / 2.f, GetColorU32(ImGuiCol_Border), circleSeg, border_size);
 		}
 	}
-	ImGui::PopStyleColor(2);
+
 	if (button_operation_type == ImGUI_Button_Operation_Type_Reset) {
 		gui_id = -1;
 	}else if (pressed)
@@ -8368,8 +8477,8 @@ bool ImGui::ImageRoundButton2(ImTextureID user_texture_id, ImTextureID user_text
 	PopID();
 
 	const ImVec2 padding = (frame_padding >= 0) ? ImVec2((float)frame_padding, (float)frame_padding) : style.FramePadding;
-	const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size + padding * 2);
-	const ImRect image_bb(window->DC.CursorPos + padding, window->DC.CursorPos + padding + size);
+	const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size + padding * 1);
+	const ImRect image_bb(window->DC.CursorPos + padding * 0.5, window->DC.CursorPos + padding * 0.5 + size);
 	ItemSize(bb);
 	if (!ItemAdd(bb, id))
 		return false;
@@ -8379,13 +8488,14 @@ bool ImGui::ImageRoundButton2(ImTextureID user_texture_id, ImTextureID user_text
 
 	// Render	
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.0f));
-	const ImU32 col = GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+	const ImU32 col = GetColorU32(ImGuiCol_Button);
+    const ImU32 col2 = GetColorU32(ImGuiCol_ButtonActive);
 
 	RenderNavHighlight(bb, id);
 
-	float rounding = bb.GetWidth() / 2.f;
 	int circleSeg = 64;
-	window->DrawList->AddCircleFilled(bb.GetCenter(), bb.GetWidth() / 2.f, col, circleSeg);
+	window->DrawList->AddCircleFilled(bb.GetCenter(), bb.GetWidth() / 2.f + padding.x * 0.75, col, circleSeg);
+    window->DrawList->AddCircleFilled(bb.GetCenter(), bb.GetWidth() / 2.f, col2, circleSeg);
 	ImGui::PopStyleColor(1);
 
 	if (bg_col.w > 0.0f)
@@ -9110,6 +9220,7 @@ bool ImGui::InputScalarAsWidgetReplacement(const ImRect& bb, ImGuiID id, const c
     // Our replacement widget will override the focus ID (registered previously to allow for a TAB focus to happen)
     // On the first frame, g.ScalarAsInputTextId == 0, then on subsequent frames it becomes == id
     SetActiveID(g.ScalarAsInputTextId, window);
+
     g.ActiveIdAllowNavDirFlags = (1 << ImGuiDir_Up) | (1 << ImGuiDir_Down);
     SetHoveredID(0);
     FocusableItemUnregister(window);
@@ -9120,6 +9231,7 @@ bool ImGui::InputScalarAsWidgetReplacement(const ImRect& bb, ImGuiID id, const c
     DataTypeFormatString(data_buf, IM_ARRAYSIZE(data_buf), data_type, data_ptr, format);
     ImStrTrimBlanks(data_buf);
     ImGuiInputTextFlags flags = ImGuiInputTextFlags_AutoSelectAll | ((data_type == ImGuiDataType_Float || data_type == ImGuiDataType_Double) ? ImGuiInputTextFlags_CharsScientific : ImGuiInputTextFlags_CharsDecimal);
+
     bool value_changed = InputTextEx(label, data_buf, IM_ARRAYSIZE(data_buf), bb.GetSize(), flags);
     if (g.ScalarAsInputTextId == 0)     // First frame we started displaying the InputText widget
     {
@@ -9418,8 +9530,34 @@ static bool ImGui::SliderBehaviorT(const ImRect& bb, ImGuiID id, ImGuiDataType d
         grab_bb = ImRect(grab_pos - grab_sz*0.5f, bb.Min.y + grab_padding, grab_pos + grab_sz*0.5f, bb.Max.y - grab_padding);
     else
         grab_bb = ImRect(bb.Min.x + grab_padding, grab_pos - grab_sz*0.5f, bb.Max.x - grab_padding, grab_pos + grab_sz*0.5f);
-    window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
-
+    
+    //window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+    //const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
+    if (v_max == 100) {
+        RenderFrame(bb.Min, ImVec2(grab_bb.GetCenter().x, bb.Max.y), GetColorU32(ImGuiCol_FrameBgHovered), true, g.Style.FrameRounding);
+        RenderFrame(ImVec2(grab_bb.GetCenter().x, bb.Min.y), bb.Max, GetColorU32(ImGuiCol_FrameBg), true, g.Style.FrameRounding);
+    }
+    else {
+        float mid = (bb.Max.x + bb.Min.x) / 2;
+        RenderFrame(bb.Min, bb.Max, GetColorU32(ImGuiCol_FrameBg), true, g.Style.FrameRounding);
+        float startx, endx;
+        if (grab_bb.GetCenter().x < mid) {
+            startx = grab_bb.GetCenter().x;
+            endx = mid;
+        }
+        else {
+            startx = mid;
+            endx = grab_bb.GetCenter().x;
+        }
+        RenderFrame(ImVec2(startx, bb.Min.y), ImVec2(endx, bb.Max.y), GetColorU32(ImGuiCol_FrameBgHovered), true, g.Style.FrameRounding);
+     }
+    if (v_max > 1) {
+        window->DrawList->AddCircleFilled(grab_bb.GetCenter(), grab_bb.GetWidth() * 1.2f + 1, GetColorU32(ImVec4(70.f / 255.f, 67.f / 255.f, 113.f / 255.f, 0.2f)), 64);
+        window->DrawList->AddCircleFilled(grab_bb.GetCenter(), grab_bb.GetWidth() * 1.2f, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), 64);
+    }
+    else {
+        window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+    }
     return value_changed;
 }
 
@@ -9432,7 +9570,7 @@ bool ImGui::SliderBehavior(const ImRect& bb, ImGuiID id, ImGuiDataType data_type
     ImGuiContext& g = *GImGui;
     const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
     RenderNavHighlight(bb, id);
-    RenderFrame(bb.Min, bb.Max, frame_col, true, g.Style.FrameRounding);
+    //RenderFrame(bb.Min, bb.Max, frame_col, true, g.Style.FrameRounding);
 
     switch (data_type)
     {
@@ -9496,7 +9634,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* v, co
     const float w = CalcItemWidth();
 
     const ImVec2 label_size = CalcTextSize(label, NULL, true);
-    const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y*2.0f));
+    const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y / 2 + style.FramePadding.y*2.0f));
     const ImRect total_bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
 
     // NB- we don't call ItemSize() yet because we may turn into a text edit box below
@@ -9518,6 +9656,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* v, co
     bool start_text_input = false;
     const bool tab_focus_requested = FocusableItemRegister(window, id);
     const bool hovered = ItemHoverable(frame_bb, id);
+
     if (tab_focus_requested || (hovered && g.IO.MouseClicked[0]) || g.NavActivateId == id || (g.NavInputId == id && g.ScalarAsInputTextId != id))
     {
         SetActiveID(id, window);
@@ -9530,19 +9669,30 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* v, co
             g.ScalarAsInputTextId = 0;
         }
     }
-    if (start_text_input || (g.ActiveId == id && g.ScalarAsInputTextId == id))
+    /*if (start_text_input || (g.ActiveId == id && g.ScalarAsInputTextId == id))
         return InputScalarAsWidgetReplacement(frame_bb, id, label, data_type, v, format);
 
+    ImVec2 textAreaMin = ImVec2((frame_bb.Max.x + frame_bb.Min.x) / 2 + 30, frame_bb.Min.y - 5);
+    ImVec2 textAreaMax = ImVec2(frame_bb.Max.x + (frame_bb.Max.x - frame_bb.Min.x) / 2 + 30, frame_bb.Min.y + 15);
+    ImRect textAreaRect = ImRect(ImVec2(frame_bb.Max.x + 12, frame_bb.Min.y - 10), ImVec2(frame_bb.Max.x + 48, frame_bb.Max.y + 10));
+
+    bool hoveredArea = ItemHoverable(textAreaRect, id);
+    ImU32 textBorder = hoveredArea ? GetColorU32(ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f)) : GetColorU32(ImVec4(70.f / 255.f, 67.f / 255.f, 113.f / 255.f, 0.2f));
+
+    window->DrawList->AddRect(textAreaRect.Min, textAreaRect.Max, textBorder, 4, ImDrawCornerFlags_All, 1.0f);*/
+    
     // Actual slider behavior + render grab
     ItemSize(total_bb, style.FramePadding.y);
-    const bool value_changed = SliderBehavior(frame_bb, id, data_type, v, v_min, v_max, format, power);
+
+    bool value_changed = SliderBehavior(frame_bb, id, data_type, v, v_min, v_max, format, power);
     if (value_changed)
         MarkItemValueChanged(id);
 
     // Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
+
     char value_buf[64];
     const char* value_buf_end = value_buf + DataTypeFormatString(value_buf, IM_ARRAYSIZE(value_buf), data_type, v, format);
-    RenderTextClipped(frame_bb.Min, frame_bb.Max, value_buf, value_buf_end, NULL, ImVec2(0.5f,0.5f));
+    // RenderTextClipped(textAreaMin, textAreaMax, value_buf, value_buf_end, NULL, ImVec2(0.5f, 0.5f));
 
     if (label_size.x > 0.0f)
         RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
@@ -10077,7 +10227,7 @@ bool ImGui::DragScalar(const char* label, ImGuiDataType data_type, void* v, floa
     // Tabbing or CTRL-clicking on Drag turns it into an input box
     bool start_text_input = false;
     const bool tab_focus_requested = FocusableItemRegister(window, id);
-    if (tab_focus_requested || (hovered && (g.IO.MouseClicked[0] || g.IO.MouseDoubleClicked[0])) || g.NavActivateId == id || (g.NavInputId == id && g.ScalarAsInputTextId != id))
+    if (tab_focus_requested || (hovered && g.IO.MouseDoubleClicked[0]) || g.NavActivateId == id || (g.NavInputId == id && g.ScalarAsInputTextId != id))
     {
         SetActiveID(id, window);
         SetFocusID(id, window);
@@ -10088,6 +10238,12 @@ bool ImGui::DragScalar(const char* label, ImGuiDataType data_type, void* v, floa
             start_text_input = true;
             g.ScalarAsInputTextId = 0;
         }
+    }
+
+    if (hovered && g.ActiveId != id) {
+        SetActiveID(id, window);
+        SetFocusID(id, window);
+        FocusWindow(window);
     }
     if (start_text_input || (g.ActiveId == id && g.ScalarAsInputTextId == id))
         return InputScalarAsWidgetReplacement(frame_bb, id, label, data_type, v, format);
@@ -10101,7 +10257,11 @@ bool ImGui::DragScalar(const char* label, ImGuiDataType data_type, void* v, floa
     // Draw frame
     const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
     RenderNavHighlight(frame_bb, id);
-    RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, style.FrameRounding);
+
+    ImU32 textBorder = hovered ? GetColorU32(ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f)) :
+        GetColorU32(ImVec4(70.f / 255.f, 67.f / 255.f, 113.f / 255.f, 0.2f));
+    window->DrawList->AddRect(frame_bb.Min, frame_bb.Max, textBorder, 4, ImDrawCornerFlags_All, 1.0f);
+    //RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, style.FrameRounding);
 
     // Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
     char value_buf[64];
@@ -10451,7 +10611,14 @@ bool ImGui::Checkbox(const char* label, bool* v)
     }
 
     RenderNavHighlight(total_bb, id);
-    RenderFrame(check_bb.Min, check_bb.Max, GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), true, style.FrameRounding);
+    if (hovered) {
+        ImGui::PushStyleColor(ImGuiCol_Border, GetColorU32(ImGuiCol_FrameBgActive));
+    }
+    //RenderFrame(check_bb.Min, check_bb.Max, GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), true, style.FrameRounding);
+    RenderFrame(check_bb.Min, check_bb.Max, GetColorU32(*v ? ImGuiCol_FrameBgActive : ImGuiCol_FrameBg), true, style.FrameRounding);
+    if (hovered) {
+        ImGui::PopStyleColor();
+    }
     if (*v)
     {
         const float check_sz = ImMin(check_bb.GetWidth(), check_bb.GetHeight());
@@ -11244,8 +11411,10 @@ bool ImGui::InputTextEx(const char* label, char* buf, int buf_size, const ImVec2
 
     if (!is_multiline)
     {
-        RenderNavHighlight(frame_bb, id);
-        RenderFrame(frame_bb.Min, frame_bb.Max, GetColorU32(ImGuiCol_FrameBg), true, style.FrameRounding);
+        //RenderNavHighlight(frame_bb, id);
+        //RenderFrame(frame_bb.Min, frame_bb.Max, GetColorU32(ImGuiCol_FrameBg), true, style.FrameRounding);
+        ImU32 textBorder = GetColorU32(ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f));
+        window->DrawList->AddRect(frame_bb.Min, frame_bb.Max, textBorder, 4, ImDrawCornerFlags_All, 1.0f);
     }
 
     const ImVec4 clip_rect(frame_bb.Min.x, frame_bb.Min.y, frame_bb.Min.x + size.x, frame_bb.Min.y + size.y); // Not using frame_bb.Max because we have adjusted size
@@ -11367,8 +11536,8 @@ bool ImGui::InputTextEx(const char* label, char* buf, int buf_size, const ImVec2
                     if (rect_size.x <= 0.0f) rect_size.x = (float)(int)(g.Font->GetCharAdvance((unsigned short)' ') * 0.50f); // So we can see selected empty lines
                     ImRect rect(rect_pos + ImVec2(0.0f, bg_offy_up - g.FontSize), rect_pos +ImVec2(rect_size.x, bg_offy_dn));
                     rect.ClipWith(clip_rect);
-                    if (rect.Overlaps(clip_rect))
-                        draw_window->DrawList->AddRectFilled(rect.Min, rect.Max, bg_color);
+                    //if (rect.Overlaps(clip_rect))
+                        //draw_window->DrawList->AddRectFilled(rect.Min, rect.Max, bg_color);
                 }
                 rect_pos.x = render_pos.x - render_scroll.x;
                 rect_pos.y += g.FontSize;
@@ -11649,12 +11818,22 @@ bool ImGui::BeginCombo(const char* label, const char* preview_value, ImGuiComboF
     RenderNavHighlight(frame_bb, id);
     if (!(flags & ImGuiComboFlags_NoPreview))
         window->DrawList->AddRectFilled(frame_bb.Min, ImVec2(frame_bb.Max.x - arrow_size, frame_bb.Max.y), frame_col, style.FrameRounding, ImDrawCornerFlags_Left);
-    if (!(flags & ImGuiComboFlags_NoArrowButton))
+    if (popup_open)
+    {
+        window->DrawList->AddRectFilled(ImVec2(frame_bb.Max.x - arrow_size, frame_bb.Min.y), frame_bb.Max, GetColorU32((popup_open || hovered) ? ImGuiCol_ButtonHovered : ImGuiCol_Button), style.FrameRounding, (w <= arrow_size) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Right);
+        RenderArrow(ImVec2(frame_bb.Max.x - arrow_size + style.FramePadding.y, frame_bb.Min.y + style.FramePadding.y), ImGuiDir_Up);
+    }else if (!(flags & ImGuiComboFlags_NoArrowButton))
     {
         window->DrawList->AddRectFilled(ImVec2(frame_bb.Max.x - arrow_size, frame_bb.Min.y), frame_bb.Max, GetColorU32((popup_open || hovered) ? ImGuiCol_ButtonHovered : ImGuiCol_Button), style.FrameRounding, (w <= arrow_size) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Right);
         RenderArrow(ImVec2(frame_bb.Max.x - arrow_size + style.FramePadding.y, frame_bb.Min.y + style.FramePadding.y), ImGuiDir_Down);
     }
+    if (hovered || popup_open) {
+        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f));
+    }
     RenderFrameBorder(frame_bb.Min, frame_bb.Max, style.FrameRounding);
+    if (hovered || popup_open) {
+        ImGui::PopStyleColor();
+    }
     if (preview_value != NULL && !(flags & ImGuiComboFlags_NoPreview))
         RenderTextClipped(frame_bb.Min + style.FramePadding, value_bb.Max, preview_value, NULL, NULL, ImVec2(0.0f,0.0f));
     if (label_size.x > 0)
@@ -11898,10 +12077,9 @@ bool ImGui::Selectable(const char* label, bool selected, ImGuiSelectableFlags fl
         bb.Max.x -= (GetContentRegionMax().x - max_x);
     }
 
-    if (flags & ImGuiSelectableFlags_Disabled) PushStyleColor(ImGuiCol_Text, g.Style.Colors[ImGuiCol_TextDisabled]);
+    if ((flags & ImGuiSelectableFlags_Disabled )|| hovered) PushStyleColor(ImGuiCol_Text, g.Style.Colors[ImGuiCol_TextDisabled]);
     RenderTextClipped(bb_inner.Min, bb.Max, label, NULL, &label_size, ImVec2(0.5f,0.5f));
-    if (flags & ImGuiSelectableFlags_Disabled) PopStyleColor();
-
+    if ((flags & ImGuiSelectableFlags_Disabled )|| hovered) PopStyleColor();
     // Automatically close popups
     if (pressed && (window->Flags & ImGuiWindowFlags_Popup) && !(flags & ImGuiSelectableFlags_DontClosePopups) && !(window->DC.ItemFlags & ImGuiItemFlags_SelectableDontClosePopup))
         CloseCurrentPopup();
@@ -11979,18 +12157,27 @@ bool ImGui::SelectableBorder(const char* label, bool selected, ImGuiSelectableFl
 		MarkItemValueChanged(id);
 
 	// Render
-	if (hovered || selected)
+	if (!selected && hovered)
 	{		
-		const ImU32 col = GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
-		RenderFrame(bb.Min, bb.Max, col, false, 3.0f);
-		RenderNavHighlight(bb, id, ImGuiNavHighlightFlags_TypeThin | ImGuiNavHighlightFlags_NoRounding);		
-	}
+        PushStyleColor(ImGuiCol_Border, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f));
+        PushStyleColor(ImGuiCol_Header, ImVec4(1.f, 1.f, 1.f, 1.f));
+        const ImU32 col = GetColorU32(ImGuiCol_Header);
+        RenderFrame(bb.Min, bb.Max, col, true, 3.0f);
+        PopStyleColor(2);
+    }
+    else if (selected)
+    {
+        const ImU32 col = GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
+        RenderFrame(bb.Min, bb.Max, col, false, 3.0f);
+        RenderNavHighlight(bb, id, ImGuiNavHighlightFlags_TypeThin | ImGuiNavHighlightFlags_NoRounding);
+    }
 	else
 	{
-		PushStyleColor(ImGuiCol_Header, ImVec4(225.f / 255.f, 228.f / 255.f, 238.f / 255.f, 1.f));
-		const ImU32 col = GetColorU32(ImGuiCol_Header);
-		RenderFrame(bb.Min, bb.Max, col, false, 3.0f);		
-		PopStyleColor();
+        PushStyleColor(ImGuiCol_Border, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+        PushStyleColor(ImGuiCol_Header, ImVec4(1.f, 1.f, 1.f, 1.f));
+        const ImU32 col = GetColorU32(ImGuiCol_Header);
+        RenderFrame(bb.Min, bb.Max, col, true, 3.0f);
+        PopStyleColor(2);
 	}
 
 	if ((flags & ImGuiSelectableFlags_SpanAllColumns) && window->DC.ColumnsSet)
@@ -12001,7 +12188,9 @@ bool ImGui::SelectableBorder(const char* label, bool selected, ImGuiSelectableFl
 
 	if (flags & ImGuiSelectableFlags_Disabled) PushStyleColor(ImGuiCol_Text, g.Style.Colors[ImGuiCol_TextDisabled]);
 	if(selected) PushStyleColor(ImGuiCol_Text, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 1.f));
+    if(!selected && hovered) PushStyleColor(ImGuiCol_Text, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.f));
 	RenderTextClipped(bb_inner.Min, bb.Max, label, NULL, &label_size, ImVec2(0.5f, 0.5f));
+    if (!selected && hovered)PopStyleColor();
 	if (selected)PopStyleColor();
 	if (flags & ImGuiSelectableFlags_Disabled) PopStyleColor();
 

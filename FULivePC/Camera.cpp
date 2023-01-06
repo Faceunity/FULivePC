@@ -1,4 +1,4 @@
-#include "Camera.h"
+﻿#include "Camera.h"
 #include "stdio.h"
 #include "fu_tool.h"
 #include "UIBridge.h"
@@ -111,10 +111,15 @@ void CCameraDS::init() {
 
 static bool LoopVideo(CCameraDS* cc)
 {
-    if (cc->getCaptureType() == CAPTURE_FILE && cc->frame_id >= cc->frameCount && cc->IsLoop())
+    bool fileFlag = (cc->getCaptureType() == CAPTURE_FILE && cc->frame_id >= cc->frameCount);
+    if (fileFlag && cc->IsLoop())
     {
         cc->mCapture.set(cv::CAP_PROP_POS_FRAMES, 0);
         cc->frame_id = 0;
+        return true;
+    }
+    if (fileFlag && !cc->IsLoop()) {
+        cc->stop();
         return true;
     }
     return false;
@@ -129,6 +134,10 @@ static bool LoopVideoApproximate(CCameraDS* cc)
     {
         cc->mCapture.set(cv::CAP_PROP_POS_FRAMES, 0);
         cc->frame_id = 0;
+        return true;
+    }
+    if (cc->getCaptureType() == CAPTURE_FILE && !cc->IsLoop()) {
+        cc->stop();
         return true;
     }
     return false;
@@ -197,7 +206,7 @@ static void ProcessFrame(CCameraDS* cc)
 {
     while (!cc->m_bThreadEnd)
     {
-        if (!cc->checkFps() || !cc->isPlaying())
+        if (!cc->isPlaying() || !cc->checkFps())
         {
             continue;
         }
@@ -368,6 +377,9 @@ void CCameraDS::InitCameraSinglePic(int width, int height, std::string path, boo
         }
         else
         {
+            UIBridge::m_openLocalFileTip = u8"当前类型文件不支持";
+            UIBridge::m_bLoadWrongNamePNGFile = true;
+            UIBridge::mLastTimeExtra = ImGui::GetTime() + 8.0;
             m_filepath = "";
             rs_width = 0;
             rs_height = 0;
@@ -568,8 +580,14 @@ void CCameraDS::clearLastFrame() {
     Locker locker(&m_mtxFrame);
 #endif
 
-    cv::Mat blackMat(frame.rows, frame.cols, CV_8UC3, cv::Scalar(0, 0, 0));
-    frame = blackMat;
+    //cv::Mat blackMat(frame.rows, frame.cols, CV_8UC3, cv::Scalar(0, 0, 0));
+#if _WIN32
+    string defaultPicPath = "./res/gsbackground.png";
+#elif __APPLE__
+    string defaultPicPath = FuToolMac::GetFileFullPathFromResPicBundle("gsbackground.png");
+#endif
+    cv::Mat transparentMat = cv::imread(defaultPicPath, cv::IMREAD_UNCHANGED);
+    frame = transparentMat;
 
 }
 /// 设置默认的待机画面
@@ -619,7 +637,8 @@ void CCameraDS::connectCamera()
         {
 
             m_FPS = mCapture.get(cv::CAP_PROP_FPS);
-            frameCount = mCapture.get(cv::CAP_PROP_FRAME_COUNT);;
+            frameCount = mCapture.get(cv::CAP_PROP_FRAME_COUNT);
+
         }
 
         m_bThreadEnd = false;
@@ -663,7 +682,8 @@ void CCameraDS::play() {
 
     if (status == STATUS_PLAYING)return;
     if (status == STATUS_STOP || status == STATUS_INIT || status == STATUS_PAUSE) {
-
+        mCapture.set(cv::CAP_PROP_POS_FRAMES, 0);
+        frame_id = 0;
         status = STATUS_PLAYING;
         return;
     }
@@ -672,7 +692,6 @@ void CCameraDS::play() {
 void CCameraDS::stop() {
     if (status == STATUS_PLAYING) {
         status = STATUS_STOP;
-
     }
 }
 
@@ -689,17 +708,19 @@ void CCameraDS::LoadDefIFNone()
     Locker locker(&m_mtxFrame);
 #endif
 
-    if (frame.rows == 0 && frame.cols == 0)
+    if (frame.rows == 0 && frame.cols == 0 && getCaptureType() != CAPTURE_FILE)
     {
 #if _WIN32
-        string defaultPicPath = "../../res/bg_no_camera_detected.png";
+        string defaultPicPath = "./res/bg_no_camera_detected_flip.png";
 #elif __APPLE__
-        string defaultPicPath = FuToolMac::GetFileFullPathFromResPicBundle("bg_no_camera_detected.png");
+        string defaultPicPath = FuToolMac::GetFileFullPathFromResPicBundle("bg_no_camera_detected_flip.png");
 #endif
         static cv::Mat defaulfFrame = cv::imread(defaultPicPath, cv::IMREAD_COLOR);
         if (!defaulfFrame.empty())
         {
-            cv::resize(defaulfFrame, defaulfFrame, cv::Size(rs_width, rs_height));
+            if (rs_width != 0) {
+                cv::resize(defaulfFrame, defaulfFrame, cv::Size(rs_width, rs_height));
+            }
             frame = defaulfFrame;
         }
     }
@@ -1085,7 +1106,7 @@ void CCameraManage::OpenCamera(int iCamID)
     }
 }
 
-void CCameraManage::OpenCamera(string strVideoPath)
+void CCameraManage::OpenCamera(string strVideoPath, bool loop)
 {
     auto strPath = mCapture->getFilePath();
     auto curCaptureType = mCapture->getCaptureType();
@@ -1093,7 +1114,7 @@ void CCameraManage::OpenCamera(string strVideoPath)
     if ((strPath == strVideoPath && !mCapture->isInit()) || strVideoPath != strPath || curCaptureType != CAPTURE_FILE)
     {
         mCapture->closeCamera();
-        mCapture->InitCameraFile(DEF_CAMERA_WIDTH, DEF_CAMERA_HEIGHT, strVideoPath);
+        mCapture->InitCameraFile(DEF_CAMERA_WIDTH, DEF_CAMERA_HEIGHT, strVideoPath, loop);
         mFrameWidth = mCapture->m_dstFrameSize.width;
         mFrameHeight = mCapture->m_dstFrameSize.height;
         fuOnCameraChange();

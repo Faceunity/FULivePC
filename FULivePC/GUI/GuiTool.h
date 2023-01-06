@@ -46,11 +46,13 @@ namespace gui_tool
 
 	bool ImageButtonWithLabel(const char* text);
 
-	bool LayoutButton(const ImVec2& pos, const ImVec2& size, const char* label);
+	bool LayoutButton(const ImVec2& pos, const ImVec2& size, const char* label,int flag = 0);
+
+	bool LayoutButton2(const ImVec2& pos, const ImVec2& size, const char* label);
 
 	bool LayoutSelectable(const ImVec2& pos, const ImVec2& size, const char* label, bool selected);
 
-	bool LayoutSlider(const ImVec2& pos, const ImVec2& size, const char* label, float* v, float v_min, float v_max);
+	bool LayoutSlider(const ImVec2& pos, const ImVec2& size, const char* label, const char* label2, float* v, float v_min, float v_max);
 
 	void LayoutImageSameLine(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, const char* label);
 
@@ -59,6 +61,8 @@ namespace gui_tool
 	void LayoutImage(RectLayoutDesc image, ImTextureID user_texture_id, ImVec2 textPos, const char* label);
 
 	bool LayoutImageButtonWithText(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, ImTextureID user_texture_id2, const char* label);
+
+	bool LayoutImageButtonWithTextFilter(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, ImTextureID user_texture_id2, ImTextureID user_texture_id3, ImTextureID user_texture_id4, const char* label ,bool select);
 
 	bool LayoutRectImageButtonWithText(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, const char* label);
 
@@ -83,6 +87,12 @@ namespace gui_tool
 	Texture::SharedPtr createColorHSV(int iW, int iH, cv::Mat & outRGB);
 
 	void CutCircleInMiddle(cv::Mat & dataIn, cv::Mat & dataOut);
+
+    void readStyleConfig();
+
+    void saveStyleConfig();
+
+	void loadStyleParam();
 
 	void resetBeautyParam();
 

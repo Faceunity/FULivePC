@@ -39,6 +39,7 @@ bool MouseControl::isMouseReleased(){
 	return false;
 }
 
+
 /// 检测当前负责的区域有没有被选中，如果被选中，返回第一次被点击的位置
 /// @param pos 返回被点击的位置
 bool MouseControl::isSelected(ImVec2* pos){
@@ -112,4 +113,14 @@ void MouseControl::changeRect(FURect rect){
 MouseControl::~MouseControl()
 {
 	
+}
+
+float MouseControl::isMouseWheel()
+{
+	return io.MouseWheel;
+}
+
+void MouseControl::ReSetOrigin()
+{
+	mouseControlState = MouseControlStateOrignal;
 }

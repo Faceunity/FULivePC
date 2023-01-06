@@ -74,4 +74,3 @@ void UIBridge::FindAllCommonPIC(std::string folder, std::vector<std::string> &fi
 	IteratorFolder(folder.c_str(), files, ".mov");
 }
 
-

@@ -4,6 +4,13 @@
 #include<windows.h>
 #elif __APPLE__
 #endif
+#include <fu_tool.h>
+#include "rapidjson/document.h"
+#include "rapidjson/filereadstream.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/prettywriter.h"
+#include <iostream>
+#include <fstream>
 extern float scaleRatioW;
 extern float scaleRatioH;
 
@@ -14,14 +21,25 @@ namespace gui_tool
 
 	void ShowHelpMarker(const char* desc)
 	{
-		ImGui::TextDisabled("(?)");
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2 * scaleRatioH);
+		static bool hover = false;
+		if (hover) {
+			ImGui::Image(Texture::createTextureFromFile("icon_notes_hover.png", false)->getTextureID(), ImVec2(18 * scaleRatioW, 18 * scaleRatioW));
+		}
+		else {
+			ImGui::Image(Texture::createTextureFromFile("icon_notes_nor.png", false)->getTextureID(), ImVec2(18 * scaleRatioW, 18 * scaleRatioW));
+		}
 		if (ImGui::IsItemHovered())
 		{
+			hover = true;
 			ImGui::BeginTooltip();
 			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
 			ImGui::TextUnformatted(desc);
 			ImGui::PopTextWrapPos();
 			ImGui::EndTooltip();
+		}
+		else {
+			hover = false;
 		}
 	}
 
@@ -33,12 +51,22 @@ namespace gui_tool
 		return true;
 	}
 
-	bool LayoutButton(const ImVec2& pos, const ImVec2& size, const char* label)
+	bool LayoutButton(const ImVec2& pos, const ImVec2& size, const char* label,int flag)
 	{
 		ImGui::BeginGroup();
 		ImGui::Dummy(ImVec2(1, pos.y * scaleRatioH));
 		ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine();
-		bool ret = ImGui::Button(label, ImVec2(size.x * scaleRatioW, size.y * scaleRatioH));
+		bool ret = ImGui::Button(label, ImVec2(size.x * scaleRatioW, size.y * scaleRatioH), flag);
+		ImGui::EndGroup();
+		return ret;
+	}
+
+	bool LayoutButton2(const ImVec2& pos, const ImVec2& size, const char* label)
+	{
+		ImGui::BeginGroup();
+		ImGui::Dummy(ImVec2(1, pos.y * scaleRatioH));
+		ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine();
+		bool ret = ImGui::Button2(label, ImVec2(size.x * scaleRatioW, size.y * scaleRatioH));
 		ImGui::EndGroup();
 		return ret;
 	}
@@ -48,21 +76,45 @@ namespace gui_tool
 		ImGui::BeginGroup();
 		ImGui::Dummy(ImVec2(1, pos.y * scaleRatioH));
 		ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
 		bool ret = ImGui::SelectableBorder(label, selected, 0, ImVec2(size.x * scaleRatioW, size.y * scaleRatioH));
+		ImGui::PopStyleColor();
 		ImGui::EndGroup();
 		return ret;
 	}
 
-	bool LayoutSlider(const ImVec2& pos, const ImVec2& size, const char* label, float* v, float v_min, float v_max)
+	bool LayoutSlider(const ImVec2& pos, const ImVec2& size, const char* label, const char* label2, float* v, float v_min, float v_max)
 	{
 		ImGui::BeginGroup();
 		ImGui::Dummy(ImVec2(1, pos.y * scaleRatioH));
-		ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine();
+		ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1));
+		ImGui::SameLine();
 		ImGui::PushItemWidth(size.x * scaleRatioW);
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 1.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+		ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(119.f / 255.f, 135.f / 255.f, 233.f / 255.f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(224.f / 255.f, 227.f / 255.f, 238 / 255.f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_BorderShadow, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
 		bool ret = ImGui::SliderFloat(label, v, v_min, v_max, "%.f");
-		ImGui::PopStyleVar();
+		ImGui::PopStyleColor(6);
+		ImGui::PopStyleVar(2);
 		ImGui::PopItemWidth();
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 5.0f));
+		ImGui::SameLine(0, 16 * scaleRatioW);
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() -10);
+		ImGui::PushItemWidth(32 * scaleRatioW);
+		ImGui::DragFloat(label2, v, 1, v_min, v_max, "%.f");
+		if (*v > v_max) {
+			*v = v_max;
+		}
+		else if(*v < v_min){
+			*v = v_min;
+		}
+		ImGui::PopItemWidth();
+		ImGui::PopStyleVar();
 		ImGui::EndGroup();
 		return ret;
 	}
@@ -87,7 +139,9 @@ namespace gui_tool
 
 		if (strlen(label) != 0)
 		{
-			ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine(); ImGui::Text(label);
+			ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1));
+			ImGui::SameLine();
+			ImGui::Text(label);
 		}
 		
 		ImGui::EndGroup();
@@ -106,9 +160,46 @@ namespace gui_tool
 	bool LayoutImageButtonWithText(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, ImTextureID user_texture_id2, const char* label)
 	{
 		ImGui::BeginGroup();
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 1.0f));
 		bool ret = ImGui::ImageRoundButton2(user_texture_id, user_texture_id2, ImVec2(size.x * scaleRatioW, size.y * scaleRatioH));/* ImGui::SameLine(0.f, 27.f);*/
 		ImGui::Spacing();
 		ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine(); ImGui::Text(label);
+		ImGui::PopStyleColor();
+		ImGui::EndGroup();
+		return ret;
+	}
+
+	bool LayoutImageButtonWithTextFilter(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, ImTextureID user_texture_id2, ImTextureID user_texture_id3, ImTextureID user_texture_id4, const char* label, bool select)
+	{
+		ImGui::BeginGroup();
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+		bool ret = ImGui::ImageButton(user_texture_id, ImVec2(size.x, size.y));/* ImGui::SameLine(0.f, 27.f);*/
+
+		//ImGui::SetCursorPosX(ImGui::GetCursorPosX());
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - size.y - 8);
+		if (select) {
+			ImGui::Image(user_texture_id4, ImVec2(size.x , size.y));
+		}
+		else {
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::Image(user_texture_id2, ImVec2(size.x, size.y ));
+			}
+			else {
+				ImGui::Image(user_texture_id3, ImVec2(size.x, size.y));
+			}
+		}
+		if (select) {
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 29 * scaleRatioW);
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 63 * scaleRatioH);
+		}
+		else {
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 29 * scaleRatioW);
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 27 * scaleRatioH);
+		}
+		ImGui::Text(label);
+		ImGui::PopStyleColor(2);
 		ImGui::EndGroup();
 		return ret;
 	}
@@ -116,9 +207,14 @@ namespace gui_tool
 	bool LayoutRectImageButtonWithText(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, const char* label)
 	{
 		ImGui::BeginGroup();
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(255.f / 255.f, 255.f / 255.f, 255.f / 255.f, 0.0f));
 		bool ret = ImGui::ImageButton(user_texture_id, ImVec2(size.x * scaleRatioW, size.y * scaleRatioH));/* ImGui::SameLine(0.f, 27.f);*/
 		ImGui::Spacing();
-		ImGui::Dummy(ImVec2(pos.x * scaleRatioW, 1)); ImGui::SameLine(); ImGui::Text(label);
+		int length = 5 - strlen(label) / 3;
+		ImGui::Dummy(ImVec2(pos.x * scaleRatioW * length, 1)); ImGui::SameLine(); ImGui::Text(label);
+		ImGui::PopStyleColor(3);
 		ImGui::EndGroup();
 		return ret;
 	}
@@ -327,52 +423,180 @@ namespace gui_tool
 
 		return texRet;
 	}
+	void readStyleConfig() {
+		string strRealPath = "";
+ 		strRealPath = FuTool::GetFileFullPathFromeSearchPath(gCustomStyleConfig.c_str());
+		ifstream in(strRealPath.c_str());
+		if (!in.is_open()) {
+			fprintf(stderr, "fail to read json file: %s\n", gCustomStyleConfig.data());
+			return;
+		}
 
+		string json_content((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
+		in.close();
+
+		rapidjson::Document dom;
+		if (!dom.Parse(json_content.c_str()).HasParseError())
+		{
+			for (rapidjson::Value::ConstMemberIterator itr = dom.MemberBegin(); itr != dom.MemberEnd(); itr++)
+			{
+				rapidjson::Value jKey;
+				rapidjson::Value jValue;
+				rapidjson::Document::AllocatorType allocator;
+				jKey.CopyFrom(itr->name, allocator);
+				jValue.CopyFrom(itr->value, allocator);
+				if (jKey.IsString())
+				{
+					StyleRecommendationParam tempSRP;
+					tempSRP.styleName = jKey.GetString();
+					if (jValue.IsArray() && jValue.Size() > 0)
+					{
+						const auto& obj = jValue[0];
+						if (obj.HasMember("BeautyLevelDefault"))
+						{
+							const auto& arrayValue = obj["BeautyLevelDefault"];
+							for (int i = 0; i < arrayValue.Size(); i++)
+							{
+								tempSRP.mFaceBeautyLevelDefault[i] = arrayValue[i].GetFloat();
+							}
+						}
+						if (obj.HasMember("ShapeLevelDefault"))
+						{
+							const auto& arrayValue = obj["ShapeLevelDefault"];
+							for (int i = 0; i < arrayValue.Size(); i++)
+							{
+								tempSRP.mFaceShapeLevelDefault[i] = arrayValue[i].GetFloat();
+							}
+						}
+						if (obj.HasMember("BeautyLevel"))
+						{
+							const auto& arrayValue = obj["BeautyLevel"];
+							for (int i = 0; i < arrayValue.Size(); i++)
+							{
+								tempSRP.mFaceBeautyLevel[i] = arrayValue[i].GetFloat();
+							}
+						}
+						if (obj.HasMember("ShapeLevel"))
+						{
+							const auto& arrayValue = obj["ShapeLevel"];
+							for (int i = 0; i < arrayValue.Size(); i++)
+							{
+								tempSRP.mFaceShapeLevel[i] = arrayValue[i].GetFloat();
+							}
+						}
+						if (obj.HasMember("FilterLevel"))
+						{
+							const auto& arrayValue = obj["FilterLevel"];
+							tempSRP.mFilterLevel = arrayValue.GetInt();
+						}
+						if (obj.HasMember("MakeUpIntensity"))
+						{
+							const auto& arrayValue = obj["MakeUpIntensity"];
+							tempSRP.mMakeUpIntensity = arrayValue.GetInt();
+						}
+					}
+					UIBridge::mStyleParamList.push_back(tempSRP);
+				}
+			}
+		}
+
+	}
+
+	void saveStyleConfig() {
+		if (UIBridge::mStyleParamList.size() == 0) {
+			return;
+		}
+		StyleRecommendationParam tempSRP = UIBridge::mStyleParamList.at(UIBridge::mStyleRecommendationIndex);
+		for (int i = 0; i < MAX_BEAUTYFACEPARAMTER; i++) {
+			tempSRP.mFaceBeautyLevel[i] = UIBridge::mFaceBeautyLevel[i];
+		}
+		for (int i = 0; i < MAX_FACESHAPEPARAMTER; i++) {
+			tempSRP.mFaceShapeLevel[i] = UIBridge::mFaceShapeLevel[i];
+		}
+		UIBridge::mStyleParamList.at(UIBridge::mStyleRecommendationIndex) = tempSRP;
+
+		rapidjson::StringBuffer buf;
+		//rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buf); // it can word wrap
+		writer.StartObject();
+		for (int i = 0; i < UIBridge::mStyleParamList.size(); i++) {
+			StyleRecommendationParam srp = UIBridge::mStyleParamList.at(i);
+			writer.Key(srp.styleName.c_str());
+			writer.StartArray();
+			writer.StartObject();
+			writer.Key("BeautyLevelDefault");
+			writer.StartArray();
+			for (int j = 0; j < MAX_BEAUTYFACEPARAMTER; j++) {
+				writer.Double(srp.mFaceBeautyLevelDefault[j]);
+			}
+			writer.EndArray();
+			writer.Key("ShapeLevelDefault");
+			writer.StartArray();
+			for (int j = 0; j < MAX_FACESHAPEPARAMTER; j++) {
+				writer.Double(srp.mFaceShapeLevelDefault[j]);
+			}
+			writer.EndArray();
+			writer.Key("BeautyLevel");
+			writer.StartArray();
+			for (int j = 0; j < MAX_BEAUTYFACEPARAMTER; j++) {
+				writer.Double(srp.mFaceBeautyLevel[j]);
+			}
+			writer.EndArray();
+			writer.Key("ShapeLevel");
+			writer.StartArray();
+			for (int j = 0; j < MAX_FACESHAPEPARAMTER; j++) {
+				writer.Double(srp.mFaceShapeLevel[j]);
+			}
+			writer.EndArray();
+			writer.Key("FilterLevel");
+			writer.Int(srp.mFilterLevel);
+			writer.Key("MakeUpIntensity");
+			writer.Int(srp.mMakeUpIntensity);
+			writer.EndObject();
+			writer.EndArray();
+		}
+		writer.EndObject();
+
+		ofstream outfile;
+		outfile.open(gCustomStyleConfig.c_str());
+		if (!outfile.is_open()) {
+			fprintf(stderr, "fail to open file to write: %s\n", gUserConfig.data());
+		}
+
+		outfile << buf.GetString() << endl;
+		outfile.close();
+	}
+
+	void loadStyleParam()
+	{
+		StyleRecommendationParam tempSRP = UIBridge::mStyleParamList.at(UIBridge::mStyleRecommendationIndex);
+		for (int i = 0; i < MAX_BEAUTYFACEPARAMTER; i++) {
+			UIBridge::mFaceBeautyLevel[i] = tempSRP.mFaceBeautyLevel[i];
+		}
+		for (int i = 0; i < MAX_FACESHAPEPARAMTER; i++) {
+			UIBridge::mFaceShapeLevel[i] = tempSRP.mFaceShapeLevel[i];
+		}
+	}
 
 	void resetBeautyParam()
 	{
-		UIBridge::mEnableSkinDect = 1;
-		UIBridge::mEnableHeayBlur = 3;
-		UIBridge::mEnableExBlur = 0;
-		UIBridge::mFaceBeautyLevel[0] = 70;
-		UIBridge::mFaceBeautyLevel[1] = 30;
-		UIBridge::mFaceBeautyLevel[2] = 30;
-		UIBridge::mFaceBeautyLevel[3] = 20;
-		UIBridge::mFaceBeautyLevel[4] = 0;
-		UIBridge::mFaceBeautyLevel[5] = 0;
-		UIBridge::mFaceBeautyLevel[6] = 0;
-		UIBridge::mFaceBeautyLevel[7] = 0;
-		UIBridge::mFaceBeautyLevel[8] = 0;
+		StyleRecommendationParam tempSRP = UIBridge::mStyleParamList.at(UIBridge::mStyleRecommendationIndex);
+		for (int i = 0; i < MAX_BEAUTYFACEPARAMTER; i++) {
+			tempSRP.mFaceBeautyLevel[i] = tempSRP.mFaceBeautyLevelDefault[i];
+			UIBridge::mFaceBeautyLevel[i] = tempSRP.mFaceBeautyLevelDefault[i];
+		}
+		UIBridge::mStyleParamList.at(UIBridge::mStyleRecommendationIndex) = tempSRP;
 	}
 
 	void resetShapeParam()
 	{
 		UIBridge::faceType = 0;
-		UIBridge::mFaceShapeLevel[0] = 0;
-		UIBridge::mFaceShapeLevel[1] = 0;
-		UIBridge::mFaceShapeLevel[2] = 0;
-		UIBridge::mFaceShapeLevel[3] = -20;
-		UIBridge::mFaceShapeLevel[4] = -20;
-		UIBridge::mFaceShapeLevel[5] = 50;
-		UIBridge::mFaceShapeLevel[6] = -10;
-		UIBridge::mFaceShapeLevel[7] = 0;
-		UIBridge::mFaceShapeLevel[8] = 50;
-		UIBridge::mFaceShapeLevel[9] = 0;
-		UIBridge::mFaceShapeLevel[10] = 0;
-		UIBridge::mFaceShapeLevel[11] = 0;
-		UIBridge::mFaceShapeLevel[12] = 0;
-		UIBridge::mFaceShapeLevel[13] = 0;
-		UIBridge::mFaceShapeLevel[14] = 0;
-		UIBridge::mFaceShapeLevel[15] = 0;
-		UIBridge::mFaceShapeLevel[16] = 0;
-		UIBridge::mFaceShapeLevel[17] = 0;
-		UIBridge::mFaceShapeLevel[18] = 0;
-		UIBridge::mFaceShapeLevel[19] = 0;
-		UIBridge::mFaceShapeLevel[20] = 0;
-		UIBridge::mFaceShapeLevel[21] = 0;
-		UIBridge::mFaceShapeLevel[22] = 0;
-		UIBridge::mFaceShapeLevel[23] = 0;
-		UIBridge::mFaceShapeLevel[24] = 0;
+		StyleRecommendationParam tempSRP = UIBridge::mStyleParamList.at(UIBridge::mStyleRecommendationIndex);
+		for (int i = 0; i < MAX_FACESHAPEPARAMTER; i++) {
+			tempSRP.mFaceShapeLevel[i] = tempSRP.mFaceShapeLevelDefault[i];
+			UIBridge::mFaceShapeLevel[i] = tempSRP.mFaceShapeLevelDefault[i];
+		}
+		UIBridge::mStyleParamList.at(UIBridge::mStyleRecommendationIndex) = tempSRP;
 	}
 
 	void resetBodyShapeParam()
