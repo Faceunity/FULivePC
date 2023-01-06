@@ -1304,7 +1304,7 @@
 	{
       "bundle": "mu_style_lip_03",
       "icon": "demo_style_lip_03.png",
-      "name": "润泽I",
+      "name": "润泽",
 	  "type": 2,
       "colors": [
         [
@@ -1342,7 +1342,7 @@
 	{
       "bundle": "mu_style_lip_05",
       "icon": "demo_style_lip_05.png",
-      "name": "润泽II",
+      "name": "水润",
 	  "type": 7,
       "colors": [
         [

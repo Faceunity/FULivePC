@@ -93,6 +93,8 @@ namespace NamaExampleNameSpace
 		void ChangeCleanFlag(bool bOpen);
 
 		bool SelectBundle(std::string bundleName, int maxFace = 4);
+		bool CheckModuleFaceInfo();
+		bool CheckModuleBodyInfo();
 		bool CheckModuleCode(int category);
 		bool CheckModuleCodeSide(int categorySide);
 		int  IsTracking();

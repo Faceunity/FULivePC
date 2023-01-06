@@ -34,7 +34,7 @@ public:
 	static void CloseCamera(NamaExampleNameSpace::Nama * nama);
 
 
-	static bool SetCameraFileInput(NamaExampleNameSpace::Nama * nama, const char * path);
+	static bool SetCameraFileInput(NamaExampleNameSpace::Nama * nama, const char * path, bool loop = false);
 
 
 	static void ShowReChooseInputSrc();
@@ -72,6 +72,7 @@ public:
 	static void ShowColorChoiceWin(NamaExampleNameSpace::Nama * nama);
 
 	static FURect previewRect;
+	static FURect titleRect;
 	static void calculatePreViewForHalfScreen(float orgW,float orgH,float* dstW,float* dstH);
 
 	static void LoadResource();

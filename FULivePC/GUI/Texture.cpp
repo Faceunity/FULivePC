@@ -371,6 +371,39 @@ Texture::SharedPtr Texture::createTextureFromFile(const std::string filename, bo
 	return pTexture;
 }
 
+Texture::SharedPtr Texture::createTextureFromFileFilter(const std::string filename, bool generateMips)
+{
+	SharedPtr pTexture = SharedPtr(new Texture);
+	if (filename.size() == 0)
+	{
+		return SharedPtr(genError("Image Name unknown", filename));
+	}
+
+	//这边默认所有素材名称都不相同,只是win32需要全路径
+#ifdef _WIN32
+	std::string fullpath = GetFileFullPathFromeSearchPath(filename.c_str());
+#else
+	std::string fullpath = filename;
+#endif
+
+	if (mTextureMap.find(fullpath) != mTextureMap.end())
+	{
+		return mTextureMap[fullpath];
+	}
+
+	auto pBmp = FuTool::getBitmapFromFile(fullpath);
+	if (!pBmp)
+	{
+		return SharedPtr(genError("Image Load Failed", filename));
+	}
+
+	pTexture->create(pBmp->mWidth, pBmp->mHeight, pBmp->mpData);
+	delete pBmp;
+
+	mTextureMap[fullpath] = pTexture;
+	return pTexture;
+}
+
 Texture::SharedPtr Texture::createTextureFromData(uint32_t width, uint32_t height, unsigned char* pixels)
 {
 	SharedPtr pTexture = SharedPtr(new Texture);

@@ -390,7 +390,7 @@ elseif(APPLE)
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/Framework/*.dylib  ${MacOS_APP_Content}/Frameworks
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libzip/lib/x86_64/*.dylib  ${MacOS_APP_Content}/Frameworks
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/opencv/lib/x86_64/*.dylib  ${MacOS_APP_Content}/Frameworks
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/ffmpeg/lib/x86_64/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/ffmpeg/x86_64/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
 		)
 	else()
 		add_custom_command(TARGET ${target} PRE_BUILD
@@ -407,7 +407,7 @@ elseif(APPLE)
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/Framework/*.dylib  ${MacOS_APP_Content}/Frameworks
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libzip/lib/arm64/*.dylib  ${MacOS_APP_Content}/Frameworks
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/opencv/lib/arm64/*.dylib  ${MacOS_APP_Content}/Frameworks
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/ffmpeg/lib/arm64/*.dylib  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/ffmpeg/arm64/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
 		)
 	endif()
 

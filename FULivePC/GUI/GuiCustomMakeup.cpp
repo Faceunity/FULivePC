@@ -9,8 +9,8 @@ extern float scaleRatioW;
 extern float scaleRatioH;
 
 static const ImVec4 normalColor{ 1.0f, 1.0f, 1.0f, 1.0f };
-static const ImVec4 hoverColor{ 152 / 255.0f, 165 / 255.0f, 245 / 255.0f, 1.0f };
-static const ImVec4 disableColor{ 1.0f, 1.0f, 1.0f, 0.3f };
+static const ImVec4 hoverColor{ 119.f / 255.f ,135.f / 255.f ,233.f / 255.f, 1.0f };
+static const ImVec4 disableColor{ 149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.0f };
 
 Implement_Abstract_FUObject(CMBasePage);
 
@@ -133,7 +133,7 @@ void CMNormalNode::ShowUINormal(FunCBShowUI funCB, Nama* pNamaA, void* pUserData
 
 	ImGui::Dummy(ImVec2(1, 20 * scaleRatioH));
 	ImGui::Dummy(ImVec2(20 * scaleRatioW, 1)); ImGui::SameLine();
-
+	bool newlineflag = false;
 	for (size_t i = 0; i < m_vecData.size(); i++)
 	{
 		ImGui::PushID(m_vecData[i].get());
@@ -149,10 +149,14 @@ void CMNormalNode::ShowUINormal(FunCBShowUI funCB, Nama* pNamaA, void* pUserData
 			// 未选中，默认
 			currentColor = normalColor;
 		}
+
 		ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
 
-		if (LayoutRectImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile(m_vecData[i]->strIconPath, false)->getTextureID(), m_vecData[i]->strName.data()))
+		if (LayoutRectImageButtonWithText(ImVec2(6.f, 27.f), ImVec2(76, 76), Texture::createTextureFromFile(m_vecData[i]->strIconPath, false)->getTextureID(), m_vecData[i]->strName.data()))
 		{
+			if (pPage->m_fIntensity == 0.0f) {
+				pPage->m_fIntensity = 100.f;
+			}
 			pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + m_vecData[i]->strBundlePath + ".bundle", strDecKey);
 			pPage->SetIntensity();
 			m_curConfig = m_vecData[i];
@@ -160,15 +164,30 @@ void CMNormalNode::ShowUINormal(FunCBShowUI funCB, Nama* pNamaA, void* pUserData
 		}
 
 		ImGui::PopStyleColor();
-
-		ImGui::SameLine();
+		if (i >=4 ) {
+			newlineflag = true;
+		}
+		if (i == 3) {
+			ImGui::Dummy(ImVec2(1, 20 * scaleRatioH));
+			ImGui::Dummy(ImVec2(20 * scaleRatioW, 1)); ImGui::SameLine();
+		}
+		else {
+			ImGui::SameLine(0.f, 15.f * scaleRatioW);
+		}
 
 		ImGui::PopID();
 	}
 
-	ImGui::Dummy(ImVec2(0, 0));
+	if (newlineflag) {
+		ImGui::NewLine();
+		ImGui::Dummy(ImVec2(1, 20 * scaleRatioH));
+		ImGui::Dummy(ImVec2(20 * scaleRatioW, 1)); ImGui::SameLine();
+	}
+	else {
+		ImGui::Dummy(ImVec2(1, 1));
+		ImGui::Dummy(ImVec2(20 * scaleRatioW, 20 * scaleRatioH)); ImGui::SameLine();
+	}
 
-	ImGui::Dummy(ImVec2(20 * scaleRatioW, 1)); ImGui::SameLine();
 
 	if (m_curConfig)
 	{
@@ -190,7 +209,7 @@ void CMNormalNode::ShowUINormal(FunCBShowUI funCB, Nama* pNamaA, void* pUserData
 			}
 			ImGui::PushStyleColor(ImGuiCol_Button, currentCBColor);
 
-			if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), bag->pTex->getTextureID(),
+			if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(40, 40), bag->pTex->getTextureID(),
 				bag->pTex->getTextureID(), ""))
 			{
 				funCB(bag, pUserData);
@@ -199,7 +218,7 @@ void CMNormalNode::ShowUINormal(FunCBShowUI funCB, Nama* pNamaA, void* pUserData
 
 			ImGui::PopStyleColor();
 
-			ImGui::SameLine();
+			ImGui::SameLine(0, 24 * scaleRatioW);
 
 			ImGui::PopID();
 		}
@@ -217,7 +236,29 @@ void CMNormalNode::ShowUINormal(FunCBShowUI funCB, Nama* pNamaA, void* pUserData
 	ImGui::Dummy(ImVec2(40 * scaleRatioW, 0));
 	ImGui::SameLine();
 
+	ImGui::SetCursorPosY(610 * scaleRatioH);
+	ImGui::SetCursorPosX(ImGui::GetCursorPosX() - 30);
+	if (m_curBag == nullptr) {
+		if (m_curConfig == nullptr) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+		}
+		else {
+			if (m_curConfig->vecColor.size() > 0) {
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			}
+		}
+	}
 	pPage->ShowIntensityUI();
+	if (m_curBag == nullptr) {
+		if (m_curConfig == nullptr) {
+			ImGui::PopItemFlag();
+		}
+		else {
+			if (m_curConfig->vecColor.size() > 0) {
+				ImGui::PopItemFlag();
+			}
+		}
+	}
 
 	ImGui::EndGroup();
 }
@@ -290,7 +331,7 @@ void CMEyeBrow::ShowIntensityUI()
 {
 	char szPoints[1024] = { 0 };
 	sprintf(szPoints, "%p", this);
-	if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + string(szPoints)).c_str(), &m_fIntensity, 0, 100))
+	if (LayoutSlider(ImVec2(0, 22), ImVec2(320, 10), ("##slider221" + string(szPoints)).c_str(), ("##slidertext221" + std::string(szPoints)).c_str(), &m_fIntensity, 0, 100))
 	{
 		SetIntensity();
 	}
@@ -368,7 +409,7 @@ void CMEyeShadow::ShowIntensityUI()
 {
 	char szPoints[1024] = { 0 };
 	sprintf(szPoints, "%p", this);
-	if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + string(szPoints)).c_str(), &m_fIntensity, 0, 100))
+	if (LayoutSlider(ImVec2(0, 22), ImVec2(320, 10), ("##slider221" + string(szPoints)).c_str(), ("##slidertext221" + std::string(szPoints)).c_str(), &m_fIntensity, 0, 100))
 	{
 		SetIntensity();
 	}
@@ -428,7 +469,7 @@ void CMEyeLash::ShowIntensityUI()
 {
 	char szPoints[1024] = { 0 };
 	sprintf(szPoints, "%p", this);
-	if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + string(szPoints)).c_str(), &m_fIntensity, 0, 100))
+	if (LayoutSlider(ImVec2(0, 22), ImVec2(320, 10), ("##slider221" + string(szPoints)).c_str(), ("##slidertext221" + std::string(szPoints)).c_str(), &m_fIntensity, 0, 100))
 	{
 		SetIntensity();
 	}
@@ -488,7 +529,7 @@ void CMEyeLiner::ShowIntensityUI()
 {
 	char szPoints[1024] = { 0 };
 	sprintf(szPoints, "%p", this);
-	if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + string(szPoints)).c_str(), &m_fIntensity, 0, 100))
+	if (LayoutSlider(ImVec2(0, 22), ImVec2(320, 10), ("##slider221" + string(szPoints)).c_str(), ("##slidertext221" + std::string(szPoints)).c_str(), &m_fIntensity, 0, 100))
 	{
 		SetIntensity();
 	}
@@ -552,7 +593,7 @@ void CMFoundation::ShowUI()
 		}
 		ImGui::PushStyleColor(ImGuiCol_Button, currentCBColor);
 
-		if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), bag->pTex->getTextureID(),
+		if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(40, 40), bag->pTex->getTextureID(),
 			bag->pTex->getTextureID(), ""))
 		{
 			m_pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
@@ -564,12 +605,15 @@ void CMFoundation::ShowUI()
 
 		ImGui::PopStyleColor();
 
-		ImGui::SameLine();
+		ImGui::SameLine(0, 24 * scaleRatioW);
 
 		ImGui::PopID();
 
 		if (!m_curBag && config->vecColor.size() > 0)
 		{
+			if (m_fIntensity == 0.0f) {
+				m_fIntensity = 100.f;
+			}
 			m_curBag = config->vecColor[0];
 			m_pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
 			std::vector<double> colors0 = GetDoubles(m_curBag->vecColorRGBA[0]);
@@ -582,8 +626,15 @@ void CMFoundation::ShowUI()
 	ImGui::Dummy(ImVec2(40 * scaleRatioW, 0));
 	ImGui::SameLine();
 
+	ImGui::SetCursorPosY(610 * scaleRatioH);
+	ImGui::SetCursorPosX(ImGui::GetCursorPosX() - 30);
+	if (m_curBag == nullptr) {
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+	}
 	this->ShowIntensityUI();
-
+	if (m_curBag == nullptr) {
+		ImGui::PopItemFlag();
+	}
 	ImGui::EndGroup();
 
 }
@@ -597,7 +648,7 @@ void CMFoundation::ShowIntensityUI()
 {
 	char szPoints[1024] = { 0 };
 	sprintf(szPoints, "%p", this);
-	if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + string(szPoints)).c_str(), &m_fIntensity, 0, 100))
+	if (LayoutSlider(ImVec2(0, 22), ImVec2(320, 10), ("##slider221" + string(szPoints)).c_str(), ("##slidertext221" + std::string(szPoints)).c_str(), &m_fIntensity, 0, 100))
 	{
 		SetIntensity();
 	}
@@ -657,7 +708,7 @@ void CMHighLight::ShowIntensityUI()
 {
 	char szPoints[1024] = { 0 };
 	sprintf(szPoints, "%p", this);
-	if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + string(szPoints)).c_str(), &m_fIntensity, 0, 100))
+	if (LayoutSlider(ImVec2(0, 22), ImVec2(320, 10), ("##slider221" + string(szPoints)).c_str(), ("##slidertext221" + std::string(szPoints)).c_str(), &m_fIntensity, 0, 100))
 	{
 		SetIntensity();
 	}
@@ -694,7 +745,6 @@ bool CMBlush::InitFrom(const rapidjson::Value & json)
 void CMBlush::ShowUI()
 {
 	auto funCB = [](std::shared_ptr<ColorBag> choicebag, void * pUserData)-> bool {
-
 		CMBlush * pThis = (CMBlush*)pUserData;
 
 		Nama * pNama = pThis->GetNama();
@@ -704,7 +754,6 @@ void CMBlush::ShowUI()
 
 		return true;
 	};
-
 	ShowUINormal(funCB, m_pNama, this);
 }
 
@@ -717,7 +766,7 @@ void CMBlush::ShowIntensityUI()
 {
 	char szPoints[1024] = { 0 };
 	sprintf(szPoints, "%p", this);
-	if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + string(szPoints)).c_str(), &m_fIntensity, 0, 100))
+	if (LayoutSlider(ImVec2(0, 22), ImVec2(320, 10), ("##slider221" + string(szPoints)).c_str(), ("##slidertext221" + std::string(szPoints)).c_str(), &m_fIntensity, 0, 100))
 	{
 		SetIntensity();
 	}
@@ -778,7 +827,7 @@ void CMContour::ShowIntensityUI()
 {
 	char szPoints[1024] = { 0 };
 	sprintf(szPoints, "%p", this);
-	if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + string(szPoints)).c_str(), &m_fIntensity, 0, 100))
+	if (LayoutSlider(ImVec2(0, 22), ImVec2(320, 10), ("##slider221" + string(szPoints)).c_str(), ("##slidertext221" + std::string(szPoints)).c_str(), &m_fIntensity, 0, 100))
 	{
 		SetIntensity();
 	}
@@ -900,8 +949,11 @@ void CMLip::ShowUI()
 		}
 		ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
 
-		if (LayoutRectImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), Texture::createTextureFromFile(config->vecType[i].strIconPath, false)->getTextureID(), config->vecType[i].strName.data()))
+		if (LayoutRectImageButtonWithText(ImVec2(6.f, 27.f), ImVec2(76, 76), Texture::createTextureFromFile(config->vecType[i].strIconPath, false)->getTextureID(), config->vecType[i].strName.data()))
 		{
+			if (m_fIntensity == 0.0f) { 
+				m_fIntensity = 100.f;
+			}
 			m_pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->vecType[i].strBundlePath + ".bundle", GetDescName());
 			if (config->vecType[i].iType == YAO_CHUN)
 			{
@@ -916,6 +968,7 @@ void CMLip::ShowUI()
 				m_pNama->SetCMDouble("lip_type", config->vecType[i].iType);
 				m_pNama->SetCMDouble("is_two_color", 0);
 			}
+			
 			SetIntensity();
 			m_curBag = nullptr;
 			m_iCurType = config->vecType[i].iType;
@@ -923,19 +976,26 @@ void CMLip::ShowUI()
 			{
 				std::vector<double> colors0 = GetDoubles(config->vecColor[0]->vecColorRGBA[0]);
 				m_pNama->SetCMDoubles("makeup_lip_color_v2", colors0.data(), colors0.size());
-			}
+			}	
 		}
 
 		ImGui::PopStyleColor();
 
-		ImGui::SameLine();
+		if (i == 3) {
+			ImGui::Dummy(ImVec2(1, 20 * scaleRatioH));
+			ImGui::Dummy(ImVec2(20 * scaleRatioW, 1)); ImGui::SameLine();
+		}
+		else {
+			ImGui::SameLine(0.f, 15.f * scaleRatioW);
+		}
 
 		ImGui::PopID();
 	}
 
-	ImGui::Dummy(ImVec2(0, 0));
-
+	ImGui::NewLine();
+	ImGui::Dummy(ImVec2(1, 20 * scaleRatioH));
 	ImGui::Dummy(ImVec2(20 * scaleRatioW, 1)); ImGui::SameLine();
+
 
 	if (m_iCurType > -1)
 	{
@@ -957,7 +1017,7 @@ void CMLip::ShowUI()
 			}
 			ImGui::PushStyleColor(ImGuiCol_Button, currentCBColor);
 
-			if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(52, 52), bag->pTex->getTextureID(),
+			if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(40, 40), bag->pTex->getTextureID(),
 				bag->pTex->getTextureID(), ""))
 			{
 				std::vector<double> colors0 = GetDoubles(bag->vecColorRGBA[0]);
@@ -973,7 +1033,7 @@ void CMLip::ShowUI()
 
 			ImGui::PopStyleColor();
 
-			ImGui::SameLine();
+			ImGui::SameLine(0, 24 * scaleRatioW);
 
 			ImGui::PopID();
 		}
@@ -991,8 +1051,15 @@ void CMLip::ShowUI()
 	ImGui::Dummy(ImVec2(40 * scaleRatioW, 0));
 	ImGui::SameLine();
 
+	ImGui::SetCursorPosY(610 * scaleRatioH);
+	ImGui::SetCursorPosX(ImGui::GetCursorPosX() - 30);
+	if (m_curBag == nullptr) {
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+	}
 	this->ShowIntensityUI();
-
+	if (m_curBag == nullptr) {
+		ImGui::PopItemFlag();
+	}
 	ImGui::EndGroup();
 }
 
@@ -1006,7 +1073,7 @@ void CMLip::ShowIntensityUI()
 {
 	char szPoints[1024] = { 0 };
 	sprintf(szPoints, "%p", this);
-	if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + string(szPoints)).c_str(), &m_fIntensity, 0, 100))
+	if (LayoutSlider(ImVec2(0, 22), ImVec2(320, 10), ("##slider221" + string(szPoints)).c_str(), ("##slidertext221" + std::string(szPoints)).c_str(), &m_fIntensity, 0, 100))
 	{
 		SetIntensity();
 	}
@@ -1071,7 +1138,7 @@ void CMEyePupil::ShowIntensityUI()
 {
 	char szPoints[1024] = { 0 };
 	sprintf(szPoints, "%p", this);
-	if (LayoutSlider(ImVec2(22, 22), ImVec2(252, 10), ("##slider221" + string(szPoints)).c_str(), &m_fIntensity, 0, 100))
+	if (LayoutSlider(ImVec2(0, 22), ImVec2(320, 10), ("##slider221" + string(szPoints)).c_str(), ("##slidertext221" + std::string(szPoints)).c_str(), &m_fIntensity, 0, 100))
 	{
 		SetIntensity();
 	}
@@ -1145,7 +1212,7 @@ bool GUICustomMakeup::InitFromConfig(Nama * pNama)
 
 void GUICustomMakeup::Reset(Nama * pNama)
 {
-	m_curChoosed = nullptr;
+	//m_curChoosed = nullptr;
 
 	if (pNama)
 	{
@@ -1157,76 +1224,121 @@ void GUICustomMakeup::Reset(Nama * pNama)
 	for (auto & data : m_pages)
 	{
 		data.second->Reset();
+		data.second->m_fIntensity = 0.0f;
 	}
 }
 
 void GUICustomMakeup::Draw(Nama * pNama)
 {
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 	ImGui::Begin("customMakeup", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize
-		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
+		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
 
 	if (!m_bInited)
 	{
 		InitFromConfig(pNama);
 	}
+	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(45.f / 255.f, 41.f / 255.f, 86.f / 255.f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(45.f / 255.f, 41.f / 255.f, 86.f / 255.f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(45.f / 255.f, 41.f / 255.f, 86.f / 255.f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 1.f, 1.f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 8));
+	ImGui::BeginTabBar("##tabcm1", ImGuiTabBarFlags_NoAnim | ImGuiTabBarFlags_SizingPolicyEqual | ImGuiTabBarFlags_NoSelectionOnAppearing);
+	ImGui::TabItem(ImVec2(416 * scaleRatioW, 36 * scaleRatioH), u8"自定义参数");
+	ImGui::EndTabBar();
+	ImGui::PopStyleColor(4);
+	ImGui::PopStyleVar();
 
-	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.f));
-	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(150.f / 255.f, 157.f / 255.f, 181.f / 255.f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, hoverColor);
+	ImGui::PushStyleColor(ImGuiCol_Border, disableColor);
 
-	int index = 0;
-
+	ImGui::Dummy(ImVec2(10, 20));
+	int pageIndex = -1;
+	bool defaultSelect = false;
 	for (auto & data : m_pages)
 	{
+		pageIndex++;
+		if (UIBridge::customMakeupIndex >= 6) {
+			if (pageIndex < 4) {
+				continue;
+			}
+		}
 		ImGui::PushID(data.second.get());
 		
 		static ImVec4 currentColor;
+		static ImVec4 currentTextColor;
+		//默认选中第一个腮红
+		if (m_curChoosed == nullptr) {
+			m_curChoosed = data.second;
+			defaultSelect = true;
+		}
 
 		if (m_curChoosed == data.second) {
 			// 已选中，显示高亮
 			currentColor = hoverColor;
+			currentTextColor = normalColor;
 		}
 		else {
 			// 未选中，默认
 			currentColor = normalColor;
+			currentTextColor = disableColor;
 		}
-		ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
-
-
 		auto strName = data.second->GetDescName();
 		auto strUtf8 = FuTool::convert2utf8(strName.data());
 
-		if (LayoutButton(ImVec2(20, 20), ImVec2(40, 30), strUtf8.data()))
+		ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
+		ImGui::PushStyleColor(ImGuiCol_Text, currentTextColor);
+
+		if (LayoutButton(ImVec2(0, 0), ImVec2(54, 30), strUtf8.data()))
 		{
 			m_curChoosed = data.second;
+			defaultSelect = false;
+			UIBridge::customMakeupIndex = pageIndex;
 		}
+		ImGui::PopStyleColor(2);
+		ImGui::SameLine(0, 0.f * scaleRatioW);
 
-		if ((index+1) % 5 != 0 && (index+1)!=m_pages.size())
-		{
-			ImGui::SameLine();
-		}
-
-		index++;
-
-
-		ImGui::PopStyleColor();
 		ImGui::PopID();
 	}
 
 	if (m_curChoosed)
 	{
+		ImGui::NewLine();
 		m_curChoosed->ShowUI();
 	}
 
-	if (LayoutButton(ImVec2(135, 38), ImVec2(126, 40), u8"一键卸妆"))
-	{
-		Reset(pNama);
+	if (defaultSelect && m_pages.begin()->second->m_fIntensity == 0) {
+		m_curChoosed = nullptr;
+	}
+
+	if (m_curChoosed == nullptr || m_curChoosed->m_fIntensity == 0.0f) {
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(246.f / 255.f, 246.f / 255.f, 250.f/ 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(246.f / 255.f, 246.f / 255.f, 250.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 0.3f));
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(127.f / 255.f, 134.f / 255.f, 152.f / 255.f, 0.3f));
+		LayoutButton(ImVec2(135, 38), ImVec2(126, 32), u8"一键卸妆", ImGuiButtonFlags_Disabled);
+		ImGui::PopStyleColor(4);
+	}
+	else {
+		ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(246.f / 255.f, 246.f / 255.f, 250.f / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 1.f, 1.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));
+		if (LayoutButton(ImVec2(135, 38), ImVec2(126, 32), u8"一键卸妆"))
+		{
+			Reset(pNama);
+		}
+		ImGui::PopStyleColor(5);
 	}
 
 	ImGui::PopStyleColor(2);
 	ImGui::PopStyleVar(2);
 
 	ImGui::End();
+	ImGui::PopStyleVar(2);
 }
 

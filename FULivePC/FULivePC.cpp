@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 	
 	using namespace NamaExampleNameSpace;
 
-	Gui::UniquePtr gui = Gui::create(1360, 830);
+	Gui::UniquePtr gui = Gui::create(1360, 870);
 
 	if (nullptr == gui)
 	{

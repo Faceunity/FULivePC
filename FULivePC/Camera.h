@@ -194,7 +194,7 @@ public:
 	}
 	void CloseCurCamera();
 	void OpenCamera(int);
-	void OpenCamera(std::string strVideoPath);
+	void OpenCamera(std::string strVideoPath, bool loop = true);
 	cv::Size getCameraDstResolution();
 	bool IsCameraPlaying();
 	bool IsCameraInit();

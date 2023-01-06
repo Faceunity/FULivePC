@@ -135,7 +135,7 @@ void FuController::EnableFaceProcessor(int enable)
 
 void FuController::EnableHumanFollowMode(int enable)
 {
-	fuSetInstanceRiggingRetargeterAvatarFollowMode(mSceneHandle, FUAIHUMAN_FOLLOW_MODE_ALIGN);
+	fuSetInstanceRiggingRetargeterAvatarFollowMode(mInstanceHandle, FUAIHUMAN_FOLLOW_MODE_FIX);
 }
 
 void FuController::SetAvatar3DScene(BodyTrackType scene)
