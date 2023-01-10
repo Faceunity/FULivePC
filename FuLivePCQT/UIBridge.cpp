@@ -108,7 +108,7 @@ UIBridge::UIBridge()
     m_tempCustomMakeup.append(QStringList{"眼线", "makeup_eyeLiner_color", "makeup_intensity_eyeLiner", "100", "-1", "-1"});
     m_tempCustomMakeup.append(QStringList{"美瞳", "makeup_pupil_color", "makeup_intensity_pupil", "100", "-1", "-1"});
     m_tempCustomMakeup.append(QStringList{"眼影", "makeup_eye_color", "makeup_intensity_eye", "100", "-1", "-1"});
-    m_tempCustomMakeup.append(QStringList{"粉底", "makeup_foundation_color", "makeup_intensity_foundation", "100", "0", "-1"});
+    m_tempCustomMakeup.append(QStringList{"粉底", "makeup_foundation_color", "makeup_intensity_foundation", "100", "-1", "-1"});
     m_tempCustomMakeup.append(QStringList{"高亮", "makeup_highlight_color", "makeup_intensity_highlight", "100", "-1", "-1"});
     m_tempCustomMakeup.append(QStringList{"口红", "makeup_lip_color", "makeup_intensity_lip", "100", "-1", "-1"});
     readCustomMakeup();
@@ -1280,7 +1280,7 @@ void UIBridge::resetItemParam(int item)
 
 void UIBridge::setFilter(QString value)
 {
-    updateCategory(m_filter, 1, m_filterIndex, value);
+    updateCategory(m_filter, 2, m_filterIndex, value);
     Nama *nama = MainClass::getInstance()->m_nama;
     nama->itemSetParamd(nama->m_BeautyHandles, "filter_level", value.toDouble() / 100);
 }
@@ -1288,7 +1288,7 @@ void UIBridge::setFilter(QString value)
 void UIBridge::resetFilterIndex(int index) {
     m_filterIndex = index;
     Nama *nama = MainClass::getInstance()->m_nama;
-    //qDebug()<<m_filter.at(1).toStringList();
+    //qDebug()<<"+++++++"<<m_filter.at(1).toStringList()[index];
     nama->itemSetParams(nama->m_BeautyHandles, "filter_name", m_filter.at(1).toStringList()[index].toStdString());
 }
 
@@ -1606,7 +1606,7 @@ void UIBridge::gsSafeAreaSelect(QString path)
 
 void UIBridge::openHelpText()
 {
-    WinExec("notepad.exe README.md", SW_SHOW);
+    WinExec("notepad.exe ../README.md", SW_SHOW);
 }
 
 int UIBridge::getStickerLength()

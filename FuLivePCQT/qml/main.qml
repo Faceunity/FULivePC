@@ -217,6 +217,7 @@ Window {
         m_rPropOptionBackgroundSeg.visible = false
         m_rBoutiqueSticker.visible = false
         showGreenScreenList(false)
+        b_replayShow = false
         if(!arfun){
             m_rpropOption.enabled = true
             i_propPageLast = i_propPage
@@ -254,7 +255,7 @@ Window {
                 i_selectCategory = i_arSelectCategoryPoint.x
                 UIBridge.selectCategory = i_arSelectCategoryPoint.x
                 updatePropOption(i_arSelectCategoryPoint.x)
-                if(i_arSelectCategoryPoint.x == 0){
+                if(i_arSelectCategoryPoint.x == i_category_avatar){
                     showAvator(true)
                 }else if(i_arSelectCategoryPoint.x == i_category_jingpin){
                     showBoutiqueSticker(true)
@@ -477,7 +478,13 @@ Window {
         //修改选中项
         var selectMakeup = Number(UIBridge.getCustomMakeup(index)[0][4])
         var selectColor = Number(UIBridge.getCustomMakeup(index)[0][5])
+        if(selectMakeup === -1){
+            m_rCustomMakeupWindow.b_fSliderMakeup = false
+            m_sliderMakeup.value = 0
+            m_rCustomMakeupWindow.b_fSliderMakeup = true
+        }
         m_lCustomMakeup.contentX = 0
+        m_lCustomMakeup.currentIndex = -1
         m_lCustomMakeup.currentIndex = selectMakeup
         m_lCustomMakeup.visible = true
         //粉底列外,直接显示颜色
@@ -499,10 +506,12 @@ Window {
     }
     //选中自定义美妆选项下表苹果肌,扇形等展示颜色
     function selectCustomMakeup(index){
-        //修改滑块值
-        m_sliderMakeup.value = UIBridge.getCustomMakeup(index)[0][3]
         m_lCustomMakeupColor.visible = true
         m_lmCustomMakeupColor.clear()
+        //修改滑块值
+        if(m_lmCustomMakeup.count != 0){
+            m_sliderMakeup.value = UIBridge.getCustomMakeup(m_rCustomMakeupWindow.n_select)[0][3]
+        }
         //根据颜色字符串每个#截取分开
         for(var i = 4; i < UIBridge.getCustomMakeup(m_rCustomMakeupWindow.n_select)[index + 1].length; i++){
             var color0 = "", color1 = "", color2 = ""
@@ -588,8 +597,15 @@ Window {
     }
     //一键卸妆
     function resetMakeup(){
+        m_rCustomMakeupWindow.b_fSliderMakeup = false
+        m_sliderMakeup.value = 0
+        m_rCustomMakeupWindow.b_fSliderMakeup = true
         m_lCustomMakeup.currentIndex = -1
-        m_lCustomMakeupColor.visible = false
+        if(m_lmCustomMakeup.count != 0){
+            m_lCustomMakeupColor.visible = false
+        }else{
+            m_lCustomMakeupColor.currentIndex = -1
+        }
         UIBridge.resetCustomMakeup()
     }
     //更新最近颜色
@@ -2837,6 +2853,8 @@ Window {
                     id: m_rCustomMakeupWindow
                     //选中一级下标 腮红 阴影 眉毛
                     property var n_select: -1
+                    //滑块切换显示0
+                    property var b_fSliderMakeup: true
                     x: 930
                     y: 70
                     width: 420
@@ -2846,11 +2864,11 @@ Window {
                     onVisibleChanged: {
                         //默认选中第一个
                         if(visible){
-                            for(var i = 0; i < m_gCustomMakeupTitle.count; i++){
-                                m_gCustomMakeupTitle.itemAtIndex(i).updateSelect(m_gCustomMakeupTitle.currentIndex)
+                            for(var i = 0; i < m_lvCustomMakeupTitle.count; i++){
+                                m_lvCustomMakeupTitle.itemAtIndex(i).updateSelect(m_lvCustomMakeupTitle.currentIndex)
                             }
-                            m_rCustomMakeupWindow.n_select = m_gCustomMakeupTitle.currentIndex
-                            selectCustomMakeupTitel(m_gCustomMakeupTitle.currentIndex)
+                            m_rCustomMakeupWindow.n_select = m_lvCustomMakeupTitle.currentIndex
+                            selectCustomMakeupTitel(m_lvCustomMakeupTitle.currentIndex)
                         }
                     }
                     Rectangle{
@@ -2867,7 +2885,7 @@ Window {
                     }
                     //自定义美妆标题 腮红 阴影 眉毛
                     ListView{
-                        id: m_gCustomMakeupTitle
+                        id: m_lvCustomMakeupTitle
                         x: 10
                         y: 60
                         width: 385
@@ -2890,8 +2908,8 @@ Window {
                                 }
                             }
                             function onButtonClick(){
-                                for(var i = 0; i < m_gCustomMakeupTitle.count; i++){
-                                    m_gCustomMakeupTitle.itemAtIndex(i).updateSelect(index)
+                                for(var i = 0; i < m_lvCustomMakeupTitle.count; i++){
+                                    m_lvCustomMakeupTitle.itemAtIndex(i).updateSelect(index)
                                 }
                                 m_rCustomMakeupWindow.n_select = index
                                 selectCustomMakeupTitel(index)
@@ -2981,7 +2999,7 @@ Window {
                     ListView{
                         id: m_lCustomMakeupColor
                         x: 30
-                        y: m_lCustomMakeup.count > 4 ? 395 : 255
+                        y: m_lCustomMakeup.count == 0 ? 120 : m_lCustomMakeup.count > 4 ? 395 : 255
                         width: 350
                         height: 100
                         orientation: ListView.Horizontal
@@ -2992,6 +3010,11 @@ Window {
                         onCurrentIndexChanged:{
                             for(var i = 0; i < m_lCustomMakeupColor.count; i++){
                                 m_lCustomMakeupColor.itemAtIndex(i).updateSelect(currentIndex)
+                            }
+                            //粉底一键卸妆后更新滑块值
+                            if(m_sliderMakeup.value == 0 && m_lmCustomMakeup.count == 0 && currentIndex != -1){
+                                UIBridge.setCustomMakeupIndex(7, 0)
+                                m_sliderMakeup.value = UIBridge.getCustomMakeup(m_rCustomMakeupWindow.n_select)[0][3]
                             }
                         }
                         delegate:Rectangle{
@@ -3053,7 +3076,7 @@ Window {
                         enabled: m_lCustomMakeupColor.currentIndex >= 0
                         onValueChanged:
                         {
-                            if(m_rCustomMakeupWindow.n_select != -1){
+                            if(m_rCustomMakeupWindow.n_select != -1 && m_rCustomMakeupWindow.b_fSliderMakeup){
                                 UIBridge.setCustomMakeupValue(m_rCustomMakeupWindow.n_select,value)
                             }
                         }
@@ -3062,10 +3085,9 @@ Window {
                     RectangleButtonText{
                         x: 140
                         y: 685
-                        enabled: m_sliderMakeup.value != 0
+                        enabled: m_sliderMakeup.value != 0 && (m_lCustomMakeup.currentIndex != -1 || m_lmCustomMakeup.count == 0)
                         t_Text: "一键卸妆"
                         function onButtonClick(){
-                            m_sliderMakeup.value = 0
                             resetMakeup()
                         }
                     }
