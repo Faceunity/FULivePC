@@ -576,5 +576,6 @@
         <file>../res/list_icon_Propmap_dis.png</file>
         <file>../res/list_icon_annimoji_dis.png</file>
         <file>../res/list_icon_avatar_dis.png</file>
+        <file>../res/gsbackground.png</file>
     </qresource>
 </RCC>

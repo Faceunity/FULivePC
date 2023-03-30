@@ -49,12 +49,12 @@ void FuController::InitController(std::string strControllerPath, std::string str
     fuSetLogLevel(FULOGLEVEL::FU_LOG_LEVEL_INFO);
     std::vector<char> vecCtrlBundle, vecCfgBundle;
     bool flag = LoadBundle(strControllerPath, vecCtrlBundle);
-    bool flagCfg = LoadBundle(strConfigPath, vecCfgBundle);
+    //    bool flagCfg = LoadBundle(strConfigPath, vecCfgBundle);
     m_vecRender.clear();
-    if (flag && flagCfg)
+    if (flag)
     {
         m_nCtrlHandle = fuCreateItemFromPackage(&vecCtrlBundle[0], vecCtrlBundle.size());
-        m_nCtrlCfgHandle = fuCreateItemFromPackage(&vecCfgBundle[0], vecCfgBundle.size());
+        //m_nCtrlCfgHandle = fuCreateItemFromPackage(&vecCfgBundle[0], vecCfgBundle.size());
         m_vecRender.push_back(m_nCtrlHandle);
 
         mSceneHandle = fuCreateScene();
@@ -65,7 +65,10 @@ void FuController::InitController(std::string strControllerPath, std::string str
         fuSetInstanceEnableHumanAnimDriver(mInstanceHandle, true);
 
         fuEnableHumanProcessor(mSceneHandle, 1.0);
-        fuBindItemsToScene(mSceneHandle, &m_nCtrlCfgHandle, 1);
+        //        fuBindItemsToScene(mSceneHandle, &m_nCtrlCfgHandle, 1);
+        if(m_nCtrlHandle != 0){
+            m_initFlag = true;
+        }
     }
 }
 

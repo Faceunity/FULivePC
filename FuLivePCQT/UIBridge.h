@@ -10,6 +10,7 @@
 #include "Nama.h"
 #include <QMediaPlayer>
 #include <QVector3D>
+#include <Camera.h>
 using namespace std;
 
 //鉴权证书页1
@@ -324,6 +325,7 @@ public:
     //QString          m_gsCameraName;
     //绿幕背景视频播放
     QMediaPlayer m_gsMediaPlayer;
+    QtCameraCapture *m_gsvideoSurface;
     //绿幕视频播放
     QMediaPlayer m_gsVideoMediaPlayer;
     //背景分割视频播放

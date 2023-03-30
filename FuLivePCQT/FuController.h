@@ -7,6 +7,7 @@
 class FuController
 {
 public:
+    bool m_initFlag = false;
     FuController();
     ~FuController();
 
@@ -59,7 +60,7 @@ public:
     bool IsPlayAnim();
     double GetAnimPregress(int nHandle);
 private:
-    int m_nCtrlHandle = -1;
+    int m_nCtrlHandle = 0;
     int m_nCtrlCfgHandle = -1;
     int m_fxaaBundle = -1;
     std::map<std::string, int> m_vecBundles;

@@ -113,13 +113,33 @@ Window {
             m_itGSForegroundArea.height = m_CameraDisplay.height * (endy - starty)
         }
         onUpdateGreenScreenParam:{
-            updateGreenScreen()
+            for(var i = 0; i< UIBridge.greenScreen[0].length; i++)
+            {
+                var value = UIBridge.greenScreen[3][i]
+                m_lGreenScreen.model.setProperty(i, "value", value);
+                m_lGreenScreen.itemAtIndex(i).i_Value = value
+            }
         }
         onUpdateBeautySkinParam:{
-            updateBeautySkin()
+            for(var i = 0; i< UIBridge.beautySkin[0].length; i++)
+            {
+                var value = UIBridge.beautySkin[3][i]
+                m_lBeautySkin.model.setProperty(i, "value", value)
+                var item = m_lBeautySkin.itemAtIndex(i)
+                item.i_Value = value
+                //精准美肤按钮
+                if(item.b_Type){
+                    item.m_lButton.currentIndex = item.i_Button_Num - value
+                }
+            }
         }
         onUpdateBeautyFaceParam:{
-            updateBeautyFace()
+            for(var i = 0; i< UIBridge.beautyFace[0].length; i++)
+            {
+                var value = UIBridge.beautyFace[3][i]
+                m_lBeautyFace.model.setProperty(i, "value", value);
+                m_lBeautyFace.itemAtIndex(i).i_Value = value
+            }
         }
         onUpdateBsgPic: {
             //选中第二个背景图片
@@ -1403,7 +1423,7 @@ Window {
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: {
-                                UIBridge.setBackgroundSegType(0)
+                                UIBridge.setBackgroundSegType(2)
                                 m_rPropOptionBackgroundSeg.visible = false
                             }
                             onEntered: {

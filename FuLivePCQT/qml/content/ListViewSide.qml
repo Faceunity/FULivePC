@@ -13,6 +13,7 @@ Rectangle{
     property var b_RestoreDefault: false //恢复默认
     property var b_Middle: false //滑动条是否从中间开始,true中间[-50,50],false[0,100]
     property bool b_TextEdit: false //避免循环修改文本滑块
+    property alias m_lButton: m_lButton
     signal iValueChanged(var value)
     x: 0
     y: 0

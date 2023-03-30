@@ -132,47 +132,33 @@ void Nama::InitNama()
     if (false == LoadBundle(g_assetDir + g_tongue, tongue_model_data))
     {
         cout << "Error: fail load tongue model" << g_tongue << endl;
+    }else{
+        fuLoadTongueModel(reinterpret_cast<float*>(&tongue_model_data[0]), tongue_model_data.size());
     }
-
-    fuLoadTongueModel(reinterpret_cast<float*>(&tongue_model_data[0]), tongue_model_data.size());
     //加载AI能力
     vector<char> ai_model_data;
     if (false == LoadBundle(g_assetDir + g_ai_faceprocessor, ai_model_data))
     {
         cout << "Error:fail load faceprocessor model" << g_ai_faceprocessor << endl;
+    }else{
+        fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_model_data[0]), ai_model_data.size(), FUAITYPE::FUAITYPE_FACEPROCESSOR);
     }
-    fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_model_data[0]), ai_model_data.size(), FUAITYPE::FUAITYPE_FACEPROCESSOR);
-
-    vector<char> ai_beseg_green_model_data;
-    if (false == LoadBundle(g_assetDir + g_ai_bgseg_green, ai_beseg_green_model_data))
-    {
-        cout << "Error: fail load bgseg green model" << g_ai_bgseg_green << endl;
-    }
-    fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_beseg_green_model_data[0]), ai_beseg_green_model_data.size(), FUAITYPE::FUAITYPE_BACKGROUNDSEGMENTATION_GREEN);
-
-    vector<char> ai_hairseg_model_data;
-    if (false == LoadBundle(g_assetDir + g_ai_hairseg, ai_hairseg_model_data))
-    {
-        cout << "Error: fail load hair seg model" << g_ai_hairseg << endl;
-    }
-    fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_hairseg_model_data[0]), ai_hairseg_model_data.size(), FUAITYPE::FUAITYPE_HAIRSEGMENTATION);
-
-
     vector<char> ai_human_model_data;
     if (false == LoadBundle(g_assetDir + g_ai_humanprocessor, ai_human_model_data))
     {
         cout << "Error: fail load humanprocessor model" << g_ai_humanprocessor << endl;
+    }else{
+        fuSetHumanSegMode(FUAIHUMAN_SEG_GPU_COMMON);
+        //fuPreprocessAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
+        fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
     }
-    fuPreprocessAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
-    fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
-
     vector<char> ai_gesture_model_data;
     if (false == LoadBundle(g_assetDir + g_ai_hand_processor, ai_gesture_model_data))
     {
         cout << "Error: fail load gesture model" << g_ai_hand_processor << endl;
+    }else{
+        fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_gesture_model_data[0]), ai_gesture_model_data.size(), FUAITYPE::FUAITYPE_HANDGESTURE);
     }
-    fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_gesture_model_data[0]), ai_gesture_model_data.size(), FUAITYPE::FUAITYPE_HANDGESTURE);
-
     m_ModuleCode = fuGetModuleCode(0);
     m_ModuleCode1 = fuGetModuleCode(1);
     {
@@ -180,10 +166,11 @@ void Nama::InitNama()
         if (false == LoadBundle(g_assetDir + g_faceBeautification, propData))
         {
             cout << "load face beautification data failed." << endl;
+        }else{
+            cout << "load face beautification data." << endl;
+            //加载道具包，使其可以在主运行接口中被执行。一个道具包可能是一个功能模块或者多个功能模块的集合，加载道具包可以在流水线中激活对应的功能模块，在同一套SDK调用逻辑中实现即插即用。
+            m_BeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
         }
-        cout << "load face beautification data." << endl;
-        //加载道具包，使其可以在主运行接口中被执行。一个道具包可能是一个功能模块或者多个功能模块的集合，加载道具包可以在流水线中激活对应的功能模块，在同一套SDK调用逻辑中实现即插即用。
-        m_BeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
     }
 
     {
@@ -191,11 +178,11 @@ void Nama::InitNama()
         if (false == LoadBundle(g_assetDir + g_Makeup, propData))
         {
             cout << "load face makeup data failed." << endl;
+        }else{
+            cout << "load face makeup data." << endl;
+            m_MakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+            //fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1);
         }
-        cout << "load face makeup data." << endl;
-
-        m_MakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
-        //fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1);
     }
 
     {
@@ -203,10 +190,10 @@ void Nama::InitNama()
         if (false == LoadBundle(g_assetDir + g_bodySlim, propData))
         {
             cout << "load body slim data failed." << endl;
+        }else{
+            cout << "load body slim data." << endl;
+            m_BodyShapeHandle = fuCreateItemFromPackage(&propData[0], propData.size());
         }
-        cout << "load body slim data." << endl;
-
-        m_BodyShapeHandle = fuCreateItemFromPackage(&propData[0], propData.size());
     }
 
     {
@@ -214,10 +201,10 @@ void Nama::InitNama()
         if (false == LoadBundle(g_assetDir + g_greenscreen, propData))
         {
             cout << "load gs data failed." << endl;
+        }else{
+            cout << "load gs data." << endl;
+            m_GSHandle = fuCreateItemFromPackage(&propData[0], propData.size());
         }
-        cout << "load gs data." << endl;
-
-        m_GSHandle = fuCreateItemFromPackage(&propData[0], propData.size());
     }
 
     {
@@ -225,16 +212,17 @@ void Nama::InitNama()
         if (false == LoadBundle(g_assetDir + g_fxaa, propData))
         {
             cout << "load fx data failed." << endl;
+        }else{
+            cout << "load fx data." << endl;
+            m_FxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
         }
-        cout << "load fx data." << endl;
-
-        m_FxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
     }
 
     fuItemSetParamd(m_BodyShapeHandle,"Debug",0.0);
 
     fuItemSetParamd(m_MakeUpHandle, "machine_level", 1.0);
     float fValue = 0.5f;
+
     fuSetFaceTrackParam((void*)"mouth_expression_more_flexible", &fValue);
     fuSetMaxFaces(4);
 
@@ -380,10 +368,11 @@ void Nama::ReloadItems()
         if (false == LoadBundle(g_assetDir + g_faceBeautification, propData))
         {
             cout << "load face beautification data failed." << endl;
+        }else{
+            cout << "load face beautification data." << endl;
+            //加载道具包，使其可以在主运行接口中被执行。一个道具包可能是一个功能模块或者多个功能模块的集合，加载道具包可以在流水线中激活对应的功能模块，在同一套SDK调用逻辑中实现即插即用。
+            m_BeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
         }
-        cout << "load face beautification data." << endl;
-        //加载道具包，使其可以在主运行接口中被执行。一个道具包可能是一个功能模块或者多个功能模块的集合，加载道具包可以在流水线中激活对应的功能模块，在同一套SDK调用逻辑中实现即插即用。
-        m_BeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
     }
 
     {
@@ -391,10 +380,10 @@ void Nama::ReloadItems()
         if (false == LoadBundle(g_assetDir + g_bodySlim, propData))
         {
             cout << "load body slim data failed." << endl;
+        }else{
+            cout << "load body slim data." << endl;
+            m_BodyShapeHandle = fuCreateItemFromPackage(&propData[0], propData.size());
         }
-        cout << "load body slim data." << endl;
-
-        m_BodyShapeHandle = fuCreateItemFromPackage(&propData[0], propData.size());
     }
 
     {
@@ -402,10 +391,10 @@ void Nama::ReloadItems()
         if (false == LoadBundle(g_assetDir + g_greenscreen, propData))
         {
             cout << "load gs data failed." << endl;
+        }else{
+            cout << "load gs data." << endl;
+            m_GSHandle = fuCreateItemFromPackage(&propData[0], propData.size());
         }
-        cout << "load gs data." << endl;
-
-        m_GSHandle = fuCreateItemFromPackage(&propData[0], propData.size());
     }
 
     {
@@ -413,10 +402,10 @@ void Nama::ReloadItems()
         if (false == LoadBundle(g_assetDir + g_fxaa, propData))
         {
             cout << "load fx data failed." << endl;
+        }else{
+            cout << "load fx data." << endl;
+            m_FxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
         }
-        cout << "load fx data." << endl;
-
-        m_FxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
     }
 
     fuItemSetParamd(m_BodyShapeHandle,"Debug",0.0);
@@ -436,10 +425,11 @@ void Nama::LoadMakeup()
         if (false == LoadBundle(g_assetDir + g_Makeup, propData))
         {
             cout << "load face makeup data failed." << endl;
+        }else{
+            cout << "load face makeup data." << endl;
+            m_MakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+            fuItemSetParamd(m_MakeUpHandle, "machine_level", 1.0);
         }
-        cout << "load face makeup data." << endl;
-        m_MakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
-        fuItemSetParamd(m_MakeUpHandle, "machine_level", 1.0);
     }
 }
 
@@ -878,7 +868,7 @@ void Nama::bindMakeUp(string name, string item)
     ChangeCleanFlag(false);
     int bundleID = 0;
     vector<char> propData;
-    if (false == LoadBundle(g_assetDir + item, propData))
+    if (false == LoadBundle(item, propData))
     {
         cout << "load prop data failed." << endl;
         return;
@@ -899,5 +889,16 @@ void Nama::itemJingpinClick()
 
 void Nama::CameraChange(){
     fuOnCameraChange();
+}
+
+void Nama::setBackgroundSegType(int type)
+{
+    vector<char> ai_human_model_data;
+    if (LoadBundle(g_assetDir + g_ai_humanprocessor, ai_human_model_data))
+    {
+        fuReleaseAIModel(FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
+        fuSetHumanSegMode(FUAIHUMANSEGMODE(type));
+        fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
+    }
 }
 
