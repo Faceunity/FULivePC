@@ -3,7 +3,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12" CACHE STRING "Minimum OS X deployment ve
 project(FULivePC)
 set(target FULivePC)
 set(CMAKE_CXX_STANDARD 14)
-
+set(CMAKE_CXX_STANDARD_REQUIRED ON) 
 
 if(WIN32)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/cmakeScripts/Modules)
@@ -24,6 +24,8 @@ if(APPLE)
         -DGLFW_EXPOSE_NATIVE_COCOA
         -DGLFW_EXPOSE_NATIVE_NSGL
         )
+	add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-std=c++14>") 
+	add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>") 
 else() 
     add_definitions(
         -DIMGUI_IMPL_OPENGL_LOADER_GL3W

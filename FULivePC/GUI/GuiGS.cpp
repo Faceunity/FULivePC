@@ -1439,7 +1439,11 @@ void GUIGS::LoadResource()
 		}
 		if (dom.HasMember("GSSaveAreaFilePath") && dom["GSSaveAreaFilePath"].IsString())
 		{
-			mConfig.strFilePath = dom["GSSaveAreaFilePath"].GetString();
+			string path = dom["GSSaveAreaFilePath"].GetString();
+			ifstream ifs(path.c_str());
+			if (ifs.good()) {
+				mConfig.strFilePath = dom["GSSaveAreaFilePath"].GetString();
+			}
 		}
 	}
 

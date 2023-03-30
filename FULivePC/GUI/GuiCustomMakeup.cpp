@@ -596,6 +596,9 @@ void CMFoundation::ShowUI()
 		if (LayoutImageButtonWithText(ImVec2(0.f, 27.f), ImVec2(40, 40), bag->pTex->getTextureID(),
 			bag->pTex->getTextureID(), ""))
 		{
+			if (m_fIntensity == 0.0f) {
+				m_fIntensity = 100.f;
+			}
 			m_pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
 			std::vector<double> colors0 = GetDoubles(bag->vecColorRGBA[0]);
 			m_pNama->SetCMDoubles("makeup_foundation_color", colors0.data(), colors0.size());
@@ -609,17 +612,6 @@ void CMFoundation::ShowUI()
 
 		ImGui::PopID();
 
-		if (!m_curBag && config->vecColor.size() > 0)
-		{
-			if (m_fIntensity == 0.0f) {
-				m_fIntensity = 100.f;
-			}
-			m_curBag = config->vecColor[0];
-			m_pNama->SelectCustomMakeupBundle(gBundlePath[UIBridge::bundleCategory] + "/subs/" + config->strBundlePath + ".bundle", GetDescName());
-			std::vector<double> colors0 = GetDoubles(m_curBag->vecColorRGBA[0]);
-			m_pNama->SetCMDoubles("makeup_foundation_color", colors0.data(), colors0.size());
-			SetIntensity();
-		}
 	}
 
 	ImGui::Dummy(ImVec2(0, 0));

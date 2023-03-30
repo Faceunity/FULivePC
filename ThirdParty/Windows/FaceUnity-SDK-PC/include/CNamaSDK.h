@@ -54,7 +54,9 @@ typedef enum FUAITYPE {
   FUAITYPE_FACE_ATTRIBUTE_PROCESSOR = 1 << 12,
   FUAITYPE_FACELANDMARKS75 = 1 << 13,
   FUAITYPE_FACELANDMARKS209 = 1 << 14,
-  FUAITYPE_FACELANDMARKS239 = 1 << 15
+  FUAITYPE_FACELANDMARKS239 = 1 << 15,
+  FUAITYPE_FACEPROCESSOR_IMAGE_BEAUTY = 1 << 16,
+  FUAITYPE_HUMAN_PROCESSOR_IMAGE_BEAUTY = 1 << 17
 
 } FUAITYPE;
 
@@ -201,6 +203,12 @@ typedef enum FUAIHUMANSEGSCENETYPE {
   FUAIHUMAN_SEG_MEETING = 0,
   FUAIHUMAN_SEG_COMMON = 1
 } FUAIHUMANSEGSCENETYPE;
+
+typedef enum FUAIHUMANSEGMODE {
+  FUAIHUMAN_SEG_CPU_COMMON = 0x00,  //  default
+  FUAIHUMAN_SEG_GPU_COMMON = 0x01,
+  FUAIHUMAN_SEG_GPU_MEETING = 0x02
+} FUAIHUMANSEGMODE;
 
 typedef enum TRANSFORM_MATRIX {
   /*
@@ -1831,12 +1839,6 @@ FUNAMA_API int fuProfileResetAllTimers();
 
 FUNAMA_API void fuSetForcePortraitMode(int mode);
 
-// in_format 0->RGB 1->RGBA
-FUNAMA_API void fuImageBeautyResetPic(void* in_ptr, int w, int h, int format,
-                                      void* out_ptr, int out_w, int out_h);
-
-FUNAMA_API void fuImageBeautyNewPic();
-
 FUNAMA_API void fuSetFaceDelayLeaveFrameNum(int frame_num);
 
 FUNAMA_API void fuSetFaceDelayLeaveEnable(bool use);
@@ -1844,6 +1846,8 @@ FUNAMA_API void fuSetFaceDelayLeaveEnable(bool use);
 FUNAMA_API void fuSetHumanSegScene(FUAIHUMANSEGSCENETYPE seg_scene);
 
 FUNAMA_API void fuSetHandDetectEveryNFramesWhenNoHand(int frame_num);
+
+FUNAMA_API void fuSetHumanSegMode(FUAIHUMANSEGMODE flag);
 
 #ifdef __cplusplus
 }

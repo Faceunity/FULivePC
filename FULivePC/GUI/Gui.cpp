@@ -1983,8 +1983,9 @@ void Gui::render(Nama* nama)
 	readStyleConfig();
 	GUIGS::InitColorVec();
 	GUIGS::ResetDefParam();
-	//resetBeautyParam();
+
 	loadStyleParam();
+	resetBeautyParam();
 	resetShapeParam();
 
 	nama->UpdateGreenScreen();
