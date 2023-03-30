@@ -13,7 +13,7 @@
 #include "BgSegUpdate.h"
 
 using namespace NamaExampleNameSpace;
-
+using namespace std;
 bool Nama::mHasSetup = false;
 
 
@@ -69,10 +69,6 @@ bool Nama::Release() {
 Nama::~Nama()
 {
 	SaveRencentColorToFile();
-
-	
-
-
 	map<int, Mp3*>::iterator it;
 	for (it = mp3Map.begin(); it != mp3Map.end(); it++)
 	{
@@ -80,7 +76,6 @@ Nama::~Nama()
 		delete it->second;
 		UIBridge::mNeedPlayMP3 = false;
 	}
-
 }
 
 #ifdef _WIN32
@@ -167,52 +162,39 @@ bool Nama::Init()
 		if (false == FuTool::LoadBundle(g_tongue, tongue_model_data))
 		{
 			cout << "Error: fail load tongue model" << g_tongue << endl;
-			return false;
 		}
-
-		fuLoadTongueModel(reinterpret_cast<float*>(&tongue_model_data[0]), tongue_model_data.size());
+		else {
+			fuLoadTongueModel(reinterpret_cast<float*>(&tongue_model_data[0]), tongue_model_data.size());
+		}
 
 		vector<char> ai_model_data;
 		if (false == FuTool::LoadBundle(g_ai_faceprocessor, ai_model_data))
 		{
 			cout << "Error:fail load faceprocessor model" << g_ai_faceprocessor << endl;
-			return false;
 		}
-		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_model_data[0]), ai_model_data.size(), FUAITYPE::FUAITYPE_FACEPROCESSOR);
-
-		vector<char> ai_beseg_green_model_data;
-		if (false == FuTool::LoadBundle(g_ai_bgseg_green, ai_beseg_green_model_data))
-		{
-			cout << "Error: fail load bgseg green model" << g_ai_bgseg_green << endl;
-			return false;
+		else {
+			fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_model_data[0]), ai_model_data.size(), FUAITYPE::FUAITYPE_FACEPROCESSOR);
 		}
-		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_beseg_green_model_data[0]), ai_beseg_green_model_data.size(), FUAITYPE::FUAITYPE_BACKGROUNDSEGMENTATION_GREEN);
-
-		vector<char> ai_hairseg_model_data;
-		if (false == FuTool::LoadBundle(g_ai_hairseg, ai_hairseg_model_data))
-		{
-			cout << "Error: fail load hair seg model" << g_ai_hairseg << endl;
-			return false;
-		}
-		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_hairseg_model_data[0]), ai_hairseg_model_data.size(), FUAITYPE::FUAITYPE_HAIRSEGMENTATION);
-
 
 		vector<char> ai_human_model_data;
 		if (false == FuTool::LoadBundle(g_ai_humanprocessor, ai_human_model_data))
 		{
 			cout << "Error: fail load humanprocessor model" << g_ai_humanprocessor << endl;
-			return false;
 		}
-		fuPreprocessAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
-		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
+		else {
+			fuSetHumanSegMode(FUAIHUMAN_SEG_GPU_COMMON);
+			//fuPreprocessAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
+			fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
+		}
 		vector<char> ai_gesture_model_data;
 		if (false == FuTool::LoadBundle(g_ai_hand_processor, ai_gesture_model_data))
 		{
 			cout << "Error: fail load gesture model" << g_ai_hand_processor << endl;
-			return false;
 		}
-		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_gesture_model_data[0]), ai_gesture_model_data.size(), FUAITYPE::FUAITYPE_HANDGESTURE);
+		else {
+			fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_gesture_model_data[0]), ai_gesture_model_data.size(), FUAITYPE::FUAITYPE_HANDGESTURE);
 
+		}
 		mModuleCode = fuGetModuleCode(0);
 		mModuleCode1 = fuGetModuleCode(1);
 		{
@@ -220,11 +202,11 @@ bool Nama::Init()
 			if (false == FuTool::LoadBundle(g_faceBeautification, propData))
 			{
 				cout << "load face beautification data failed." << endl;
-				return false;
+			} 
+			else {
+				cout << "load face beautification data." << endl;
+				mBeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
 			}
-			cout << "load face beautification data." << endl;
-
-			mBeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
 		}
 
 
@@ -234,11 +216,11 @@ bool Nama::Init()
 			if (false == FuTool::LoadBundle(g_Makeup, propData))
 			{
 				cout << "load face makeup data failed." << endl;
-				return false;
 			}
-			cout << "load face makeup data." << endl;
-
-			mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+			else {
+				cout << "load face makeup data." << endl;
+				mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+			}
 			//fuItemSetParamd(mMakeUpHandle, "is_clear_makeup", 1);
 		}
 
@@ -247,11 +229,11 @@ bool Nama::Init()
 			if (false == FuTool::LoadBundle(g_bodySlim, propData))
 			{
 				cout << "load body slim data failed." << endl;
-				return false;
 			}
-			cout << "load body slim data." << endl;
-
-			mBodyShapeHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+			else {
+				cout << "load body slim data." << endl;
+				mBodyShapeHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+			}
 		}
 
 		{
@@ -259,11 +241,11 @@ bool Nama::Init()
 			if (false == FuTool::LoadBundle(g_greenscreen, propData))
 			{
 				cout << "load gs data failed." << endl;
-				return false;
 			}
-			cout << "load gs data." << endl;
-
-			mGSHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+			else {
+				cout << "load gs data." << endl;
+				mGSHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+			}
 		}
 
 		{
@@ -271,11 +253,11 @@ bool Nama::Init()
 			if (false == FuTool::LoadBundle(g_fxaa, propData))
 			{
 				cout << "load fx data failed." << endl;
-				return false;
 			}
-			cout << "load fx data." << endl;
-
-			mFxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
+			else {
+				cout << "load fx data." << endl;
+				mFxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
+			}
 		}
 		
 		fuItemSetParamd(mBodyShapeHandle, "Debug", 0.0);
@@ -384,8 +366,10 @@ void Nama::ReloadItems() {
 		{
 			cout << "load face beautification data failed." << endl;
 		}
-		cout << "load face beautification data." << endl;
-		mBeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
+		else {
+			cout << "load face beautification data." << endl;
+			mBeautyHandles = fuCreateItemFromPackage(&propData[0], propData.size());
+		}
 	}
 
 	{
@@ -394,9 +378,10 @@ void Nama::ReloadItems() {
 		{
 			cout << "load body slim data failed." << endl;
 		}
-		cout << "load body slim data." << endl;
-
-		mBodyShapeHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+		else {
+			cout << "load body slim data." << endl;
+			mBodyShapeHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+		}
 	}
 
 	{
@@ -405,9 +390,10 @@ void Nama::ReloadItems() {
 		{
 			cout << "load gs data failed." << endl;
 		}
-		cout << "load gs data." << endl;
-
-		mGSHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+		else {
+			cout << "load gs data." << endl;
+			mGSHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+		}
 	}
 
 	{
@@ -416,9 +402,10 @@ void Nama::ReloadItems() {
 		{
 			cout << "load fx data failed." << endl;
 		}
-		cout << "load fx data." << endl;
-
-		mFxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
+		else {
+			cout << "load fx data." << endl;
+			mFxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
+		}
 	}
 
 	float fValue = 0.5f;
@@ -639,7 +626,6 @@ void Nama::UpdateBeauty()
 			UIBridge::mFaceShapeLevel[i] += 50;
 		}
 		fuItemSetParamd(mBeautyHandles, const_cast<char*>(g_faceShapeParamName[i].c_str()), UIBridge::mFaceShapeLevel[i] / 100.0f);
-
 		/*if (i == 12)
 		{
 			wchar_t szBuf[2048] = { 0 };
@@ -1056,9 +1042,11 @@ void Nama::UnbindCurFixedMakeup()
 			{
 				cout << "load face makeup data failed." << endl;
 			}
-			cout << "load face makeup data." << endl;
-			mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
-			fuItemSetParamd(mMakeUpHandle, "machine_level", 1.0);
+			else {
+				cout << "load face makeup data." << endl;
+				mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+				fuItemSetParamd(mMakeUpHandle, "machine_level", 1.0);
+			}
 		}
 	}
 }
@@ -1152,9 +1140,11 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 					{
 						cout << "load face makeup data failed." << endl;
 					}
-					cout << "load face makeup data." << endl;
-					mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
-					fuItemSetParamd(mMakeUpHandle, "machine_level", 1.0);
+					else {
+						cout << "load face makeup data." << endl;
+						mMakeUpHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+						fuItemSetParamd(mMakeUpHandle, "machine_level", 1.0);
+					}
 				}
 				fuBindItems(mMakeUpHandle, &bundleID, 1);
 				UIBridge::m_curBindedItem = bundleID;
@@ -1367,7 +1357,7 @@ bool Nama::CheckModuleCodeSide(int categorySide)
 	return bOK;
 }
 
-void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
+void Nama::RenderDefNama(cv::Mat& picInput, int rotType)
 {
 
 	if (UIBridge::mNeedPlayMP3)
@@ -1392,13 +1382,14 @@ void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
 
 	{
 		vector<int> renderList;
-		
+
 		// AR 和 美体互斥
 		if (UIBridge::m_bShowingBodyBeauty)
 		{
 			renderList.push_back(mBodyShapeHandle);
 			renderList.push_back(mBeautyHandles);
-		}else{
+		}
+		else {
 			renderList.push_back(mBeautyHandles);
 			if (UIBridge::renderBundleCategory == BundleCategory::Makeup)
 			{
@@ -1438,6 +1429,27 @@ void Nama::RenderDefNama(cv::Mat & picInput, int rotType)
 				UIBridge::m_openLocalFileTip = u8"未检测到手势";
 				UIBridge::m_bLoadWrongNamePNGFile = true;
 				UIBridge::mLastTimeExtra = ImGui::GetTime() + 1.0;
+			}
+		}
+		else if (UIBridge::bundleCategory == BundleCategory::BackgroundSegmentation ||
+			UIBridge::bundleCategory == BundleCategory::GreenScreen || 
+			UIBridge::m_bShowingBodyBeauty)
+		{
+			if (CheckModuleBodyInfo()) {
+				if (fuHumanProcessorGetNumResults() == 0) {
+					UIBridge::m_openLocalFileTip = u8"未检测到人体";
+					UIBridge::m_bLoadWrongNamePNGFile = true;
+					UIBridge::mLastTimeExtra = ImGui::GetTime() + 1.0;
+				}
+			}
+			else {
+				static bool once = false;
+				if (!once) {
+					UIBridge::m_openLocalFileTip = u8"没有获取人体信息权限";
+					UIBridge::m_bLoadWrongNamePNGFile = true;
+					UIBridge::mLastTimeExtra = ImGui::GetTime() + 10.0;
+
+				}
 			}
 		}
 		else {
@@ -1696,7 +1708,14 @@ void NamaExampleNameSpace::Nama::setLightMakeupParam(LightMakeupParam param)
 
 void NamaExampleNameSpace::Nama::setHumanSegScene(int type)
 {
-	fuSetHumanSegScene(FUAIHUMANSEGSCENETYPE(type));
+	//fuSetHumanSegScene(FUAIHUMANSEGSCENETYPE(type));
+	vector<char> ai_human_model_data;
+	if (FuTool::LoadBundle(g_ai_humanprocessor, ai_human_model_data))
+	{	
+		fuReleaseAIModel(FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
+		fuSetHumanSegMode(FUAIHUMANSEGMODE(type));
+		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
+	}
 }
 
 void NamaExampleNameSpace::Nama::setMaxFaces(int face)

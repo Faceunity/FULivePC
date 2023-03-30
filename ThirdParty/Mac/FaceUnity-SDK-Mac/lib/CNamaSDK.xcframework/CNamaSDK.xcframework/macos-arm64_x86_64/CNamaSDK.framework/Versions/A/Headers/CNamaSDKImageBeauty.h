@@ -49,6 +49,7 @@ typedef enum FuImageBeautyProcessMode {
   FU_IMAGE_BEAUTY_MODE_FACE_WARP = 1 << 1,
   FU_IMAGE_BEAUTY_MODE_BODY_SLIM = 1 << 2,
   FU_IMAGE_BEAUTY_MODE_AUTO = 1 << 3,
+  FU_IMAGE_BEAUTY_MODE_AUTO_WITHOUT_ACEN_AVER = 1 << 19,
   FU_IMAGE_BEAUTY_MODE_UPLOAD = 1 << 4,
   FU_IMAGE_BEAUTY_MODE_FACE_BEAUTY_PREPROCESS = 1 << 5,
   FU_IMAGE_BEAUTY_MODE_BLUR = 1 << 6,
@@ -209,6 +210,8 @@ FUNAMA_API FuImageBeautyStatus fuImageBeautyClearMemory(const int* p_items,
 
 FUNAMA_API int fuImageBeautyGetInfo(int face_id, const char* name, void* pret,
                                     int num);
+
+FUNAMA_API void fuProcessorChangeModel(int type);
 #ifdef __cplusplus
 }
 #endif

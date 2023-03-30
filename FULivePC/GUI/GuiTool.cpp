@@ -98,7 +98,7 @@ namespace gui_tool
 		ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
 		ImGui::PushStyleColor(ImGuiCol_BorderShadow, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
-		bool ret = ImGui::SliderFloat(label, v, v_min, v_max, "%.f");
+		bool ret1 = ImGui::SliderFloat(label, v, v_min, v_max, "%.f");
 		ImGui::PopStyleColor(6);
 		ImGui::PopStyleVar(2);
 		ImGui::PopItemWidth();
@@ -106,7 +106,7 @@ namespace gui_tool
 		ImGui::SameLine(0, 16 * scaleRatioW);
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() -10);
 		ImGui::PushItemWidth(32 * scaleRatioW);
-		ImGui::DragFloat(label2, v, 1, v_min, v_max, "%.f");
+	    bool ret2 = ImGui::DragFloat(label2, v, 1, v_min, v_max, "%.f");
 		if (*v > v_max) {
 			*v = v_max;
 		}
@@ -116,7 +116,7 @@ namespace gui_tool
 		ImGui::PopItemWidth();
 		ImGui::PopStyleVar();
 		ImGui::EndGroup();
-		return ret;
+		return ret1 || ret2;
 	}
 
 	void LayoutImageSameLine(const ImVec2& pos, const ImVec2& size, ImTextureID user_texture_id, const char* label)

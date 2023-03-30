@@ -360,7 +360,7 @@ void CCameraDS::InitCameraSinglePic(int width, int height, std::string path, boo
 
         closeCamera();
         frame = cv::imread(path.c_str(), cv::IMREAD_UNCHANGED);
-
+        
         if (frame.data)
         {
             //最高720的宽，防止图片过大造成卡顿

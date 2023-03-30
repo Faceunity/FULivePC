@@ -72,7 +72,11 @@ bool GUIBgSeg::LoadUserConfig() {
 	{
 		if (dom.HasMember("BgSegFilePath") && dom["BgSegFilePath"].IsString())
 		{
-			mConfig.strFilePath = dom["BgSegFilePath"].GetString();
+			string path = dom["BgSegFilePath"].GetString(); 
+			ifstream ifs(path.c_str());
+			if (ifs.good()) {
+				mConfig.strFilePath = path;
+			}
 		}
 	}
 
@@ -205,7 +209,7 @@ void GUIBgSeg::ShowBgSegOption(NamaExampleNameSpace::Nama* nama)
 	if (LayoutButton2(ImVec2(0, 10), ImVec2(176, 40), u8"视频会议版"))
 	{
 		UIBridge::mSelectedBsType = true;
-		nama->setHumanSegScene(0);
+		nama->setHumanSegScene(2);
 	}
 	if (UIBridge::m_bShowingBodyBeauty) {
 		ImGui::PopItemFlag();
