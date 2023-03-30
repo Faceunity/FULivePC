@@ -164,6 +164,8 @@ public:
     void ApplyBodyTrackConfig(BodyTrackParam params);
     //改变摄像头
     void CameraChange();
+    //ai human mode
+    void setBackgroundSegType(int type);
 };
 
 #endif // NAMA_H

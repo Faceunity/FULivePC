@@ -1061,20 +1061,21 @@ void UIBridge::useProps(int index)
             nama->ReloadItems();
             reloadItemParam();
         }
-        m_selectCategoryLast = m_selectCategory;
     }
+    if(m_selectCategory == BundleCategory::StyleRecommendation){
+        updateStyleRecommendation(index);
+    }else{
+        if(m_selectCategoryLast == BundleCategory::StyleRecommendation){
+            updateStyleRecommendation();
+        }
+    }
+    m_selectCategoryLast = m_selectCategory;
     if(nama->m_mp3 != nullptr)
     {
         nama->m_mp3->Pause();
     }
     if(m_selectCategory != BundleCategory::Avatar){
         unLoadAvatar();
-    }
-    updateFilter();
-    if(m_selectCategory == BundleCategory::StyleRecommendation){
-        updateStyleRecommendation(index);
-    }else{
-        updateStyleRecommendation();
     }
     if(m_arFunction){
         m_selectCategoryIndex = index;
@@ -1188,9 +1189,13 @@ void UIBridge::nonuseProps()
             nama->NonuseGreenScreenSafeArea();
         }else{
             m_gsSelectBgIndex = -1;
+            disconnect(m_gsvideoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(updateGreenScreenSegment(const cv::Mat &)));
             m_gsMediaPlayer.stop();
-            cv::Mat dataRGBA(nama->m_frame.rows, nama->m_frame.cols,CV_8UC4,cv::Scalar(0));
-            nama->UpdateGreenScreenSegment(dataRGBA);
+            //取消传入透明图
+            //cv::Mat defaulfFrame(nama->m_frame.rows, nama->m_frame.cols,CV_8UC4,cv::Scalar(0));
+            string defaultPicPath = "../res/gsbackground.png";
+            static cv::Mat defaulfFrame = cv::imread(defaultPicPath, cv::IMREAD_UNCHANGED);
+            nama->UpdateGreenScreenSegment(defaulfFrame);
         }
     }
 }
@@ -1245,7 +1250,6 @@ void UIBridge::resetItemParam(int item)
     switch (itemParam) {
     case BeautySkin:
         m_beautySkin.replace(3, m_styleRecommendationParam.mBeautySkinDefault.at(m_styleRecommendationIndex));
-        emit updateBeautySkinParam();
         for(int i = 0 ; i < m_beautySkin.at(0).toStringList().size(); i++){
             if(i <= 1){
                 namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, true);
@@ -1253,13 +1257,14 @@ void UIBridge::resetItemParam(int item)
                 namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, false);
             }
         }
+        emit updateBeautySkinParam();
         break;
     case BeautyFace:
         m_beautyFace.replace(3, m_styleRecommendationParam.mBeautyFaceDefault.at(m_styleRecommendationIndex));
-        emit updateBeautyFaceParam();
         for(int i = 0 ; i < m_beautyFace.at(0).toStringList().size(); i++){
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautyFace, i, false);
         }
+        emit updateBeautyFaceParam();
         break;
     case BeautyBody:
         m_flagARBody = false;
@@ -1274,6 +1279,7 @@ void UIBridge::resetItemParam(int item)
         for(int i = 0 ; i < m_greenScreen.at(0).toStringList().size(); i++){
             namaFuItemSetParamd(nama->m_GSHandle, m_greenScreen, i, false);
         }
+        emit updateGreenScreenParam();
         break;
     }
 }
@@ -1493,14 +1499,14 @@ void UIBridge::gsPlayBGVideo(QString videopath)
 {
     //qDebug()<<"gsPlayBGVideo"<<videopath;
     m_gsMediaPlayer.stop();
-    QtCameraCapture *videoSurface = new QtCameraCapture(true);
-    m_gsMediaPlayer.setVideoOutput(videoSurface);
+    m_gsvideoSurface = new QtCameraCapture(true);
+    m_gsMediaPlayer.setVideoOutput(m_gsvideoSurface);
     QMediaPlaylist *playlist = new QMediaPlaylist;
     //循环播放
     playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
     playlist->addMedia(QUrl::fromLocalFile(videopath));
     m_gsMediaPlayer.setPlaylist(playlist);
-    connect(videoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(updateGreenScreenSegment(const cv::Mat &)), Qt::AutoConnection);
+    connect(m_gsvideoSurface, SIGNAL(presentGSBGFrame(const cv::Mat &)), MainClass::getInstance()->m_UIBridge, SLOT(updateGreenScreenSegment(const cv::Mat &)), Qt::AutoConnection);
     m_gsMediaPlayer.play();
 }
 
@@ -2055,9 +2061,6 @@ void UIBridge::updateStyleRecommendation(int index)
     m_styleRecommendationIndex = index;
     m_beautySkin.replace(3, m_styleRecommendationParam.mBeautySkin.at(index));
     m_beautyFace.replace(3, m_styleRecommendationParam.mBeautyFace.at(index));
-    //更新界面美颜,美型参数
-    emit updateBeautySkinParam();
-    emit updateBeautyFaceParam();
     for(int i = 0 ; i < m_beautySkin.at(0).toStringList().size(); i++){
         if(i <= 1){
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, true);
@@ -2068,12 +2071,17 @@ void UIBridge::updateStyleRecommendation(int index)
     for(int i = 0 ; i < m_beautyFace.at(0).toStringList().size(); i++){
         namaFuItemSetParamd(nama->m_BeautyHandles, m_beautyFace, i, false);
     }
+    //更新界面美颜,美型参数
+    emit updateBeautySkinParam();
+    emit updateBeautyFaceParam();
     m_bSaveStyleRecommendation = true;
+    updateFilter();
 }
 
 void UIBridge::setBackgroundSegType(int type)
 {
-    fuSetHumanSegScene(FUAIHUMANSEGSCENETYPE(type));
+    //    fuSetHumanSegScene(FUAIHUMANSEGSCENETYPE(type));
+    MainClass::getInstance()->m_nama->setBackgroundSegType(type);
 }
 
 void UIBridge::changedStatus(QMediaPlayer::MediaStatus status)

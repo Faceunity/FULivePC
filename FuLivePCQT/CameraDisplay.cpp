@@ -83,10 +83,19 @@ void CameraDisplayRenderer::render()
             nama->RenderDefNama();
             uibridge->detectionBodyTip();
         }else if(uibridge->m_bLoadBear){
-            nama->RenderBear();
+            if(nama->m_Controller->m_initFlag){
+                nama->RenderBear();
+            }else{
+                nama->RenderDefNama();
+            }
             uibridge->detectionBodyTip();
         }else if(uibridge->m_bodyTrackType != BodyTrackType::None){
-            nama->RenderP2A();
+            if(nama->m_Controller->m_initFlag){
+                nama->RenderP2A();
+            }else{
+                nama->changeRenderList(RENDER_PICKCOLOR);
+                nama->RenderDefNama();
+            }
             uibridge->detectionBodyTip();
         }else{
             nama->RenderDefNama();
