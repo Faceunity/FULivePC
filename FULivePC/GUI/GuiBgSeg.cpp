@@ -151,7 +151,7 @@ void GUIBgSeg::SaveUserConfig() {
 	ofstream outfile;
 	outfile.open(GetCongfigPath().data());
 	if (!outfile.is_open()) {
-		fprintf(stderr, "fail to open file to write: %s\n", gUserConfig.data());
+		fprintf(stderr, "fail to open file to write: %s\n", GetCongfigPath().data());
 	}
 
 	outfile << buf.GetString() << endl;

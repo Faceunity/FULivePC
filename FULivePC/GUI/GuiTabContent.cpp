@@ -63,6 +63,7 @@ namespace gui_tab_content
 		{
 			UIBridge::mFaceBeautyLevel[1] = 1;
 			nama->UpdateBeauty();
+			saveStyleConfig();
 		}
 		ImGui::SameLine();
 		if (LayoutSelectable(ImVec2(0, 11), ImVec2(57, 30), u8"朦胧磨皮##2", UIBridge::mFaceBeautyLevel[1] == 2))
