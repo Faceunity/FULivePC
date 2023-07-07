@@ -1024,7 +1024,8 @@ int Nama::GetLastNamaError()
 
 void Nama::UnbindCurFixedMakeup()
 {
-	if (UIBridge::bundleCategoryLast == BundleCategory::ItemJingpin) {
+	if (UIBridge::bundleCategoryLast == BundleCategory::ItemJingpin ||
+		UIBridge::bundleCategoryLast == BundleCategory::StyleRecommendation ) {
 		ReloadItems();
 	}
 	if (UIBridge::bundleCategoryLast == BundleCategory::StyleRecommendation) {

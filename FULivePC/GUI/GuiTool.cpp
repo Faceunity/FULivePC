@@ -1,9 +1,10 @@
+#if _WIN32
+#include "Windows.h"
+#elif __APPLE__
+#include "fu_tool_mac.h"
+#endif
 #include "GuiTool.h"
 #include "UIBridge.h"
-#if _WIN32
-#include<windows.h>
-#elif __APPLE__
-#endif
 #include <fu_tool.h>
 #include "rapidjson/document.h"
 #include "rapidjson/filereadstream.h"
@@ -51,7 +52,7 @@ namespace gui_tool
 		return true;
 	}
 
-	bool LayoutButton(const ImVec2& pos, const ImVec2& size, const char* label,int flag)
+	bool LayoutButton(const ImVec2& pos, const ImVec2& size, const char* label, int flag)
 	{
 		ImGui::BeginGroup();
 		ImGui::Dummy(ImVec2(1, pos.y * scaleRatioH));
@@ -104,13 +105,13 @@ namespace gui_tool
 		ImGui::PopItemWidth();
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 5.0f));
 		ImGui::SameLine(0, 16 * scaleRatioW);
-		ImGui::SetCursorPosY(ImGui::GetCursorPosY() -10);
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 10);
 		ImGui::PushItemWidth(32 * scaleRatioW);
-	    bool ret2 = ImGui::DragFloat(label2, v, 1, v_min, v_max, "%.f");
+		bool ret2 = ImGui::DragFloat(label2, v, 1, v_min, v_max, "%.f");
 		if (*v > v_max) {
 			*v = v_max;
 		}
-		else if(*v < v_min){
+		else if (*v < v_min) {
 			*v = v_min;
 		}
 		ImGui::PopItemWidth();
@@ -143,7 +144,7 @@ namespace gui_tool
 			ImGui::SameLine();
 			ImGui::Text(label);
 		}
-		
+
 		ImGui::EndGroup();
 	}
 
@@ -179,12 +180,12 @@ namespace gui_tool
 		//ImGui::SetCursorPosX(ImGui::GetCursorPosX());
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - size.y - 8);
 		if (select) {
-			ImGui::Image(user_texture_id4, ImVec2(size.x , size.y));
+			ImGui::Image(user_texture_id4, ImVec2(size.x, size.y));
 		}
 		else {
 			if (ImGui::IsItemHovered())
 			{
-				ImGui::Image(user_texture_id2, ImVec2(size.x, size.y ));
+				ImGui::Image(user_texture_id2, ImVec2(size.x, size.y));
 			}
 			else {
 				ImGui::Image(user_texture_id3, ImVec2(size.x, size.y));
@@ -220,7 +221,7 @@ namespace gui_tool
 	}
 
 
-	void UpdateFrame2Tex(cv::Mat & frameData, GLuint texID)
+	void UpdateFrame2Tex(cv::Mat& frameData, GLuint texID)
 	{
 		glBindTexture(GL_TEXTURE_2D, texID);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, frameData.step / frameData.elemSize());
@@ -229,7 +230,7 @@ namespace gui_tool
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void funGenTex(GLuint & texId)
+	void funGenTex(GLuint& texId)
 	{
 		glGenTextures(1, &texId);
 		glBindTexture(GL_TEXTURE_2D, texId);
@@ -242,7 +243,7 @@ namespace gui_tool
 		glDeleteTextures(1, &texID);
 	}
 
-	void funShowImg(GLuint & texId, float rotio, ImVec2 frameSize, bool bNeedFlip)
+	void funShowImg(GLuint& texId, float rotio, ImVec2 frameSize, bool bNeedFlip)
 	{
 		ImVec2 frameUV_LB;
 		ImVec2 frameUV_RT;
@@ -263,11 +264,11 @@ namespace gui_tool
 			frameUV_LB = ImVec2(0, 0);
 			frameUV_RT = ImVec2(1, 1);
 		}
-		
-		ImGui::Image((void *)(intptr_t)texId, frameSize, frameUV_LB, frameUV_RT, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+
+		ImGui::Image((void*)(intptr_t)texId, frameSize, frameUV_LB, frameUV_RT, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
 	};
 
-	void generatePureColorMat(cv::Vec4b colorRGBA, cv::Mat & dataOut)
+	void generatePureColorMat(cv::Vec4b colorRGBA, cv::Mat& dataOut)
 	{
 		cv::Vec4b def = { 255,255,255,0 };
 		dataOut.release();
@@ -279,9 +280,9 @@ namespace gui_tool
 		cv::circle(dataOut, { DEF_COLOR_W / 2,DEF_COLOR_W / 2 }, DEF_COLOR_W / 2, color, -1, cv::LINE_AA);
 	}
 
-	void CutCircleInMiddle(cv::Mat & dataIn, cv::Mat & dataOut) {
+	void CutCircleInMiddle(cv::Mat& dataIn, cv::Mat& dataOut) {
 
-		Mat & srcImg = dataIn;
+		Mat& srcImg = dataIn;
 		Mat maskImg;
 
 		maskImg = Mat(srcImg.rows, srcImg.cols, CV_8UC1, Scalar(0));
@@ -291,10 +292,10 @@ namespace gui_tool
 
 		int X = srcImg.cols / 2;
 		int Y = srcImg.rows / 2;
-        cv::Point pt_o = cv::Point(X, Y);
+		cv::Point pt_o = cv::Point(X, Y);
 		int r = MIN(srcImg.rows, srcImg.cols) / 2;
 
-        cv::circle(maskImg, pt_o, r, Scalar(255), -1);
+		cv::circle(maskImg, pt_o, r, Scalar(255), -1);
 
 		//带阿尔法通道的原始图
 		if (srcImg.channels() == 4)
@@ -314,7 +315,7 @@ namespace gui_tool
 				}
 			}
 		}
-		
+
 
 		//imshow("testMask", maskImg);
 
@@ -326,28 +327,28 @@ namespace gui_tool
 		//imshow("testOut", dataOut);
 	}
 
-	void generateTwoColorMat(cv::Vec4b colorRGBA0, cv::Vec4b colorRGBA1, cv::Mat & dataOut)
+	void generateTwoColorMat(cv::Vec4b colorRGBA0, cv::Vec4b colorRGBA1, cv::Mat& dataOut)
 	{
-		cv::Mat img(cv::Size(DEF_COLOR_W*2, DEF_COLOR_H*2), CV_8UC3);
+		cv::Mat img(cv::Size(DEF_COLOR_W * 2, DEF_COLOR_H * 2), CV_8UC3);
 
-		rectangle(img, cv::Rect(0, 0, DEF_COLOR_W*2, DEF_COLOR_H), colorRGBA0, -1);
-		rectangle(img, cv::Rect(0, DEF_COLOR_H, DEF_COLOR_W*2, DEF_COLOR_H), colorRGBA1, -1);
-		
+		rectangle(img, cv::Rect(0, 0, DEF_COLOR_W * 2, DEF_COLOR_H), colorRGBA0, -1);
+		rectangle(img, cv::Rect(0, DEF_COLOR_H, DEF_COLOR_W * 2, DEF_COLOR_H), colorRGBA1, -1);
+
 		//imshow("img1", img);
 
 		CutCircleInMiddle(img, dataOut);
 	}
 
-	void generateThreeColorMat(cv::Vec4b colorRGBA0, cv::Vec4b colorRGBA1, cv::Vec4b colorRGBA2, cv::Mat & dataOut)
+	void generateThreeColorMat(cv::Vec4b colorRGBA0, cv::Vec4b colorRGBA1, cv::Vec4b colorRGBA2, cv::Mat& dataOut)
 	{
 
 		cv::Mat img;
-		img.create(DEF_COLOR_W * 3, DEF_COLOR_H*3, CV_8UC4);
+		img.create(DEF_COLOR_W * 3, DEF_COLOR_H * 3, CV_8UC4);
 
 		rectangle(img, cv::Rect(0, 0, DEF_COLOR_W * 3, DEF_COLOR_H), colorRGBA0, -1);
-		rectangle(img, cv::Rect(0, DEF_COLOR_H, DEF_COLOR_W*3, DEF_COLOR_H), colorRGBA1, -1);
-		rectangle(img, cv::Rect(0, DEF_COLOR_H*2, DEF_COLOR_W * 3, DEF_COLOR_H), colorRGBA2, -1);
-		
+		rectangle(img, cv::Rect(0, DEF_COLOR_H, DEF_COLOR_W * 3, DEF_COLOR_H), colorRGBA1, -1);
+		rectangle(img, cv::Rect(0, DEF_COLOR_H * 2, DEF_COLOR_W * 3, DEF_COLOR_H), colorRGBA2, -1);
+
 		CutCircleInMiddle(img, dataOut);
 
 	}
@@ -361,15 +362,16 @@ namespace gui_tool
 		if (nCnt == 1)
 		{
 			generatePureColorMat(vecColorRGBA[0], colordata);
-		}else if (nCnt == 2)
+		}
+		else if (nCnt == 2)
 		{
 			generateTwoColorMat(vecColorRGBA[0], vecColorRGBA[1], colordata);
 		}
-		else if ( nCnt == 3)
+		else if (nCnt == 3)
 		{
 			generateThreeColorMat(vecColorRGBA[0], vecColorRGBA[1], vecColorRGBA[2], colordata);
 		}
-		
+
 
 		if (colordata.data)
 		{
@@ -381,11 +383,11 @@ namespace gui_tool
 
 	typedef cv::Point3_<uchar> Pixel;
 
-	void generateHSVMat(int iW, int iH, cv::Mat & outData)
+	void generateHSVMat(int iW, int iH, cv::Mat& outData)
 	{
 		outData.release();
 		outData.create(iH, iW, CV_8UC3);
-		outData.forEach<Pixel>([&](Pixel &pixel, const int* position) {
+		outData.forEach<Pixel>([&](Pixel& pixel, const int* position) {
 			int posY = iH - position[0];
 			int posX = position[1];
 
@@ -394,13 +396,13 @@ namespace gui_tool
 			pixel.x = (float)posX / iW * 180;  //H
 			pixel.y = 255;  //S OK
 			pixel.z = (float)posY / iH * 255;  //V
-		});
+			});
 	}
 
 	/*
-	
+
 	*/
-	Texture::SharedPtr createColorHSV(int iW, int iH, cv::Mat & outRGBMat)
+	Texture::SharedPtr createColorHSV(int iW, int iH, cv::Mat& outRGBMat)
 	{
 		Texture::SharedPtr texRet = nullptr;
 
@@ -424,12 +426,23 @@ namespace gui_tool
 		return texRet;
 	}
 	void readStyleConfig() {
+
 		string strRealPath = "";
- 		strRealPath = FuTool::GetFileFullPathFromeSearchPath(gCustomStyleConfig.c_str());
+
+#ifdef __APPLE__
+		strRealPath = FuToolMac::GetDocumentPath() + "/style_setup.json";
+#else
+		strRealPath = FuTool::GetFileFullPathFromeSearchPath(gCustomStyleConfig.c_str());
+#endif 
+
 		ifstream in(strRealPath.c_str());
 		if (!in.is_open()) {
 			fprintf(stderr, "fail to read json file: %s\n", gCustomStyleConfig.data());
-			return;
+			strRealPath = FuTool::GetFileFullPathFromeSearchPath(gCustomStyleConfig.c_str());
+			in.open(strRealPath);
+			if (!in.is_open()) {
+				return;
+			}
 		}
 
 		string json_content((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
@@ -556,11 +569,16 @@ namespace gui_tool
 			writer.EndArray();
 		}
 		writer.EndObject();
-
+		string ConfPath = "";
+#ifdef __APPLE__
+		ConfPath = FuToolMac::GetDocumentPath() + "/style_setup.json";
+#else
+		ConfPath = gCustomStyleConfig;
+#endif 
 		ofstream outfile;
-		outfile.open(gCustomStyleConfig.c_str());
+		outfile.open(ConfPath.c_str());
 		if (!outfile.is_open()) {
-			fprintf(stderr, "fail to open file to write: %s\n", gUserConfig.data());
+			fprintf(stderr, "fail to open file to write: %s\n", gCustomStyleConfig.data());
 		}
 
 		outfile << buf.GetString() << endl;
@@ -604,7 +622,7 @@ namespace gui_tool
 		memset(UIBridge::mBodyShapeLevel, 0, sizeof(float) * MAX_BODY_SHAPE_PARAM);
 	}
 #if _WIN32
-	int CalWstringWidth(const std::wstring & targetWstring,int fontH,int fontW, int fontWeight)
+	int CalWstringWidth(const std::wstring& targetWstring, int fontH, int fontW, int fontWeight)
 	{
 		HDC hDC = ::GetDC(NULL);
 		HFONT hFont = CreateFont(fontH, fontW, 0, 0, FW_DONTCARE, fontWeight, 0, 0,
