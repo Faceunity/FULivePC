@@ -33,8 +33,9 @@ public:
 	std::string mItemName;
 	std::vector<std::string> mBundleNames;
 	std::string mIconName;
-
 	std::string mIconDir;
+	std::string mEventToast;
+	std::string mEventToastEn;
 	std::vector<std::string> mBundleDirs;
 	std::atomic_bool mBundleIsDownload;
 	std::atomic_bool mIsDownloading;

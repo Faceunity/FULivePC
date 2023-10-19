@@ -8,7 +8,7 @@
 #include "imgui/imgui.h"
 
 #define MAX_PATH_LENGTH 1024  
-#define MAX_BEAUTYFACEPARAMTER 11
+#define MAX_BEAUTYFACEPARAMTER 13
 #define MAX_FACESHAPEPARAMTER 25
 #define MAX_BODY_SHAPE_PARAM  7
 #define MAX_GREEN_SCREEN_PARAM 3
@@ -299,7 +299,7 @@ private:
 };
 const string g_styleRecommendationName[MAX_STYLE_RECOMMENDATION_PARAM] = { "BeautyParam", "SeniorSister" };
 
-const string g_faceBeautyParamName[MAX_BEAUTYFACEPARAMTER] = { "skin_detect", "blur_type","blur_level","color_level_mode2", "red_level","sharpen", "face_threed", "eye_bright", "tooth_whiten" ,"remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2" };
+const string g_faceBeautyParamName[MAX_BEAUTYFACEPARAMTER] = { "skin_detect","blur_type","blur_level","delspot_level","color_level_mode2","red_level","clarity","sharpen","face_threed","eye_bright","tooth_whiten","remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2" };
 
 const string g_faceShapeParamName[MAX_FACESHAPEPARAMTER] = { "cheek_thinning_mode2","eye_enlarging_mode3","intensity_eye_circle", "intensity_chin_mode2", 
 			"intensity_forehead_mode2", "intensity_nose_mode2","intensity_mouth_mode3", "intensity_lip_thick",

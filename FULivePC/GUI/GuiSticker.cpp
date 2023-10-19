@@ -139,6 +139,12 @@ void GUISticker::ShowStickerList(Nama * nama, int tagIndex)
 
 		auto bundle = res.lock();
 
+		if (bundle->mEventToast != "") {
+			UIBridge::m_openLocalFileTip = bundle->mEventToast;
+			UIBridge::m_bLoadWrongNamePNGFile = true;
+			UIBridge::mLastTimeExtra = ImGui::GetTime() + 2.0;
+		}
+
 		if (UIBridge::showCustomMakeup)
 		{
 			GUICustomMakeup::Reset(nama);

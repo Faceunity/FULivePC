@@ -187,6 +187,12 @@ void StikcerHolder::RequestTools()
 				else if (category == CATEGORY_ANIMOJI)
 					bundleRes->mCategory = category;
 			}
+			if (tool.HasMember("eventToast")) {
+				bundleRes->mEventToast = tool["eventToast"].GetString();
+			}
+			if (tool.HasMember("eventToastEn")) {
+				bundleRes->mEventToastEn = tool["eventToastEn"].GetString();
+			}
 #ifdef __APPLE__
 			if(bundleRes->mIconName != "小熊icon.png")
 #endif

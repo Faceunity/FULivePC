@@ -150,8 +150,7 @@ bool Nama::Init()
 	if (false == mHasSetup && true == mNamaAppState.EnableNama)
 	{
 		CheckGLContext();
-
-		fuSetLogLevel(FU_LOG_LEVEL_ERROR);
+		fuSetLogLevel(FU_LOG_LEVEL_DEBUG);
 
 		fuSetup(nullptr, 0, nullptr, g_auth_package, sizeof(g_auth_package));
 		// setup without license, only render 1000 frames.
@@ -1446,6 +1445,7 @@ void Nama::RenderDefNama(cv::Mat& picInput, int rotType)
 			else {
 				static bool once = false;
 				if (!once) {
+					once = true;
 					UIBridge::m_openLocalFileTip = u8"没有获取人体信息权限";
 					UIBridge::m_bLoadWrongNamePNGFile = true;
 					UIBridge::mLastTimeExtra = ImGui::GetTime() + 10.0;
@@ -1464,6 +1464,7 @@ void Nama::RenderDefNama(cv::Mat& picInput, int rotType)
 			else {
 				static bool once = false;
 				if (!once) {
+					once = true;
 					UIBridge::m_openLocalFileTip = u8"没有获取人脸信息权限";
 					UIBridge::m_bLoadWrongNamePNGFile = true;
 					UIBridge::mLastTimeExtra = ImGui::GetTime() + 10.0;
@@ -1576,7 +1577,6 @@ void Nama::RenderItems(cv::Mat & picMat)
 		else
 			RenderDefNama(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
 	}
-
 	return;
 }
 
