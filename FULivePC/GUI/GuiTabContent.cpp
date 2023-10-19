@@ -73,32 +73,32 @@ namespace gui_tab_content
 			saveStyleConfig();
 		}
 		ImGui::PopStyleVar();
-		std::string sliderIconNameArr[MAX_BEAUTYFACEPARAMTER] = { "list_icon_Grindingskin_open","list_icon_Skinwhitening_open", "list_icon_Ruddy_open","list_iconsharpen_open",
+		std::string sliderIconNameArr[MAX_BEAUTYFACEPARAMTER] = { "list_icon_Grindingskin_open","list_icon_acne_open","list_icon_Skinwhitening_open", "list_icon_Ruddy_open","list_icon_clearness_open","list_iconsharpen_open",
 			"list_icon_stereoscopic_open", "list_icon_Brighteye_open", "list_iconBeautifulteeth_open",
 			"list_icon_dark_circles_open","list_icon_wrinkle_open" };
 
-		std::string sliderNameArr[MAX_BEAUTYFACEPARAMTER] = { u8"   磨皮", u8"   美白",u8"   红润",u8"   锐化", u8"五官立体",u8"   亮眼", u8"   美牙" ,u8"去黑眼圈", u8"去法令纹" };
+		std::string sliderNameArr[MAX_BEAUTYFACEPARAMTER] = { u8"   磨皮", u8"  祛斑痘", u8"   美白",u8"   红润",u8"   清晰",u8"   锐化", u8"五官立体",u8"   亮眼", u8"   美牙" ,u8"去黑眼圈", u8"去法令纹" };
 
-		for (int i = 0; i < MAX_BEAUTYFACEPARAMTER - 2; i++)
+		for (int i = 0; i < MAX_BEAUTYFACEPARAMTER - 3; i++)
 		{
-			if (UIBridge::mFaceBeautyLevel[i + 2] == 0)
-			{
-				std::string closeIconFile = sliderIconNameArr[i].substr(0, sliderIconNameArr[i].find_last_of('_')) + "_close";
-				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(closeIconFile + ".png", false)->getTextureID(), sliderNameArr[i].c_str());
-			}
-			else
-			{
-				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(sliderIconNameArr[i] + ".png", false)->getTextureID(), sliderNameArr[i].c_str());
-			}
-			ImGui::SameLine();
-			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+				if (UIBridge::mFaceBeautyLevel[i + 2] == 0)
+				{
+					std::string closeIconFile = sliderIconNameArr[i].substr(0, sliderIconNameArr[i].find_last_of('_')) + "_close";
+					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(closeIconFile + ".png", false)->getTextureID(), sliderNameArr[i].c_str());
+				}
+				else
+				{
+					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(sliderIconNameArr[i] + ".png", false)->getTextureID(), sliderNameArr[i].c_str());
+				}
+				ImGui::SameLine();
+				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
 
-			if (LayoutSlider(ImVec2(22, 22), ImVec2(232, 10), ("##slider221" + std::to_string(i)).c_str(), ("##slidertext221" + std::to_string(i)).c_str(), &UIBridge::mFaceBeautyLevel[i + 2], 0, 100))
-			{
-				nama->UpdateBeauty();
-				saveStyleConfig();
-			}
-			ImGui::PopStyleVar();
+				if (LayoutSlider(ImVec2(22, 22), ImVec2(232, 10), ("##slider221" + std::to_string(i)).c_str(), ("##slidertext221" + std::to_string(i)).c_str(), &UIBridge::mFaceBeautyLevel[i + 2], 0, 100))
+				{
+					nama->UpdateBeauty();
+					saveStyleConfig();
+				}
+				ImGui::PopStyleVar();
 		}
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
 		ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(149.f / 255.f, 156.f / 255.f, 180.f / 255.f, 1.f));

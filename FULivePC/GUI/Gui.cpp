@@ -1546,10 +1546,12 @@ void Gui::ShowMainWindow(Nama* nama)
 		};
 		m_mouseControlSec->changeRect(newViewRect);
 	}
-	if (UIBridge::showGreenScreen && !UIBridge::m_bNeedReChooseInputSrc && UIBridge::m_bSetGSInputSrc) {
+	if (UIBridge::showGreenScreen && !UIBridge::m_bNeedReChooseInputSrc
+		&& UIBridge::m_bSetGSInputSrc && UIBridge::gsBundleCategory == BUNDLE_CATEGORY_NOMEAN) {
 		ImVec2 dealt;
 		if (m_mouseControl->draging(&dealt)) {
 			FURect namaGSPreviewRect = nama->gsPreviewRect;
+
 			float direction = bNeedFlip ? -1.0 : 1.0;
 			float dealtXInNama = dealt.x / w;
 			float dealtYInNama = dealt.y / h;
