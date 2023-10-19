@@ -34,23 +34,27 @@ UIBridge::UIBridge()
     //第四个QStringList是nama中fuItemSetParamd设置值,也是qml滑块值和按钮选中项
     //第五个QStringList是qml中滑块显示是否在中间,true中间[-50,50],false[0,100],""转换qml为false,"1"转换为true
     //美肤
-    m_beautySkin.append(QStringList{"精准美肤 开启|关闭", "美肤模式 均匀磨皮|精细磨皮|朦胧磨皮|清晰磨皮", "磨皮", "美白", "红润",
-                                    "锐化", "五官立体", "亮眼", "美牙", "去黑眼圈",
-                                    "去法令纹"});
-    m_beautySkin.append(QStringList{ "skinbeauty", "BeautyMode", "Grindingskin", "Skinwhitening", "Ruddy", "sharpen", "stereoscopic",
+    m_beautySkin.append(QStringList{"精准美肤 开启|关闭", "美肤模式 均匀磨皮|精细磨皮|清晰磨皮|朦胧磨皮", "磨皮", "祛斑痘",
+                                    "美白", "红润", "清晰", "锐化", "五官立体",
+                                    "亮眼","美牙", "去黑眼圈", "去法令纹"});
+    m_beautySkin.append(QStringList{ "skinbeauty", "BeautyMode", "Grindingskin", "acne",
+                                     "Skinwhitening", "Ruddy", "clearness","sharpen", "stereoscopic",
                                      "Brighteye", "Beautifulteeth", "dark_circles", "wrinkle"});
-    m_beautySkin.append(QStringList{ "skin_detect", "blur_type", "blur_level", "color_level_mode2", "red_level", "sharpen", "face_threed", "eye_bright", "tooth_whiten",
-                                     "remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2"});
-    m_defaultBeautySkin = QStringList{ "1", "3", "70", "30", "30", "20", "0", "0", "0", "0", "0"};
+    m_beautySkin.append(QStringList{ "skin_detect", "blur_type", "blur_level", "delspot_level",
+                                     "color_level_mode2", "red_level", "clarity", "sharpen", "face_threed",
+                                     "eye_bright", "tooth_whiten", "remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2"});
+    m_defaultBeautySkin = QStringList{ "1", "3", "70", "0",
+            "30", "30", "0", "20", "0",
+            "0", "0", "0", "0"};
     m_beautySkin.append(m_defaultBeautySkin);
-    m_beautySkin.append(QStringList{ "","","","","","","","","","","",""});
+    m_beautySkin.append(QStringList{ "","","","","","","","","","","","",""});
     //美型
     m_beautyFace.append(QStringList{ "瘦脸", "大眼", "圆眼", "下巴", "额头",
                                      "瘦鼻", "嘴型", "嘴唇厚度", "V脸", "窄脸",
                                      "短脸", "小脸", "瘦颧骨", "瘦下颌骨", "眼睛位置",
                                      "开眼角", "眼睑下至", "眼距", "眼睛角度", "长鼻",
                                      "缩人中", "微笑嘴角", "眉毛上下", "眉间距", "眉毛粗细"});
-    m_beautyFace.append(QStringList{ "Thinface", "Bigeye", "round_eye", "chin", "forehead",
+    m_beautyFace.append(QStringList{ "Thinface", "Bigeye", "round_eye", "chin", "forehead",+
                                      "Thinnose", "Mouthtype", "mouth_thickness", "v", "narrow_face",
                                      "short_face", "little_face", "cheekbones", "lower_jaw", "eye_position",
                                      "open_eyes", "eyelid_down", "eye_distance", "eye_angle", "proboscis",
@@ -727,17 +731,27 @@ void UIBridge::readUserConfig()
             QJsonObject jsonObject = document.object();
             if(jsonObject.contains("BgSegPath")){
                 m_begUserFilePath = jsonObject["BgSegPath"].toString();
-                //将背景分割里添加自定义背景分割图标。
-                QStringList tempList = m_categoryBundles.at(BundleCategory::BackgroundSegmentation).toStringList();
-                tempList.insert(1, "bg_seg_shot");
-                m_categoryBundles.replace(BundleCategory::BackgroundSegmentation, tempList);
+                QFile testFile(m_begUserFilePath);
+                if(testFile.exists()){
+                    //将背景分割里添加自定义背景分割图标。
+                    QStringList tempList = m_categoryBundles.at(BundleCategory::BackgroundSegmentation).toStringList();
+                    tempList.insert(1, "bg_seg_shot");
+                    m_categoryBundles.replace(BundleCategory::BackgroundSegmentation, tempList);
+                }else{
+                    m_begUserFilePath = "";
+                }
             }
             if(jsonObject.contains("GsSafePath")){
                 m_gsSafeUserFilePath = jsonObject["GsSafePath"].toString();
-                QStringList tempList = m_greenScreenIcon.at(1).toStringList();
-                if(!tempList.contains("gs_savearea_shot")){
-                    tempList.insert(1, "gs_savearea_shot");
-                    m_greenScreenIcon.replace(1, tempList);
+                QFile testFile(m_gsSafeUserFilePath);
+                if(testFile.exists()){
+                    QStringList tempList = m_greenScreenIcon.at(1).toStringList();
+                    if(!tempList.contains("gs_savearea_shot")){
+                        tempList.insert(1, "gs_savearea_shot");
+                        m_greenScreenIcon.replace(1, tempList);
+                    }
+                }else{
+                    m_gsSafeUserFilePath = "";
                 }
             }
             if(jsonObject.contains("CameraName")){
@@ -947,24 +961,7 @@ void UIBridge::updateUserConfig()
 {
     Nama *nama = MainClass::getInstance()->m_nama;
     //加载美颜,美肤等参数
-    for(int i = 0 ; i < m_beautySkin.at(0).toStringList().size(); i++){
-        if(i <= 1){
-            namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, true);
-        }else{
-            namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, false);
-        }
-    }
-    for(int i = 0 ; i < m_beautyFace.at(0).toStringList().size(); i++){
-        namaFuItemSetParamd(nama->m_BeautyHandles, m_beautyFace, i, false);
-    }
-    for(int i = 0 ; i < m_beautyBody.at(0).toStringList().size(); i++){
-        namaFuItemSetParamd(nama->m_BeautyHandles, m_beautyBody, i, false);
-    }
-    for(int i = 0 ; i < m_greenScreen.at(0).toStringList().size(); i++){
-        namaFuItemSetParamd(nama->m_GSHandle, m_greenScreen, i, false);
-    }
-    updateFilter();
-    nama->changeGSPreviewRect(m_gsStart.x(), m_gsStart.y(), m_gsStart.x() + m_gsSize.x(), m_gsStart.y() + m_gsSize.y());
+    reloadItemParam();
     QString color = "#" + QString("%1").arg(m_gsColor[0],2,16,QChar('0')) +
             QString("%1").arg(m_gsColor[1],2,16,QChar('0')) +
             QString("%1").arg(m_gsColor[2],2,16,QChar('0'));
@@ -1054,10 +1051,8 @@ void UIBridge::useProps(int index)
     std::unique_lock<std::mutex> lock(nama->m_frameMutex);
     m_bgsVideoMediaPlayer.stop();
     if(m_selectCategory != int(BundleCategory::GreenScreen) && m_selectCategory != int(BundleCategory::SafeArea)){
-        if((m_selectCategoryLast == int(BundleCategory::ItemJingpin) &&
-            m_selectCategory != int(BundleCategory::ItemJingpin)) ||
-                (m_selectCategoryLast == int(BundleCategory::Makeup) &&
-                 m_selectCategory != int(BundleCategory::Makeup))){
+        if((m_selectCategoryLast == int(BundleCategory::ItemJingpin) && m_selectCategory != int(BundleCategory::ItemJingpin)) ||
+                (m_selectCategoryLast == int(BundleCategory::Makeup) && m_selectCategory != int(BundleCategory::Makeup))){
             nama->ReloadItems();
             reloadItemParam();
         }
@@ -1069,7 +1064,6 @@ void UIBridge::useProps(int index)
             updateStyleRecommendation();
         }
     }
-    m_selectCategoryLast = m_selectCategory;
     if(nama->m_mp3 != nullptr)
     {
         nama->m_mp3->Pause();
@@ -1114,6 +1108,11 @@ void UIBridge::useProps(int index)
             nama->SelectBundle(g_assetDir + full_path.toStdString(), 4, m_bmakeupFlag);
         }else{
             //自定义美妆不用加载bundle
+            if(m_selectCategoryLast == int(BundleCategory::ItemJingpin) ||
+                    m_selectCategoryLast == int(BundleCategory::StyleRecommendation)){
+                nama->ReloadItems();
+                reloadItemParam();
+            }
             nama->DestroyAll();
             nama->LoadMakeup();
             nama->ChangeCleanFlag(false);
@@ -1127,6 +1126,7 @@ void UIBridge::useProps(int index)
         }
         //风格推荐设置美妆,滤镜强度
         if(m_selectCategory == BundleCategory::StyleRecommendation){
+            fuItemSetParamd(nama->m_bundleCurrent, "machine_level", 1.0);
             fuItemSetParamd(nama->m_bundleCurrent, "filter_level", float(m_styleRecommendationParam.mFilterLevel.at(m_styleRecommendationIndex)) / 100);
             fuItemSetParamd(nama->m_bundleCurrent, "makeup_intensity", float(m_styleRecommendationParam.mMakeUpIntensity.at(m_styleRecommendationIndex)) / 100);
         }
@@ -1161,6 +1161,7 @@ void UIBridge::useProps(int index)
             }
         }
     }
+    m_selectCategoryLast = m_selectCategory;
 }
 
 void UIBridge::nonuseProps()
@@ -1711,9 +1712,16 @@ void UIBridge::useBoutique(int index)
     m_selectCategoryLast = m_selectCategory;
     m_bLoadBear = false;
     int maxPeople = 4;
+    MainClass *main = MainClass::getInstance();
     Nama *nama = MainClass::getInstance()->m_nama;
     std::unique_lock<std::mutex> lock(nama->m_frameMutex);
-    if (MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->IsOnlyOnePeople())
+    //显示提示文字
+    string tipText = main->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mEventToast;
+    if(tipText != ""){
+        m_tip = QString::fromStdString(tipText);
+        tipChanged();
+    }
+    if (main->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->IsOnlyOnePeople())
     {
         maxPeople = 1;
     }
@@ -1723,11 +1731,11 @@ void UIBridge::useBoutique(int index)
     }
     updateFilter();
     //小熊贴纸特有
-    if(MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleDirs.size() > 1){
+    if(main->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleDirs.size() > 1){
         unLoadAvatar();
         m_bodyTrackType = BodyTrackType::FullBody;
         std::vector<std::string> mBundleDirs;
-        for (auto& index: MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleDirs){
+        for (auto& index: main->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleDirs){
             mBundleDirs.emplace_back(index);
         }
         nama->LoadAvatarBundles(mBundleDirs);
@@ -1739,7 +1747,7 @@ void UIBridge::useBoutique(int index)
         m_bLoadBear = true;
     }else{
         unLoadAvatar();
-        for (auto& index: MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleDirs){
+        for (auto& index: main->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleDirs){
             nama->SelectBundle(index,maxPeople);
             if(m_flagARBody){
                 nama->changeRenderList(RENDER_BODY);
@@ -2080,8 +2088,10 @@ void UIBridge::updateStyleRecommendation(int index)
 
 void UIBridge::setBackgroundSegType(int type)
 {
-    //    fuSetHumanSegScene(FUAIHUMANSEGSCENETYPE(type));
-    MainClass::getInstance()->m_nama->setBackgroundSegType(type);
+    //fuSetHumanSegScene(FUAIHUMANSEGSCENETYPE(type));
+    m_bSetBackgroundSegType = type;
+    //需要同线程,渲染中修改
+    //MainClass::getInstance()->m_nama->setBackgroundSegType(type);
 }
 
 void UIBridge::changedStatus(QMediaPlayer::MediaStatus status)

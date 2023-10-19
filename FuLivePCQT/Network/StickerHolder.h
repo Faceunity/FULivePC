@@ -32,8 +32,9 @@ public:
     std::string mItemName;
     std::vector<std::string> mBundleNames;
     std::string mIconName;
-
     std::string mIconDir;
+    std::string mEventToast;
+    std::string mEventToastEn;
     std::vector<std::string> mBundleDirs;
     std::atomic_bool mBundleIsDownload;
     std::atomic_bool mIsDownloading;
@@ -79,18 +80,18 @@ public:
         mIconDir = FuToolMac::GetDocumentPath() + "/" + mIconName;
         for (auto& name : mBundleNames)
             mBundleDirs.emplace_back(FuToolMac::GetDocumentPath() + "/" + name);
-        
+
 #else
         std::string strDir = "bundleRes";
         mkdir(strDir.c_str());
         strDir += "/";
         strDir += strId;
         mkdir(strDir.c_str());
-        
+
         mIconDir = strDir + "/" + mIconName;
         for (auto& name : mBundleNames)
             mBundleDirs.emplace_back(strDir + "/" + name);
-        
+
 #endif
 
         mBundleIsDownload = true;

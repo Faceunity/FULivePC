@@ -20,20 +20,23 @@ Rectangle{
     width: 420
     height: 85
     function resetValue(ivalue) {
-        i_Value = ivalue
-        m_lButton.currentIndex = i_Button_Num - i_Value
+        if(b_Type){
+            m_lButton.currentIndex = 0
+        }else{
+            i_Value = ivalue
+        }
     }
     function defaultClick(){
     }
     //如果是精准美肤,选中关闭按钮时图标变灰,其他都是蓝
     function updateImage(ivalue){
-        if(b_Type && m_text.text == "精准美肤"){
+        if(b_Type && (m_text.text == "精准美肤")){
             if(ivalue == 0){
                 icon_Full = "qrc:/res/list_icon_"+ icon_Name + "_close.png"
             }else{
                 icon_Full = "qrc:/res/list_icon_"+ icon_Name + "_open.png"
             }
-        }else if(b_Type && m_text.text !== "精准美肤"){
+        }else if(b_Type){
             icon_Full = "qrc:/res/list_icon_"+ icon_Name + "_open.png"
         }else{
             if(ivalue == 0){
@@ -51,7 +54,7 @@ Rectangle{
         if(t_Text == "恢复默认"){
             b_RestoreDefault = true
         }
-        //分割字符 均匀磨皮|精细磨皮|朦胧磨皮|清晰磨皮 生成4个按钮
+        //分割字符 均匀磨皮|精细磨皮|清晰磨皮|朦胧磨皮 生成4个按钮
         if(b_Type){
             m_text.text = t_Text.substring(0,t_Text.indexOf(" "))
             var str2 = t_Text.substring(t_Text.indexOf(" ") + 1,t_Text.length)
@@ -63,7 +66,7 @@ Rectangle{
                 i_Button_Num++
             }
             m_lmButton.append({"tText": str2})
-            m_lButton.currentIndex = i_Button_Num - i_Value
+            m_lButton.currentIndex = 0
         }
         updateImage(i_Value)
     }
@@ -121,7 +124,15 @@ Rectangle{
                     }
                     //按钮更改隐藏滑块值
                     onClicked: {
-                        i_Value = i_Button_Num - index
+                        if( m_tButton.text == "精细磨皮" || m_tButton.text == "关闭"){
+                            i_Value = 0
+                        }else if( m_tButton.text == "清晰磨皮" || m_tButton.text == "开启"){
+                            i_Value = 1
+                        }else if(m_tButton.text == "朦胧磨皮"){
+                            i_Value = 2
+                        }else if(m_tButton.text == "均匀磨皮"){
+                            i_Value = 3
+                        }
                         m_lButton.currentIndex = index
                     }
                 }
