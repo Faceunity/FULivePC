@@ -393,6 +393,8 @@ public:
     bool m_gsCameraPlay = false;
     //风格推荐保存flag,更新参数时不保存
     bool m_bSaveStyleRecommendation = false;
+    //更改背景分割模式需要与渲染同线程
+    int m_bSetBackgroundSegType = -1;
 signals:
     //qml界面相关
     void cameraSetListChanged();

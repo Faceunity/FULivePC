@@ -35,6 +35,7 @@ Window {
     property var b_replayShow: false
     //底部列表第几页
     property var i_selectCategoryPage: 0
+    property var i_selectCategoryPageLast: 0
     //底部选中第几个道具项
     property var i_selectCategory: -1
     //弹出道具列表第几页
@@ -126,11 +127,7 @@ Window {
                 var value = UIBridge.beautySkin[3][i]
                 m_lBeautySkin.model.setProperty(i, "value", value)
                 var item = m_lBeautySkin.itemAtIndex(i)
-                item.i_Value = value
-                //精准美肤按钮
-                if(item.b_Type){
-                    item.m_lButton.currentIndex = item.i_Button_Num - value
-                }
+                item.resetValue(value)
             }
         }
         onUpdateBeautyFaceParam:{
@@ -229,7 +226,6 @@ Window {
     //AR功能/绿幕切换
     function switchARFunction(arfun){
         b_ARFunction = arfun
-        i_selectCategoryPage = 0
         updateProp()
         updateCheckModule()
         m_rpropOption.visible = false
@@ -242,6 +238,8 @@ Window {
             m_rpropOption.enabled = true
             i_propPageLast = i_propPage
             i_propPage = 0
+            i_selectCategoryPageLast = i_selectCategoryPage
+            i_selectCategoryPage = 0
             m_propOptionListView.contentX = 0
             showAvator(false)
             m_lProp.x = 380
@@ -270,6 +268,15 @@ Window {
             m_maCameraDisplay.enabled = false
             //切换回之前状态
             if(i_arSelectCategoryPoint != Qt.point(-1,-1)){
+                i_propPage = i_propPageLast
+                i_selectCategoryPage = i_selectCategoryPageLast
+                m_propOptionListView.contentX += 760 * i_propPage
+                if(i_selectCategoryPage == 1){
+                    //双次切换显示正确
+                    m_lProp.contentX = 900
+                    m_lProp.contentX = 0
+                    m_lProp.contentX = 900
+                }
                 m_rpropOption.visible = true
                 m_lmProp.get(i_arSelectCategoryPoint.x).selected = true
                 i_selectCategory = i_arSelectCategoryPoint.x
@@ -280,8 +287,6 @@ Window {
                 }else if(i_arSelectCategoryPoint.x == i_category_jingpin){
                     showBoutiqueSticker(true)
                 }
-                i_propPage =  i_propPageLast
-                m_propOptionListView.contentX += 760 * i_propPage
             }
             //如果选择美体
             if(b_arBody){
@@ -1894,6 +1899,7 @@ Window {
                         width: 415
                         height: 680
                         clip: true
+                        cacheBuffer: 10000
                         model: ListModel
                         {
                             id: m_lmBeautySkin

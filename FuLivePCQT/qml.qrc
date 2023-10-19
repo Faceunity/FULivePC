@@ -577,5 +577,9 @@
         <file>../res/list_icon_annimoji_dis.png</file>
         <file>../res/list_icon_avatar_dis.png</file>
         <file>../res/gsbackground.png</file>
+        <file>../res/list_icon_acne_close.png</file>
+        <file>../res/list_icon_acne_open.png</file>
+        <file>../res/list_icon_clearness_close.png</file>
+        <file>../res/list_icon_clearness_open.png</file>
     </qresource>
 </RCC>

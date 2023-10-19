@@ -59,7 +59,7 @@ StikcerHolder::~StikcerHolder()
 }
 
 
-#define MAIN_URL  string("https://items.faceunity.com:4006/api") //string("http://192.168.0.122:8089/api")
+#define MAIN_URL  string("http://192.168.0.122:8089/api") //string("https://items.faceunity.com:4006/api")
 
 #define GET_QUEST_TAG_URL  (MAIN_URL + "/guest/tags?platform=pc")
 
@@ -137,6 +137,7 @@ void StikcerHolder::RequestTools()
 
         std::vector<std::shared_ptr<BundleRes>> vecBundleRes;
         const rapidjson::Value& docsObj = dataObj["docs"];
+
         for (int i = 0; i < docsObj.Size(); i++)
         {
             const rapidjson::Value& docObj = docsObj[i];
@@ -187,7 +188,12 @@ void StikcerHolder::RequestTools()
                 else if (category == CATEGORY_ANIMOJI)
                     bundleRes->mCategory = category;
             }
-
+            if (tool.HasMember("eventToast")) {
+                bundleRes->mEventToast = tool["eventToast"].GetString();
+            }
+            if (tool.HasMember("eventToastEn")) {
+                bundleRes->mEventToastEn = tool["eventToastEn"].GetString();
+            }
             vecBundleRes.emplace_back(bundleRes);
         }
 
