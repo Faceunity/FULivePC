@@ -30,7 +30,7 @@ Rectangle{
     }
     //如果是精准美肤,选中关闭按钮时图标变灰,其他都是蓝
     function updateImage(ivalue){
-        if(b_Type && (m_text.text == "精准美肤")){
+        if(b_Type && (m_text.text == "精准美肤" || m_text.text == "美白模式")){
             if(ivalue == 0){
                 icon_Full = "qrc:/res/list_icon_"+ icon_Name + "_close.png"
             }else{
@@ -124,11 +124,11 @@ Rectangle{
                     }
                     //按钮更改隐藏滑块值
                     onClicked: {
-                        if( m_tButton.text == "精细磨皮" || m_tButton.text == "关闭"){
+                        if(m_tButton.text == "全局美白" || m_tButton.text == "清晰磨皮" || m_tButton.text == "关闭"){
                             i_Value = 0
-                        }else if( m_tButton.text == "清晰磨皮" || m_tButton.text == "开启"){
+                        }else if(m_tButton.text == "皮肤美白" || m_tButton.text == "朦胧磨皮" || m_tButton.text == "开启"){
                             i_Value = 1
-                        }else if(m_tButton.text == "朦胧磨皮"){
+                        }else if(m_tButton.text == "精细磨皮"){
                             i_Value = 2
                         }else if(m_tButton.text == "均匀磨皮"){
                             i_Value = 3

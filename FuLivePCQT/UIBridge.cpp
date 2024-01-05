@@ -34,20 +34,21 @@ UIBridge::UIBridge()
     //第四个QStringList是nama中fuItemSetParamd设置值,也是qml滑块值和按钮选中项
     //第五个QStringList是qml中滑块显示是否在中间,true中间[-50,50],false[0,100],""转换qml为false,"1"转换为true
     //美肤
-    m_beautySkin.append(QStringList{"精准美肤 开启|关闭", "美肤模式 均匀磨皮|精细磨皮|清晰磨皮|朦胧磨皮", "磨皮", "祛斑痘",
+    //0 清晰磨皮  1 朦胧磨皮  2精细磨皮 3为均匀磨皮
+    m_beautySkin.append(QStringList{"精准美肤 开启|关闭", "美肤模式 均匀磨皮|精细磨皮|清晰磨皮|朦胧磨皮", "磨皮", "祛斑痘", "美白模式 全局美白|皮肤美白",
                                     "美白", "红润", "清晰", "锐化", "五官立体",
                                     "亮眼","美牙", "去黑眼圈", "去法令纹"});
-    m_beautySkin.append(QStringList{ "skinbeauty", "BeautyMode", "Grindingskin", "acne",
+    m_beautySkin.append(QStringList{ "skinbeauty", "BeautyMode", "Grindingskin", "acne", "Skinwhitening",
                                      "Skinwhitening", "Ruddy", "clearness","sharpen", "stereoscopic",
                                      "Brighteye", "Beautifulteeth", "dark_circles", "wrinkle"});
-    m_beautySkin.append(QStringList{ "skin_detect", "blur_type", "blur_level", "delspot_level",
+    m_beautySkin.append(QStringList{ "skin_detect", "blur_type", "blur_level", "delspot_level", "enable_skinseg",
                                      "color_level_mode2", "red_level", "clarity", "sharpen", "face_threed",
                                      "eye_bright", "tooth_whiten", "remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2"});
-    m_defaultBeautySkin = QStringList{ "1", "3", "70", "0",
+    m_defaultBeautySkin = QStringList{ "1", "3", "70", "0", "0",
             "30", "30", "0", "20", "0",
             "0", "0", "0", "0"};
     m_beautySkin.append(m_defaultBeautySkin);
-    m_beautySkin.append(QStringList{ "","","","","","","","","","","","",""});
+    m_beautySkin.append(QStringList{ "","","","","","","","","","","","","","","","",""});
     //美型
     m_beautyFace.append(QStringList{ "瘦脸", "大眼", "圆眼", "下巴", "额头",
                                      "瘦鼻", "嘴型", "嘴唇厚度", "V脸", "窄脸",
@@ -94,7 +95,7 @@ UIBridge::UIBridge()
     m_greenScreen.append(QStringList{"相似度", "平滑", "祛色度"});
     m_greenScreen.append(QStringList{"tolerance", "smooth", "transparency"});
     m_greenScreen.append(QStringList{"chroma_thres", "chroma_thres_T", "alpha_L"});
-    m_defaultGreenScreen = QStringList{ "50", "30", "66"};
+    m_defaultGreenScreen = QStringList{ "50", "50", "100"};
     m_greenScreen.append(m_defaultGreenScreen);
     m_greenScreen.append(QStringList{ "","",""});
 
@@ -1209,7 +1210,7 @@ void UIBridge::updateItemParam(int item, int index, QString value)
     case BeautySkin:
         updateCategory(m_beautySkin, 3, index, value);
         //前两个是按钮
-        if(index <= 1){
+        if(index <= 1 || index == 4){
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, index, true);
         }else{
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, index, false);
@@ -1252,7 +1253,7 @@ void UIBridge::resetItemParam(int item)
     case BeautySkin:
         m_beautySkin.replace(3, m_styleRecommendationParam.mBeautySkinDefault.at(m_styleRecommendationIndex));
         for(int i = 0 ; i < m_beautySkin.at(0).toStringList().size(); i++){
-            if(i <= 1){
+            if(i <= 1 || i == 4){
                 namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, true);
             }else{
                 namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, false);
@@ -1763,7 +1764,7 @@ void UIBridge::reloadItemParam()
 {
     Nama *nama = MainClass::getInstance()->m_nama;
     for(int i = 0 ; i < m_beautySkin.at(0).toStringList().size(); i++){
-        if(i <= 1){
+        if(i <= 1 || i == 4){
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, true);
         }else{
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, false);
@@ -2070,7 +2071,7 @@ void UIBridge::updateStyleRecommendation(int index)
     m_beautySkin.replace(3, m_styleRecommendationParam.mBeautySkin.at(index));
     m_beautyFace.replace(3, m_styleRecommendationParam.mBeautyFace.at(index));
     for(int i = 0 ; i < m_beautySkin.at(0).toStringList().size(); i++){
-        if(i <= 1){
+        if(i <= 1 || i == 4){
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, true);
         }else{
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, false);
@@ -2089,9 +2090,8 @@ void UIBridge::updateStyleRecommendation(int index)
 void UIBridge::setBackgroundSegType(int type)
 {
     //fuSetHumanSegScene(FUAIHUMANSEGSCENETYPE(type));
-    m_bSetBackgroundSegType = type;
-    //需要同线程,渲染中修改
-    //MainClass::getInstance()->m_nama->setBackgroundSegType(type);
+    std::unique_lock<std::mutex> lock(MainClass::getInstance()->m_nama->m_frameMutex);
+    MainClass::getInstance()->m_nama->setBackgroundSegType(type);
 }
 
 void UIBridge::changedStatus(QMediaPlayer::MediaStatus status)

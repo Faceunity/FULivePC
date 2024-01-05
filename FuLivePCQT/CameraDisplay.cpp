@@ -75,10 +75,6 @@ void CameraDisplayRenderer::render()
     glLoadIdentity();           //重置为单位矩阵
     glOrtho(0, width, 0, height, 0, 1000);//设置剪裁区域
     glDisable(GL_DEPTH_TEST);
-    if(uibridge->m_bSetBackgroundSegType != -1){
-        nama->setBackgroundSegType(uibridge->m_bSetBackgroundSegType);
-        uibridge->m_bSetBackgroundSegType = -1;
-    }
     m_timeRender.start();
     if(uibridge->m_newImage){
         if(uibridge->m_bgsSelectVideo){
