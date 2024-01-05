@@ -150,6 +150,7 @@ bool Nama::Init()
 	if (false == mHasSetup && true == mNamaAppState.EnableNama)
 	{
 		CheckGLContext();
+
 		fuSetLogLevel(FU_LOG_LEVEL_DEBUG);
 
 		fuSetup(nullptr, 0, nullptr, g_auth_package, sizeof(g_auth_package));
@@ -611,6 +612,10 @@ void Nama::UpdateBeauty()
 		if (i == 2)
 		{
 			fuItemSetParamd(mBeautyHandles, const_cast<char*>(g_faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i] * 6.0 / 100.f);
+		}
+		else if (i == 4)
+		{
+			fuItemSetParamd(mBeautyHandles, const_cast<char*>(g_faceBeautyParamName[i].c_str()), UIBridge::mFaceBeautyLevel[i]);
 		}
 		else
 		{
@@ -1577,6 +1582,7 @@ void Nama::RenderItems(cv::Mat & picMat)
 		else
 			RenderDefNama(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
 	}
+
 	return;
 }
 

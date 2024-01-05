@@ -177,7 +177,7 @@ namespace NamaExampleNameSpace
 		int mFrameID;		
 		int mModuleCode, mModuleCode1;
 		FURect gsPreviewRect;
-
+	
 		static std::string mFilters[6];
 		std::map<std::string, int> mBundlesMap;
 		std::unordered_map<std::string, std::vector<MakeupParam> > mMakeupsMap;

@@ -983,8 +983,8 @@ void GUIGS::UpdateGreenScreenBg(NamaExampleNameSpace::Nama * nama)
 void GUIGS::ResetDefParam()
 {
 	UIBridge::mGSParam[0] = 50;
-	UIBridge::mGSParam[1] = 30;
-	UIBridge::mGSParam[2] = 66;
+	UIBridge::mGSParam[1] = 50;
+	UIBridge::mGSParam[2] = 100;
 }
 
 void GUIGS::InitColorVec()

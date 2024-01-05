@@ -19,7 +19,7 @@ FuController::~FuController()
 
 void FuController::InitController(std::string strControllerPath, std::string strConfigPath)
 {
-	fuSetLogLevel(FULOGLEVEL::FU_LOG_LEVEL_INFO);
+	fuSetLogLevel(FULOGLEVEL::FU_LOG_LEVEL_DEBUG);
 	std::vector<char> vecCtrlBundle, vecCfgBundle;
 	bool flag = FuTool::LoadBundle(strControllerPath, vecCtrlBundle);
 	//bool flagCfg = FuTool::LoadBundle(strConfigPath, vecCfgBundle);
