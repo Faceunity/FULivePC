@@ -5,6 +5,10 @@
 SDK版本: 8.8.0
 
 ### 最新更新内容：
+**2024-04-19 v8.10.0:
+1. 新增fuSetFaceModelConfig / fuSetFaceAlgorithmConfig / fuSetHumanModelConfig / fuSetHumanAlgorithmConfig / fuSetModelToCPU接口。
+用于配置算法bundle的加载，需要再loadaibundle前才有效。
+
 **2024-01-05 v8.9.0:
 1. 【美颜】Android端部分高端机型新增祛斑祛痘AI美颜功能；新增仅皮肤区域美白模式
 2. 【人脸关键点】算法升级，全脸精度优化，重点提升嘴唇点位准确性

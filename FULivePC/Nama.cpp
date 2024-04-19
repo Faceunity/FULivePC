@@ -173,6 +173,8 @@ bool Nama::Init()
 			cout << "Error:fail load faceprocessor model" << g_ai_faceprocessor << endl;
 		}
 		else {
+			fuSetFaceModelConfig(FUAIFACE_ALL_DEFAULT);
+			fuSetFaceAlgorithmConfig(FUAIFACE_ENABLE_ALL);
 			fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_model_data[0]), ai_model_data.size(), FUAITYPE::FUAITYPE_FACEPROCESSOR);
 		}
 
@@ -182,8 +184,10 @@ bool Nama::Init()
 			cout << "Error: fail load humanprocessor model" << g_ai_humanprocessor << endl;
 		}
 		else {
-			fuSetHumanSegMode(FUAIHUMAN_SEG_GPU_COMMON);
+			//fuSetHumanSegMode(FUAIHUMAN_SEG_GPU_COMMON);
 			//fuPreprocessAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
+			fuSetHumanModelConfig(FUAIHUMAN_SEG_GPU_COMM);
+			fuSetHumanAlgorithmConfig(FUAIHUMAN_ENABLE_ALL);
 			fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
 		}
 		vector<char> ai_gesture_model_data;
@@ -1129,6 +1133,12 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 		bundleID = fuCreateItemFromPackage(&propData[0], propData.size());
 		mBundlesMap[bundleName] = bundleID;
 		
+		if (bundleName == "assets/items/BackgroundSegmentation/background_blur.bundle") {
+			fuItemSetParamd(bundleID, "blur_size", 4);
+			fuItemSetParamd(bundleID, "blur_times ", 2);
+			fuItemSetParamd(bundleID, "erode_size", 1);
+		}
+
 		if (UIBridge::bundleCategory == BundleCategory::GestureRecognition) {
 			fuItemSetParamd(bundleID, "rotMode", 0);
 			if (bundleName.find("ctrl_flower") != std::string::npos) {
@@ -1649,6 +1659,7 @@ void Nama::SwitchBodyTrackType()
 void Nama::SetBodyTrackType(BodyTrackType type)
 {
 	m_bodyTrackType = type;
+	fuHumanProcessorReset();
 	switch (type)
 	{
 	case BodyTrackType::None:
@@ -1720,7 +1731,9 @@ void NamaExampleNameSpace::Nama::setHumanSegScene(int type)
 	if (FuTool::LoadBundle(g_ai_humanprocessor, ai_human_model_data))
 	{	
 		fuReleaseAIModel(FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
-		fuSetHumanSegMode(FUAIHUMANSEGMODE(type));
+		//fuSetHumanSegMode(FUAIHUMANSEGMODE(type));
+		fuSetHumanModelConfig(FUAIHUMANMODELCONFIG(type));
+		fuSetHumanAlgorithmConfig(FUAIHUMAN_ENABLE_ALL);
 		fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
 	}
 }
