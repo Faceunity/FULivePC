@@ -135,12 +135,16 @@ void Nama::InitNama()
     }else{
         fuLoadTongueModel(reinterpret_cast<float*>(&tongue_model_data[0]), tongue_model_data.size());
     }
+    //允许特殊设备强制算法运作在CPU上
+    //fuSetModelToCPU();
     //加载AI能力
     vector<char> ai_model_data;
     if (false == LoadBundle(g_assetDir + g_ai_faceprocessor, ai_model_data))
     {
         cout << "Error:fail load faceprocessor model" << g_ai_faceprocessor << endl;
     }else{
+        fuSetFaceModelConfig(FUAIFACE_ALL_DEFAULT);
+        fuSetFaceAlgorithmConfig(FUAIFACE_ENABLE_ALL);
         fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_model_data[0]), ai_model_data.size(), FUAITYPE::FUAITYPE_FACEPROCESSOR);
     }
     vector<char> ai_human_model_data;
@@ -148,8 +152,10 @@ void Nama::InitNama()
     {
         cout << "Error: fail load humanprocessor model" << g_ai_humanprocessor << endl;
     }else{
-        fuSetHumanSegMode(FUAIHUMAN_SEG_GPU_COMMON);
+        //fuSetHumanSegMode(FUAIHUMAN_SEG_GPU_COMMON);
         //fuPreprocessAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
+        fuSetHumanModelConfig(FUAIHUMAN_SEG_GPU_COMM);
+        fuSetHumanAlgorithmConfig(FUAIHUMAN_ENABLE_ALL);
         fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
     }
     vector<char> ai_gesture_model_data;
@@ -897,7 +903,9 @@ void Nama::setBackgroundSegType(int type)
     if (LoadBundle(g_assetDir + g_ai_humanprocessor, ai_human_model_data))
     {
         fuReleaseAIModel(FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
-        fuSetHumanSegMode(FUAIHUMANSEGMODE(type));
+        //fuSetHumanSegMode(FUAIHUMANSEGMODE(type));
+        fuSetHumanModelConfig(FUAIHUMANMODELCONFIG(type));
+        fuSetHumanAlgorithmConfig(FUAIHUMAN_ENABLE_ALL);
         fuLoadAIModelFromPackage(reinterpret_cast<float*>(&ai_human_model_data[0]), ai_human_model_data.size(), FUAITYPE::FUAITYPE_HUMAN_PROCESSOR);
     }
 }
