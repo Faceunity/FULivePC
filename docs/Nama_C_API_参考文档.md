@@ -2,13 +2,18 @@
 <!--每次更新文档，更新时间-->
 
 级别：Public   
-更新日期：2022-11-14   
-SDK版本: 8.4.0  
+更新日期：2024-4-2  
+SDK版本: 8.10.0  
 
 ------
 ### 最新更新内容：
 
 <!--这个小节写每次最新以及次新的更新记录，时间，更新内容。新增函数，函数接口定义更新-->
+
+2024-4-2 v8.10.0:
+
+1. 新增fuSetFaceModelConfig/fuSetFaceAlgorithmConfig/fuSetHumanModelConfig/fuSetHumanAlgorithmConfig接口，用于配置算法模块加载策略。  
+2. 新增fuSetModelToCPU接口，允许特殊设备强制算法运作在CPU上。  
 
 2022-11-14 v8.4.0:
 
@@ -699,16 +704,16 @@ __参数:__
 
 *func_flag*：流水线功能掩码，表示流水线启用的功能模组，以及特定的绘制选项。多个掩码通过运算符“或”进行连接。所有支持的掩码及其含义如下。
 
-| 流水线功能掩码     | 含义     |
-| ---- | ---- |
-| NAMA_RENDER_FEATURE_TRACK_FACE     | 人脸识别和跟踪功能     |
-| NAMA_RENDER_FEATURE_BEAUTIFY_IMAGE     | 输入图像美化功能     |
-| NAMA_RENDER_FEATURE_RENDER     | 人脸相关的绘制功能，如美颜、贴纸、人脸变形、滤镜等     |
-| NAMA_RENDER_FEATURE_ADDITIONAL_DETECTOR     | 其他非人脸的识别功能，包括背景分割、手势识别等     |
-| NAMA_RENDER_FEATURE_RENDER_ITEM     | 人脸相关的道具绘制，如贴纸     |
-| NAMA_RENDER_FEATURE_FULL     | 流水线功能全开     |
-| NAMA_RENDER_OPTION_FLIP_X     | 绘制选项，水平翻转     |
-| NAMA_RENDER_OPTION_FLIP_Y     | 绘制选项，垂直翻转     |
+| 流水线功能掩码                          | 含义                                               |
+| --------------------------------------- | -------------------------------------------------- |
+| NAMA_RENDER_FEATURE_TRACK_FACE          | 人脸识别和跟踪功能                                 |
+| NAMA_RENDER_FEATURE_BEAUTIFY_IMAGE      | 输入图像美化功能                                   |
+| NAMA_RENDER_FEATURE_RENDER              | 人脸相关的绘制功能，如美颜、贴纸、人脸变形、滤镜等 |
+| NAMA_RENDER_FEATURE_ADDITIONAL_DETECTOR | 其他非人脸的识别功能，包括背景分割、手势识别等     |
+| NAMA_RENDER_FEATURE_RENDER_ITEM         | 人脸相关的道具绘制，如贴纸                         |
+| NAMA_RENDER_FEATURE_FULL                | 流水线功能全开                                     |
+| NAMA_RENDER_OPTION_FLIP_X               | 绘制选项，水平翻转                                 |
+| NAMA_RENDER_OPTION_FLIP_Y               | 绘制选项，垂直翻转                                 |
 
 *p_item_masks*：道具掩码，表示在多人模式下，每个道具具体对哪几个人脸生效。该数组长度应和 *p_items* 一致，每个道具一个int类型掩码。掩码中，从int低位到高位，第i位值为1代表该道具对第i个人脸生效，值为0代表不生效。
 
@@ -842,16 +847,16 @@ __参数:__
 
 *func_flag*：流水线功能掩码，表示流水线启用的功能模组，以及特定的绘制选项。多个掩码通过运算符“或”进行连接。所有支持的掩码及其含义如下。
 
-| 流水线功能掩码     | 含义     |
-| ---- | ---- |
-| NAMA_RENDER_FEATURE_TRACK_FACE     | 人脸识别和跟踪功能     |
-| NAMA_RENDER_FEATURE_BEAUTIFY_IMAGE     | 输入图像美化功能     |
-| NAMA_RENDER_FEATURE_RENDER     | 人脸相关的绘制功能，如美颜、贴纸、人脸变形、滤镜等     |
-| NAMA_RENDER_FEATURE_ADDITIONAL_DETECTOR     | 其他非人脸的识别功能，包括背景分割、手势识别等     |
-| NAMA_RENDER_FEATURE_RENDER_ITEM     | 人脸相关的道具绘制，如贴纸     |
-| NAMA_RENDER_FEATURE_FULL     | 流水线功能全开     |
-| NAMA_RENDER_OPTION_FLIP_X     | 绘制选项，水平翻转     |
-| NAMA_RENDER_OPTION_FLIP_Y     | 绘制选项，垂直翻转     |
+| 流水线功能掩码                          | 含义                                               |
+| --------------------------------------- | -------------------------------------------------- |
+| NAMA_RENDER_FEATURE_TRACK_FACE          | 人脸识别和跟踪功能                                 |
+| NAMA_RENDER_FEATURE_BEAUTIFY_IMAGE      | 输入图像美化功能                                   |
+| NAMA_RENDER_FEATURE_RENDER              | 人脸相关的绘制功能，如美颜、贴纸、人脸变形、滤镜等 |
+| NAMA_RENDER_FEATURE_ADDITIONAL_DETECTOR | 其他非人脸的识别功能，包括背景分割、手势识别等     |
+| NAMA_RENDER_FEATURE_RENDER_ITEM         | 人脸相关的道具绘制，如贴纸                         |
+| NAMA_RENDER_FEATURE_FULL                | 流水线功能全开                                     |
+| NAMA_RENDER_OPTION_FLIP_X               | 绘制选项，水平翻转                                 |
+| NAMA_RENDER_OPTION_FLIP_Y               | 绘制选项，垂直翻转                                 |
 
 *p_item_masks*：道具掩码，表示在多人模式下，每个道具具体对哪几个人脸生效。该数组长度应和 *p_items* 一致，每个道具一个int类型掩码。掩码中，从int低位到高位，第i位值为1代表该道具对第i个人脸生效，值为0代表不生效。
 
@@ -983,16 +988,16 @@ __参数:__
 
 *func_flag*：流水线功能掩码，表示流水线启用的功能模组，以及特定的绘制选项。多个掩码通过运算符“或”进行连接。所有支持的掩码及其含义如下。
 
-| 流水线功能掩码     | 含义     |
-| ---- | ---- |
-| NAMA_RENDER_FEATURE_TRACK_FACE     | 人脸识别和跟踪功能     |
-| NAMA_RENDER_FEATURE_BEAUTIFY_IMAGE     | 输入图像美化功能     |
-| NAMA_RENDER_FEATURE_RENDER     | 人脸相关的绘制功能，如美颜、贴纸、人脸变形、滤镜等     |
-| NAMA_RENDER_FEATURE_ADDITIONAL_DETECTOR     | 其他非人脸的识别功能，包括背景分割、手势识别等     |
-| NAMA_RENDER_FEATURE_RENDER_ITEM     | 人脸相关的道具绘制，如贴纸     |
-| NAMA_RENDER_FEATURE_FULL     | 流水线功能全开     |
-| NAMA_RENDER_OPTION_FLIP_X     | 绘制选项，水平翻转     |
-| NAMA_RENDER_OPTION_FLIP_Y     | 绘制选项，垂直翻转     |
+| 流水线功能掩码                          | 含义                                               |
+| --------------------------------------- | -------------------------------------------------- |
+| NAMA_RENDER_FEATURE_TRACK_FACE          | 人脸识别和跟踪功能                                 |
+| NAMA_RENDER_FEATURE_BEAUTIFY_IMAGE      | 输入图像美化功能                                   |
+| NAMA_RENDER_FEATURE_RENDER              | 人脸相关的绘制功能，如美颜、贴纸、人脸变形、滤镜等 |
+| NAMA_RENDER_FEATURE_ADDITIONAL_DETECTOR | 其他非人脸的识别功能，包括背景分割、手势识别等     |
+| NAMA_RENDER_FEATURE_RENDER_ITEM         | 人脸相关的道具绘制，如贴纸                         |
+| NAMA_RENDER_FEATURE_FULL                | 流水线功能全开                                     |
+| NAMA_RENDER_OPTION_FLIP_X               | 绘制选项，水平翻转                                 |
+| NAMA_RENDER_OPTION_FLIP_Y               | 绘制选项，垂直翻转                                 |
 
 *p_item_masks*：道具掩码，表示在多人模式下，每个道具具体对哪几个人脸生效。该数组长度应和 *p_items* 一致，每个道具一个int类型掩码。掩码中，从int低位到高位，第i位值为1代表该道具对第i个人脸生效，值为0代表不生效。
 
@@ -1043,16 +1048,16 @@ __参数:__
 
 *func_flag*：流水线功能掩码，表示流水线启用的功能模组，以及特定的绘制选项。多个掩码通过运算符“或”进行连接。所有支持的掩码及其含义如下。
 
-| 流水线功能掩码     | 含义     |
-| ---- | ---- |
-| NAMA_RENDER_FEATURE_TRACK_FACE     | 人脸识别和跟踪功能     |
-| NAMA_RENDER_FEATURE_BEAUTIFY_IMAGE     | 输入图像美化功能     |
-| NAMA_RENDER_FEATURE_RENDER     | 人脸相关的绘制功能，如美颜、贴纸、人脸变形、滤镜等     |
-| NAMA_RENDER_FEATURE_ADDITIONAL_DETECTOR     | 其他非人脸的识别功能，包括背景分割、手势识别等     |
-| NAMA_RENDER_FEATURE_RENDER_ITEM     | 人脸相关的道具绘制，如贴纸     |
-| NAMA_RENDER_FEATURE_FULL     | 流水线功能全开     |
-| NAMA_RENDER_OPTION_FLIP_X     | 绘制选项，水平翻转     |
-| NAMA_RENDER_OPTION_FLIP_Y     | 绘制选项，垂直翻转     |
+| 流水线功能掩码                          | 含义                                               |
+| --------------------------------------- | -------------------------------------------------- |
+| NAMA_RENDER_FEATURE_TRACK_FACE          | 人脸识别和跟踪功能                                 |
+| NAMA_RENDER_FEATURE_BEAUTIFY_IMAGE      | 输入图像美化功能                                   |
+| NAMA_RENDER_FEATURE_RENDER              | 人脸相关的绘制功能，如美颜、贴纸、人脸变形、滤镜等 |
+| NAMA_RENDER_FEATURE_ADDITIONAL_DETECTOR | 其他非人脸的识别功能，包括背景分割、手势识别等     |
+| NAMA_RENDER_FEATURE_RENDER_ITEM         | 人脸相关的道具绘制，如贴纸                         |
+| NAMA_RENDER_FEATURE_FULL                | 流水线功能全开                                     |
+| NAMA_RENDER_OPTION_FLIP_X               | 绘制选项，水平翻转                                 |
+| NAMA_RENDER_OPTION_FLIP_Y               | 绘制选项，垂直翻转                                 |
 
 *p_item_masks*：道具掩码，表示在多人模式下，每个道具具体对哪几个人脸生效。该数组长度应和 *p_items* 一致，每个道具一个int类型掩码。掩码中，从int低位到高位，第i位值为1代表该道具对第i个人脸生效，值为0代表不生效。
 
@@ -1603,30 +1608,30 @@ __备注:__
 
 所有支持获取的信息、含义、权限要求如下：
 
-| 信息名称       | 长度 | 类型|含义                                                         | 权限     |
-| -------------- | ---- | ------------------------------------------------------------ | -------- | -------- |
-| face_rect      | 4    | float |人脸矩形框，图像分辨率坐标，数据为 (x_min, y_min, x_max, y_max) | 默认     |
-| rotation_mode  | 1    | int |识别人脸相对于设备图像的旋转朝向，取值范围 0-3，分别代表旋转0度、90度、180度、270度 | 默认     |
-| failure_rate[已废弃] | 1    | float |人脸跟踪的失败率，表示人脸跟踪的质量。取值范围为 0-2，取值越低代表人脸跟踪的质量越高 | 默认     |
-| is_calibrating[已废弃] | 1    | int |表示是否SDK正在进行主动表情校准，取值为 0 或 1。             | 默认     |
-| focal_length   | 1    | float| SDK当前三维人脸跟踪所采用的焦距数值                          | 默认     |
-| landmarks      | 75x2 | float|人脸 75 个特征点，图像分辨率坐标                             | Landmark |
-| landmarks_ar      | 75x3 | float|人脸 75 个特征点，3D空间坐标，需使用投影矩阵计算，见下文示例代码                             | Avatar |
-| rotation       | 4    | float|人脸三维旋转，数据为旋转四元数\*                              | Landmark |
-| translation    | 3    | float|人脸三维平移，数据为 (x, y, z)                               | Landmark |
-| eye_rotation   | 4    | float| 眼球旋转，数据为旋转四元数\*，上下22度，左右30度。                                  | Landmark |
-| eye_rotation_xy   | 2    | float| 眼球旋转，数据范围为[-1,1]，第一个通道表示水平方向转动，第二个通道表示垂直方向转动                                  | Landmark |
-| expression     | 46   | float| 人脸表情系数，表情系数含义可以参考《Expression Guide》       | Avatar   |
-| expression_with_tongue     | 56   | float | 1-46为人脸表情系数，同上expression，表情系数含义可以参考《Expression Guide》。47-56为舌头blendshape系数       | Avatar   |
-| armesh_vertex_num     | 1   |int| armesh三维网格顶点数量       | armesh   |
-| armesh_face_num     | 1   | int| armesh三维网格三角面片数量       | armesh   |
-| armesh_vertices     | armesh_vertex_num * 3   |float| armesh三维网格顶点位置数据       | armesh   |
-| armesh_uvs     | armesh_vertex_num * 2   |float| armesh三维网格顶点纹理数据       | armesh   |
-| armesh_faces     | armesh_face_num * 3   |int| armesh三维网格三角片数据       | armesh  |
-| armesh_trans_mat     | 4x4 |float| armesh 的transformation。 __注意:__ 1. 获取'armesh_trans_mat'前需要先获取对应脸的'armesh_vertices'。2. 该trans_mat,相比使用'position'和'rotation'重算的transform更加准确，配合armesh，更好贴合人脸。 | armesh  |
-| tongue_direction | 1 |int| 舌头方向，数值对应 FUAITONGUETYPE 定义，见下表。 | Avatar |
-| expression_type | 1 |int| 表情识别，数值对应 FUAIEXPRESSIONTYPE定义，见下表。 | Avatar |
-| rotation_euler | 3 |float| 返回头部旋转欧拉角，分别为roll、pitch、yaw | Landmark |
+| 信息名称               | 长度                  | 类型  | 含义                                                                                                                                                                                                 | 权限     |
+| ---------------------- | --------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| face_rect              | 4                     | float | 人脸矩形框，图像分辨率坐标，数据为 (x_min, y_min, x_max, y_max)                                                                                                                                      | 默认     |
+| rotation_mode          | 1                     | int   | 识别人脸相对于设备图像的旋转朝向，取值范围 0-3，分别代表旋转0度、90度、180度、270度                                                                                                                  | 默认     |
+| failure_rate[已废弃]   | 1                     | float | 人脸跟踪的失败率，表示人脸跟踪的质量。取值范围为 0-2，取值越低代表人脸跟踪的质量越高                                                                                                                 | 默认     |
+| is_calibrating[已废弃] | 1                     | int   | 表示是否SDK正在进行主动表情校准，取值为 0 或 1。                                                                                                                                                     | 默认     |
+| focal_length           | 1                     | float | SDK当前三维人脸跟踪所采用的焦距数值                                                                                                                                                                  | 默认     |
+| landmarks              | 75x2                  | float | 人脸 75 个特征点，图像分辨率坐标                                                                                                                                                                     | Landmark |
+| landmarks_ar           | 75x3                  | float | 人脸 75 个特征点，3D空间坐标，需使用投影矩阵计算，见下文示例代码                                                                                                                                     | Avatar   |
+| rotation               | 4                     | float | 人脸三维旋转，数据为旋转四元数\*                                                                                                                                                                     | Landmark |
+| translation            | 3                     | float | 人脸三维平移，数据为 (x, y, z)                                                                                                                                                                       | Landmark |
+| eye_rotation           | 4                     | float | 眼球旋转，数据为旋转四元数\*，上下22度，左右30度。                                                                                                                                                   | Landmark |
+| eye_rotation_xy        | 2                     | float | 眼球旋转，数据范围为[-1,1]，第一个通道表示水平方向转动，第二个通道表示垂直方向转动                                                                                                                   | Landmark |
+| expression             | 46                    | float | 人脸表情系数，表情系数含义可以参考《Expression Guide》                                                                                                                                               | Avatar   |
+| expression_with_tongue | 56                    | float | 1-46为人脸表情系数，同上expression，表情系数含义可以参考《Expression Guide》。47-56为舌头blendshape系数                                                                                              | Avatar   |
+| armesh_vertex_num      | 1                     | int   | armesh三维网格顶点数量                                                                                                                                                                               | armesh   |
+| armesh_face_num        | 1                     | int   | armesh三维网格三角面片数量                                                                                                                                                                           | armesh   |
+| armesh_vertices        | armesh_vertex_num * 3 | float | armesh三维网格顶点位置数据                                                                                                                                                                           | armesh   |
+| armesh_uvs             | armesh_vertex_num * 2 | float | armesh三维网格顶点纹理数据                                                                                                                                                                           | armesh   |
+| armesh_faces           | armesh_face_num * 3   | int   | armesh三维网格三角片数据                                                                                                                                                                             | armesh   |
+| armesh_trans_mat       | 4x4                   | float | armesh 的transformation。 __注意:__ 1. 获取'armesh_trans_mat'前需要先获取对应脸的'armesh_vertices'。2. 该trans_mat,相比使用'position'和'rotation'重算的transform更加准确，配合armesh，更好贴合人脸。 | armesh   |
+| tongue_direction       | 1                     | int   | 舌头方向，数值对应 FUAITONGUETYPE 定义，见下表。                                                                                                                                                     | Avatar   |
+| expression_type        | 1                     | int   | 表情识别，数值对应 FUAIEXPRESSIONTYPE定义，见下表。                                                                                                                                                  | Avatar   |
+| rotation_euler         | 3                     | float | 返回头部旋转欧拉角，分别为roll、pitch、yaw                                                                                                                                                           | Landmark |
 *注：旋转四元数转换为欧拉角可以参考 [该网页](https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles)。
 
 ```C
@@ -2594,6 +2599,107 @@ FUNAMA_API float fuHandDetectorGetResultHandScore(int index);
 __参数:__  
 *index [in]*：第index个手势，从0开始，不超过fuHandDetectorGetResultNumHands结果。  
 __返回值:__ 获取HandGesture手势算法模块跟踪手势置信度。
+
+__备注:__  
+无
+
+------
+##### fuSetFaceModelConfig 函数
+设置算法人脸模块的加载策略,模型运行CPU或GPU之类
+```C
+typedef enum FUAIFACEMODELCONFIG {  // face model config
+  FUAIFACE_ALL_DEFAULT = -1,
+} FUAIFACEMODELCONFIG;
+/**
+ \brief set face processor model config, ref to FUAIFACEMODELCONFIG
+*/
+FUNAMA_API void fuSetFaceModelConfig(FUAIFACEMODELCONFIG flag);
+```
+__参数:__  
+*flag [in]*：FUAIFACEMODELCONFIG 类型，标记加载策略, 人脸模块当前暂无特殊加载策略。
+__返回值:__ 无返回值，具体影响到 fuLoadAIModelFromPackage
+
+__备注:__  
+无
+
+------
+##### fuSetFaceAlgorithmConfig 函数
+设置算法人脸模块的加载策略，是否关闭一些模块的加载。可提高加载速度。
+```C
+typedef enum FUAIFACEALGORITHMCONFIG {  // face algorithm config
+  FUAIFACE_ENABLE_ALL = 0,
+  FUAIFACE_DISABLE_FACE_OCCU = 1 << 0, //关闭全脸遮挡分割  
+  FUAIFACE_DISABLE_SKIN_SEG = 1 << 1,  //关闭美白皮肤分割  
+  FUAIFACE_DISABLE_DEL_SPOT = 1 << 2,  //关闭去斑痘  
+} FUAIFACEALGORITHMCONFIG;
+/**
+ \brief set face processor algorithm config, ref to FUAIFACEALGORITHMCONFIG ,
+ use to disable some sub-module while load face ai module
+*/
+FUNAMA_API void fuSetFaceAlgorithmConfig(FUAIFACEALGORITHMCONFIG flag);
+```
+__参数:__  
+*flag [in]*：FUAIFACEALGORITHMCONFIG  类型，标记加载策略。
+__返回值:__ 无返回值，具体影响到 fuLoadAIModelFromPackage
+
+__备注:__  
+无
+
+------
+##### fuSetHumanModelConfig 函数
+设置算法全身模块的加载策略,模型运行CPU或GPU之类
+```C
+typedef enum FUAIHUMANMODELCONFIG {                   // human model config
+  FUAIHUMAN_SEG_CPU_COMM = FUAIHUMAN_SEG_CPU_COMMON,  // 人像分割使用使用常规CPU版本   
+  FUAIHUMAN_SEG_GPU_COMM = FUAIHUMAN_SEG_GPU_COMMON,  // 人像分割使用使用常规GPU版本  
+  FUAIHUMAN_SEG_GPU_MEET = FUAIHUMAN_SEG_GPU_MEETING,  // 人像分割使用使用GPU半身版本  
+} FUAIHUMANMODELCONFIG;
+/**
+ \brief set face processor model config, ref to FUAIHUMANMODELCONFIG, config cpu
+ or gpu mode,eth.
+ */
+FUNAMA_API void fuSetHumanModelConfig(FUAIHUMANMODELCONFIG flag);
+
+```
+__参数:__  
+*flag [in]*：见FUAIHUMANMODELCONFIG  类型，标记加载策略。
+__返回值:__ 无返回值，具体影响到 fuLoadAIModelFromPackage
+
+__备注:__  
+无
+
+------
+##### fuSetHumanAlgorithmConfig 函数
+设置算法全身模块的加载策略，是否关闭一些模块的加载。可提高加载速度。
+```C
+typedef enum FUAIHUMANALGORITHMCONFIG {  // human algorithm config
+  FUAIHUMAN_ENABLE_ALL = 0,
+  FUAIHUMAN_DISABLE_HUMAN_SEG = 1 << 0,  //关闭人像分割模型的加载  
+} FUAIHUMANALGORITHMCONFIG;
+/**
+ \brief set human processor algorithm config, ref to FUAIHUMANALGORITHMCONFIG ,
+ use to disable some sub-module while load human ai module
+*/
+FUNAMA_API void fuSetHumanAlgorithmConfig(FUAIHUMANALGORITHMCONFIG flag);
+```
+__参数:__  
+*flag [in]*：FUAIHUMANALGORITHMCONFIG   类型，标记加载策略。
+__返回值:__ 无返回值，具体影响到 fuLoadAIModelFromPackage
+
+__备注:__  
+无
+
+------
+##### fuSetModelToCPU 函数
+设置算法模块的加载策略，是否强制所有模型运作在CPU上。
+```C
+/**
+ \brief force fu ai model to run on CPU
+*/
+FUNAMA_API void fuSetModelToCPU();
+```
+__参数:__  无
+__返回值:__ 无返回值，具体影响到 fuLoadAIModelFromPackage
 
 __备注:__  
 无
