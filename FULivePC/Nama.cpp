@@ -1133,12 +1133,6 @@ bool Nama::SelectBundle(string bundleName, int maxFace)
 		bundleID = fuCreateItemFromPackage(&propData[0], propData.size());
 		mBundlesMap[bundleName] = bundleID;
 		
-		if (bundleName == "assets/items/BackgroundSegmentation/background_blur.bundle") {
-			fuItemSetParamd(bundleID, "blur_size", 4);
-			fuItemSetParamd(bundleID, "blur_times ", 2);
-			fuItemSetParamd(bundleID, "erode_size", 1);
-		}
-
 		if (UIBridge::bundleCategory == BundleCategory::GestureRecognition) {
 			fuItemSetParamd(bundleID, "rotMode", 0);
 			if (bundleName.find("ctrl_flower") != std::string::npos) {
