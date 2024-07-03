@@ -1,10 +1,18 @@
 ﻿# Windows Nama SDK 集成指导文档  
 
 级别：Public   
-更新日期：2023-10-19   
-SDK版本: 8.8.0
+更新日期：2024-07-03   
+SDK版本: 8.11.0
 
 ### 最新更新内容：
+
+**2024-07-03 v8.11.0:
+
+1. 【SDK升级】新增极速版策略，更好的兼容中低端机型，实现功能与性能的极致平衡，使用体验更丝滑
+2. 【人脸关键点】算法升级，广泛覆盖人种特征，提升算法精度和适用性
+3. 【AR mesh】算法升级，全面提升新mesh模型稳定性
+4.  修复部分已知问题
+
 **2024-04-19 v8.10.0:
 1. 新增fuSetFaceModelConfig / fuSetFaceAlgorithmConfig / fuSetHumanModelConfig / fuSetHumanAlgorithmConfig / fuSetModelToCPU接口。
 用于配置算法bundle的加载，需要再loadaibundle前才有效。
@@ -125,7 +133,7 @@ SDK版本: 8.8.0
 8. 提供独立核心算法SDK，接口文档详见算法SDK文档(FUAI_C_API_参考文档.md)。
 9. fuGetFaceInfo接口新增三个参数，分别为：舌头方向(tongue_direction)，表情识别(expression_type)，头部旋转信息欧拉角参数(rotation_euler)。
 10. 新增人体动作识别动作定义文档(人体动作识别文档.md)。
- 
+
 
 2020-7-29 v7.1.0:
 
