@@ -1228,15 +1228,14 @@ void UIBridge::updateItemParam(int item, int index, QString value)
         //显示AR功能跟美体模块无法共用
         if(!m_flagARBody && value.toInt() > 0){
             m_flagARBody = true;
-            nama->changeRenderList(RENDER_BODY);
             updateFilter();
             m_tip = "AR功能跟美体模块无法共用";
             tipChanged();
             arBodyFlagChanged(m_flagARBody);
         }
         updateCategory(m_beautyBody, 3, index, value);
-        checkBodyParam();
         namaFuItemSetParamd(nama->m_BodyShapeHandle, m_beautyBody, index, false);
+        checkBodyParam();
         break;
     case ItemGreenScreen:
         updateCategory(m_greenScreen, 3, index, value);
@@ -1386,7 +1385,7 @@ void UIBridge::setCustomMakeupColor(int index, QString value)
     if(m_bmakeup_moisturized){
         name = "makeup_lip_color_v2";
     }
-    //qDebug()<<"setCustomMakeupColor"<<name<<colorFull;
+//    qDebug()<<"setCustomMakeupColor"<<name<<colorFull;
     MainClass::getInstance()->m_nama->setMakeUpColor(name.toStdString(), GetColorDouble(color0), GetColorDouble(color1), GetColorDouble(color2));
 }
 
@@ -1749,6 +1748,7 @@ void UIBridge::useBoutique(int index)
     }else{
         unLoadAvatar();
         for (auto& index: main->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleDirs){
+            cout<<index<<endl;
             nama->SelectBundle(index,maxPeople);
             if(m_flagARBody){
                 nama->changeRenderList(RENDER_BODY);

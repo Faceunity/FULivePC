@@ -761,9 +761,11 @@ void Nama::SetBodyTrackType(BodyTrackType type)
         break;
     case BodyTrackType::HalfBody:
         m_Controller->SetAvatar3DScene(BodyTrackType::HalfBody);
+        fuHumanProcessorReset();
         break;
     case BodyTrackType::FullBody:
         m_Controller->SetAvatar3DScene(BodyTrackType::FullBody);
+        fuHumanProcessorReset();
         break;
     default:
         break;
