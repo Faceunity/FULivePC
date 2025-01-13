@@ -164,7 +164,10 @@ void GUISticker::ShowStickerList(Nama * nama, int tagIndex)
 		bundle->mHasNotBinded = true;
 		//¼ÓÔØÐ¡ÐÜ
 		if (bundle->mBundleDirs.size() > 1) {
-				nama->UnLoadAvatar();
+				if (Nama::mNamaAppState.RenderAvatarBear) {
+					nama->UnLoadAvatar();
+					return;
+				}
 				nama->UnLoadMakeup();
 				std::vector<std::string> mBundleDirs;
 				for (auto& i : bundle->mBundleDirs) {

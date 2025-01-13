@@ -263,7 +263,9 @@ bool Nama::Init()
 				mFxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
 			}
 		}
-		
+
+		fuFaceProcessorSetFaceLandmarkQuality(2);
+
 		fuItemSetParamd(mBodyShapeHandle, "Debug", 0.0);
 
 		fuItemSetParamd(mMakeUpHandle, "machine_level", 1.0);
@@ -411,6 +413,8 @@ void Nama::ReloadItems() {
 			mFxaaHandles = fuCreateItemFromPackage(&propData[0], propData.size());
 		}
 	}
+
+	fuFaceProcessorSetFaceLandmarkQuality(2);
 
 	float fValue = 0.5f;
 	fuSetFaceTrackParam((void*)"mouth_expression_more_flexible", &fValue);
@@ -1581,8 +1585,9 @@ void Nama::RenderItems(cv::Mat & picMat)
 		}else if (mNamaAppState.RenderAvatarBear) {
 			RenderDefNama(picMat, TRANSFORM_MATRIX::CCROT0);
 			RenderP2A(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
-		}else if (mNamaAppState.RenderAvatar)
-			RenderP2A(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
+		}
+		//else if (mNamaAppState.RenderAvatar)
+			//RenderP2A(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
 		else
 			RenderDefNama(picMat, TRANSFORM_MATRIX::CCROT0_FLIPHORIZONTAL);
 	}

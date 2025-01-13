@@ -608,7 +608,7 @@ static void ShowFloatMenuAR(Nama* nama)
 	}
 	auto bundleCategory = UIBridge::bundleCategory;
 
-	if (bundleCategory == BundleCategory::Avatar) {
+	/*if (bundleCategory == BundleCategory::Avatar) {
 		auto& path = gBundlePath[BundleCategory::Avatar];
 		{
 			ImGui::PushID(0);
@@ -706,8 +706,8 @@ static void ShowFloatMenuAR(Nama* nama)
 			ImGui::PopID();
 		}
 
-	}
-	else if (bundleCategory < BundleCategory::Count)
+	}else */
+	if (bundleCategory < BundleCategory::Count)
 	{
 		if (UIBridge::categoryBundles[BundleCategory::LightMakeup].size() == 0)
 		{
@@ -974,15 +974,16 @@ static void ShowFloatMenu(Nama* nama)
 
 static void ShowArMenu(Nama* nama)
 {
+	//"list_icon_avatar_nor", u8"Avatar",
 	string* categoryNameArr = nullptr;
 	string allCategory[] = { "list_icon_Jinpin_nor","list_icon_Propmap_nor","list_icon_style_recommendation_nor","list_icon_makeup_nor","list_icon_lightmakeup_nor",
-		"list_icon_Bgsegmentation_nor","list_icon_gesturerecognition_nor","list_icon_Expressionrecognition_nor","list_icon_annimoji_nor","list_icon_avatar_nor",
+		"list_icon_Bgsegmentation_nor","list_icon_gesturerecognition_nor","list_icon_Expressionrecognition_nor","list_icon_annimoji_nor",
 		"list_icon_hairdressing_nor","list_icon_AR_nor","list_icon_Musicfilter_nor","list_icon_Hahamirror_nor","list_icon_photo_sticker_nor",
-		u8"精品贴纸",u8"道具贴纸",u8"风格推荐",u8"  美妆",u8" 轻美妆",u8"人像分割",u8"手势识别",u8"表情识别","Animoji",u8"Avatar",
+		u8"精品贴纸",u8"道具贴纸",u8"风格推荐",u8"  美妆",u8" 轻美妆",u8"人像分割",u8"手势识别",u8"表情识别","Animoji",
 		u8"  美发",u8"AR面具",u8"音乐滤镜",u8" 哈哈镜",u8"搞笑大头" };
-	int amount = 15;
+	int amount = 14;
 	categoryNameArr = allCategory;
-	int end = 15;
+	int end = 14;
 	int i = 0 + UIBridge::categoryPage * 10;
 	if (UIBridge::categoryPage == 0) {
 		end = 10;
@@ -1012,10 +1013,10 @@ static void ShowArMenu(Nama* nama)
 					if (UIBridge::m_curRenderItem == -1) {
 						UIBridge::bundleCategory = BUNDLE_CATEGORY_NOMEAN;
 					}
-					if (BundleCategory::Avatar == index)
+					/*if (BundleCategory::Avatar == index)
 					{
 						Nama::mNamaAppState.EnableAvatar = false;
-					}
+					}*/
 				};
 				funSetUnSelectd(i);
 			}
@@ -1030,14 +1031,14 @@ static void ShowArMenu(Nama* nama)
 				auto funSetSelectd = [&](int index) {
 					GUISticker::mSelectSticker = true;
 					UIBridge::bundleCategoryPage = 0;
-					if (BundleCategory::Avatar == index)
+					/*if (BundleCategory::Avatar == index)
 					{
 						Nama::mNamaAppState.EnableAvatar = true;
 					}
 					else
 					{
 						Nama::mNamaAppState.EnableAvatar = false;
-					}
+					}*/
 					UIBridge::bundleCategory = index;
 					UIBridge::showItemSelectWindow = true;
 					UIBridge::mSelectedBsType = false;

@@ -2,6 +2,14 @@
 
 ------
 ### Updates：
+2024-10-15 v8.12.0
+1. Support high quality landmark occlusion and race recognition algorithm for FaceProcessor. FUAIFACEALGORITHMCONFIG support FUAIFACE_DISABLE_RACE and FUAIFACE_DISABLE_LANDMARK_HP_OCCU. 
+2. Add fuFaceProcessorSetFaceLandmarkHpOccu interface, which enable the high quality landmark occlusion.
+
+
+2024-7-3 v8.11.0
+1. Add fuSetDynamicQualityControl interface which is used to dynamicly adjust the frame rate and render quality. Add fuSetDynammicQaulityParams which is used to configure the parameters.
+2. Add fuSetARMeshV2 interface which applys the new armesh effect and takes effect on old version bundles.
 
 2021-01-25 v7.4.0:
 
@@ -2479,6 +2487,25 @@ __Return Value:__ Get the tracking of confidence level of HandGesture gesture al
 
 __Notes:__  
 Null.
+
+------
+
+##### fuFaceProcessorSetFaceLandmarkHpOccu 函数
+Enable the hight quality Landmark occlusion.
+```C
+/**
+ * \brief Disable the complex visible model in face landmark algorithm
+ * \param  enable       true: turn on; false: turn off
+ */
+FUNAMA_API void fuFaceProcessorSetFaceLandmarkHpOccu(int enable);
+```
+__Parameters:__  
+*enable [in]*: int, 1 for enable，0 for disable
+__Return Value:__  Null.
+
+__Notes:__  
+Null.
+
 
 ------
 #### 2.8 Abandoned API
