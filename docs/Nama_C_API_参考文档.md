@@ -2,22 +2,22 @@
 <!--每次更新文档，更新时间-->
 
 级别：Public   
-更新日期：2024-4-2  
-SDK版本: 8.10.0  
+更新日期：2024-10-15  
+SDK版本: 8.12.0  
 
 ------
 ### 最新更新内容：
 
 <!--这个小节写每次最新以及次新的更新记录，时间，更新内容。新增函数，函数接口定义更新-->
+2024-10-15 v8.12.0
+1. 人脸算法bundle新增人种识别和人脸遮挡算法能力，FUAIFACEALGORITHMCONFIG新增FUAIFACE_DISABLE_RACE，FUAIFACE_DISABLE_LANDMARK_HP_OCCU。
+2. 新增接口fuFaceProcessorSetFaceLandmarkHpOccu,加载人脸遮挡算法能力后，使用该接口开启或关闭高质量遮挡
 
-2024-10-15 v8.12.0:
 
-1. 【智能美颜】：支持鸿蒙OS NEXT原生适配，包括质感美肤、面部及五官微整形、多种滤镜风格，超质感美颜效果，打造高级上镜感
-2. 【AR贴纸】：支持鸿蒙OS NEXT原生适配，风格多变，玩法丰富
-3. 【FUliveDemo】：鸿蒙版AR人像视频特效demo重磅上线
-4. 【人脸关键点】：算法升级，新增遮挡识别功能，算法适用性更广，处理复杂场景更智能
-5. 【AR Mesh】：算法升级，扩增脸部边界范围，覆盖全脸区域更精准，特效适配更全面
-6. 【人种分类】：新增人种分类算法，精准识别人种类别，支持美颜美妆多人种适配，让美更贴合个性化需求，满足全球用户的多样化需求
+2024-7-3 v8.11.0:
+1. 新增极速版接口fuSetDynamicQualityControl接口，用于动态调整帧率与输出质量,该接口目前所影响的功能范围为：美型、美肤以及输出图像整体质量，新增fuSetDynamicQualityParams接口，用于配置动态调整策略的参数。
+2. 新增fuSetARMeshV2接口，可以开启armeshV2效果，可对旧版道具生效
+
 
 2024-4-2 v8.10.0:
 
@@ -2622,7 +2622,7 @@ typedef enum FUAIFACEMODELCONFIG {  // face model config
 /**
  \brief set face processor model config, ref to FUAIFACEMODELCONFIG
 */
-FUNAMA_API void fuSetFaceModelConfig(FUAIFACEMODELCONFIG flag);
+FUNAMA_API void fuSetFaceModelConfig(long long flag);
 ```
 __参数:__  
 *flag [in]*：FUAIFACEMODELCONFIG 类型，标记加载策略, 人脸模块当前暂无特殊加载策略。
@@ -2645,7 +2645,7 @@ typedef enum FUAIFACEALGORITHMCONFIG {  // face algorithm config
  \brief set face processor algorithm config, ref to FUAIFACEALGORITHMCONFIG ,
  use to disable some sub-module while load face ai module
 */
-FUNAMA_API void fuSetFaceAlgorithmConfig(FUAIFACEALGORITHMCONFIG flag);
+FUNAMA_API void fuSetFaceAlgorithmConfig(long long flag);
 ```
 __参数:__  
 *flag [in]*：FUAIFACEALGORITHMCONFIG  类型，标记加载策略。
@@ -2667,7 +2667,7 @@ typedef enum FUAIHUMANMODELCONFIG {                   // human model config
  \brief set face processor model config, ref to FUAIHUMANMODELCONFIG, config cpu
  or gpu mode,eth.
  */
-FUNAMA_API void fuSetHumanModelConfig(FUAIHUMANMODELCONFIG flag);
+FUNAMA_API void fuSetHumanModelConfig(long long flag);
 
 ```
 __参数:__  
@@ -2689,7 +2689,7 @@ typedef enum FUAIHUMANALGORITHMCONFIG {  // human algorithm config
  \brief set human processor algorithm config, ref to FUAIHUMANALGORITHMCONFIG ,
  use to disable some sub-module while load human ai module
 */
-FUNAMA_API void fuSetHumanAlgorithmConfig(FUAIHUMANALGORITHMCONFIG flag);
+FUNAMA_API void fuSetHumanAlgorithmConfig(long long flag);
 ```
 __参数:__  
 *flag [in]*：FUAIHUMANALGORITHMCONFIG   类型，标记加载策略。
@@ -2712,6 +2712,24 @@ __返回值:__ 无返回值，具体影响到 fuLoadAIModelFromPackage
 
 __备注:__  
 无
+
+------
+
+##### fuFaceProcessorSetFaceLandmarkHpOccu 函数
+设置人脸模块高质量遮挡算法是否开启
+```C
+/**
+ * \brief Disable the complex visible model in face landmark algorithm
+ * \param  enable       true: turn on; false: turn off
+ */
+FUNAMA_API void fuFaceProcessorSetFaceLandmarkHpOccu(int enable);
+```
+__参数:__  
+*enable [in]*: int, 1代表开启，0表示关闭
+__返回值:__ 无返回值
+
+__备注:__  
+无  
 
 ------
 #### 2.8 废弃接口
