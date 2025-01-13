@@ -127,7 +127,7 @@ const QString gBundlePath[] = {
     QString::fromStdString(g_assetDir) + "items/" + "GestureRecognition",
     QString::fromStdString(g_assetDir) + "items/" + "ExpressionRecognition",
     QString::fromStdString(g_assetDir) + "items/" + "Animoji",
-    QString::fromStdString(g_assetDir) + "Avatars/",
+    // QString::fromStdString(g_assetDir) + "Avatars/",
     QString::fromStdString(g_assetDir) + "items/" + "BeautyHair",
     QString::fromStdString(g_assetDir) + "items/" + "ARMask",
     QString::fromStdString(g_assetDir) + "items/" + "MusicFilter",

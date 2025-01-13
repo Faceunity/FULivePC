@@ -35,52 +35,52 @@ UIBridge::UIBridge()
     //第五个QStringList是qml中滑块显示是否在中间,true中间[-50,50],false[0,100],""转换qml为false,"1"转换为true
     //美肤
     //0 清晰磨皮  1 朦胧磨皮  2精细磨皮 3为均匀磨皮
-    m_beautySkin.append(QStringList{"精准美肤 开启|关闭", "美肤模式 均匀磨皮|精细磨皮|清晰磨皮|朦胧磨皮", "磨皮", "祛斑痘", "美白模式 全局美白|皮肤美白",
+    m_beautySkin.append(QStringList{ "精准美肤 开启|关闭", "美肤模式 均匀磨皮|精细磨皮|清晰磨皮|朦胧磨皮", "磨皮", "祛斑痘", "美白模式 全局美白|皮肤美白",
                                     "美白", "红润", "清晰", "锐化", "五官立体",
                                     "亮眼","美牙", "去黑眼圈", "去法令纹"});
     m_beautySkin.append(QStringList{ "skinbeauty", "BeautyMode", "Grindingskin", "acne", "Skinwhitening",
-                                     "Skinwhitening", "Ruddy", "clearness","sharpen", "stereoscopic",
-                                     "Brighteye", "Beautifulteeth", "dark_circles", "wrinkle"});
+                                    "Skinwhitening", "Ruddy", "clearness","sharpen", "stereoscopic",
+                                    "Brighteye", "Beautifulteeth", "dark_circles", "wrinkle"});
     m_beautySkin.append(QStringList{ "skin_detect", "blur_type", "blur_level", "delspot_level", "enable_skinseg",
-                                     "color_level_mode2", "red_level", "clarity", "sharpen", "face_threed",
-                                     "eye_bright", "tooth_whiten", "remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2"});
-    m_defaultBeautySkin = QStringList{ "1", "3", "70", "0", "0",
-            "30", "30", "0", "20", "0",
-            "0", "0", "0", "0"};
+                                    "color_level_mode2", "red_level", "clarity", "sharpen", "face_threed",
+                                    "eye_bright", "tooth_whiten", "remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2"});
+    m_defaultBeautySkin = QStringList{ "1", "3", "55", "0", "0",
+                                      "40", "30", "0", "60", "40",
+                                      "30", "0", "80", "80"};
     m_beautySkin.append(m_defaultBeautySkin);
     m_beautySkin.append(QStringList{ "","","","","","","","","","","","","","","","",""});
     //美型
     m_beautyFace.append(QStringList{ "瘦脸", "大眼", "圆眼", "下巴", "额头",
-                                     "瘦鼻", "嘴型", "嘴唇厚度", "V脸", "窄脸",
-                                     "短脸", "小脸", "瘦颧骨", "瘦下颌骨", "眼睛位置",
-                                     "开眼角", "眼睑下至", "眼距", "眼睛角度", "长鼻",
-                                     "缩人中", "微笑嘴角", "眉毛上下", "眉间距", "眉毛粗细"});
-    m_beautyFace.append(QStringList{ "Thinface", "Bigeye", "round_eye", "chin", "forehead",+
-                                     "Thinnose", "Mouthtype", "mouth_thickness", "v", "narrow_face",
-                                     "short_face", "little_face", "cheekbones", "lower_jaw", "eye_position",
-                                     "open_eyes", "eyelid_down", "eye_distance", "eye_angle", "proboscis",
-                                     "shrinking", "smile_mouth", "eyebrow_position", "eyebrow_spacing", "eyebrow_thickness"});
+                                    "瘦鼻", "嘴型", "嘴唇厚度", "V脸", "窄脸",
+                                    "短脸", "小脸", "瘦颧骨", "瘦下颌骨", "眼睛位置",
+                                    "开眼角", "眼睑下至", "眼距", "眼睛角度", "长鼻",
+                                    "缩人中", "微笑嘴角", "眉毛上下", "眉间距", "眉毛粗细"});
+    m_beautyFace.append(QStringList{ "Thinface", "Bigeye", "round_eye", "chin", "forehead",
+                                    "Thinnose", "Mouthtype", "mouth_thickness", "v", "narrow_face",
+                                    "short_face", "little_face", "cheekbones", "lower_jaw", "eye_position",
+                                    "open_eyes", "eyelid_down", "eye_distance", "eye_angle", "proboscis",
+                                    "shrinking", "smile_mouth", "eyebrow_position", "eyebrow_spacing", "eyebrow_thickness"});
     m_beautyFace.append(QStringList{ "cheek_thinning_mode2", "eye_enlarging_mode3", "intensity_eye_circle", "intensity_chin_mode2", "intensity_forehead_mode2",
-                                     "intensity_nose_mode2", "intensity_mouth_mode3", "intensity_lip_thick", "cheek_v", "cheek_narrow_mode2",
-                                     "cheek_short", "cheek_small_mode2", "intensity_cheekbones","intensity_lower_jaw", "intensity_eye_height",
-                                     "intensity_canthus", "intensity_eye_lid", "intensity_eye_space", "intensity_eye_rotate","intensity_long_nose",
-                                     "intensity_philtrum", "intensity_smile", "intensity_brow_height", "intensity_brow_space", "intensity_brow_thick"});
-    m_defaultBeautyFace = QStringList{ "0", "0", "0", "-20", "-20",
-            "50", "-10", "0", "50", "0",
-            "0", "0", "0", "0", "0",
-            "0", "0", "0", "0", "0",
-            "0", "0", "0", "0", "0"};
+                                    "intensity_nose_mode2", "intensity_mouth_mode3", "intensity_lip_thick", "cheek_v", "cheek_narrow_mode2",
+                                    "cheek_short", "cheek_small_mode2", "intensity_cheekbones","intensity_lower_jaw", "intensity_eye_height",
+                                    "intensity_canthus", "intensity_eye_lid", "intensity_eye_space", "intensity_eye_rotate","intensity_long_nose",
+                                    "intensity_philtrum", "intensity_smile", "intensity_brow_height", "intensity_brow_space", "intensity_brow_thick"});
+    m_defaultBeautyFace = QStringList{ "0", "40", "0", "0", "0",
+                                      "50", "0", "0", "50", "0",
+                                      "0", "0", "0", "10", "0",
+                                      "0", "0", "0", "0", "0",
+                                      "0", "35", "0", "0", "0"};
     m_beautyFace.append(m_defaultBeautyFace);
     m_beautyFace.append(QStringList{ "","","","1","1",
-                                     "","1","1","","",
-                                     "","","","","1",
-                                     "","","1","1","1",
-                                     "1","","1","1","1"});
+                                    "","1","1","","",
+                                    "","","","","1",
+                                    "","","1","1","1",
+                                    "1","","1","1","1"});
     //美体
     m_beautyBody.append(QStringList{ "瘦身", "长腿", "瘦腰", "美肩", "美臀", "小头", "瘦腿"});
     m_beautyBody.append(QStringList{ "slimming", "stovepipe", "thin_waist", "shoulder", "hip", "little_head", "thin_leg"});
     m_beautyBody.append(QStringList{ "BodySlimStrength","LegSlimStrength" ,"WaistSlimStrength" , "ShoulderSlimStrength",
-                                     "HipSlimStrength" , "HeadSlim", "LegSlim"});
+                                    "HipSlimStrength" , "HeadSlim", "LegSlim"});
     m_defaultBeautyBody = QStringList{ "0", "0", "0", "0", "0", "0", "0"};
     m_beautyBody.append(m_defaultBeautyBody);
     m_beautyBody.append(QStringList{ "","","","1","","",""});
@@ -92,30 +92,30 @@ UIBridge::UIBridge()
     m_filter.append(QStringList{ "origin", "bailiang1", "fennen1", "xiaoqingxin1", "lengsediao1", "nuansediao1"});
     m_filter.append(QStringList{ "0", "40", "40", "40", "40", "40"});
     //绿幕
-    m_greenScreen.append(QStringList{"相似度", "平滑", "祛色度"});
-    m_greenScreen.append(QStringList{"tolerance", "smooth", "transparency"});
-    m_greenScreen.append(QStringList{"chroma_thres", "chroma_thres_T", "alpha_L"});
+    m_greenScreen.append(QStringList{ "相似度", "平滑", "祛色度"});
+    m_greenScreen.append(QStringList{ "tolerance", "smooth", "transparency"});
+    m_greenScreen.append(QStringList{ "chroma_thres", "chroma_thres_T", "alpha_L"});
     m_defaultGreenScreen = QStringList{ "50", "50", "100"};
     m_greenScreen.append(m_defaultGreenScreen);
     m_greenScreen.append(QStringList{ "","",""});
 
     //绿幕道具、图片名
-    m_greenScreenIcon.append(QStringList{"green_screen_bg_atechnology", "green_screen_bg_beach", "green_screen_bg_classroom",
+    m_greenScreenIcon.append(QStringList{ "green_screen_bg_atechnology", "green_screen_bg_beach", "green_screen_bg_classroom",
                                          "green_screen_bg_ink painting", "green_screen_bg_jforest"});
-    m_greenScreenIcon.append(QStringList{"gs_savearea", "safe_area_high", "safe_area_low"});
+    m_greenScreenIcon.append(QStringList{ "gs_savearea", "safe_area_high", "safe_area_low"});
 
     //自定义美妆
     //一为显示中文名,二为道具名,三为对应强度名称,四为强度系数,五为选中下标,六选中颜色下标
-    m_tempCustomMakeup.append(QStringList{"腮红", "makeup_blusher_color", "makeup_intensity_blusher", "100", "-1", "-1"});
-    m_tempCustomMakeup.append(QStringList{"阴影", "makeup_shadow_color", "makeup_intensity_shadow", "100", "-1", "-1"});
-    m_tempCustomMakeup.append(QStringList{"眉毛", "makeup_eyeBrow_color", "makeup_intensity_eyeBrow", "100", "-1", "-1"});
-    m_tempCustomMakeup.append(QStringList{"睫毛", "makeup_eyelash_color", "makeup_intensity_eyelash", "100", "-1", "-1"});
-    m_tempCustomMakeup.append(QStringList{"眼线", "makeup_eyeLiner_color", "makeup_intensity_eyeLiner", "100", "-1", "-1"});
-    m_tempCustomMakeup.append(QStringList{"美瞳", "makeup_pupil_color", "makeup_intensity_pupil", "100", "-1", "-1"});
-    m_tempCustomMakeup.append(QStringList{"眼影", "makeup_eye_color", "makeup_intensity_eye", "100", "-1", "-1"});
-    m_tempCustomMakeup.append(QStringList{"粉底", "makeup_foundation_color", "makeup_intensity_foundation", "100", "-1", "-1"});
-    m_tempCustomMakeup.append(QStringList{"高亮", "makeup_highlight_color", "makeup_intensity_highlight", "100", "-1", "-1"});
-    m_tempCustomMakeup.append(QStringList{"口红", "makeup_lip_color", "makeup_intensity_lip", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{ "腮红", "makeup_blusher_color", "makeup_intensity_blusher", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{ "阴影", "makeup_shadow_color", "makeup_intensity_shadow", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{ "眉毛", "makeup_eyeBrow_color", "makeup_intensity_eyeBrow", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{ "睫毛", "makeup_eyelash_color", "makeup_intensity_eyelash", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{ "眼线", "makeup_eyeLiner_color", "makeup_intensity_eyeLiner", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{ "美瞳", "makeup_pupil_color", "makeup_intensity_pupil", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{ "眼影", "makeup_eye_color", "makeup_intensity_eye", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{ "粉底", "makeup_foundation_color", "makeup_intensity_foundation", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{ "高亮", "makeup_highlight_color", "makeup_intensity_highlight", "100", "-1", "-1"});
+    m_tempCustomMakeup.append(QStringList{ "口红", "makeup_lip_color", "makeup_intensity_lip", "100", "-1", "-1"});
     readCustomMakeup();
     //保存一份默认,一键卸妆用
     m_defaultCustomMakeup = m_customMakeup;
@@ -173,12 +173,14 @@ void UIBridge::readCategoryBundle()
             continue;
         }else if(i == BundleCategory::BackgroundSegmentation){
             tempList.append("bg_segment");
-        }else if(i == BundleCategory::Avatar){
-            QStringList tempList;
-            tempList<<"fakeman";
-            m_categoryBundles.append(tempList);
-            continue;
-        }else if(i == BundleCategory::LightMakeup){
+        }
+        // else if(i == BundleCategory::Avatar){
+        //     QStringList tempList;
+        //     tempList<<"fakeman";
+        //     m_categoryBundles.append(tempList);
+        //     continue;
+        // }
+        else if(i == BundleCategory::LightMakeup){
             //轻美妆加入桃花,西柚,清透,男友
             QStringList tempList;
             tempList<<"light_makeup_peachblossom"<<"light_makeup_grapefruit"<<"light_makeup_clear"<<"light_makeup_boyfriend";
@@ -264,8 +266,8 @@ void UIBridge::readCustomMakeup()
                     QJsonArray color = colors.at(j).toArray();
                     QString hexColor;
                     hexColor += "#" + QString("%1").arg(int(color.at( 0).toDouble() * 255),2,16,QChar('0')) +
-                            QString("%1").arg(int(color.at(1).toDouble() * 255),2,16,QChar('0')) +
-                            QString("%1").arg(int(color.at(2).toDouble() * 255),2,16,QChar('0'));
+                                QString("%1").arg(int(color.at(1).toDouble() * 255),2,16,QChar('0')) +
+                                QString("%1").arg(int(color.at(2).toDouble() * 255),2,16,QChar('0'));
                     //第四个透明度都为1
                     //+QString("%1").arg(int(color.at(3).toDouble() * 255),2,16,QChar('0'));
                     tempStr.append(hexColor);
@@ -289,8 +291,8 @@ void UIBridge::readCustomMakeup()
                     //这里考虑双色眼影,三色情况
                     for(int k = 0; k < color.size(); k += 4){
                         hexColor += "#" + QString("%1").arg(int(color.at(k + 0).toDouble() * 255),2,16,QChar('0')) +
-                                QString("%1").arg(int(color.at(k + 1).toDouble() * 255),2,16,QChar('0')) +
-                                QString("%1").arg(int(color.at(k + 2).toDouble() * 255),2,16,QChar('0'));
+                                    QString("%1").arg(int(color.at(k + 1).toDouble() * 255),2,16,QChar('0')) +
+                                    QString("%1").arg(int(color.at(k + 2).toDouble() * 255),2,16,QChar('0'));
                         //+QString("%1").arg(int(color.at(k + 3).toDouble() * 255),2,16,QChar('0'));
                     }
                     tempStr.append(hexColor);
@@ -594,7 +596,7 @@ void UIBridge::setARFunction(bool ar){
             }
         }
         m_frameSize = QString::number(MainClass::getInstance()->m_camera->m_FrameWidth) + "x" +
-                QString::number(MainClass::getInstance()->m_camera->m_FrameHeight);
+                      QString::number(MainClass::getInstance()->m_camera->m_FrameHeight);
         emit frameSizeChanged();
         //重新设置轻美妆滤镜
         if(m_selectCategory == BundleCategory::LightMakeup && !m_flagARBody){
@@ -825,8 +827,8 @@ void UIBridge::readUserConfig()
                     QVector3D keycolor(tempKey.at(0).toInt(),tempKey.at(1).toInt(),tempKey.at(2).toInt());
                     m_gsKeyColorList.append(keycolor);
                     QString color = "#" + QString("%1").arg(int(keycolor.x()),2,16,QChar('0')) +
-                            QString("%1").arg(int(keycolor.y()),2,16,QChar('0')) +
-                            QString("%1").arg(int(keycolor.z()),2,16,QChar('0'));
+                                    QString("%1").arg(int(keycolor.y()),2,16,QChar('0')) +
+                                    QString("%1").arg(int(keycolor.z()),2,16,QChar('0'));
                     color = color.toUpper();
                     strList.append(color);
                 }
@@ -964,8 +966,8 @@ void UIBridge::updateUserConfig()
     //加载美颜,美肤等参数
     reloadItemParam();
     QString color = "#" + QString("%1").arg(m_gsColor[0],2,16,QChar('0')) +
-            QString("%1").arg(m_gsColor[1],2,16,QChar('0')) +
-            QString("%1").arg(m_gsColor[2],2,16,QChar('0'));
+                    QString("%1").arg(m_gsColor[1],2,16,QChar('0')) +
+                    QString("%1").arg(m_gsColor[2],2,16,QChar('0'));
     color = color.toUpper();
     emit selectColorChanged(color);
     nama->m_bundleCategory = BundleCategory(m_selectCategory);
@@ -982,9 +984,10 @@ void UIBridge::updateUserConfig()
         updateGSSelectIndex(m_gsSelectBgIndex, m_gsSelectSafeArea);
     }else{
         if(m_selectCategory >= 0 && m_selectCategoryIndex >= 0 ){
-            if(m_selectCategory == BundleCategory::Avatar && m_selectCategoryIndex == 0){
-                updateBodyTrackType(int(m_bodyTrackType));
-            }else if(m_selectCategory == BundleCategory::ItemJingpin){
+            // if(m_selectCategory == BundleCategory::Avatar && m_selectCategoryIndex == 0){
+            //     updateBodyTrackType(int(m_bodyTrackType));
+            // }else
+            if(m_selectCategory == BundleCategory::ItemJingpin){
                 downloadSticker(m_selectCategoryIndex);
             }else{
                 useProps(m_selectCategoryIndex);
@@ -1053,7 +1056,7 @@ void UIBridge::useProps(int index)
     m_bgsVideoMediaPlayer.stop();
     if(m_selectCategory != int(BundleCategory::GreenScreen) && m_selectCategory != int(BundleCategory::SafeArea)){
         if((m_selectCategoryLast == int(BundleCategory::ItemJingpin) && m_selectCategory != int(BundleCategory::ItemJingpin)) ||
-                (m_selectCategoryLast == int(BundleCategory::Makeup) && m_selectCategory != int(BundleCategory::Makeup))){
+            (m_selectCategoryLast == int(BundleCategory::Makeup) && m_selectCategory != int(BundleCategory::Makeup))){
             nama->ReloadItems();
             reloadItemParam();
         }
@@ -1069,9 +1072,9 @@ void UIBridge::useProps(int index)
     {
         nama->m_mp3->Pause();
     }
-    if(m_selectCategory != BundleCategory::Avatar){
-        unLoadAvatar();
-    }
+    // if(m_selectCategory != BundleCategory::Avatar){
+    //     unLoadAvatar();
+    // }
     if(m_arFunction){
         m_selectCategoryIndex = index;
         QString name = m_categoryBundles[m_selectCategory].toStringList()[m_selectCategoryIndex];
@@ -1088,9 +1091,9 @@ void UIBridge::useProps(int index)
             full_path = gBundlePath[m_selectCategory] + "/" + name + ".bundle";
         }
         if(name.compare("light_makeup_peachblossom") == 0 ||
-                name.compare("light_makeup_grapefruit") == 0||
-                name.compare("light_makeup_clear") == 0||
-                name.compare("light_makeup_boyfriend") == 0){
+            name.compare("light_makeup_grapefruit") == 0||
+            name.compare("light_makeup_clear") == 0||
+            name.compare("light_makeup_boyfriend") == 0){
             //使用轻美妆
             b_light_makeup = true;
             full_path = "items/LightMakeup/light_makeup.bundle";
@@ -1110,7 +1113,7 @@ void UIBridge::useProps(int index)
         }else{
             //自定义美妆不用加载bundle
             if(m_selectCategoryLast == int(BundleCategory::ItemJingpin) ||
-                    m_selectCategoryLast == int(BundleCategory::StyleRecommendation)){
+                m_selectCategoryLast == int(BundleCategory::StyleRecommendation)){
                 nama->ReloadItems();
                 reloadItemParam();
             }
@@ -1385,7 +1388,7 @@ void UIBridge::setCustomMakeupColor(int index, QString value)
     if(m_bmakeup_moisturized){
         name = "makeup_lip_color_v2";
     }
-//    qDebug()<<"setCustomMakeupColor"<<name<<colorFull;
+    //    qDebug()<<"setCustomMakeupColor"<<name<<colorFull;
     MainClass::getInstance()->m_nama->setMakeUpColor(name.toStdString(), GetColorDouble(color0), GetColorDouble(color1), GetColorDouble(color2));
 }
 
@@ -1420,7 +1423,7 @@ void UIBridge::gsCameraConfirm()
     m_gsSize = QPointF(0.5,0.5);
     MainClass::getInstance()->m_nama->changeGSPreviewRect(0.5, 0.5, 1, 1);
     m_frameSize = QString::number(MainClass::getInstance()->m_camera->m_FrameWidth) + "x" +
-            QString::number(MainClass::getInstance()->m_camera->m_FrameHeight);
+                  QString::number(MainClass::getInstance()->m_camera->m_FrameHeight);
     emit frameSizeChanged();
 }
 
@@ -1443,8 +1446,8 @@ void UIBridge::selectColor(int mouseX, int mouseY)
         int posy = ratioY * mouseY;
         auto dataBGR = frameMat.at<cv::Vec4b>(posy, posx);
         QString color = "#" + QString("%1").arg(dataBGR[2],2,16,QChar('0')) +
-                QString("%1").arg(dataBGR[1],2,16,QChar('0')) +
-                QString("%1").arg(dataBGR[0],2,16,QChar('0'));
+                        QString("%1").arg(dataBGR[1],2,16,QChar('0')) +
+                        QString("%1").arg(dataBGR[0],2,16,QChar('0'));
         color = color.toUpper();
         //不是蓝绿白,保存最近使用颜色
         if(color.compare("#FFFFFF") != 0 && color.compare("#0000FF") != 0 && color.compare("#00FF00") != 0){
@@ -1474,8 +1477,8 @@ void UIBridge::saveGSKeyColor(QVector3D color3d)
         for(int i = 0; i < m_gsKeyColorList.size(); i++){
             QVector3D vector3d = m_gsKeyColorList.at(i);
             QString color = "#" + QString("%1").arg(int(vector3d.x()),2,16,QChar('0')) +
-                    QString("%1").arg(int(vector3d.y()),2,16,QChar('0')) +
-                    QString("%1").arg(int(vector3d.z()),2,16,QChar('0'));
+                            QString("%1").arg(int(vector3d.y()),2,16,QChar('0')) +
+                            QString("%1").arg(int(vector3d.z()),2,16,QChar('0'));
             color = color.toUpper();
             strList.append(color);
         }
@@ -1667,7 +1670,7 @@ void UIBridge::downloadSticker(int index)
     m_selectCategoryIndex = index;
     //没下载下载
     if (MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mBundleIsDownload == false &&
-            MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mIsDownloading == false && m_GIsDownloading == false)
+        MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mIsDownloading == false && m_GIsDownloading == false)
     {
         std::packaged_task<void()> task([&, index]() {
             MainClass::getInstance()->m_stickerHolder->mTagBundleList[m_stickerIndex][index]->mIsDownloading = true;
