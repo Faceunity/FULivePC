@@ -53,13 +53,13 @@ Window {
     //渲染美体
     property var b_arBody: false
     //道具选项下标
-    property var i_category_avatar: 9
+    // property var i_category_avatar: 9
     property var i_category_jingpin: 0
     property var i_category_backgroundSegmentation: 5
     property var i_category_makeup: 3
     property var i_category_lightMakeup: 4
-    property var i_category_greenScreen: 15
-    property var i_category_safeArea: 16
+    property var i_category_greenScreen: 14
+    property var i_category_safeArea: 15
     //窗体大小改变
     onWidthChanged: {
         xScale = width * 1.0 / 1360.0
@@ -163,9 +163,10 @@ Window {
             if(x < i_category_greenScreen){
                 i_arSelectCategoryPoint = Qt.point(x,y)
                 i_selectCategory = x
-                if(x == 0 && y == 0){
-                    showAvator(true)
-                }else if(x == i_category_jingpin){
+                // if(x == i_category_avatar && y == 0){
+                //     showAvator(true)
+                // }else
+                if(x == i_category_jingpin){
                     i_selectSticker = z
                     m_lStickerTips.currentIndex = z
                 }else{
@@ -241,7 +242,7 @@ Window {
             i_selectCategoryPageLast = i_selectCategoryPage
             i_selectCategoryPage = 0
             m_propOptionListView.contentX = 0
-            showAvator(false)
+            // showAvator(false)
             m_lProp.x = 380
             m_lProp.contentX = 0
             //第一次没选择摄像头或视频时遮挡
@@ -282,9 +283,10 @@ Window {
                 i_selectCategory = i_arSelectCategoryPoint.x
                 UIBridge.selectCategory = i_arSelectCategoryPoint.x
                 updatePropOption(i_arSelectCategoryPoint.x)
-                if(i_arSelectCategoryPoint.x == i_category_avatar){
-                    showAvator(true)
-                }else if(i_arSelectCategoryPoint.x == i_category_jingpin){
+                // if(i_arSelectCategoryPoint.x == i_category_avatar){
+                //     showAvator(true)
+                // }else
+                if(i_arSelectCategoryPoint.x == i_category_jingpin){
                     showBoutiqueSticker(true)
                 }
             }
@@ -369,7 +371,7 @@ Window {
             m_lmProp.append( { icon: "gesturerecognition", text:"手势识别", selected: false, selecteditem:false , enabledItem: false})
             m_lmProp.append( { icon: "Expressionrecognition", text:"表情识别", selected: false, selecteditem:false , enabledItem: false})
             m_lmProp.append( { icon: "annimoji", text:"Animoji", selected: false, selecteditem:false, enabledItem: false})
-            m_lmProp.append( { icon: "avatar", text:"Avatar", selected: false, selecteditem:false, enabledItem: false})
+            // m_lmProp.append( { icon: "avatar", text:"Avatar", selected: false, selecteditem:false, enabledItem: false})
             m_lmProp.append( { icon: "hairdressing", text:"美发", selected: false, selecteditem:false , enabledItem: false})
             m_lmProp.append( { icon: "AR", text:"AR面具", selected: false, selecteditem:false , enabledItem: false})
             m_lmProp.append( { icon: "Musicfilter", text:"音乐滤镜", selected: false, selecteditem:false , enabledItem: false})
@@ -1341,23 +1343,25 @@ Window {
                                                 m_rBGSegment.visible = true
                                                 m_rARGSShadow.visible = true
                                                 m_fileDialogBGS.open()
-                                            }else if(UIBridge.selectCategory === i_category_avatar && i === 0){
-                                                showAvator(true)
-                                            }else if(UIBridge.selectCategory === i_category_safeArea && i === 0){
+                                            }
+                                            // else if(UIBridge.selectCategory === i_category_avatar && i === 0){
+                                            //     showAvator(true)
+                                            // }
+                                            else if(UIBridge.selectCategory === i_category_safeArea && i === 0){
                                                 //打开自定义绿幕安全区域选择
                                                 m_rPropShadow.visible = true
                                                 m_rARGSShadow.visible = true
                                                 m_fileDialogGSSafe.open()
                                             }else{
-                                                showAvator(false)
+                                                // showAvator(false)
                                                 UIBridge.useProps(i)
                                             }
                                         }else{
-                                            if(UIBridge.selectCategory === i_category_avatar){
-                                                showAvator(false)
-                                            }else{
+                                            // if(UIBridge.selectCategory === i_category_avatar){
+                                            //     showAvator(false)
+                                            // }else{
                                                 UIBridge.nonuseProps()
-                                            }
+                                            // }
                                             i_arSelectCategoryPoint = Qt.point(-1, -1)
                                         }
                                     }else{
@@ -1509,7 +1513,7 @@ Window {
                             onClicked: {
                                 if(i_propJingpinPage != 0){
                                     i_propJingpinPage--
-                                    m_lStickerBundles.contentX -= 760
+                                    m_lStickerBundles.contentX -= 764
                                     if(m_lStickerBundles.contentX < 0){
                                         m_lStickerBundles.contentX = 0
                                     }
@@ -1529,7 +1533,7 @@ Window {
                             onClicked: {
                                 if(i_propJingpinPage != Math.ceil(m_lmStickerBundles.count / 9) - 1){
                                     i_propJingpinPage++
-                                    m_lStickerBundles.contentX += 760
+                                    m_lStickerBundles.contentX += 764
                                 }
                             }
                         }
@@ -3118,46 +3122,46 @@ Window {
                         }
                     }
                 }//---自定义美妆窗体
-                //选择avator后右侧提示
-                Rectangle{
-                    x: 930
-                    y: 70
-                    width: 420
-                    height: 790
-                    color: "#C8FFFFFF"
-                    visible: i_arSelectCategoryPoint.x == i_category_avatar && i_arSelectCategoryPoint.y == 0
-                    MouseArea{
-                        anchors.fill: parent
-                    }
-                    Rectangle{
-                        x: 35
-                        y: 360
-                        width: 350
-                        height: 90
-                        radius: 8
-                        border.color: "#E1E1E1"
-                        border.width: 1
-                        Image {
-                            x: 30
-                            y: 15
-                            width: 20
-                            height: 20
-                            source: "qrc:/res/icon_tips.png"
-                        }
-                        TextBlack{
-                            x: 0
-                            y: 15
-                            width: 350
-                            text: "全身Avatar开启后美颜模块无法使用"
-                        }
-                        TextBlack{
-                            x: 0
-                            y: 55
-                            width: 350
-                            text: "如需编辑请先取消"
-                        }
-                    }
-                }//---选择avator后右侧提示
+                // //选择avator后右侧提示
+                // Rectangle{
+                //     x: 930
+                //     y: 70
+                //     width: 420
+                //     height: 790
+                //     color: "#C8FFFFFF"
+                //     visible: i_arSelectCategoryPoint.x == i_category_avatar && i_arSelectCategoryPoint.y == 0
+                //     MouseArea{
+                //         anchors.fill: parent
+                //     }
+                //     Rectangle{
+                //         x: 35
+                //         y: 360
+                //         width: 350
+                //         height: 90
+                //         radius: 8
+                //         border.color: "#E1E1E1"
+                //         border.width: 1
+                //         Image {
+                //             x: 30
+                //             y: 15
+                //             width: 20
+                //             height: 20
+                //             source: "qrc:/res/icon_tips.png"
+                //         }
+                //         TextBlack{
+                //             x: 0
+                //             y: 15
+                //             width: 350
+                //             text: "全身Avatar开启后美颜模块无法使用"
+                //         }
+                //         TextBlack{
+                //             x: 0
+                //             y: 55
+                //             width: 350
+                //             text: "如需编辑请先取消"
+                //         }
+                //     }
+                // }//---选择avator后右侧提示
             }
         }
         //---总窗体

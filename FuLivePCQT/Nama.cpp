@@ -30,10 +30,10 @@ PIXELFORMATDESCRIPTOR pfd = {
 void Nama::InitOpenGL()
 {
     HWND hw = CreateWindowExA(
-                0, "EDIT", "", ES_READONLY,
-                0, 0, 1, 1,
-                NULL, NULL,
-                GetModuleHandleA(NULL), NULL);
+        0, "EDIT", "", ES_READONLY,
+        0, 0, 1, 1,
+        NULL, NULL,
+        GetModuleHandleA(NULL), NULL);
     HDC hgldc = GetDC(hw);
     int spf = ChoosePixelFormat(hgldc, &pfd);
     int ret = SetPixelFormat(hgldc, spf, &pfd);
@@ -224,6 +224,8 @@ void Nama::InitNama()
         }
     }
 
+    fuFaceProcessorSetFaceLandmarkQuality(2);
+
     fuItemSetParamd(m_BodyShapeHandle,"Debug",0.0);
 
     fuItemSetParamd(m_MakeUpHandle, "machine_level", 1.0);
@@ -287,8 +289,8 @@ void Nama::RenderDefNama()
     }
 #ifdef SynchronizingCamera
     if(m_getNewFrame){
-#endif
-        //当前fuRender图像长与前一个不相同时调用fuHumanProcessorReset重置人体算法模块,解决分辨率切换崩溃
+#endif \
+    //当前fuRender图像长与前一个不相同时调用fuHumanProcessorReset重置人体算法模块,解决分辨率切换崩溃
         if(m_FrameWidth != m_frame.cols){
             m_FrameWidth = m_frame.cols;
             fuHumanProcessorReset();
@@ -414,6 +416,7 @@ void Nama::ReloadItems()
         }
     }
 
+    fuFaceProcessorSetFaceLandmarkQuality(2);
     fuItemSetParamd(m_BodyShapeHandle,"Debug",0.0);
     float fValue = 0.5f;
     fuSetFaceTrackParam((void*)"mouth_expression_more_flexible", &fValue);
@@ -504,7 +507,7 @@ bool Nama::SelectBundle(string bundleName, int person, bool bindFlag)
     DestroyAll();
 
     if ((m_bundleCategory == BundleCategory::Makeup && !bindFlag) ||
-            m_bundleCategory == BundleCategory::ItemJingpin){
+        m_bundleCategory == BundleCategory::ItemJingpin){
         UnLoadMakeup();
     }
     //绑定一个临时道具

@@ -19,7 +19,7 @@ enum BundleCategory
     GestureRecognition,     //手势识别
     ExpressionRecognition,  //表情识别
     Animoji,                //动物
-    Avatar,                 //虚拟人
+    // Avatar,                 //虚拟人
     BeautyHair,             //美发
     ARMask,                 //AR面具
     MusicFilter,            //音乐滤镜
