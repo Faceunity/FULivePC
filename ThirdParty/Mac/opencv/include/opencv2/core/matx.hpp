@@ -53,9 +53,7 @@
 #include "opencv2/core/traits.hpp"
 #include "opencv2/core/saturate.hpp"
 
-#ifdef CV_CXX11
 #include <initializer_list>
-#endif
 
 namespace cv
 {
@@ -142,26 +140,24 @@ public:
          _Tp v12, _Tp v13, _Tp v14, _Tp v15); //!< 1x16, 4x4 or 16x1 matrix
     explicit Matx(const _Tp* vals); //!< initialize from a plain array
 
-#ifdef CV_CXX11
     Matx(std::initializer_list<_Tp>); //!< initialize from an initializer list
-#endif
 
-    CV_NODISCARD_STD static Matx all(_Tp alpha);
-    CV_NODISCARD_STD static Matx zeros();
-    CV_NODISCARD_STD static Matx ones();
-    CV_NODISCARD_STD static Matx eye();
-    CV_NODISCARD_STD static Matx diag(const diag_type& d);
+    static Matx all(_Tp alpha);
+    static Matx zeros();
+    static Matx ones();
+    static Matx eye();
+    static Matx diag(const diag_type& d);
     /** @brief Generates uniformly distributed random numbers
     @param a Range boundary.
     @param b The other range boundary (boundaries don't have to be ordered, the lower boundary is inclusive,
     the upper one is exclusive).
      */
-    CV_NODISCARD_STD static Matx randu(_Tp a, _Tp b);
+    static Matx randu(_Tp a, _Tp b);
     /** @brief Generates normally distributed random numbers
     @param a Mean value.
     @param b Standard deviation.
      */
-    CV_NODISCARD_STD static Matx randn(_Tp a, _Tp b);
+    static Matx randn(_Tp a, _Tp b);
 
     //! dot product computed with the default precision
     _Tp dot(const Matx<_Tp, m, n>& v) const;
@@ -371,9 +367,7 @@ public:
     Vec(_Tp v0, _Tp v1, _Tp v2, _Tp v3, _Tp v4, _Tp v5, _Tp v6, _Tp v7, _Tp v8, _Tp v9, _Tp v10, _Tp v11, _Tp v12, _Tp v13); //!< 14-element vector constructor
     explicit Vec(const _Tp* values);
 
-#ifdef CV_CXX11
     Vec(std::initializer_list<_Tp>);
-#endif
 
     Vec(const Vec<_Tp, cn>& v);
 
@@ -679,7 +673,6 @@ Matx<_Tp, m, n>::Matx(const _Tp* values)
     for( int i = 0; i < channels; i++ ) val[i] = values[i];
 }
 
-#ifdef CV_CXX11
 template<typename _Tp, int m, int n> inline
 Matx<_Tp, m, n>::Matx(std::initializer_list<_Tp> list)
 {
@@ -690,7 +683,6 @@ Matx<_Tp, m, n>::Matx(std::initializer_list<_Tp> list)
         val[i++] = elem;
     }
 }
-#endif
 
 template<typename _Tp, int m, int n> inline
 Matx<_Tp, m, n> Matx<_Tp, m, n>::all(_Tp alpha)
@@ -1033,11 +1025,9 @@ template<typename _Tp, int cn> inline
 Vec<_Tp, cn>::Vec(const _Tp* values)
     : Matx<_Tp, cn, 1>(values) {}
 
-#ifdef CV_CXX11
 template<typename _Tp, int cn> inline
 Vec<_Tp, cn>::Vec(std::initializer_list<_Tp> list)
     : Matx<_Tp, cn, 1>(list) {}
-#endif
 
 template<typename _Tp, int cn> inline
 Vec<_Tp, cn>::Vec(const Vec<_Tp, cn>& m)

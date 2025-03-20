@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.5)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12" CACHE STRING "Minimum OS X deployment version" FORCE)
 project(FULivePC)
 set(target FULivePC)
@@ -9,6 +9,7 @@ if(WIN32)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/cmakeScripts/Modules)
     include(${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Windows/cmakeScripts/import_custom_library.cmake)
 elseif(APPLE)
+    set(CMAKE_BUILD_RPATH "@executable_path/../Frameworks")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/cmakeScripts/Modules)
     include(${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/cmakeScripts/import_custom_library.cmake)
 elseif(UNIX)
@@ -387,7 +388,7 @@ elseif(APPLE)
 			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/../res    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
 			COMMAND ${CMAKE_COMMAND} -E make_directory  ${MacOS_APP_Content}/Frameworks
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/glfw/lib/x86_64/*.dylib  ${MacOS_APP_Content}/Frameworks
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/FaceUnity-SDK-Mac/lib/CNamaSDK.xcframework  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/FaceUnity-SDK-Mac/lib/x86_64/*.dylib  ${MacOS_APP_Content}/Frameworks
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libcurl/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/Framework/*.dylib  ${MacOS_APP_Content}/Frameworks
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libzip/lib/x86_64/*.dylib  ${MacOS_APP_Content}/Frameworks
@@ -404,7 +405,7 @@ elseif(APPLE)
 			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/../res    ${CMAKE_CURRENT_LIST_DIR}/MAC_DATA/ResPic.bundle
 			COMMAND ${CMAKE_COMMAND} -E make_directory  ${MacOS_APP_Content}/Frameworks
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/glfw/lib/arm64/*.dylib  ${MacOS_APP_Content}/Frameworks
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/FaceUnity-SDK-Mac/lib/CNamaSDK.xcframework  ${MacOS_APP_Content}/Frameworks
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/FaceUnity-SDK-Mac/lib/arm64/*.dylib  ${MacOS_APP_Content}/Frameworks
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libcurl/lib/*.dylib  ${MacOS_APP_Content}/Frameworks
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/Framework/*.dylib  ${MacOS_APP_Content}/Frameworks
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/Mac/libzip/lib/arm64/*.dylib  ${MacOS_APP_Content}/Frameworks
