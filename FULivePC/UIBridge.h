@@ -170,8 +170,16 @@ struct StyleRecommendationParam {
 	float mFaceShapeLevelDefault[MAX_FACESHAPEPARAMTER];
 	float mFaceBeautyLevel[MAX_BEAUTYFACEPARAMTER];
 	float mFaceShapeLevel[MAX_FACESHAPEPARAMTER];
+	float mBodyBlurLevelDefault = 0.f;
+	float mBodyBlurLevel = 0.f;
+	float mFacialPlumpLevelDefault = 0.f;
+	float mFacialPlumpLevel = 0.f;
+	float mEyePupilLevelDefault = 0.f;
+	float mEyePupilLevel = 0.f;
 	int mMakeUpIntensity;
 	int mFilterLevel;
+	int mBeautyFilterIdx = -1;
+	int mBeautyFilterLevel = 0;
 };
 
 struct LightMakeupParam
@@ -264,10 +272,14 @@ public:
 	static float m_localBgSegVideoHeight;
 	
 	static float mFaceBeautyLevel[MAX_BEAUTYFACEPARAMTER];
+	static float mBodyBlurLevel;
+	static float mFacialPlumpLevel;
+	static float mEyePupilLevel;
 	static float mFaceShapeLevel[MAX_FACESHAPEPARAMTER];
 	static float mFilterLevel[10];
 	static float mMakeupLevel[10];
 	static float mBodyShapeLevel[MAX_BODY_SHAPE_PARAM];
+	static float mBreastStrengthLevel;
 	static float mGSParam[MAX_GREEN_SCREEN_PARAM];
 	static vector<StyleRecommendationParam> mStyleParamList;
 	static int mStyleRecommendationIndex;

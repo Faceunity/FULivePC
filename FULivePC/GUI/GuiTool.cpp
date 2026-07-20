@@ -12,6 +12,7 @@
 #include "rapidjson/prettywriter.h"
 #include <iostream>
 #include <fstream>
+#include <map>
 extern float scaleRatioW;
 extern float scaleRatioH;
 
@@ -19,6 +20,193 @@ using namespace cv;
 
 namespace gui_tool
 {
+	static bool parseStyleParamObject(const rapidjson::Value& obj, StyleRecommendationParam& tempSRP)
+	{
+		if (!obj.IsObject()) {
+			return false;
+		}
+		if (obj.HasMember("BeautyLevelDefault"))
+		{
+			const auto& arrayValue = obj["BeautyLevelDefault"];
+			for (rapidjson::SizeType i = 0; i < arrayValue.Size() && i < MAX_BEAUTYFACEPARAMTER; i++)
+			{
+				tempSRP.mFaceBeautyLevelDefault[i] = arrayValue[i].GetFloat();
+			}
+		}
+		if (obj.HasMember("ShapeLevelDefault"))
+		{
+			const auto& arrayValue = obj["ShapeLevelDefault"];
+			for (rapidjson::SizeType i = 0; i < arrayValue.Size() && i < MAX_FACESHAPEPARAMTER; i++)
+			{
+				tempSRP.mFaceShapeLevelDefault[i] = arrayValue[i].GetFloat();
+			}
+		}
+		if (obj.HasMember("BeautyLevel"))
+		{
+			const auto& arrayValue = obj["BeautyLevel"];
+			for (rapidjson::SizeType i = 0; i < arrayValue.Size() && i < MAX_BEAUTYFACEPARAMTER; i++)
+			{
+				tempSRP.mFaceBeautyLevel[i] = arrayValue[i].GetFloat();
+			}
+		}
+		if (obj.HasMember("ShapeLevel"))
+		{
+			const auto& arrayValue = obj["ShapeLevel"];
+			for (rapidjson::SizeType i = 0; i < arrayValue.Size() && i < MAX_FACESHAPEPARAMTER; i++)
+			{
+				tempSRP.mFaceShapeLevel[i] = arrayValue[i].GetFloat();
+			}
+		}
+		if (obj.HasMember("FilterLevel"))
+		{
+			tempSRP.mFilterLevel = obj["FilterLevel"].GetInt();
+		}
+		if (obj.HasMember("BeautyFilterIdx"))
+		{
+			tempSRP.mBeautyFilterIdx = obj["BeautyFilterIdx"].GetInt();
+		}
+		if (obj.HasMember("BeautyFilterLevel"))
+		{
+			tempSRP.mBeautyFilterLevel = obj["BeautyFilterLevel"].GetInt();
+		}
+		if (obj.HasMember("MakeUpIntensity"))
+		{
+			tempSRP.mMakeUpIntensity = obj["MakeUpIntensity"].GetInt();
+		}
+		if (obj.HasMember("BodyBlurLevelDefault"))
+		{
+			tempSRP.mBodyBlurLevelDefault = obj["BodyBlurLevelDefault"].GetFloat();
+		}
+		if (obj.HasMember("BodyBlurLevel"))
+		{
+			tempSRP.mBodyBlurLevel = obj["BodyBlurLevel"].GetFloat();
+		}
+		if (obj.HasMember("FacialPlumpLevelDefault"))
+		{
+			tempSRP.mFacialPlumpLevelDefault = obj["FacialPlumpLevelDefault"].GetFloat();
+		}
+		if (obj.HasMember("FacialPlumpLevel"))
+		{
+			tempSRP.mFacialPlumpLevel = obj["FacialPlumpLevel"].GetFloat();
+		}
+		if (obj.HasMember("EyePupilLevelDefault"))
+		{
+			tempSRP.mEyePupilLevelDefault = obj["EyePupilLevelDefault"].GetFloat();
+		}
+		if (obj.HasMember("EyePupilLevel"))
+		{
+			tempSRP.mEyePupilLevel = obj["EyePupilLevel"].GetFloat();
+		}
+		return true;
+	}
+
+	static bool parseStyleConfigContent(const string& json_content, vector<StyleRecommendationParam>& outList)
+	{
+		rapidjson::Document dom;
+		if (dom.Parse(json_content.c_str()).HasParseError() || !dom.IsObject()) {
+			return false;
+		}
+		outList.clear();
+		for (rapidjson::Value::ConstMemberIterator itr = dom.MemberBegin(); itr != dom.MemberEnd(); itr++)
+		{
+			if (!itr->name.IsString()) {
+				continue;
+			}
+			StyleRecommendationParam tempSRP;
+			tempSRP.styleName = itr->name.GetString();
+			const auto& jValue = itr->value;
+			if (jValue.IsArray() && jValue.Size() > 0)
+			{
+				parseStyleParamObject(jValue[0], tempSRP);
+			}
+			outList.push_back(tempSRP);
+		}
+		return !outList.empty();
+	}
+
+	static bool readStyleConfigFile(const string& path, vector<StyleRecommendationParam>& outList)
+	{
+		ifstream in(path.c_str());
+		if (!in.is_open()) {
+			return false;
+		}
+		string json_content((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
+		in.close();
+		return parseStyleConfigContent(json_content, outList);
+	}
+
+	// 仅按 mStyleParamList 写文件，不把当前 UI 滑杆同步进列表（合并写回时使用）
+	static void writeStyleParamListToFile(const string& confPath)
+	{
+		if (UIBridge::mStyleParamList.empty() || confPath.empty()) {
+			return;
+		}
+		rapidjson::StringBuffer buf;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buf);
+		writer.StartObject();
+		for (size_t i = 0; i < UIBridge::mStyleParamList.size(); i++) {
+			StyleRecommendationParam srp = UIBridge::mStyleParamList.at(i);
+			writer.Key(srp.styleName.c_str());
+			writer.StartArray();
+			writer.StartObject();
+			writer.Key("BeautyLevelDefault");
+			writer.StartArray();
+			for (int j = 0; j < MAX_BEAUTYFACEPARAMTER; j++) {
+				writer.Double(srp.mFaceBeautyLevelDefault[j]);
+			}
+			writer.EndArray();
+			writer.Key("ShapeLevelDefault");
+			writer.StartArray();
+			for (int j = 0; j < MAX_FACESHAPEPARAMTER; j++) {
+				writer.Double(srp.mFaceShapeLevelDefault[j]);
+			}
+			writer.EndArray();
+			writer.Key("BeautyLevel");
+			writer.StartArray();
+			for (int j = 0; j < MAX_BEAUTYFACEPARAMTER; j++) {
+				writer.Double(srp.mFaceBeautyLevel[j]);
+			}
+			writer.EndArray();
+			writer.Key("ShapeLevel");
+			writer.StartArray();
+			for (int j = 0; j < MAX_FACESHAPEPARAMTER; j++) {
+				writer.Double(srp.mFaceShapeLevel[j]);
+			}
+			writer.EndArray();
+			writer.Key("FilterLevel");
+			writer.Int(srp.mFilterLevel);
+			if (srp.mBeautyFilterIdx >= 0) {
+				writer.Key("BeautyFilterIdx");
+				writer.Int(srp.mBeautyFilterIdx);
+				writer.Key("BeautyFilterLevel");
+				writer.Int(srp.mBeautyFilterLevel);
+			}
+			writer.Key("MakeUpIntensity");
+			writer.Int(srp.mMakeUpIntensity);
+			writer.Key("BodyBlurLevelDefault");
+			writer.Double(srp.mBodyBlurLevelDefault);
+			writer.Key("BodyBlurLevel");
+			writer.Double(srp.mBodyBlurLevel);
+			writer.Key("FacialPlumpLevelDefault");
+			writer.Double(srp.mFacialPlumpLevelDefault);
+			writer.Key("FacialPlumpLevel");
+			writer.Double(srp.mFacialPlumpLevel);
+			writer.Key("EyePupilLevelDefault");
+			writer.Double(srp.mEyePupilLevelDefault);
+			writer.Key("EyePupilLevel");
+			writer.Double(srp.mEyePupilLevel);
+			writer.EndObject();
+			writer.EndArray();
+		}
+		writer.EndObject();
+		ofstream outfile(confPath.c_str());
+		if (!outfile.is_open()) {
+			fprintf(stderr, "fail to open file to write: %s\n", confPath.c_str());
+			return;
+		}
+		outfile << buf.GetString() << endl;
+		outfile.close();
+	}
 
 	void ShowHelpMarker(const char* desc)
 	{
@@ -426,93 +614,73 @@ namespace gui_tool
 		return texRet;
 	}
 	void readStyleConfig() {
+		UIBridge::mStyleParamList.clear();
 
-		string strRealPath = "";
-
-#ifdef __APPLE__
-		strRealPath = FuToolMac::GetDocumentPath() + "/style_setup.json";
-#else
-		strRealPath = FuTool::GetFileFullPathFromeSearchPath(gCustomStyleConfig.c_str());
-#endif 
-
-		ifstream in(strRealPath.c_str());
-		if (!in.is_open()) {
-			fprintf(stderr, "fail to read json file: %s\n", gCustomStyleConfig.data());
-			strRealPath = FuTool::GetFileFullPathFromeSearchPath(gCustomStyleConfig.c_str());
-			in.open(strRealPath);
-			if (!in.is_open()) {
-				return;
-			}
+		// 包内配置作为基准（含新增风格、且保持与 bundle 序号对齐的顺序）
+		string bundledPath = FuTool::GetFileFullPathFromeSearchPath(gCustomStyleConfig.c_str());
+		vector<StyleRecommendationParam> bundledList;
+		if (!readStyleConfigFile(bundledPath, bundledList)) {
+			fprintf(stderr, "fail to read bundled style json: %s\n", gCustomStyleConfig.data());
 		}
 
-		string json_content((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
-		in.close();
+		string userPath = "";
+#ifdef __APPLE__
+		userPath = FuToolMac::GetDocumentPath() + "/style_setup.json";
+#else
+		// Windows 直接读写 assets 同路径；无独立 Documents 副本时不做合并
+		userPath = bundledPath;
+#endif
 
-		rapidjson::Document dom;
-		if (!dom.Parse(json_content.c_str()).HasParseError())
-		{
-			for (rapidjson::Value::ConstMemberIterator itr = dom.MemberBegin(); itr != dom.MemberEnd(); itr++)
-			{
-				rapidjson::Value jKey;
-				rapidjson::Value jValue;
-				rapidjson::Document::AllocatorType allocator;
-				jKey.CopyFrom(itr->name, allocator);
-				jValue.CopyFrom(itr->value, allocator);
-				if (jKey.IsString())
-				{
-					StyleRecommendationParam tempSRP;
-					tempSRP.styleName = jKey.GetString();
-					if (jValue.IsArray() && jValue.Size() > 0)
-					{
-						const auto& obj = jValue[0];
-						if (obj.HasMember("BeautyLevelDefault"))
-						{
-							const auto& arrayValue = obj["BeautyLevelDefault"];
-							for (int i = 0; i < arrayValue.Size(); i++)
-							{
-								tempSRP.mFaceBeautyLevelDefault[i] = arrayValue[i].GetFloat();
-							}
-						}
-						if (obj.HasMember("ShapeLevelDefault"))
-						{
-							const auto& arrayValue = obj["ShapeLevelDefault"];
-							for (int i = 0; i < arrayValue.Size(); i++)
-							{
-								tempSRP.mFaceShapeLevelDefault[i] = arrayValue[i].GetFloat();
-							}
-						}
-						if (obj.HasMember("BeautyLevel"))
-						{
-							const auto& arrayValue = obj["BeautyLevel"];
-							for (int i = 0; i < arrayValue.Size(); i++)
-							{
-								tempSRP.mFaceBeautyLevel[i] = arrayValue[i].GetFloat();
-							}
-						}
-						if (obj.HasMember("ShapeLevel"))
-						{
-							const auto& arrayValue = obj["ShapeLevel"];
-							for (int i = 0; i < arrayValue.Size(); i++)
-							{
-								tempSRP.mFaceShapeLevel[i] = arrayValue[i].GetFloat();
-							}
-						}
-						if (obj.HasMember("FilterLevel"))
-						{
-							const auto& arrayValue = obj["FilterLevel"];
-							tempSRP.mFilterLevel = arrayValue.GetInt();
-						}
-						if (obj.HasMember("MakeUpIntensity"))
-						{
-							const auto& arrayValue = obj["MakeUpIntensity"];
-							tempSRP.mMakeUpIntensity = arrayValue.GetInt();
-						}
-					}
-					UIBridge::mStyleParamList.push_back(tempSRP);
+		vector<StyleRecommendationParam> userList;
+		bool hasUserFile = false;
+#ifdef __APPLE__
+		hasUserFile = readStyleConfigFile(userPath, userList);
+#else
+		// 非 Mac：仅用包内（或 search path）结果
+		hasUserFile = false;
+#endif
+
+		if (bundledList.empty() && hasUserFile) {
+			// 包内失败时退化为用户文件
+			UIBridge::mStyleParamList = userList;
+			return;
+		}
+		if (bundledList.empty()) {
+			return;
+		}
+
+		bool needMergeWriteBack = false;
+		if (hasUserFile) {
+			map<string, StyleRecommendationParam> userMap;
+			for (size_t i = 0; i < userList.size(); i++) {
+				userMap[userList[i].styleName] = userList[i];
+			}
+			UIBridge::mStyleParamList.clear();
+			UIBridge::mStyleParamList.reserve(bundledList.size());
+			for (size_t i = 0; i < bundledList.size(); i++) {
+				auto it = userMap.find(bundledList[i].styleName);
+				if (it != userMap.end()) {
+					// 保留用户已调过的参数
+					UIBridge::mStyleParamList.push_back(it->second);
+				} else {
+					// 旧配置缺失的新风格，用包内默认补齐
+					UIBridge::mStyleParamList.push_back(bundledList[i]);
+					needMergeWriteBack = true;
 				}
 			}
+			if (userList.size() < bundledList.size()) {
+				needMergeWriteBack = true;
+			}
+			if (needMergeWriteBack) {
+				writeStyleParamListToFile(userPath);
+			}
+		} else {
+			UIBridge::mStyleParamList = bundledList;
+#ifdef __APPLE__
+			// Documents 尚无配置时写入一份，后续用户调节可保存在此
+			writeStyleParamListToFile(userPath);
+#endif
 		}
-
 	}
 
 	void saveStyleConfig() {
@@ -526,6 +694,9 @@ namespace gui_tool
 		for (int i = 0; i < MAX_FACESHAPEPARAMTER; i++) {
 			tempSRP.mFaceShapeLevel[i] = UIBridge::mFaceShapeLevel[i];
 		}
+		tempSRP.mBodyBlurLevel = UIBridge::mBodyBlurLevel;
+		tempSRP.mFacialPlumpLevel = UIBridge::mFacialPlumpLevel;
+		tempSRP.mEyePupilLevel = UIBridge::mEyePupilLevel;
 		UIBridge::mStyleParamList.at(UIBridge::mStyleRecommendationIndex) = tempSRP;
 
 		rapidjson::StringBuffer buf;
@@ -563,8 +734,26 @@ namespace gui_tool
 			writer.EndArray();
 			writer.Key("FilterLevel");
 			writer.Int(srp.mFilterLevel);
+			if (srp.mBeautyFilterIdx >= 0) {
+				writer.Key("BeautyFilterIdx");
+				writer.Int(srp.mBeautyFilterIdx);
+				writer.Key("BeautyFilterLevel");
+				writer.Int(srp.mBeautyFilterLevel);
+			}
 			writer.Key("MakeUpIntensity");
 			writer.Int(srp.mMakeUpIntensity);
+			writer.Key("BodyBlurLevelDefault");
+			writer.Double(srp.mBodyBlurLevelDefault);
+			writer.Key("BodyBlurLevel");
+			writer.Double(srp.mBodyBlurLevel);
+			writer.Key("FacialPlumpLevelDefault");
+			writer.Double(srp.mFacialPlumpLevelDefault);
+			writer.Key("FacialPlumpLevel");
+			writer.Double(srp.mFacialPlumpLevel);
+			writer.Key("EyePupilLevelDefault");
+			writer.Double(srp.mEyePupilLevelDefault);
+			writer.Key("EyePupilLevel");
+			writer.Double(srp.mEyePupilLevel);
 			writer.EndObject();
 			writer.EndArray();
 		}
@@ -594,6 +783,18 @@ namespace gui_tool
 		for (int i = 0; i < MAX_FACESHAPEPARAMTER; i++) {
 			UIBridge::mFaceShapeLevel[i] = tempSRP.mFaceShapeLevel[i];
 		}
+		UIBridge::mBodyBlurLevel = tempSRP.mBodyBlurLevel;
+		UIBridge::mFacialPlumpLevel = tempSRP.mFacialPlumpLevel;
+		UIBridge::mEyePupilLevel = tempSRP.mEyePupilLevel;
+		if (tempSRP.mBeautyFilterIdx >= 0) {
+			UIBridge::m_curFilterIdx = tempSRP.mBeautyFilterIdx;
+			UIBridge::mFilterLevel[tempSRP.mBeautyFilterIdx] = float(tempSRP.mBeautyFilterLevel);
+			UIBridge::showFilterSlider = tempSRP.mBeautyFilterIdx != 0;
+		} else {
+			UIBridge::m_curFilterIdx = 0;
+			UIBridge::mFilterLevel[0] = 0.f;
+			UIBridge::showFilterSlider = false;
+		}
 	}
 
 	void resetBeautyParam()
@@ -603,6 +804,12 @@ namespace gui_tool
 			tempSRP.mFaceBeautyLevel[i] = tempSRP.mFaceBeautyLevelDefault[i];
 			UIBridge::mFaceBeautyLevel[i] = tempSRP.mFaceBeautyLevelDefault[i];
 		}
+		tempSRP.mBodyBlurLevel = tempSRP.mBodyBlurLevelDefault;
+		UIBridge::mBodyBlurLevel = tempSRP.mBodyBlurLevelDefault;
+		tempSRP.mFacialPlumpLevel = tempSRP.mFacialPlumpLevelDefault;
+		UIBridge::mFacialPlumpLevel = tempSRP.mFacialPlumpLevelDefault;
+		tempSRP.mEyePupilLevel = tempSRP.mEyePupilLevelDefault;
+		UIBridge::mEyePupilLevel = tempSRP.mEyePupilLevelDefault;
 		UIBridge::mStyleParamList.at(UIBridge::mStyleRecommendationIndex) = tempSRP;
 	}
 
@@ -614,12 +821,15 @@ namespace gui_tool
 			tempSRP.mFaceShapeLevel[i] = tempSRP.mFaceShapeLevelDefault[i];
 			UIBridge::mFaceShapeLevel[i] = tempSRP.mFaceShapeLevelDefault[i];
 		}
+		tempSRP.mEyePupilLevel = tempSRP.mEyePupilLevelDefault;
+		UIBridge::mEyePupilLevel = tempSRP.mEyePupilLevelDefault;
 		UIBridge::mStyleParamList.at(UIBridge::mStyleRecommendationIndex) = tempSRP;
 	}
 
 	void resetBodyShapeParam()
 	{
 		memset(UIBridge::mBodyShapeLevel, 0, sizeof(float) * MAX_BODY_SHAPE_PARAM);
+		UIBridge::mBreastStrengthLevel = 0.f;
 	}
 #if _WIN32
 	int CalWstringWidth(const std::wstring& targetWstring, int fontH, int fontW, int fontWeight)

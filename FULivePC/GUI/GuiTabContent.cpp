@@ -126,6 +126,45 @@ namespace gui_tab_content
 					saveStyleConfig();
 				}
 				ImGui::PopStyleVar();
+
+				if (i == 0)
+				{
+					if (UIBridge::mBodyBlurLevel == 0)
+					{
+						LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_body_blur_close.png", false)->getTextureID(), u8"身体磨皮");
+					}
+					else
+					{
+						LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_body_blur_open.png", false)->getTextureID(), u8"身体磨皮");
+					}
+					ImGui::SameLine();
+					ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+					if (LayoutSlider(ImVec2(22, 22), ImVec2(232, 10), "##sliderBodyBlur", "##slidertextBodyBlur", &UIBridge::mBodyBlurLevel, 0, 100))
+					{
+						nama->UpdateBeauty();
+						saveStyleConfig();
+					}
+					ImGui::PopStyleVar();
+				}
+				else if (i == 1)
+				{
+					if (UIBridge::mFacialPlumpLevel == 0)
+					{
+						LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_facial_plump_close.png", false)->getTextureID(), u8"面部丰盈");
+					}
+					else
+					{
+						LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_facial_plump_open.png", false)->getTextureID(), u8"面部丰盈");
+					}
+					ImGui::SameLine();
+					ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+					if (LayoutSlider(ImVec2(22, 22), ImVec2(232, 10), "##sliderFacialPlump", "##slidertextFacialPlump", &UIBridge::mFacialPlumpLevel, 0, 100))
+					{
+						nama->UpdateBeauty();
+						saveStyleConfig();
+					}
+					ImGui::PopStyleVar();
+				}
 			}
 		}
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
@@ -206,6 +245,26 @@ namespace gui_tab_content
 				}
 			}
 			ImGui::PopStyleVar();
+
+			if (i == 2)
+			{
+				if (UIBridge::mEyePupilLevel == 0)
+				{
+					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_eye_pupil_close.png", false)->getTextureID(), u8"瞳孔大小");
+				}
+				else
+				{
+					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_eye_pupil_open.png", false)->getTextureID(), u8"瞳孔大小");
+				}
+				ImGui::SameLine();
+				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+				if (LayoutSlider(ImVec2(22, 22), ImVec2(232, 10), "##sliderEyePupil", "##slidertextEyePupil", &UIBridge::mEyePupilLevel, -50, 50))
+				{
+					nama->UpdateBeauty();
+					saveStyleConfig();
+				}
+				ImGui::PopStyleVar();
+			}
 		}
 
 		//ImGui::EndChild();
@@ -399,6 +458,37 @@ namespace gui_tab_content
 
 
 			ImGui::PopStyleVar();
+
+			if (i == 6)
+			{
+				if (UIBridge::mBreastStrengthLevel == 0)
+				{
+					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_breast_close.png", false)->getTextureID(), u8"   丰胸");
+				}
+				else
+				{
+					LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile("list_icon_breast_open.png", false)->getTextureID(), u8"   丰胸");
+				}
+				ImGui::SameLine();
+				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+				if (LayoutSlider(ImVec2(22, 22), ImVec2(232, 10), "##sliderBreastStrength", "##slidertextBreastStrength", &UIBridge::mBreastStrengthLevel, 0, 100))
+				{
+					if (!UIBridge::m_bShowingBodyBeauty) {
+						UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+						if (UIBridge::bundleCategory == BundleCategory::MusicFilter && UIBridge::mNeedPlayMP3) {
+							nama->pauseCurrentMp3();
+						}
+					}
+					if (UIBridge::bundleCategory == BundleCategory::LightMakeup && UIBridge::showLightMakeupTip) {
+						nama->UpdateFilter(UIBridge::m_curFilterIdx);
+						UIBridge::showLightMakeupTip = false;
+					}
+					UIBridge::mLastTime = ImGui::GetTime() + 2.0;
+					UIBridge::m_bShowingBodyBeauty = true;
+					nama->UpdateBodyShape();
+				}
+				ImGui::PopStyleVar();
+			}
 		}
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
 
@@ -412,6 +502,10 @@ namespace gui_tab_content
 					bTestOK = false;
 					break;
 				}
+			}
+
+			if (UIBridge::mBreastStrengthLevel != 0) {
+				bTestOK = false;
 			}
 
 			return bTestOK;

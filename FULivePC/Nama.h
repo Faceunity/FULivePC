@@ -155,6 +155,7 @@ namespace NamaExampleNameSpace
 	private:			
 		int mBodyShapeHandle = -1;
 		int mBeautyHandles;
+		int tempHandles;
 		int mMakeUpHandle;
 		int mGestureHandles;
 		int mFxaaHandles;

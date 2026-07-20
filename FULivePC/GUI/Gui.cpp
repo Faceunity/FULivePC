@@ -77,11 +77,15 @@ double UIBridge::mLastTimeExtra = 0.0;
 int UIBridge::mSelectedCamera = 0;
 bool UIBridge::mSelectedBsType = false;
 float UIBridge::mFaceBeautyLevel[MAX_BEAUTYFACEPARAMTER] = { 0.0f };
+float UIBridge::mBodyBlurLevel = 0.0f;
+float UIBridge::mFacialPlumpLevel = 0.0f;
+float UIBridge::mEyePupilLevel = 0.0f;
 
 float UIBridge::mFaceShapeLevel[MAX_FACESHAPEPARAMTER] = { 0.0f };
 float UIBridge::mFilterLevel[10] = { 40,40,40,40,40, 40,40,40,40,40 };
 float UIBridge::mMakeupLevel[10] = { 100,100,100,100,100, 100,100,100,100,100 };
 float UIBridge::mBodyShapeLevel[MAX_BODY_SHAPE_PARAM] = { 0.0f };
+float UIBridge::mBreastStrengthLevel = 0.0f;
 
 bool UIBridge::mNeedIpcWrite = false;
 bool UIBridge::mNeedPlayMP3 = false;
@@ -795,6 +799,7 @@ static void ShowFloatMenuAR(Nama* nama)
 						UIBridge::mStyleRecommendationIndex = i + 1;
 						loadStyleParam();
 						nama->UpdateBeauty();
+						nama->UpdateFilter(UIBridge::m_curFilterIdx);
 					}
 				}
 				else
@@ -803,6 +808,7 @@ static void ShowFloatMenuAR(Nama* nama)
 					UIBridge::mStyleRecommendationIndex = 0;
 					loadStyleParam();
 					nama->UpdateBeauty();
+					nama->UpdateFilter(UIBridge::m_curFilterIdx);
 					UIBridge::mLastTime = 0.0;
 					UIBridge::showItemTipsWindow = false;
 					UIBridge::mNeedStopMP3 = true;
@@ -1284,6 +1290,7 @@ static void ShowMainMenu(Nama* nama)
 					UIBridge::mStyleRecommendationIndex = UIBridge::mStyleRecommendationIndexLast;
 					loadStyleParam();
 					nama->UpdateBeauty();
+					nama->UpdateFilter(UIBridge::m_curFilterIdx);
 				}
 			}
 

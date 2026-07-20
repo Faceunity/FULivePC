@@ -57,8 +57,9 @@ StikcerHolder::~StikcerHolder()
 	curl_easy_cleanup(mCurl);
 }
 
-
-#define MAIN_URL  string("https://items.faceunity.com:4006/api") //string("http://192.168.0.122:8089/api") 
+#define MAIN_URL \
+  string(        \
+      "https://items.faceunity.com:4006/api")  // string("http://192.168.0.122:8089/api")
 
 #define GET_QUEST_TAG_URL  (MAIN_URL + "/guest/tags?platform=pc")
 
