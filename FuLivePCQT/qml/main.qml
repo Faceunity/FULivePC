@@ -138,6 +138,14 @@ Window {
                 m_lBeautyFace.itemAtIndex(i).i_Value = value
             }
         }
+        onUpdateFilterParam:{
+            updateFilter()
+            m_gFilter.currentIndex = UIBridge.filterIndex
+            m_slider.value = UIBridge.filter[2][UIBridge.filterIndex]
+            for(var i = 0; i < m_gFilter.count; i++){
+                m_gFilter.itemAtIndex(i).updateSelect(UIBridge.filterIndex)
+            }
+        }
         onUpdateBsgPic: {
             //选中第二个背景图片
             i_arSelectCategoryPoint.y = 1

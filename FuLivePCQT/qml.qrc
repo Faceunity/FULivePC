@@ -124,7 +124,10 @@
         <file>../res/jingongmen_zh_fu.png</file>
         <file>../res/juanhuzi_lm_fu.png</file>
         <file>../res/lanhudie.png</file>
-        <file>../res/list_icon_Brighteye_open.png</file>
+        <file>../res/list_icon_body_blur_close.png</file>
+        <file>../res/list_icon_body_blur_open.png</file>
+        <file>../res/list_icon_breast_close.png</file>
+        <file>../res/list_icon_breast_open.png</file>
         <file>../res/list_icon_annimoji_hover.png</file>
         <file>../res/list_icon_annimoji_nor.png</file>
         <file>../res/list_icon_AR_hover.png</file>
@@ -447,16 +450,16 @@
         <file>../res/yazui.png</file>
         <file>../res/yuguan.png</file>
         <file>../res/zhenxinhua-damaoxian.png</file>
-        <file>../res/叉-触光.png</file>
-        <file>../res/窗口-触光 .png</file>
-        <file>../res/勾icon.png</file>
-        <file>../res/镜像icon.png</file>
-        <file>../res/矩形10.png</file>
-        <file>../res/矩形-矩形.png</file>
-        <file>../res/摄像头 icon .png</file>
-        <file>../res/椭圆 5.png</file>
-        <file>../res/选择icon.png</file>
-        <file>../res/圆角三角.png</file>
+        <file>../res/res_fork_chuguang.png</file>
+        <file>../res/res_window_chuguang.png</file>
+        <file>../res/res_icon_check.png</file>
+        <file>../res/res_icon_mirror.png</file>
+        <file>../res/res_rect_10.png</file>
+        <file>../res/res_rect_rect.png</file>
+        <file>../res/res_icon_camera.png</file>
+        <file>../res/res_ellipse_5.png</file>
+        <file>../res/res_icon_select.png</file>
+        <file>../res/res_rounded_triangle.png</file>
         <file>qml/main.qml</file>
         <file>qml/content/TextBlack.qml</file>
         <file>qml/content/ListViewProp.qml</file>
@@ -556,6 +559,9 @@
         <file>../res/style_icon_09_jingdian.png</file>
         <file>../res/style_icon_10_nvshen.png</file>
         <file>../res/style_icon_11_nanshen.png</file>
+        <file>../res/style_icon_12_baikaishui.png</file>
+        <file>../res/style_icon_13_hunxuebaby.png</file>
+        <file>../res/style_icon_14_tianxinpai.png</file>
         <file>../res/btn_paly.png</file>
         <file>../res/list_icon_Jinpin_dis.png</file>
         <file>../res/list_icon_AR_dis.png</file>
@@ -579,6 +585,10 @@
         <file>../res/gsbackground.png</file>
         <file>../res/list_icon_acne_close.png</file>
         <file>../res/list_icon_acne_open.png</file>
+        <file>../res/list_icon_eye_pupil_close.png</file>
+        <file>../res/list_icon_eye_pupil_open.png</file>
+        <file>../res/list_icon_facial_plump_close.png</file>
+        <file>../res/list_icon_facial_plump_open.png</file>
         <file>../res/list_icon_clearness_close.png</file>
         <file>../res/list_icon_clearness_open.png</file>
     </qresource>

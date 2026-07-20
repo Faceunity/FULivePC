@@ -35,55 +35,55 @@ UIBridge::UIBridge()
     //第五个QStringList是qml中滑块显示是否在中间,true中间[-50,50],false[0,100],""转换qml为false,"1"转换为true
     //美肤
     //0 清晰磨皮  1 朦胧磨皮  2精细磨皮 3为均匀磨皮
-    m_beautySkin.append(QStringList{ "精准美肤 开启|关闭", "美肤模式 均匀磨皮|精细磨皮|清晰磨皮|朦胧磨皮", "磨皮", "祛斑痘", "美白模式 全局美白|皮肤美白",
+    m_beautySkin.append(QStringList{ "精准美肤 开启|关闭", "美肤模式 均匀磨皮|精细磨皮|清晰磨皮|朦胧磨皮", "磨皮", "身体磨皮", "祛斑痘", "面部丰盈", "美白模式 全局美白|皮肤美白",
                                     "美白", "红润", "清晰", "锐化", "五官立体",
                                     "亮眼","美牙", "去黑眼圈", "去法令纹"});
-    m_beautySkin.append(QStringList{ "skinbeauty", "BeautyMode", "Grindingskin", "acne", "Skinwhitening",
+    m_beautySkin.append(QStringList{ "skinbeauty", "BeautyMode", "Grindingskin", "body_blur", "acne", "facial_plump", "Skinwhitening",
                                     "Skinwhitening", "Ruddy", "clearness","sharpen", "stereoscopic",
                                     "Brighteye", "Beautifulteeth", "dark_circles", "wrinkle"});
-    m_beautySkin.append(QStringList{ "skin_detect", "blur_type", "blur_level", "delspot_level", "enable_skinseg",
+    m_beautySkin.append(QStringList{ "skin_detect", "blur_type", "blur_level", "body_blur_level", "delspot_level", "facial_plump", "enable_skinseg",
                                     "color_level_mode2", "red_level", "clarity", "sharpen", "face_threed",
                                     "eye_bright", "tooth_whiten", "remove_pouch_strength_mode2", "remove_nasolabial_folds_strength_mode2"});
-    m_defaultBeautySkin = QStringList{ "1", "3", "55", "0", "0",
-                                      "40", "30", "0", "60", "40",
+    m_defaultBeautySkin = QStringList{ "1", "3", "55", "0", "0", "0",
+                                      "0", "40", "30", "0", "60", "40",
                                       "30", "0", "80", "80"};
     m_beautySkin.append(m_defaultBeautySkin);
-    m_beautySkin.append(QStringList{ "","","","","","","","","","","","","","","","",""});
+    m_beautySkin.append(QStringList{ "","","","","","","","","","","","","","","","","",""});
     //美型
-    m_beautyFace.append(QStringList{ "瘦脸", "大眼", "圆眼", "下巴", "额头",
+    m_beautyFace.append(QStringList{ "瘦脸", "大眼", "圆眼", "瞳孔大小", "下巴", "额头",
                                     "瘦鼻", "嘴型", "嘴唇厚度", "V脸", "窄脸",
                                     "短脸", "小脸", "瘦颧骨", "瘦下颌骨", "眼睛位置",
                                     "开眼角", "眼睑下至", "眼距", "眼睛角度", "长鼻",
                                     "缩人中", "微笑嘴角", "眉毛上下", "眉间距", "眉毛粗细"});
-    m_beautyFace.append(QStringList{ "Thinface", "Bigeye", "round_eye", "chin", "forehead",
+    m_beautyFace.append(QStringList{ "Thinface", "Bigeye", "round_eye", "eye_pupil", "chin", "forehead",
                                     "Thinnose", "Mouthtype", "mouth_thickness", "v", "narrow_face",
                                     "short_face", "little_face", "cheekbones", "lower_jaw", "eye_position",
                                     "open_eyes", "eyelid_down", "eye_distance", "eye_angle", "proboscis",
                                     "shrinking", "smile_mouth", "eyebrow_position", "eyebrow_spacing", "eyebrow_thickness"});
-    m_beautyFace.append(QStringList{ "cheek_thinning_mode2", "eye_enlarging_mode3", "intensity_eye_circle", "intensity_chin_mode2", "intensity_forehead_mode2",
+    m_beautyFace.append(QStringList{ "cheek_thinning_mode2", "eye_enlarging_mode3", "intensity_eye_circle", "intensity_eye_pupil", "intensity_chin_mode2", "intensity_forehead_mode2",
                                     "intensity_nose_mode2", "intensity_mouth_mode3", "intensity_lip_thick", "cheek_v", "cheek_narrow_mode2",
                                     "cheek_short", "cheek_small_mode2", "intensity_cheekbones","intensity_lower_jaw", "intensity_eye_height",
                                     "intensity_canthus", "intensity_eye_lid", "intensity_eye_space", "intensity_eye_rotate","intensity_long_nose",
                                     "intensity_philtrum", "intensity_smile", "intensity_brow_height", "intensity_brow_space", "intensity_brow_thick"});
-    m_defaultBeautyFace = QStringList{ "0", "40", "0", "0", "0",
+    m_defaultBeautyFace = QStringList{ "0", "40", "0", "0", "0", "0",
                                       "50", "0", "0", "50", "0",
                                       "0", "0", "0", "10", "0",
                                       "0", "0", "0", "0", "0",
                                       "0", "35", "0", "0", "0"};
     m_beautyFace.append(m_defaultBeautyFace);
     m_beautyFace.append(QStringList{ "","","","1","1",
-                                    "","1","1","","",
+                                    "1","","1","1","",
                                     "","","","","1",
                                     "","","1","1","1",
-                                    "1","","1","1","1"});
+                                    "1","","1","1","1","1"});
     //美体
-    m_beautyBody.append(QStringList{ "瘦身", "长腿", "瘦腰", "美肩", "美臀", "小头", "瘦腿"});
-    m_beautyBody.append(QStringList{ "slimming", "stovepipe", "thin_waist", "shoulder", "hip", "little_head", "thin_leg"});
+    m_beautyBody.append(QStringList{ "瘦身", "长腿", "瘦腰", "美肩", "美臀", "小头", "瘦腿", "丰胸"});
+    m_beautyBody.append(QStringList{ "slimming", "stovepipe", "thin_waist", "shoulder", "hip", "little_head", "thin_leg", "breast"});
     m_beautyBody.append(QStringList{ "BodySlimStrength","LegSlimStrength" ,"WaistSlimStrength" , "ShoulderSlimStrength",
-                                    "HipSlimStrength" , "HeadSlim", "LegSlim"});
-    m_defaultBeautyBody = QStringList{ "0", "0", "0", "0", "0", "0", "0"};
+                                    "HipSlimStrength" , "HeadSlim", "LegSlim", "BreastStrength"});
+    m_defaultBeautyBody = QStringList{ "0", "0", "0", "0", "0", "0", "0", "0"};
     m_beautyBody.append(m_defaultBeautyBody);
-    m_beautyBody.append(QStringList{ "","","","1","","",""});
+    m_beautyBody.append(QStringList{ "","","","1","","","",""});
     //滤镜
     //第一个QStringList是qml中显示列表文字,括号中分成按钮显示
     //第二个QStringList是qml中显示图标中间名,也是nama中fuItemSetParamd设置道具名
@@ -127,7 +127,7 @@ UIBridge::UIBridge()
     readUserConfig();
     //读取风格推荐参数
     readStyleRecommendation();
-    m_styleRecommendationName = QStringList{"QiZhi", "XueJie", "ZhiYa", "DanYan", "ZhiGan", "HanGuoXueMei", "AiLing", "YuanSheng", "JingDian", "NvShen", "NanShen"};
+    m_styleRecommendationName = QStringList{"QiZhi", "XueJie", "ZhiYa", "DanYan", "ZhiGan", "HanGuoXueMei", "AiLing", "YuanSheng", "JingDian", "NvShen", "NanShen", "baikaishui", "hunxuebaby", "tianxinpai"};
     m_styleRecommendationIndex = m_styleRecommendationParam.mNameList.indexOf("BeautyParam");
     QStringList strList;
     m_gsKeyColor = strList;
@@ -366,6 +366,16 @@ void UIBridge::readStyleRecommendation()
             if(tempobj.contains("MakeUpIntensity")){
                 m_styleRecommendationParam.mMakeUpIntensity.append(tempobj["MakeUpIntensity"].toInt());
             }
+            if(tempobj.contains("BeautyFilterIdx")){
+                m_styleRecommendationParam.mBeautyFilterIdx.append(tempobj["BeautyFilterIdx"].toInt());
+            }else{
+                m_styleRecommendationParam.mBeautyFilterIdx.append(-1);
+            }
+            if(tempobj.contains("BeautyFilterLevel")){
+                m_styleRecommendationParam.mBeautyFilterLevel.append(tempobj["BeautyFilterLevel"].toInt());
+            }else{
+                m_styleRecommendationParam.mBeautyFilterLevel.append(0);
+            }
         }
     }
 }
@@ -404,6 +414,10 @@ void UIBridge::saveStyleRecommendation()
         object["ShapeLevel"] = temparray4;
         object["FilterLevel"] = m_styleRecommendationParam.mFilterLevel.at(i);
         object["MakeUpIntensity"] = m_styleRecommendationParam.mMakeUpIntensity.at(i);
+        if(m_styleRecommendationParam.mBeautyFilterIdx.at(i) >= 0){
+            object["BeautyFilterIdx"] = m_styleRecommendationParam.mBeautyFilterIdx.at(i);
+            object["BeautyFilterLevel"] = m_styleRecommendationParam.mBeautyFilterLevel.at(i);
+        }
         array.append(object);
         jsonObject[m_styleRecommendationParam.mNameList.at(i)] = array;
     }
@@ -718,6 +732,15 @@ void UIBridge::unLoadAvatar()
     }
 }
 
+static QStringList mergeConfigValues(const QStringList &saved, const QStringList &defaults)
+{
+    QStringList result = defaults;
+    for(int i = 0; i < saved.size() && i < result.size(); ++i){
+        result[i] = saved[i];
+    }
+    return result;
+}
+
 void UIBridge::readUserConfig()
 {
     //读取自定义背景分割配置
@@ -764,13 +787,13 @@ void UIBridge::readUserConfig()
                 m_cameraSet = jsonObject["CameraSet"].toInt();
             }
             if(jsonObject.contains("BeautySkin")){
-                m_beautySkin.replace(3, jsonObject["BeautySkin"].toString().split(","));
+                m_beautySkin.replace(3, mergeConfigValues(jsonObject["BeautySkin"].toString().split(","), m_defaultBeautySkin.toStringList()));
             }
             if(jsonObject.contains("BeautyFace")){
-                m_beautyFace.replace(3, jsonObject["BeautyFace"].toString().split(","));
+                m_beautyFace.replace(3, mergeConfigValues(jsonObject["BeautyFace"].toString().split(","), m_defaultBeautyFace.toStringList()));
             }
             if(jsonObject.contains("BeautyBody")){
-                m_beautyBody.replace(3, jsonObject["BeautyBody"].toString().split(","));
+                m_beautyBody.replace(3, mergeConfigValues(jsonObject["BeautyBody"].toString().split(","), m_defaultBeautyBody.toStringList()));
             }
             if(jsonObject.contains("GreenScreen")){
                 m_greenScreen.replace(3, jsonObject["GreenScreen"].toString().split(","));
@@ -1213,7 +1236,7 @@ void UIBridge::updateItemParam(int item, int index, QString value)
     case BeautySkin:
         updateCategory(m_beautySkin, 3, index, value);
         //前两个是按钮
-        if(index <= 1 || index == 4){
+        if(index <= 1 || index == 6){
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, index, true);
         }else{
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, index, false);
@@ -1255,7 +1278,7 @@ void UIBridge::resetItemParam(int item)
     case BeautySkin:
         m_beautySkin.replace(3, m_styleRecommendationParam.mBeautySkinDefault.at(m_styleRecommendationIndex));
         for(int i = 0 ; i < m_beautySkin.at(0).toStringList().size(); i++){
-            if(i <= 1 || i == 4){
+            if(i <= 1 || i == 6){
                 namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, true);
             }else{
                 namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, false);
@@ -1767,7 +1790,7 @@ void UIBridge::reloadItemParam()
 {
     Nama *nama = MainClass::getInstance()->m_nama;
     for(int i = 0 ; i < m_beautySkin.at(0).toStringList().size(); i++){
-        if(i <= 1 || i == 4){
+        if(i <= 1 || i == 6){
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, true);
         }else{
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, false);
@@ -1895,8 +1918,8 @@ void UIBridge::namaFuItemSetParamd(int handle, QList<QVariant> &valueList, int i
         {
             dValue += 50;
         }
-        //磨皮0-6
-        if(name == "blur_level"){
+        //磨皮0-6, 身体磨皮0-6
+        if(name == "blur_level" || name == "body_blur_level"){
             nama->itemSetParamd(handle, name.toStdString(), dValue * 6.0/ 100.0);
         }else{
             nama->itemSetParamd(handle, name.toStdString(), dValue / 100.0);
@@ -2074,7 +2097,7 @@ void UIBridge::updateStyleRecommendation(int index)
     m_beautySkin.replace(3, m_styleRecommendationParam.mBeautySkin.at(index));
     m_beautyFace.replace(3, m_styleRecommendationParam.mBeautyFace.at(index));
     for(int i = 0 ; i < m_beautySkin.at(0).toStringList().size(); i++){
-        if(i <= 1 || i == 4){
+        if(i <= 1 || i == 6){
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, true);
         }else{
             namaFuItemSetParamd(nama->m_BeautyHandles, m_beautySkin, i, false);
@@ -2086,8 +2109,22 @@ void UIBridge::updateStyleRecommendation(int index)
     //更新界面美颜,美型参数
     emit updateBeautySkinParam();
     emit updateBeautyFaceParam();
+    int beautyFilterIdx = m_styleRecommendationParam.mBeautyFilterIdx.at(index);
+    if(beautyFilterIdx >= 0){
+        m_filterIndex = beautyFilterIdx;
+        QStringList filterValues = m_filter.at(2).toStringList();
+        filterValues[m_filterIndex] = QString::number(m_styleRecommendationParam.mBeautyFilterLevel.at(index));
+        m_filter.replace(2, filterValues);
+    }else{
+        m_filterIndex = 0;
+        QStringList filterValues = m_filter.at(2).toStringList();
+        filterValues[0] = "0";
+        m_filter.replace(2, filterValues);
+    }
+    emit filterIndexChanged();
     m_bSaveStyleRecommendation = true;
     updateFilter();
+    emit updateFilterParam();
 }
 
 void UIBridge::setBackgroundSegType(int type)

@@ -145,6 +145,8 @@ struct StyleRecommendationParam{
     QList<QVariant> mBeautyFace;        //美型用户参数列表
     QList<int> mFilterLevel;            //滤镜强度
     QList<int> mMakeUpIntensity;        //美妆强度
+    QList<int> mBeautyFilterIdx;        //美颜滤镜栏索引,-1表示不使用
+    QList<int> mBeautyFilterLevel;      //美颜滤镜栏强度
 };
 
 class UIBridge:public QObject{
@@ -158,6 +160,7 @@ class UIBridge:public QObject{
     Q_PROPERTY(QList<QVariant> beautyFace READ beautyFace)
     Q_PROPERTY(QList<QVariant> beautyBody READ beautyBody)
     Q_PROPERTY(QList<QVariant> filter READ filter)
+    Q_PROPERTY(int filterIndex READ filterIndex NOTIFY filterIndexChanged)
     Q_PROPERTY(QVariant gsKeyColor READ gsKeyColor)
     Q_PROPERTY(QVariant checkModule READ checkModule)
     Q_PROPERTY(bool arFunction READ arFunction WRITE setARFunction NOTIFY arFunctionChanged)
@@ -188,6 +191,7 @@ public:
     QList<QVariant> beautyFace(){ return m_beautyFace; }
     QList<QVariant> beautyBody(){ return m_beautyBody; }
     QList<QVariant> filter(){ return m_filter; }
+    int filterIndex(){ return m_filterIndex; }
     QVariant gsKeyColor(){ return m_gsKeyColor; }
     QVariant checkModule(){ return m_checkMode; }
     QStringList cameraList();
@@ -434,6 +438,9 @@ signals:
     void updateBeautySkinParam();
     //更新美型参数
     void updateBeautyFaceParam();
+    //更新滤镜参数
+    void updateFilterParam();
+    void filterIndexChanged();
     //更新绿幕参数
     void updateGreenScreenParam();
     //更新绿幕重播按钮状态
