@@ -13,7 +13,7 @@ The parameter interface of hairdressing function is based on props, and the inpu
 
 #### Parameters：
 
-- Index        This prop preset 8 kinds of hair color, this parameter set value 0-7 corresponding.
+- Index        This prop presets 9 hair colors, corresponding to values 0-8; Index=8 is the black-hair preset.
 - Strength     This parameter is used to control the color intensity, 0 corresponds to no effect, 1 corresponds to the strongest effect, and the middle is continuous transition.
 - Col_L        Change hair color，Col_L = L/100.0，L is the L value of LAB color space.
 - Col_A        Change hair color，Col_A = A/254.0 + 0.5，A is the A value of the LAB color space.

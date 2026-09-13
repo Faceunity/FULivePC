@@ -171,6 +171,27 @@ private:
 
 };
 
+class CMEyeLashWocan :public CMBasePage, public CMNormalNode
+{
+	Declare_FUObject(CMEyeLashWocan, CMBasePage);
+public:
+	CMEyeLashWocan();
+	~CMEyeLashWocan();
+
+	virtual bool InitFrom(const rapidjson::Value & json) override;
+	virtual void ShowUI() override;
+	virtual std::string GetDescName() const override
+	{
+		return "卧蚕";
+	}
+
+	virtual void Reset() override;
+	virtual void ShowIntensityUI() override;
+	virtual void SetIntensity() override;
+
+private:
+
+};
 class CMEyeLiner :public CMBasePage, public CMNormalNode
 {
 	Declare_FUObject(CMEyeLiner, CMBasePage);

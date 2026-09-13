@@ -1,4 +1,4 @@
-#if _WIN32
+ï»¿#if _WIN32
 #include "Windows.h"
 #elif __APPLE__
 #include "fu_tool_mac.h"
@@ -20,6 +20,29 @@ using namespace cv;
 
 namespace gui_tool
 {
+	static const int kLegacyFaceShapeParameterCount = 25;
+	static const int kLegacyFaceShapeToCurrent[kLegacyFaceShapeParameterCount] = {
+		0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 14,
+		15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27
+	};
+
+	static void parseFaceShapeLevels(const rapidjson::Value& arrayValue,
+		float output[MAX_FACESHAPEPARAMTER], bool& isLegacy)
+	{
+		if (!arrayValue.IsArray()) {
+			return;
+		}
+		if (arrayValue.Size() == kLegacyFaceShapeParameterCount) {
+			isLegacy = true;
+			for (rapidjson::SizeType i = 0; i < arrayValue.Size(); ++i) {
+				output[kLegacyFaceShapeToCurrent[i]] = arrayValue[i].GetFloat();
+			}
+			return;
+		}
+		for (rapidjson::SizeType i = 0; i < arrayValue.Size() && i < MAX_FACESHAPEPARAMTER; ++i) {
+			output[i] = arrayValue[i].GetFloat();
+		}
+	}
 	static bool parseStyleParamObject(const rapidjson::Value& obj, StyleRecommendationParam& tempSRP)
 	{
 		if (!obj.IsObject()) {
@@ -36,10 +59,7 @@ namespace gui_tool
 		if (obj.HasMember("ShapeLevelDefault"))
 		{
 			const auto& arrayValue = obj["ShapeLevelDefault"];
-			for (rapidjson::SizeType i = 0; i < arrayValue.Size() && i < MAX_FACESHAPEPARAMTER; i++)
-			{
-				tempSRP.mFaceShapeLevelDefault[i] = arrayValue[i].GetFloat();
-			}
+			parseFaceShapeLevels(arrayValue, tempSRP.mFaceShapeLevelDefault, tempSRP.mFaceShapeArrayLegacy);
 		}
 		if (obj.HasMember("BeautyLevel"))
 		{
@@ -52,10 +72,7 @@ namespace gui_tool
 		if (obj.HasMember("ShapeLevel"))
 		{
 			const auto& arrayValue = obj["ShapeLevel"];
-			for (rapidjson::SizeType i = 0; i < arrayValue.Size() && i < MAX_FACESHAPEPARAMTER; i++)
-			{
-				tempSRP.mFaceShapeLevel[i] = arrayValue[i].GetFloat();
-			}
+			parseFaceShapeLevels(arrayValue, tempSRP.mFaceShapeLevel, tempSRP.mFaceShapeArrayLegacy);
 		}
 		if (obj.HasMember("FilterLevel"))
 		{
@@ -112,7 +129,7 @@ namespace gui_tool
 			if (!itr->name.IsString()) {
 				continue;
 			}
-			StyleRecommendationParam tempSRP;
+			StyleRecommendationParam tempSRP{};
 			tempSRP.styleName = itr->name.GetString();
 			const auto& jValue = itr->value;
 			if (jValue.IsArray() && jValue.Size() > 0)
@@ -135,7 +152,7 @@ namespace gui_tool
 		return parseStyleConfigContent(json_content, outList);
 	}
 
-	// ½ö°´ mStyleParamList Ð´ÎÄ¼þ£¬²»°Ñµ±Ç° UI »¬¸ËÍ¬²½½øÁÐ±í£¨ºÏ²¢Ð´»ØÊ±Ê¹ÓÃ£©
+	// ï¿½ï¿½ï¿½ï¿½ mStyleParamList Ð´ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½Ç° UI ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½ï¿½ï¿½ï¿½Ï²ï¿½Ð´ï¿½ï¿½Ê±Ê¹ï¿½Ã£ï¿½
 	static void writeStyleParamListToFile(const string& confPath)
 	{
 		if (UIBridge::mStyleParamList.empty() || confPath.empty()) {
@@ -485,7 +502,7 @@ namespace gui_tool
 
 		cv::circle(maskImg, pt_o, r, Scalar(255), -1);
 
-		//´ø°¢¶û·¨Í¨µÀµÄÔ­Ê¼Í¼
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½Ô­Ê¼Í¼
 		if (srcImg.channels() == 4)
 		{
 			int height = srcImg.rows;
@@ -497,7 +514,7 @@ namespace gui_tool
 					int maskAlpha = maskImg.at<cv::uint8_t>(row, col);
 					if (maskAlpha == 255)
 					{
-						//Ô²È¦ÇøÓò¸³Öµ³É°¢¶û·¨Ô­Ê¼Öµ
+						//Ô²È¦ï¿½ï¿½ï¿½ï¿½Öµï¿½É°ï¿½ï¿½ï¿½ï¿½ï¿½Ô­Ê¼Öµ
 						maskImg.at<cv::uint8_t>(row, col) = srcAlpha;
 					}
 				}
@@ -616,7 +633,7 @@ namespace gui_tool
 	void readStyleConfig() {
 		UIBridge::mStyleParamList.clear();
 
-		// °üÄÚÅäÖÃ×÷Îª»ù×¼£¨º¬ÐÂÔö·ç¸ñ¡¢ÇÒ±£³ÖÓë bundle ÐòºÅ¶ÔÆëµÄË³Ðò£©
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò±ï¿½ï¿½ï¿½ï¿½ï¿½ bundle ï¿½ï¿½Å¶ï¿½ï¿½ï¿½ï¿½Ë³ï¿½ï¿½
 		string bundledPath = FuTool::GetFileFullPathFromeSearchPath(gCustomStyleConfig.c_str());
 		vector<StyleRecommendationParam> bundledList;
 		if (!readStyleConfigFile(bundledPath, bundledList)) {
@@ -627,7 +644,7 @@ namespace gui_tool
 #ifdef __APPLE__
 		userPath = FuToolMac::GetDocumentPath() + "/style_setup.json";
 #else
-		// Windows Ö±½Ó¶ÁÐ´ assets Í¬Â·¾¶£»ÎÞ¶ÀÁ¢ Documents ¸±±¾Ê±²»×öºÏ²¢
+		// Windows Ö±ï¿½Ó¶ï¿½Ð´ assets Í¬Â·ï¿½ï¿½ï¿½ï¿½ï¿½Þ¶ï¿½ï¿½ï¿½ Documents ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Ï²ï¿½
 		userPath = bundledPath;
 #endif
 
@@ -636,12 +653,12 @@ namespace gui_tool
 #ifdef __APPLE__
 		hasUserFile = readStyleConfigFile(userPath, userList);
 #else
-		// ·Ç Mac£º½öÓÃ°üÄÚ£¨»ò search path£©½á¹û
+		// ï¿½ï¿½ Macï¿½ï¿½ï¿½ï¿½ï¿½Ã°ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ search pathï¿½ï¿½ï¿½ï¿½ï¿½
 		hasUserFile = false;
 #endif
 
 		if (bundledList.empty() && hasUserFile) {
-			// °üÄÚÊ§°ÜÊ±ÍË»¯ÎªÓÃ»§ÎÄ¼þ
+			// ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½Ê±ï¿½Ë»ï¿½Îªï¿½Ã»ï¿½ï¿½Ä¼ï¿½
 			UIBridge::mStyleParamList = userList;
 			return;
 		}
@@ -660,10 +677,20 @@ namespace gui_tool
 			for (size_t i = 0; i < bundledList.size(); i++) {
 				auto it = userMap.find(bundledList[i].styleName);
 				if (it != userMap.end()) {
-					// ±£ÁôÓÃ»§ÒÑµ÷¹ýµÄ²ÎÊý
-					UIBridge::mStyleParamList.push_back(it->second);
+					StyleRecommendationParam merged = it->second;
+					if (merged.mFaceShapeArrayLegacy) {
+						// Preserve every old setting by parameter name and seed only new parameters from the bundle.
+						const int newParameterIndices[] = { 6, 13, 18 };
+						for (int index : newParameterIndices) {
+							merged.mFaceShapeLevelDefault[index] = bundledList[i].mFaceShapeLevelDefault[index];
+							merged.mFaceShapeLevel[index] = bundledList[i].mFaceShapeLevel[index];
+						}
+						merged.mFaceShapeArrayLegacy = false;
+						needMergeWriteBack = true;
+					}
+					UIBridge::mStyleParamList.push_back(merged);
 				} else {
-					// ¾ÉÅäÖÃÈ±Ê§µÄÐÂ·ç¸ñ£¬ÓÃ°üÄÚÄ¬ÈÏ²¹Æë
+					// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È±Ê§ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ã°ï¿½ï¿½ï¿½Ä¬ï¿½Ï²ï¿½ï¿½ï¿½
 					UIBridge::mStyleParamList.push_back(bundledList[i]);
 					needMergeWriteBack = true;
 				}
@@ -677,7 +704,7 @@ namespace gui_tool
 		} else {
 			UIBridge::mStyleParamList = bundledList;
 #ifdef __APPLE__
-			// Documents ÉÐÎÞÅäÖÃÊ±Ð´ÈëÒ»·Ý£¬ºóÐøÓÃ»§µ÷½Ú¿É±£´æÔÚ´Ë
+			// Documents ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±Ð´ï¿½ï¿½Ò»ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½Ú¿É±ï¿½ï¿½ï¿½ï¿½Ú´ï¿½
 			writeStyleParamListToFile(userPath);
 #endif
 		}

@@ -160,6 +160,8 @@ namespace NamaExampleNameSpace
 		int mGestureHandles;
 		int mFxaaHandles;
 		int mGSHandle = -1;
+		int mHairNormalHandle = -1;
+		int mHairGradientHandle = -1;
 		std::queue<gui_tool::ColorBag> m_queueRencetColor;
 		std::map<std::string, int> m_CMakeupTypeMap;
 		std::unordered_map<std::string, int> m_CMakeupMap;
@@ -179,7 +181,7 @@ namespace NamaExampleNameSpace
 		int mModuleCode, mModuleCode1;
 		FURect gsPreviewRect;
 	
-		static std::string mFilters[6];
+		static std::string mFilters[10];
 		std::map<std::string, int> mBundlesMap;
 		std::unordered_map<std::string, std::vector<MakeupParam> > mMakeupsMap;
 		std::shared_ptr<FuController> m_Controller;

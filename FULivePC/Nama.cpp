@@ -36,8 +36,7 @@ extern void* new_context;
 
 map<int, Mp3*> mp3Map;
 
-string Nama::mFilters[6] = {"origin",       "bailiang1",   "fennen1",
-                            "xiaoqingxin1", "lengsediao1", "nuansediao1"};
+string Nama::mFilters[10] = {"origin", "roguanglengzi", "lengbaipi", "weibaolvjing", "qingtouguanggan", "bailiang1", "fennen1", "xiaoqingxin1", "lengsediao1", "nuansediao1"};
 std::unique_ptr<Nama> Nama::pNama = nullptr;
 
 void Nama::create(bool enable) {
@@ -340,6 +339,8 @@ void Nama::ReloadItems() {
   fuDestroyAllItems();
   fuOnDeviceLost();
   mMakeUpHandle = -1;
+  mHairNormalHandle = -1;
+  mHairGradientHandle = -1;
   UIBridge::m_curRenderItem = -1;
   UIBridge::m_curPlayingMusicItem = -1;
   m_CMakeupMap.clear();
@@ -1013,7 +1014,41 @@ bool Nama::SelectBundle(string bundleName, int maxFace) {
     UIBridge::m_curPlayingMusicItem = -1;
     UIBridge::mNeedPlayMP3 = false;
   }
-  if (0 == mBundlesMap[bundleName]) {
+  const bool isBeautyHair =
+      UIBridge::bundleCategory == BundleCategory::BeautyHair;
+  if (isBeautyHair) {
+    const bool isGradient = bundleName.find("hair_gradient_") != string::npos;
+    int& hairHandle =
+        isGradient ? mHairGradientHandle : mHairNormalHandle;
+
+    if (hairHandle <= 0) {
+      const size_t separator = bundleName.find_last_of("/\\");
+      const string bundleFolder =
+          separator == string::npos ? "" : bundleName.substr(0, separator + 1);
+      const string sharedBundleName =
+          bundleFolder +
+          (isGradient ? "hair_gradient.bundle" : "hair_normal.bundle");
+
+      vector<char> propData;
+      if (false == FuTool::LoadBundle(sharedBundleName, propData)) {
+        cout << "load hair prop data failed: " << sharedBundleName << endl;
+        UIBridge::m_curRenderItem = -1;
+        return false;
+      }
+
+      hairHandle = fuCreateItemFromPackage(&propData[0], propData.size());
+      if (hairHandle <= 0) {
+        cout << "create hair prop failed: " << sharedBundleName << endl;
+        UIBridge::m_curRenderItem = -1;
+        return false;
+      }
+      cout << "load hair prop data: " << sharedBundleName << endl;
+    }
+
+    bundleID = hairHandle;
+    const int index = FuTool::extractIntFromPath(bundleName) - 1;
+    fuItemSetParamd(bundleID, "Index", index);
+  } else if (0 == mBundlesMap[bundleName]) {
     /*if (!CheckModuleCode(UIBridge::bundleCategory))
     {
             cout << "no right to use." << endl;
@@ -1072,12 +1107,6 @@ bool Nama::SelectBundle(string bundleName, int maxFace) {
         fuItemSetParamd(bundleID, "machine_level", 1.0);
       }
     }
-    // 处理 美发
-    if (UIBridge::bundleCategory == BundleCategory::BeautyHair) {
-      int index = FuTool::extractIntFromPath(bundleName) - 1;
-      fuItemSetParamd(bundleID, "Index", index);
-    }
-
     if (UIBridge::bundleCategory == BundleCategory::MusicFilter) {
       string itemName = UIBridge::mCurRenderItemName.substr(
           0, UIBridge::mCurRenderItemName.find_last_of("."));
@@ -1137,7 +1166,10 @@ bool Nama::SelectBundle(string bundleName, int maxFace) {
     }
   }
 
-  if (UIBridge::m_curRenderItem == bundleID &&
+  const bool deselectCurrent =
+      isBeautyHair ? UIBridge::mCurRenderItemName == "NONE"
+                   : UIBridge::m_curRenderItem == bundleID;
+  if (deselectCurrent &&
       UIBridge::bundleCategory != BundleCategory::LightMakeup) {
     if (UIBridge::bundleCategory == BundleCategory::Makeup) {
       fuUnbindItems(mMakeUpHandle, &UIBridge::m_curRenderItem, 1);
@@ -1157,10 +1189,12 @@ bool Nama::SelectBundle(string bundleName, int maxFace) {
 
   ////////////////////////////////////////////////////////////////////////////////////////
   // 旧版本统一设定参数
-  fuItemSetParamd(UIBridge::m_curRenderItem, "is3DFlipH", 1);
-  fuItemSetParamd(UIBridge::m_curRenderItem, "isFlipTrack", 1);
-  // PC 就只有横屏
-  fuItemSetParamd(UIBridge::m_curRenderItem, "rotationMode", 2);
+  if (UIBridge::m_curRenderItem > 0) {
+    fuItemSetParamd(UIBridge::m_curRenderItem, "is3DFlipH", 1);
+    fuItemSetParamd(UIBridge::m_curRenderItem, "isFlipTrack", 1);
+    // PC 就只有横屏
+    fuItemSetParamd(UIBridge::m_curRenderItem, "rotationMode", 2);
+  }
 
   if (UIBridge::bundleCategory == Animoji) {
     maxFace = 1;
@@ -1184,12 +1218,14 @@ bool Nama::SelectBundle(string bundleName, int maxFace) {
     maxFace = 1;
   }
 
-  if (UIBridge::renderBundleCategory == Animoji) {
-    fuItemSetParamd(UIBridge::m_curRenderItem,
-                    "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 1);
-  } else {
-    fuItemSetParamd(UIBridge::m_curRenderItem,
-                    "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 0);
+  if (UIBridge::m_curRenderItem > 0) {
+    if (UIBridge::renderBundleCategory == Animoji) {
+      fuItemSetParamd(UIBridge::m_curRenderItem,
+                      "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 1);
+    } else {
+      fuItemSetParamd(UIBridge::m_curRenderItem,
+                      "{\"thing\":\"<global>\",\"param\":\"follow\"} ", 0);
+    }
   }
 
   UIBridge::lastMaxFace = maxFace;
