@@ -102,6 +102,7 @@
         <file>../res/hair_normal_06.png</file>
         <file>../res/hair_normal_07.png</file>
         <file>../res/hair_normal_08.png</file>
+        <file>../res/hair_normal_09.png</file>
         <file>../res/hez_ztt_fu.png</file>
         <file>../res/home_icon_Camera.png</file>
         <file>../res/hudie_lm_fu.png</file>
@@ -591,5 +592,22 @@
         <file>../res/list_icon_facial_plump_open.png</file>
         <file>../res/list_icon_clearness_close.png</file>
         <file>../res/list_icon_clearness_open.png</file>
+        <file>../res/list_image_roguanglengzi.png</file>
+        <file>../res/list_image_lengbaipi.png</file>
+        <file>../res/list_image_weibaolvjing.png</file>
+        <file>../res/list_image_qingtouguanggan.png</file>
+        <file>../res/demo_style_wocan_01.png</file>
+        <file>../res/demo_style_wocan_02.png</file>
+        <file>../res/demo_style_wocan_03.png</file>
+        <file>../res/demo_style_wocan_04.png</file>
+        <file>../res/demo_style_wocan_05.png</file>
+        <file>../res/list_icon_biyi_open.png</file>
+        <file>../res/list_icon_biyi_close.png</file>
+        <file>../res/list_icon_xiaotou_open.png</file>
+        <file>../res/list_icon_xiaotou_close.png</file>
+        <file>../res/list_icon_waiyanjiao_open.png</file>
+        <file>../res/list_icon_waiyanjiao_close.png</file>
+        <file>../res/list_icon_tianejing_open.png</file>
+        <file>../res/list_icon_tianejing_close.png</file>
     </qresource>
 </RCC>

@@ -1,4 +1,4 @@
-﻿import QtQuick 2.0
+import QtQuick 2.0
 import QtQuick.Window 2.0
 import QtQuick.Controls 2.1
 import QtQuick.Controls 1.2 as Controls12
@@ -497,7 +497,7 @@ Window {
     //读取美妆参数
     function loadCustomMakeupTitle(){
         m_lmCustomMakeupTitle.clear()
-        for(var i = 0; i < 10; i++)
+        for(var i = 0; i < 11; i++)
         {
             m_lmCustomMakeupTitle.append({"text":UIBridge.getCustomMakeup(i)[0][0], "value":UIBridge.getCustomMakeup(i)[0][3]})
         }
@@ -526,7 +526,7 @@ Window {
         if(m_lmCustomMakeup.count == 0){
             selectCustomMakeup(0)
             //粉底需要加载bundle
-            UIBridge.setCustomMakeupIndex(7, 0)
+            UIBridge.setCustomMakeupIndex(8, 0)
             m_lCustomMakeupColor.visible = true
         }else{
             if(selectColor !== -1){
@@ -2901,9 +2901,9 @@ Window {
                     visible: i_arSelectCategoryPoint.x == i_category_makeup && i_arSelectCategoryPoint.y == 0 && b_ARFunction
                     onVisibleChanged: {
                         //默认选中第一个
-                        if(visible){
-                            for(var i = 0; i < m_lvCustomMakeupTitle.count; i++){
-                                m_lvCustomMakeupTitle.itemAtIndex(i).updateSelect(m_lvCustomMakeupTitle.currentIndex)
+                        if(visible && m_lvCustomMakeupTitle.count > 0){
+                            if(m_lvCustomMakeupTitle.currentIndex < 0){
+                                m_lvCustomMakeupTitle.currentIndex = 0
                             }
                             m_rCustomMakeupWindow.n_select = m_lvCustomMakeupTitle.currentIndex
                             selectCustomMakeupTitel(m_lvCustomMakeupTitle.currentIndex)
@@ -2938,17 +2938,9 @@ Window {
                             width: 54
                             height: 30
                             t_Text: text
-                            function updateSelect(select){
-                                if(select === index){
-                                    b_Select = true
-                                }else{
-                                    b_Select = false
-                                }
-                            }
+                            b_Select: m_lvCustomMakeupTitle.currentIndex === index
                             function onButtonClick(){
-                                for(var i = 0; i < m_lvCustomMakeupTitle.count; i++){
-                                    m_lvCustomMakeupTitle.itemAtIndex(i).updateSelect(index)
-                                }
+                                m_lvCustomMakeupTitle.currentIndex = index
                                 m_rCustomMakeupWindow.n_select = index
                                 selectCustomMakeupTitel(index)
                             }
@@ -2966,15 +2958,11 @@ Window {
                         model: ListModel{
                             id: m_lmCustomMakeup
                         }
-                        onCurrentIndexChanged:{
-                            for(var i = 0; i < m_lCustomMakeup.count; i++){
-                                m_lCustomMakeup.itemAtIndex(i).updateSelect(currentIndex)
-                            }
-                        }
+
                         cellWidth: 98
                         cellHeight: 140
                         delegate:Rectangle{
-                            property var b_Selected: false
+                            property var b_Selected: m_lCustomMakeup.currentIndex === index
                             property var icon_Full: ""
                             Component.onCompleted: {
                                 icon_Full =  "qrc:/res/" + icon
@@ -2982,13 +2970,7 @@ Window {
                             }
                             width: 98
                             height: 120
-                            function updateSelect(select){
-                                if(select === index){
-                                    b_Selected = true
-                                }else{
-                                    b_Selected = false
-                                }
-                            }
+
                             Rectangle{
                                 x: 0
                                 y: 0
@@ -3046,12 +3028,10 @@ Window {
                             id: m_lmCustomMakeupColor
                         }
                         onCurrentIndexChanged:{
-                            for(var i = 0; i < m_lCustomMakeupColor.count; i++){
-                                m_lCustomMakeupColor.itemAtIndex(i).updateSelect(currentIndex)
-                            }
+
                             //粉底一键卸妆后更新滑块值
                             if(m_sliderMakeup.value == 0 && m_lmCustomMakeup.count == 0 && currentIndex != -1){
-                                UIBridge.setCustomMakeupIndex(7, 0)
+                                UIBridge.setCustomMakeupIndex(8, 0)
                                 m_sliderMakeup.value = UIBridge.getCustomMakeup(m_rCustomMakeupWindow.n_select)[0][3]
                             }
                         }
@@ -3059,14 +3039,8 @@ Window {
                             id: m_rCustomMakeupColor
                             width: 70
                             height: 70
-                            property var b_Selected: false
-                            function updateSelect(select){
-                                if(select === index){
-                                    b_Selected = true
-                                }else{
-                                    b_Selected = false
-                                }
-                            }
+                            property var b_Selected: m_lCustomMakeupColor.currentIndex === index
+
                             Rectangle{
                                 x: 5
                                 y: 5

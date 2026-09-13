@@ -1,4 +1,4 @@
-﻿#include "StickerHolder.h"
+#include "StickerHolder.h"
 #include "StickerHolder.h"
 
 #include <stdio.h>
@@ -57,6 +57,7 @@ StikcerHolder::~StikcerHolder()
 {
     curl_easy_cleanup(mCurl);
 }
+
 
 #define MAIN_URL \
   string(        \
@@ -359,35 +360,47 @@ bool StikcerHolder::DownLoadFile(std::string strUrl, std::string strPath)
     return curlRet == CURLE_OK ? true : false;
 }
 
-TCHAR *StringToTcharP(std::string str)
+std::basic_string<TCHAR> StringToTchar(const std::string& value)
 {
-    //string ->  char*
-    char* p_char=const_cast<char*>(str.c_str());
-
-    //char* -> Tchar*
-    int nLen = strlen(p_char) + 1;
-    int nwLen = MultiByteToWideChar(CP_ACP,0,p_char,nLen,NULL, 0);
-    //TCHAR p_tchar[256] 会乱码，更换成以下就好了
-    TCHAR * p_tchar=new TCHAR[256];
-    MultiByteToWideChar(CP_ACP, 0,p_char,nLen,p_tchar,nwLen);
-
-    return p_tchar;
+#ifdef UNICODE
+    const int length = MultiByteToWideChar(CP_ACP, 0, value.c_str(), -1, nullptr, 0);
+    if (length <= 0) {
+        return {};
+    }
+    std::wstring result(length, L'\0');
+    MultiByteToWideChar(CP_ACP, 0, value.c_str(), -1, result.data(), length);
+    result.pop_back();
+    return result;
+#else
+    return value;
+#endif
 }
 
-std::string TcharPToString(TCHAR *STR)
+std::string TcharToString(const TCHAR* value)
 {
-    int iLen = WideCharToMultiByte(CP_ACP, 0,STR, -1, NULL, 0, NULL, NULL);
-    char* chRtn =new char[iLen*sizeof(char)];
-    WideCharToMultiByte(CP_ACP, 0, STR, -1, chRtn, iLen, NULL, NULL);
-    std::string str(chRtn);
-    return str;
+    if (value == nullptr) {
+        return {};
+    }
+#ifdef UNICODE
+    const int length = WideCharToMultiByte(CP_ACP, 0, value, -1, nullptr, 0, nullptr, nullptr);
+    if (length <= 0) {
+        return {};
+    }
+    std::string result(length, '\0');
+    WideCharToMultiByte(CP_ACP, 0, value, -1, result.data(), length, nullptr, nullptr);
+    result.pop_back();
+    return result;
+#else
+    return value;
+#endif
 }
-
 void StikcerHolder::UnzipFile(string strPath, string dirPath, int stickerIndex, int index)
 {
+    const std::basic_string<TCHAR> zipPath = StringToTchar(strPath);
+    const std::basic_string<TCHAR> outputDir = StringToTchar(dirPath);
     HZIP hz;
-    hz = OpenZip(StringToTcharP(strPath), 0);
-    SetUnzipBaseDir(hz,StringToTcharP(dirPath));
+    hz = OpenZip(zipPath.c_str(), 0);
+    SetUnzipBaseDir(hz, outputDir.c_str());
     ZIPENTRY ze;
     GetZipItem(hz,-1,&ze);
     int numitems = ze.index;
@@ -396,7 +409,7 @@ void StikcerHolder::UnzipFile(string strPath, string dirPath, int stickerIndex, 
     {
         GetZipItem(hz,zi,&ze);
         UnzipItem(hz,zi,ze.name);
-        string fileName = TcharPToString(ze.name);
+        string fileName = TcharToString(ze.name);
         if(fileName.find(".bundle") != string::npos){
             mTagBundleList[stickerIndex][index]->mBundleDirs.emplace_back(dirPath + fileName);
         }

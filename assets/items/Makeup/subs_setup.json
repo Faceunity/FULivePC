@@ -737,7 +737,13 @@
       ]
     }
   ],
-  "CMEyeLiner": [
+  "CMEyeLashWocan": [
+    { "bundle": "mu_style_wocan_01", "icon": "demo_style_wocan_01.png", "name": "01平扇" },
+    { "bundle": "mu_style_wocan_02", "icon": "demo_style_wocan_02.png", "name": "02开扇" },
+    { "bundle": "mu_style_wocan_03", "icon": "demo_style_wocan_03.png", "name": "03月牙" },
+    { "bundle": "mu_style_wocan_04", "icon": "demo_style_wocan_04.png", "name": "04平行" },
+    { "bundle": "mu_style_wocan_05", "icon": "demo_style_wocan_05.png", "name": "05亮片" }
+  ],  "CMEyeLiner": [
     {
       "bundle": "mu_style_eyeliner_01",
       "icon": "demo_style_eyeliner_01.png",
