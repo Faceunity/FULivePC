@@ -197,20 +197,23 @@ namespace gui_tab_content
 		UIBridge::faceType = 0;
 		nama->SetCurrentShape(4);
 
-		std::string faceShapeIconNameArr[MAX_FACESHAPEPARAMTER] = { "list_icon_Thinface_open", "list_icon_Bigeye_open",
-			"list_icon_round_eye_open","list_icon_chin_open", "list_icon_forehead_open", "list_icon_Thinnose_open","list_icon_Mouthtype_open","list_icon_mouth_thickness_open",
-			"list_icon_v_open","list_icon_narrow_face_open","list_icon_short_face_open","list_icon_little_face_open",
-		"list_icon_cheekbones_open" ,"list_icon_lower_jaw_open" ,"list_icon_eye_position_open", "list_icon_open_eyes_open" ,"list_icon_eyelid_down_open" ,"list_icon_eye_distance_open" ,"list_icon_eye_angle_open" ,
-		"list_icon_proboscis_open" ,"list_icon_shrinking_open" ,"list_icon_smile_mouth_open" ,"list_icon_eyebrow_position_open" ,"list_icon_eyebrow_spacing_open" ,"list_icon_eyebrow_thickness_open" };
+		std::string faceShapeIconNameArr[MAX_FACESHAPEPARAMTER] = {
+	"list_icon_Thinface_open", "list_icon_Bigeye_open", "list_icon_round_eye_open", "list_icon_chin_open",
+	"list_icon_forehead_open", "list_icon_Thinnose_open", "鼻翼_开", "list_icon_Mouthtype_open",
+	"list_icon_mouth_thickness_open", "list_icon_v_open", "list_icon_narrow_face_open", "list_icon_short_face_open",
+	"list_icon_little_face_open", "小头_开", "list_icon_cheekbones_open", "list_icon_lower_jaw_open",
+	"list_icon_eye_position_open", "list_icon_open_eyes_open", "外眼角_开", "list_icon_eyelid_down_open",
+	"list_icon_eye_distance_open", "list_icon_eye_angle_open", "list_icon_proboscis_open", "list_icon_shrinking_open",
+	"list_icon_smile_mouth_open", "list_icon_eyebrow_position_open", "list_icon_eyebrow_spacing_open", "list_icon_eyebrow_thickness_open"
+};
 
-		//眼角、眼距、眼睛角度、长鼻、缩人中、微笑嘴角
-
-		std::string faceShapeNameArr[MAX_FACESHAPEPARAMTER] = { u8"   瘦脸" ,u8"   大眼" ,u8"   圆眼" ,u8"   下巴",u8"   额头" ,
-			u8"   瘦鼻",u8"   嘴型", u8"嘴唇厚度",u8"   V脸",u8"   窄脸",u8"   短脸" ,u8"   小脸" ,u8" 瘦颧骨", u8"瘦下颌骨" , u8"眼睛位置",
-			u8" 开眼角", u8"眼睑下至", u8"   眼距", u8"眼睛角度", u8"   长鼻", u8" 缩人中", u8"微笑嘴角" , u8"眉毛上下" , u8" 眉间距" , u8"眉毛粗细" };
-
-
-		ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 1.f));
+std::string faceShapeNameArr[MAX_FACESHAPEPARAMTER] = {
+	u8"   瘦脸", u8"   大眼", u8"   圆眼", u8"   下巴", u8"   额头", u8"   瘦鼻", u8"   鼻翼", u8"   嘴型",
+	u8"嘴唇厚度", u8"   V脸", u8"   窄脸", u8"   短脸", u8"   小脸", u8"   小头", u8" 瘦颧骨", u8"瘦下颌骨",
+	u8"眼睛位置", u8" 开眼角", u8" 外眼角", u8"眼睑下至", u8"   眼距", u8"眼睛角度", u8"   长鼻", u8" 缩人中",
+	u8"微笑嘴角", u8"眉毛上下", u8" 眉间距", u8"眉毛粗细"
+};
+ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(224.f / 255.f, 227.f / 255.f, 238.f / 255.f, 1.f));
 		for (int i = 0; i < MAX_FACESHAPEPARAMTER; i++)
 		{
 			if (UIBridge::faceType != 0 && i > 1)
@@ -219,14 +222,22 @@ namespace gui_tab_content
 			}
 			if (UIBridge::mFaceShapeLevel[i] == 0)
 			{
-				std::string closeIconFile = faceShapeIconNameArr[i].substr(0, faceShapeIconNameArr[i].find_last_of('_')) + "_close";
+				std::string closeIconFile;
+				switch (i)
+				{
+				case 6: closeIconFile = "鼻翼_关"; break;
+				case 13: closeIconFile = "小头_关"; break;
+				case 18: closeIconFile = "外眼角_关"; break;
+				default:
+					closeIconFile = faceShapeIconNameArr[i].substr(0, faceShapeIconNameArr[i].find_last_of('_')) + "_close";
+					break;
+				}
 				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(closeIconFile + ".png", false)->getTextureID(), faceShapeNameArr[i].c_str());
 			}
 			else
 			{
 				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(faceShapeIconNameArr[i] + ".png", false)->getTextureID(), faceShapeNameArr[i].c_str());
-			}
-			ImGui::SameLine();
+			}			ImGui::SameLine();
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
 			if (g_faceShapeParamShowFlag[i] == FACE_SHAPE_SHOW_FLAG_MIDDLE)
 			{
@@ -299,10 +310,10 @@ namespace gui_tab_content
 		ImGui::Dummy(ImVec2(1 * scaleRatioW, 10 * scaleRatioH));
 		ImGui::Dummy(ImVec2(12 * scaleRatioW, 1));
 		ImGui::SameLine();
-		std::string filterNameArr[6] = { "list_image_origin", "list_image_bailiang1", "list_image_fennen1", "list_image_xiaoqingxin1", "list_image_lengsediao1", "list_image_nuansediao1" };
-		std::string filterTextArr[6] = { u8"   原图",  u8"   白亮",  u8"   粉嫩",  u8"  小清新",  u8"  冷色调",  u8"  暖色调" };
+		std::string filterNameArr[10] = { "list_image_origin", "list_image_roguanglengzi", "list_image_lengbaipi", "list_image_weibaolvjing", "list_image_qingtouguanggan", "list_image_bailiang1", "list_image_fennen1", "list_image_xiaoqingxin1", "list_image_lengsediao1", "list_image_nuansediao1" };
+		std::string filterTextArr[10] = { u8"   原图", u8"   柔光冷紫", u8"   冷白皮", u8"   微曝滤镜", u8"   清透光感", u8"   白亮", u8"   粉嫩", u8"  小清新", u8"  冷色调", u8"  暖色调" };
 
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < 10; i++)
 		{
 			if (LayoutImageButtonWithTextFilter(ImVec2(0.f, 0.f), ImVec2(106 * scaleRatioW, 106 * scaleRatioH), 
 				Texture::createTextureFromFile(filterNameArr[i] + ".png", false)->getTextureID(), 
@@ -324,13 +335,18 @@ namespace gui_tab_content
 					UIBridge::showFilterSlider = false;
 				}
 			}
-			if (i != 2 && i != 5)
+			if (i % 3 == 2)
+			{
+				if (i < 9)
+				{
+					// Start each following row with the same left inset as the first.
+					ImGui::Dummy(ImVec2(12 * scaleRatioW, 1));
+					ImGui::SameLine();
+				}
+			}
+			else if (i < 9)
 			{
 				ImGui::SameLine(0.f, 27.f);
-			}
-			if (i == 2) {
-				ImGui::Dummy(ImVec2(12 * scaleRatioW, 1));
-				ImGui::SameLine();
 			}
 		}
 		ImGui::PopStyleColor(2);
@@ -391,16 +407,21 @@ namespace gui_tab_content
 	{
 		ImGui::Dummy(ImVec2(1, 10 * scaleRatioH));
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(92.f / 255.f, 96.f / 255.f, 113.f / 255.f, 1.f));
-		std::string sliderIconNameArr[MAX_BODY_SHAPE_PARAM] = { "list_icon_slimming_open","list_icon_stovepipe_open", "list_icon_thin_waist_open",
-			"list_icon_shoulder_open","list_icon_hip_open",
-			"list_icon_little_head_open","list_icon_thin_leg_open" };
+		std::string sliderIconNameArr[MAX_BODY_SHAPE_PARAM] = {
+	"list_icon_slimming_open", "list_icon_stovepipe_open", "list_icon_thin_waist_open", "天鹅颈_开",
+	"list_icon_shoulder_open", "list_icon_hip_open", "list_icon_little_head_open", "list_icon_thin_leg_open"
+};
 
-		std::string sliderNameArr[MAX_BODY_SHAPE_PARAM] = { u8"   瘦身", u8"   长腿",u8"   瘦腰", u8"   美肩", u8"   美臀" ,u8"    小头", u8"    瘦腿" };
+std::string sliderNameArr[MAX_BODY_SHAPE_PARAM] = {
+	u8"   瘦身", u8"   长腿", u8"   瘦腰", u8"   天鹅颈", u8"   美肩", u8"   美臀", u8"    小头", u8"    瘦腿"
+};
 		for (int i = 0; i < MAX_BODY_SHAPE_PARAM; i++)
 		{
 			if (UIBridge::mBodyShapeLevel[i] == 0)
 			{
-				std::string closeIconFile = sliderIconNameArr[i].substr(0, sliderIconNameArr[i].find_last_of('_')) + "_close";
+				const std::string closeIconFile = i == 3
+					? "天鹅颈_关"
+					: sliderIconNameArr[i].substr(0, sliderIconNameArr[i].find_last_of('_')) + "_close";
 				LayoutImage(ImVec2(22, 0), ImVec2(52, 52), Texture::createTextureFromFile(closeIconFile + ".png", false)->getTextureID(), sliderNameArr[i].c_str());
 			}
 			else
@@ -459,7 +480,7 @@ namespace gui_tab_content
 
 			ImGui::PopStyleVar();
 
-			if (i == 6)
+			if (i == MAX_BODY_SHAPE_PARAM - 1)
 			{
 				if (UIBridge::mBreastStrengthLevel == 0)
 				{

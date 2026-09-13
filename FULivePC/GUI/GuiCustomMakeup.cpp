@@ -482,6 +482,69 @@ void CMEyeLash::SetIntensity()
 
 //////////////////////////////////////////////////////////
 
+Implement_FUObject(CMEyeLashWocan);
+
+CMEyeLashWocan::CMEyeLashWocan()
+{
+}
+
+CMEyeLashWocan::~CMEyeLashWocan()
+{
+}
+
+bool CMEyeLashWocan::InitFrom(const rapidjson::Value & json)
+{
+	if (!json.IsArray())
+	{
+		return false;
+	}
+
+	for (rapidjson::SizeType i = 0; i < json.Size(); ++i)
+	{
+		const auto& item = json[i];
+		if (!item.HasMember("bundle") || !item.HasMember("icon"))
+		{
+			continue;
+		}
+
+		auto config = std::make_shared<CMNormalConfig>();
+		config->strBundlePath = item["bundle"].GetString();
+		config->strIconPath = item["icon"].GetString();
+		config->strName = item.HasMember("name") ? item["name"].GetString() : "";
+		m_vecData.push_back(config);
+	}
+
+	return !m_vecData.empty();
+}
+
+void CMEyeLashWocan::ShowUI()
+{
+	// The bound sub-bundle supplies tex_wocan to face_makeup.bundle. No color picker is required.
+	auto noColorSelection = [](std::shared_ptr<ColorBag>, void*) -> bool { return true; };
+	ShowUINormal(noColorSelection, m_pNama, this);
+}
+
+void CMEyeLashWocan::Reset()
+{
+	CMNormalNode::ResetNormal();
+}
+
+void CMEyeLashWocan::ShowIntensityUI()
+{
+	char szPoints[1024] = { 0 };
+	sprintf(szPoints, "%p", this);
+	if (LayoutSlider(ImVec2(0, 22), ImVec2(320, 10), ("##slider221" + string(szPoints)).c_str(), ("##slidertext221" + std::string(szPoints)).c_str(), &m_fIntensity, 0, 100))
+	{
+		SetIntensity();
+	}
+}
+
+void CMEyeLashWocan::SetIntensity()
+{
+	m_pNama->SetCMDouble("makeup_intensity_wocan", m_fIntensity / 100);
+}
+
+//////////////////////////////////////////////////////////
 Implement_FUObject(CMEyeLiner);
 
 CMEyeLiner::CMEyeLiner()

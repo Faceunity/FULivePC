@@ -720,6 +720,24 @@ static void ShowFloatMenuAR(Nama* nama)
 			UIBridge::categoryBundles[BundleCategory::LightMakeup].push_back("light_makeup_clear.");
 			UIBridge::categoryBundles[BundleCategory::LightMakeup].push_back("light_makeup_boyfriend.");
 		}
+		if (UIBridge::categoryBundles[BundleCategory::BeautyHair].size() == 0)
+		{
+			// 美发色卡是虚拟选项。纯色和渐变色分别共用一个 bundle，
+			// 文件名末尾的数字仅用于设置道具的 Index 参数。
+			// Index 8 is the black-hair swatch and stays at the end of solid colors.
+			for (int i = 1; i <= 9; ++i)
+			{
+				char itemName[32];
+				snprintf(itemName, sizeof(itemName), "hair_normal_%02d.bundle", i);
+				UIBridge::categoryBundles[BundleCategory::BeautyHair].push_back(itemName);
+			}
+			for (int i = 1; i <= 5; ++i)
+			{
+				char itemName[32];
+				snprintf(itemName, sizeof(itemName), "hair_gradient_%02d.bundle", i);
+				UIBridge::categoryBundles[BundleCategory::BeautyHair].push_back(itemName);
+			}
+		}
 		for (int i = 1; i < BundleCategory::Count; i++)
 		{
 			if (UIBridge::categoryBundles[i].size() == 0)
