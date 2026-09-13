@@ -1,4 +1,4 @@
-﻿import QtQuick 2.5
+import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 
@@ -140,7 +140,6 @@ Rectangle{
         }
         Slider{
             id: m_slider
-            wheelEnabled :false
             x: 105
             y: 17
             width: 250
